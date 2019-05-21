@@ -809,7 +809,7 @@ pombiclustering <- function(pomformula,
         beta.init=beta.kmeans
         invect=c(mu.init,alpha.init,beta.init)
 
-        fit.POFM.rc.model(invect, y.mat, RG, CG, maxiter.rc=maxiter, tol.rc=tol)
+        fit.POFM.rc.model(invect, y.mat, RG, CG, maxiter.rc=maxiter.rc, tol.rc=tol.rc)
 
     } else if(pomformula=="Y~row+column+row:column"){
 
