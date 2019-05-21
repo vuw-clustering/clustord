@@ -7,16 +7,24 @@ lower.limit <- 0.00001
 #' All parameters' initial values are set by this package, users need to enter the row clustering formula.
 #' Y~row+column: Logit=mu_k-alpha_r-beta_c
 #' Y~row+column+row:column: Logit=mu_k-alpha_r-beta_c-gamma_rc
-#' @param pomformula :indicates bi-clustering models' formula.
-#' @param rowcluster : number of row clustering groups.
-#' @param columncluster : number of column clustering groups.
-#' @param data :three columns data set(must be set in order). First column is response, second column is subject, and last column is question.
-#' @return all parameters' information from model,pi,theta,mu,alpha,ppr,Row Cluster,and iterations associated with log-likelihood values
+#' @param pomformula: indicates bi-clustering models' formula.
+#' @param rowcluster: number of row clustering groups.
+#' @param columncluster: number of column clustering groups.
+#' @param data: three columns data set(must be set in order). First column is response, second column is subject, and last column is question.
+#' @param maxiter: (default 50) maximum number of iterations of the EM algorithm.
+#' @return fitted values of parameters pi, kappa, theta, mu and alpha, as well as
+#'     `ppr` and `ppc`, the posterior probabilities of membership of the row and column clusters,
+#'     and `RowClusters`, the assigned row clusters based on maximum posterior probability,
+#'     and `ColumnClusters`, the assigned column clusters based on maximum posterior probability.
 #' @examples
 #' pombiclustering("Y~row+column",3,2,data) indicates formula Logit=mu_k-alpha_r-beta_c with 3 row clustering groups and 2 column clustering groups
 #' pombiclustering("Y~row+column+row:column",3,2,data) indicates formula Logit=mu_k-alpha_r-beta_c-gamma_rc with 3 row clustering groups and 2 column clustering groups
 #' @export
-pombiclustering<-function(pomformula,rowcluster,columncluster,data){
+pombiclustering <- function(pomformula,
+                            rowcluster,
+                            columncluster,
+                            data,
+                            maxiter=50){
     if(pomformula=="Y~row+column"){
         #transform data set to matrix form #
         colnames(data)<-c("y","subject","question")
@@ -138,7 +146,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             # Run the EM cycle:
             iter=1
 
-            while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>1e-04)))&(iter<500))
+            while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>1e-04)))&(iter<maxiter))
             {
 
                 # E-step - Update posterior probabilities
@@ -223,7 +231,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
                  "mu"=mu.out,
                  "alpha"=alpha.out,
                  "ppr"=round(ppr.m,3),
-                 "Row Clusters"=Rclus)
+                 "RowClusters"=Rclus)
         }
         #####the end of ppr.m########
 
@@ -333,7 +341,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
 
             # Run the EM cycle:
             iter=1
-            while(((iter==1)|(any(abs(invect-outvect)>1e-04)))&(iter<500))
+            while(((iter==1)|(any(abs(invect-outvect)>1e-04)))&(iter<maxiter))
             {
 
                 # E-step - Update posterior probabilities
@@ -417,7 +425,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
                  "mu"=mu.out,
                  "beta"=beta.out,
                  "ppc"=round(ppc.m,3),
-                 "Column Clusters"=Cclus)
+                 "ColumnClusters"=Cclus)
         }
         #######the end of ppc.m#####
 
@@ -656,7 +664,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
 
             # Run the EM cycle:
             iter=1
-            while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>1e-04)))&(iter<500))
+            while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>1e-04)))&(iter<maxiter))
             {
 
                 invect=outvect
@@ -785,8 +793,8 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
                  "beta"=beta.out,
                  "ppr"=round(ppr.m,3),
                  "ppc"=round(ppc.m,3),
-                 "Row Clusters"=Rclus,
-                 "Column Clusters"=Cclus)
+                 "RowClusters"=Rclus,
+                 "ColumnClusters"=Cclus)
         }
         RG<-rowcluster[1]
         CG<-columncluster[1]
@@ -922,7 +930,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
 
             # Run the EM cycle:
             iter=1
-            while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>1e-04)))&(iter<500))
+            while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>1e-04)))&(iter<maxiter))
             {
 
                 invect=outvect
@@ -1057,8 +1065,8 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
                  "gamma"=gamma.out,
                  "ppr"=round(ppr.m,3),
                  "ppc"=round(ppc.m,3),
-                 "Row Clusters"=Rclus,
-                 "Column Clusters"=Cclus)
+                 "RowClusters"=Rclus,
+                 "ColumnClusters"=Cclus)
         }
         RG=rowcluster[1]
         CG=columncluster[1]
