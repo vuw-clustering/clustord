@@ -632,8 +632,6 @@ pombiclustering <- function(pomformula,
             PO.ss.out=polr(as.factor(y.mat)~1)
             PO.ss.out$mu=PO.ss.out$zeta
 
-            init<-5
-
             kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
 
             pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
@@ -801,7 +799,6 @@ pombiclustering <- function(pomformula,
         PO.ss.out=polr(as.factor(y.mat)~1)
         PO.ss.out$mu=PO.ss.out$zeta
 
-        init<-5
         kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
 
         pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
@@ -894,8 +891,6 @@ pombiclustering <- function(pomformula,
 
             PO.ss.out=polr(as.factor(y.mat)~1)
             PO.ss.out$mu=PO.ss.out$zeta
-
-            init<-5
 
             kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
 
@@ -1070,8 +1065,6 @@ pombiclustering <- function(pomformula,
 
         PO.ss.out=polr(as.factor(y.mat)~1)
         PO.ss.out$mu=PO.ss.out$zeta
-
-        init<-5
 
         kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
         pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
