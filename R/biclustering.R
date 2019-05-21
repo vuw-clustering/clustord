@@ -36,7 +36,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
 
 
         ###initial value of ppr.m ####
-        Rcluster.ll=function(theta,ppr.m,pi.v){
+        Rcluster.ll <- function(y.mat, theta, ppr.m, pi.v, RG){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
@@ -58,7 +58,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             -llc
         }
 
-        Rcluster.Incll=function(theta,pi.v)
+        Rcluster.Incll <- function(y.mat, theta, pi.v, RG)
         {
             n=nrow(y.mat)
             p=ncol(y.mat)
@@ -79,7 +79,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             logl
         }
 
-        POFM.rs=function(invect,ppr.m,pi.v){
+        POFM.rs <- function(invect, y.mat, ppr.m, pi.v, RG){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
@@ -105,14 +105,15 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             this.theta[this.theta<=0]=lower.limit
             pi.v[pi.v==0]=lower.limit
 
-            Rcluster.ll(this.theta,ppr.m,pi.v)
+            Rcluster.ll(y.mat, this.theta, ppr.m, pi.v, RG)
         }
 
-        POFM.rs.F=function(invect){
+        POFM.rs.F <- function(invect, y.mat, RG){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
-            pi.v=runif(RG-1,0,1/RG);pi.v=c(pi.v,1-sum(pi.v))
+            pi.v=runif(RG-1,0,1/RG)
+            pi.v=c(pi.v,1-sum(pi.v))
             #plot(rep(0,RG),pi.v,xlim=c(0,500),ylim=c(0,1))
             ppr.m=matrix(NA,n,RG)
             theta.arr=array(1, c(RG,p,q))
@@ -160,8 +161,12 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
                 invect=outvect
                 # M-step:
                 #use numerical maximisation
-                temp=optim(par=invect,fn=POFM.rs,
-                           ppr.m=ppr.m,pi.v=pi.v,
+                temp=optim(par=invect,
+                           fn=POFM.rs,
+                           y.mat=y.mat,
+                           ppr.m=ppr.m,
+                           pi.v=pi.v,
+                           RG=RG,
                            method="L-BFGS-B",
                            hessian=F,control=list(maxit=10000))
                 #print(temp)
@@ -201,7 +206,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             for (rr in 1:RG) Rclus[[rr]] =
                 (1:n)[ppr.m[,rr]==apply(ppr.m,1,max)]
             # Save results:
-            logl=Rcluster.Incll(theta.arr,pi.v)
+            logl=Rcluster.Incll(y.mat, theta.arr, pi.v, RG)
             res.dev = -2*logl
             npar = q+2*RG-3
             aic  = -2*logl + 2*npar
@@ -223,7 +228,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
         #####the end of ppr.m########
 
         ###initial values of ppc.m####
-        Ccluster.ll=function(theta,ppc.m,kappa.v){
+        Ccluster.ll <- function(y.mat, theta, ppc.m, kappa.v, CG){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
@@ -244,8 +249,9 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             }
             -llc
         }
+
         #The incomplete log-likelihood, used in model selection #
-        Ccluster.Incll=function(theta,kappa.v){
+        Ccluster.Incll <- function(y.mat, theta, kappa.v, CG){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
@@ -265,7 +271,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             logl
         }
 
-        POFM.sc=function(invect,ppc.m,kappa.v){
+        POFM.sc <- function(invect, y.mat, ppc.m, kappa.v, CG){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
@@ -292,10 +298,10 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             this.theta[this.theta<=0]=lower.limit
             kappa.v[kappa.v==0]=lower.limit
 
-            Ccluster.ll(this.theta,ppc.m,kappa.v)
+            Ccluster.ll(y.mat, this.theta, ppc.m, kappa.v, CG)
         }
 
-        POFM.sc.F=function(invect){
+        POFM.sc.F <- function(invect, y.mat, CG){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
@@ -351,8 +357,12 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
                 # M-step:
                 #use numerical maximisation
 
-                temp=optim(par=invect,fn=POFM.sc,
-                           ppc.m=ppc.m,kappa.v=kappa.v,
+                temp=optim(par=invect,
+                           fn=POFM.sc,
+                           y.mat=y.mat,
+                           ppc.m=ppc.m,
+                           kappa.v=kappa.v,
+                           CG=CG,
                            method="L-BFGS-B",
                            hessian=F,control=list(maxit=10000))
                 #                  hessian=F,control=list(maxit=10000, trace=TRUE))
@@ -391,7 +401,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             for (cc in 1:CG) Cclus[[cc]] =
                 (1:p)[ppc.m[,cc]==apply(ppc.m,1,max)]
             # Save results:
-            logl=Ccluster.Incll(theta.arr,kappa.v)
+            logl=Ccluster.Incll(y.mat, theta.arr, kappa.v, CG)
             res.dev = -2*logl
             npar = q+2*CG-3
             aic  = -2*logl + 2*npar
@@ -412,12 +422,11 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
         #######the end of ppc.m#####
 
         #The Log-likelihood #
-        Bicluster.ll=function(theta,ppr.m,ppc.m,pi.v,kappa.v){
+        Bicluster.ll <- function(y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, RG, CG){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
-            theta[theta==0]=0.0001
-            theta[theta<0]=0.0001
+            theta[theta<=0]=lower.limit
 
             llc=0
             for(i in 1:n){
@@ -441,13 +450,14 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             }
             -llc
         }
-        #The incomplete log-likelihood,used in model election#
-        Bicluster.IncllC <- function(theta,pi.v,kappa.v)
+
+        #The incomplete log-likelihood,used in model selection#
+        Bicluster.IncllC <- function(y.mat, theta, pi.v, kappa.v, RG, CG)
         {
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
-            theta[theta<=0]=0.0001
+            theta[theta<=0]=lower.limit
 
             # Full evaluation using the columns.
             # Use if CG^p is small enough.
@@ -508,12 +518,12 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
 
         # Rows expansion (use if RG^n small enough):
 
-        Bicluster.IncllR <- function(theta,pi.v,kappa.v)
+        Bicluster.IncllR <- function(y.mat, theta,pi.v,kappa.v, RG, CG)
         {
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
-            theta[theta<=0]=0.0001
+            theta[theta<=0]=lower.limit
 
             # Full evaluation using the rows.
             # Use if RG^n is small enough.
@@ -570,7 +580,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             logl
         }
 
-        POFM.rc=function(invect,ppr.m,ppc.m,pi.v,kappa.v){
+        POFM.rc <- function(invect,y.mat, ppr.m, ppc.m, pi.v, kappa.v, RG, CG){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
@@ -601,10 +611,10 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             pi.v[pi.v==0]=lower.limit
             kappa.v[kappa.v==0]=lower.limit
 
-            Bicluster.ll(this.theta,ppr.m,ppc.m,pi.v,kappa.v)
+            Bicluster.ll(y.mat, this.theta, ppr.m, ppc.m, pi.v, kappa.v, RG, CG)
         }
 
-        POFM.rc.F=function(invect){
+        POFM.rc.F <- function(invect, y.mat, RG, CG){
             n<-nrow(y.mat)
             p<-ncol(y.mat)
             q<-length(unique(as.vector(y.mat)))
@@ -623,21 +633,22 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             alpha.kmeans=apply(kmeans.data$centers,1,mean)
             alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
 
-            #POFM.rs.out[[RG]]=POFM.rs.F(invect=c(PO.ss.out$mu,alpha.kmeans[-1]))
-            ppr.m=POFM.rs.F(invect=c(PO.ss.out$mu,alpha.kmeans[-1]))$ppr
-            pi.v=POFM.rs.F(invect=c(PO.ss.out$mu,alpha.kmeans[-1]))$pi
+            #POFM.rs.out[[RG]]=POFM.rs.F(invect=c(PO.ss.out$mu,alpha.kmeans[-1]),y.mat,RG)
+            POFM.rs.F.out <- POFM.rs.F(invect=c(PO.ss.out$mu,alpha.kmeans[-1]),y.mat,RG)
+            ppr.m <- POFM.rs.F.out$ppr
+            pi.v <- POFM.rs.F.out$pi
             #pi.v=rep(1/RG,RG)
             #pi.v= c(0.01,0.09,0.1,0.1,0.70)
 
             #kmeans.data=kmeans(y.mat,centers=CG,nstart=50)
-
             #kappa.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
             #beta.kmeans=apply(kmeans.data$centers,1,mean)
             #beta.kmeans=beta.kmeans-beta.kmeans[1] #beta1=0
 
             #POFM.sc.out[[CG]]=POFM.sc.F(invect=c(PO.ss.out$mu),rep(1,CG-1))
-            ppc.m=POFM.sc.F(invect=c(PO.ss.out$mu,rep(1,CG-1)))$ppc
-            kappa.v=POFM.sc.F(invect=c(PO.ss.out$mu,rep(1,CG-1)))$kappa
+            POFM.sc.out <- POFM.sc.F(invect=c(PO.ss.out$mu),rep(1,CG-1),y.mat,CG)
+            ppc.m <- POFM.sc.F.out$ppc
+            kappa.v <- POFM.sc.F.out$kappa
             #plot(rep(0,RG),pi.v,xlim=c(0,500),ylim=c(0,1))
             #point(rep(0,CG),kappa.v,col="red",pch=2)
 
@@ -652,8 +663,15 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
 
                 # M-step:
                 #use numerical maximisation
-                temp=optim(par=invect,fn=POFM.rc,
-                           ppr.m=ppr.m,ppc.m=ppc.m,pi.v=pi.v,kappa.v=kappa.v,
+                temp=optim(par=invect,
+                           fn=POFM.rc,
+                           y.mat=y.mat,
+                           ppr.m=ppr.m,
+                           ppc.m=ppc.m,
+                           pi.v=pi.v,
+                           kappa.v=kappa.v,
+                           RG=RG,
+                           CG=CG,
                            method="L-BFGS-B",
                            hessian=F,control=list(maxit=10000))
 
@@ -744,7 +762,10 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
                 (1:p)[ppc.m[,cc]==apply(ppc.m,1,max)]
             # Save results:
             logl=0
-            if((n<16)|(p<16)) if(CG^p<RG^n) logl=Bicluster.IncllC(theta.arr,pi.v,kappa.v) else logl=Bicluster.IncllR(theta.arr,pi.v,kappa.v)
+            if((n<16)|(p<16)) {
+                if(CG^p<RG^n) logl <- Bicluster.IncllC(y.mat, theta.arr, pi.v, kappa.v, RG, CG)
+                else logl - Bicluster.IncllR(y.mat, theta.arr, pi.v, kappa.v, RG, CG)
+            }
             res.dev = -2*logl
             npar = q+2*CG+2*RG-5
             aic  = -2*logl + 2*npar
@@ -775,13 +796,11 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
         PO.ss.out$mu=PO.ss.out$zeta
 
         init<-5
-
         kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
 
         pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
         alpha.kmeans=apply(kmeans.data$centers,1,mean)
         alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
-
 
         kmeans.data=kmeans(y.mat,centers=CG,nstart=50)
 
@@ -795,7 +814,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
         beta.init=beta.kmeans
         invect=c(mu.init,alpha.init,beta.init)
 
-        POFM.rc.F(invect)
+        POFM.rc.F(invect, y.mat, RG, CG)
     }
 
     else if(pomformula=="Y~row+column+row:column"){
@@ -820,7 +839,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
         #############end of ppc.m and ppr.m#####################
 
 
-        POFM.rci=function(invect,ppr.m,ppc.m,pi.v,kappa.v){
+        POFM.rci <- function(invect,y.mat, ppr.m, ppc.m, pi.v, kappa.v, RG, CG){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
@@ -857,10 +876,10 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             pi.v[pi.v==0]=lower.limit
             kappa.v[kappa.v==0]=lower.limit
 
-            Bicluster.ll(this.theta,ppr.m,ppc.m,pi.v,kappa.v)
+            Bicluster.ll(y.mat, this.theta, ppr.m, ppc.m, pi.v, kappa.v, RG, CG)
         }
 
-        POFM.rci.F=function(invect){
+        POFM.rci.F <- function(invect, y.mat, RG, CG){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
@@ -890,12 +909,12 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             mu.init=PO.ss.out$mu
             alpha.init=alpha.kmeans
             beta.init=beta.kmeans
-            POFM.rc.F(invect=c(mu.init,alpha.init,beta.init))
+            POFM.rc.F.out <- POFM.rc.F(invect=c(mu.init,alpha.init,beta.init), y.mat, RG, CG)
 
-            ppr.m=POFM.rc.F(invect=c(mu.init,alpha.init,beta.init))$ppr
-            pi.v=POFM.rc.F(invect=c(mu.init,alpha.init,beta.init))$pi
-            ppc.m=POFM.rc.F(invect=c(mu.init,alpha.init,beta.init))$ppc
-            kappa.v=POFM.rc.F(invect=c(mu.init,alpha.init,beta.init))$kappa
+            ppr.m=POFM.rc.F.out$ppr
+            pi.v=POFM.rc.F.out$pi
+            ppc.m=POFM.rc.F.out$ppc
+            kappa.v=POFM.rc.F.out$kappa
             #plot(rep(0,RG),pi.v,xlim=c(0,500),ylim=c(0,1))
             #point(rep(0,CG),kappa.v,col="red",pch=2)
 
@@ -910,8 +929,15 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
                 # M-step:
                 #use numerical maximisation
 
-                temp=optim(par=invect,fn=POFM.rci,
-                           ppr.m=ppr.m,ppc.m=ppc.m,pi.v=pi.v,kappa.v=kappa.v,
+                temp=optim(par=invect,
+                           fn=POFM.rci,
+                           y.mat=y.mat,
+                           ppr.m=ppr.m,
+                           ppc.m=ppc.m,
+                           pi.v=pi.v,
+                           kappa.v=kappa.v,
+                           RG=RG,
+                           CG=CG,
                            method="L-BFGS-B",
                            hessian=F,control=list(maxit=10000))
                 #control=list(maxit=10000,trace=TRUE)
@@ -1008,7 +1034,10 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
                 (1:p)[ppc.m[,cc]==apply(ppc.m,1,max)]
             # Save results:
             logl=0
-            if((n<16)|(p<16)) if(CG^p<RG^n) logl=Bicluster.IncllC(theta.arr,pi.v,kappa.v) else logl=Bicluster.IncllR(theta.arr,pi.v,kappa.v)
+            if((n<16)|(p<16)) {
+                if(CG^p<RG^n) logl <- Bicluster.IncllC(y.mat, theta.arr,pi.v,kappa.v, RG, CG)
+                else logl <- Bicluster.IncllR(y.mat, theta.arr, pi.v, kappa.v, RG, CG)
+            }
             res.dev = -2*logl
             npar = q+RG*CG+RG+CG-4
             aic  = -2*logl + 2*npar
@@ -1056,7 +1085,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
         gamma.init=rep(0,(RG-1)*(CG-1))
         invect=c(mu.init,alpha.init,beta.init,gamma.init)
 
-        POFM.rci.F(invect)
+        POFM.rci.F(invect, y.mat, RG, CG)
 
     }
     else {
