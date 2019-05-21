@@ -653,7 +653,7 @@ pombiclustering <- function(pomformula,
             p<-ncol(y.mat)
             q<-length(unique(as.vector(y.mat)))
 
-            PO.ss.out=polr(as.factor(y.mat)~1)
+            PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
             PO.ss.out$mu=PO.ss.out$zeta
 
             kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
@@ -821,7 +821,7 @@ pombiclustering <- function(pomformula,
         RG <- nclus.row
         CG <- nclus.column
 
-        PO.ss.out=polr(as.factor(y.mat)~1)
+        PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
         PO.ss.out$mu=PO.ss.out$zeta
 
         kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
@@ -916,7 +916,7 @@ pombiclustering <- function(pomformula,
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
 
-            PO.ss.out=polr(as.factor(y.mat)~1)
+            PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
             PO.ss.out$mu=PO.ss.out$zeta
 
             kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
@@ -1094,7 +1094,7 @@ pombiclustering <- function(pomformula,
         RG <- nclus.row
         CG <- nclus.column
 
-        PO.ss.out=polr(as.factor(y.mat)~1)
+        PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
         PO.ss.out$mu=PO.ss.out$zeta
 
         kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
