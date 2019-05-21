@@ -783,36 +783,6 @@ pombiclustering <- function(pomformula,
                  "ColumnClusters"=Cclus)
         }
 
-    if(pomformula=="Y~row+column"){
-
-        RG <- nclus.row
-        CG <- nclus.column
-
-        PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
-        PO.ss.out$mu=PO.ss.out$zeta
-
-        kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
-
-        pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-        alpha.kmeans=apply(kmeans.data$centers,1,mean)
-        alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
-
-        kmeans.data=kmeans(y.mat,centers=CG,nstart=50)
-
-        kappa.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-        beta.kmeans=apply(kmeans.data$centers,1,mean)
-        beta.kmeans=beta.kmeans-beta.kmeans[1] #beta1=0
-
-        #initial mu, alpha, beta#
-        mu.init=PO.ss.out$mu
-        alpha.init=alpha.kmeans
-        beta.init=beta.kmeans
-        invect=c(mu.init,alpha.init,beta.init)
-
-        fit.POFM.rc.model(invect, y.mat, RG, CG, maxiter.rc=maxiter.rc, tol.rc=tol.rc)
-
-    } else if(pomformula=="Y~row+column+row:column"){
-
         POFM.rci <- function(invect,y.mat, ppr.m, ppc.m, pi.v, kappa.v, RG, CG){
             n=nrow(y.mat)
             p=ncol(y.mat)
@@ -1025,6 +995,36 @@ pombiclustering <- function(pomformula,
                  "RowClusters"=Rclus,
                  "ColumnClusters"=Cclus)
         }
+
+        if(pomformula=="Y~row+column"){
+
+            RG <- nclus.row
+            CG <- nclus.column
+
+            PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
+            PO.ss.out$mu=PO.ss.out$zeta
+
+            kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
+
+            pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
+            alpha.kmeans=apply(kmeans.data$centers,1,mean)
+            alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
+
+            kmeans.data=kmeans(y.mat,centers=CG,nstart=50)
+
+            kappa.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
+            beta.kmeans=apply(kmeans.data$centers,1,mean)
+            beta.kmeans=beta.kmeans-beta.kmeans[1] #beta1=0
+
+            #initial mu, alpha, beta#
+            mu.init=PO.ss.out$mu
+            alpha.init=alpha.kmeans
+            beta.init=beta.kmeans
+            invect=c(mu.init,alpha.init,beta.init)
+
+            fit.POFM.rc.model(invect, y.mat, RG, CG, maxiter.rc=maxiter.rc, tol.rc=tol.rc)
+
+        } else if(pomformula=="Y~row+column+row:column"){
 
         RG <- nclus.row
         CG <- nclus.column
