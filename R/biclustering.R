@@ -8,8 +8,8 @@ lower.limit <- 0.00001
 #' Y~row+column: Logit=mu_k-alpha_r-beta_c
 #' Y~row+column+row:column: Logit=mu_k-alpha_r-beta_c-gamma_rc
 #' @param pomformula: indicates bi-clustering models' formula.
-#' @param rowcluster: number of row clustering groups.
-#' @param columncluster: number of column clustering groups.
+#' @param nclus.row: number of row clustering groups.
+#' @param nclus.column: number of column clustering groups.
 #' @param data: three columns data set(must be set in order). First column is
 #'     response, second column is subject, and last column is question.
 #' @param maxiter.rci: (default 50) maximum number of iterations for outer EM
@@ -41,8 +41,8 @@ lower.limit <- 0.00001
 #' pombiclustering("Y~row+column+row:column",3,2,data) indicates formula Logit=mu_k-alpha_r-beta_c-gamma_rc with 3 row clustering groups and 2 column clustering groups
 #' @export
 pombiclustering <- function(pomformula,
-                            rowcluster,
-                            columncluster,
+                            nclus.row,
+                            nclus.column,
                             data,
                             maxiter.rci=50, tol.rci=1e-4,
                             maxiter.rc=50, tol.rc=1e-4,
@@ -652,8 +652,6 @@ pombiclustering <- function(pomformula,
             n<-nrow(y.mat)
             p<-ncol(y.mat)
             q<-length(unique(as.vector(y.mat)))
-            RG<-rowcluster[1]
-            CG<-columncluster[1]
 
             PO.ss.out=polr(as.factor(y.mat)~1)
             PO.ss.out$mu=PO.ss.out$zeta
@@ -819,8 +817,9 @@ pombiclustering <- function(pomformula,
                  "RowClusters"=Rclus,
                  "ColumnClusters"=Cclus)
         }
-        RG<-rowcluster[1]
-        CG<-columncluster[1]
+
+        RG <- nclus.row
+        CG <- nclus.column
 
         PO.ss.out=polr(as.factor(y.mat)~1)
         PO.ss.out$mu=PO.ss.out$zeta
@@ -916,8 +915,6 @@ pombiclustering <- function(pomformula,
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
-            RG=rowcluster[1]
-            CG=columncluster[1]
 
             PO.ss.out=polr(as.factor(y.mat)~1)
             PO.ss.out$mu=PO.ss.out$zeta
@@ -1093,8 +1090,9 @@ pombiclustering <- function(pomformula,
                  "RowClusters"=Rclus,
                  "ColumnClusters"=Cclus)
         }
-        RG=rowcluster[1]
-        CG=columncluster[1]
+
+        RG <- nclus.row
+        CG <- nclus.column
 
         PO.ss.out=polr(as.factor(y.mat)~1)
         PO.ss.out$mu=PO.ss.out$zeta
