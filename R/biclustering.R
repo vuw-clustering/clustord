@@ -629,7 +629,6 @@ pombiclustering <- function(pomformula,
             RG<-rowcluster[1]
             CG<-columncluster[1]
 
-            library(MASS)
             PO.ss.out=polr(as.factor(y.mat)~1)
             PO.ss.out$mu=PO.ss.out$zeta
 
@@ -799,7 +798,6 @@ pombiclustering <- function(pomformula,
         RG<-rowcluster[1]
         CG<-columncluster[1]
 
-        library(MASS)
         PO.ss.out=polr(as.factor(y.mat)~1)
         PO.ss.out$mu=PO.ss.out$zeta
 
@@ -894,7 +892,6 @@ pombiclustering <- function(pomformula,
             RG=rowcluster[1]
             CG=columncluster[1]
 
-            library(MASS)
             PO.ss.out=polr(as.factor(y.mat)~1)
             PO.ss.out$mu=PO.ss.out$zeta
 
