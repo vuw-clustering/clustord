@@ -12,6 +12,7 @@ lower.limit <- 0.00001
 #' @param columncluster: number of column clustering groups.
 #' @param data: three columns data set(must be set in order). First column is response, second column is subject, and last column is question.
 #' @param maxiter: (default 50) maximum number of iterations of the EM algorithm.
+#' @param tol: (default 1e-4) convergence tolerance for EM algorithm.
 #' @return fitted values of parameters pi, kappa, theta, mu and alpha, as well as
 #'     `ppr` and `ppc`, the posterior probabilities of membership of the row and column clusters,
 #'     and `RowClusters`, the assigned row clusters based on maximum posterior probability,
@@ -24,7 +25,7 @@ pombiclustering <- function(pomformula,
                             rowcluster,
                             columncluster,
                             data,
-                            maxiter=50){
+                            maxiter=50, tol=1e-04){
     if(pomformula=="Y~row+column"){
         #transform data set to matrix form #
         colnames(data)<-c("y","subject","question")
@@ -146,7 +147,7 @@ pombiclustering <- function(pomformula,
             # Run the EM cycle:
             iter=1
 
-            while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>1e-04)))&(iter<maxiter))
+            while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>tol)))&(iter<maxiter))
             {
 
                 # E-step - Update posterior probabilities
@@ -341,7 +342,7 @@ pombiclustering <- function(pomformula,
 
             # Run the EM cycle:
             iter=1
-            while(((iter==1)|(any(abs(invect-outvect)>1e-04)))&(iter<maxiter))
+            while(((iter==1)|(any(abs(invect-outvect)>tol)))&(iter<maxiter))
             {
 
                 # E-step - Update posterior probabilities
@@ -661,7 +662,7 @@ pombiclustering <- function(pomformula,
 
             # Run the EM cycle:
             iter=1
-            while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>1e-04)))&(iter<maxiter))
+            while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>tol)))&(iter<maxiter))
             {
 
                 invect=outvect
@@ -922,7 +923,7 @@ pombiclustering <- function(pomformula,
 
             # Run the EM cycle:
             iter=1
-            while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>1e-04)))&(iter<maxiter))
+            while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>tol)))&(iter<maxiter))
             {
 
                 invect=outvect
