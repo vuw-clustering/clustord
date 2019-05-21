@@ -1605,16 +1605,16 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             PO.ss.out$mu=PO.ss.out$zeta
 
             init<-5
-            set.seed(1000+init)
+
             kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
-            set.seed(87654321) #original seed
+
             pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
             alpha.kmeans=apply(kmeans.data$centers,1,mean)
             alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
 
-            set.seed(1000+init)
+
             kmeans.data=kmeans(y.mat,centers=CG,nstart=50)
-            set.seed(87654321) #original seed
+
             kappa.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
             beta.kmeans=apply(kmeans.data$centers,1,mean)
             beta.kmeans=beta.kmeans-beta.kmeans[1] #beta1=0
@@ -1771,16 +1771,13 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
         PO.ss.out$mu=PO.ss.out$zeta
 
         init<-5
-        set.seed(1000+init)
+
         kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
-        set.seed(87654321) #original seed
         pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
         alpha.kmeans=apply(kmeans.data$centers,1,mean)
         alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
 
-        set.seed(1000+init)
         kmeans.data=kmeans(y.mat,centers=CG,nstart=50)
-        set.seed(87654321) #original seed
         kappa.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
         beta.kmeans=apply(kmeans.data$centers,1,mean)
         beta.kmeans=beta.kmeans-beta.kmeans[1] #beta1=0
