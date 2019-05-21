@@ -1,3 +1,5 @@
+lower.limit <- 0.00001
+
 #' Proportional Odds Models:bi-clustering models for two-mode ordinal data.
 #'
 #' This function contains bi-clustering models(row clustering and column clustering models), with interaction terms.
@@ -38,9 +40,8 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
-            theta[theta==0]=0.00001
-            theta[theta<0]=0.00001
-            pi.v[pi.v==0]=0.00001
+            theta[theta<=0]=lower.limit
+            pi.v[pi.v==0]=lower.limit
             llc=0
             for(i in 1:n){
                 for(j in 1:p){
@@ -62,9 +63,8 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
-            theta[theta==0]=0.00001
-            theta[theta<0]=0.00001
-            pi.v[pi.v==0]=0.00001
+            theta[theta<=0]=lower.limit
+            pi.v[pi.v==0]=lower.limit
             logl = 0
             for(i in 1:n){
                 sumoverR=0
@@ -102,9 +102,8 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
                 this.theta[r,1:p,q]=1-sum(this.theta[r,1,1:(q-1)])
             }
 
-            this.theta[this.theta==0]=0.00001
-            this.theta[this.theta<0]=0.00001
-            pi.v[pi.v==0]=0.00001
+            this.theta[this.theta<=0]=lower.limit
+            pi.v[pi.v==0]=lower.limit
 
             Rcluster.ll(this.theta,ppr.m,pi.v)
         }
@@ -228,9 +227,8 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
-            theta[theta==0]=0.00001
-            theta[theta<0]=0.00001
-            kappa.v[kappa.v==0]=0.00001
+            theta[theta<=0]=lower.limit
+            kappa.v[kappa.v==0]=lower.limit
             llc=0
             for(i in 1:n){
                 for(j in 1:p){
@@ -251,9 +249,8 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
-            theta[theta==0]=0.00001
-            theta[theta<0]=0.00001
-            kappa.v[kappa.v==0]=0.00001
+            theta[theta<=0]=lower.limit
+            kappa.v[kappa.v==0]=lower.limit
             logl = 0
             for(j in 1:p){
                 sumoverC=0
@@ -292,9 +289,8 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
                 this.theta[1:n,c,q]=1-sum(this.theta[1,c,1:(q-1)])
             }
 
-            this.theta[this.theta==0]=0.00001
-            this.theta[this.theta<0]=0.00001
-            kappa.v[kappa.v==0]=0.00001
+            this.theta[this.theta<=0]=lower.limit
+            kappa.v[kappa.v==0]=lower.limit
 
             Ccluster.ll(this.theta,ppc.m,kappa.v)
         }
@@ -451,8 +447,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
-            theta[theta==0]=0.0001
-            theta[theta<0]=0.0001
+            theta[theta<=0]=0.0001
 
             # Full evaluation using the columns.
             # Use if CG^p is small enough.
@@ -518,8 +513,7 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
-            theta[theta==0]=0.0001
-            theta[theta<0]=0.0001
+            theta[theta<=0]=0.0001
 
             # Full evaluation using the rows.
             # Use if RG^n is small enough.
@@ -603,10 +597,9 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
                 }
             }
 
-            this.theta[this.theta==0]=0.00001
-            this.theta[this.theta<0]=0.00001
-            pi.v[pi.v==0]=0.00001
-            kappa.v[kappa.v==0]=0.00001
+            this.theta[this.theta<=0]=lower.limit
+            pi.v[pi.v==0]=lower.limit
+            kappa.v[kappa.v==0]=lower.limit
 
             Bicluster.ll(this.theta,ppr.m,ppc.m,pi.v,kappa.v)
         }
@@ -828,9 +821,8 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
-            theta[theta==0]=0.00001
-            theta[theta<0]=0.00001
-            pi.v[pi.v==0]=0.00001
+            theta[theta<=0]=lower.limit
+            pi.v[pi.v==0]=lower.limit
             llc=0
             for(i in 1:n){
                 for(j in 1:p){
@@ -852,9 +844,8 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
-            theta[theta==0]=0.00001
-            theta[theta<0]=0.00001
-            pi.v[pi.v==0]=0.00001
+            theta[theta<=0]=lower.limit
+            pi.v[pi.v==0]=lower.limit
             logl = 0
             for(i in 1:n){
                 sumoverR=0
@@ -892,9 +883,8 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
                 this.theta[r,1:p,q]=1-sum(this.theta[r,1,1:(q-1)])
             }
 
-            this.theta[this.theta==0]=0.00001
-            this.theta[this.theta<0]=0.00001
-            pi.v[pi.v==0]=0.00001
+            this.theta[this.theta<=0]=lower.limit
+            pi.v[pi.v==0]=lower.limit
 
             Rcluster.ll(this.theta,ppr.m,pi.v)
         }
@@ -1016,9 +1006,8 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
-            theta[theta==0]=0.00001
-            theta[theta<0]=0.00001
-            kappa.v[kappa.v==0]=0.00001
+            theta[theta<=0]=lower.limit
+            kappa.v[kappa.v==0]=lower.limit
             llc=0
             for(i in 1:n){
                 for(j in 1:p){
@@ -1039,9 +1028,8 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
-            theta[theta==0]=0.00001
-            theta[theta<0]=0.00001
-            kappa.v[kappa.v==0]=0.00001
+            theta[theta<=0]=lower.limit
+            kappa.v[kappa.v==0]=lower.limit
             logl = 0
             for(j in 1:p){
                 sumoverC=0
@@ -1080,9 +1068,9 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
                 this.theta[1:n,c,q]=1-sum(this.theta[1,c,1:(q-1)])
             }
 
-            this.theta[this.theta==0]=0.00001
-            this.theta[this.theta<0]=0.00001
-            kappa.v[kappa.v==0]=0.00001
+            this.theta[this.theta==0]=lower.limit
+            this.theta[this.theta<0]=lower.limit
+            kappa.v[kappa.v==0]=lower.limit
 
             Ccluster.ll(this.theta,ppc.m,kappa.v)
         }
@@ -1391,10 +1379,9 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
                 }
             }
 
-            this.theta[this.theta==0]=0.00001
-            this.theta[this.theta<0]=0.00001
-            pi.v[pi.v==0]=0.00001
-            kappa.v[kappa.v==0]=0.00001
+            this.theta[this.theta<=0]=lower.limit
+            pi.v[pi.v==0]=lower.limit
+            kappa.v[kappa.v==0]=lower.limit
 
             Bicluster.ll(this.theta,ppr.m,ppc.m,pi.v,kappa.v)
         }
@@ -1598,10 +1585,10 @@ pombiclustering<-function(pomformula,rowcluster,columncluster,data){
                 }
             }
 
-            this.theta[this.theta==0]=0.00001
-            this.theta[this.theta<0]=0.00001
-            pi.v[pi.v==0]=0.00001
-            kappa.v[kappa.v==0]=0.00001
+            this.theta[this.theta==0]=lower.limit
+            this.theta[this.theta<0]=lower.limit
+            pi.v[pi.v==0]=lower.limit
+            kappa.v[kappa.v==0]=lower.limit
 
             Bicluster.ll(this.theta,ppr.m,ppc.m,pi.v,kappa.v)
         }
