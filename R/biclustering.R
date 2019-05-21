@@ -10,9 +10,28 @@ lower.limit <- 0.00001
 #' @param pomformula: indicates bi-clustering models' formula.
 #' @param rowcluster: number of row clustering groups.
 #' @param columncluster: number of column clustering groups.
-#' @param data: three columns data set(must be set in order). First column is response, second column is subject, and last column is question.
-#' @param maxiter: (default 50) maximum number of iterations of the EM algorithm.
-#' @param tol: (default 1e-4) convergence tolerance for EM algorithm.
+#' @param data: three columns data set(must be set in order). First column is
+#'     response, second column is subject, and last column is question.
+#' @param maxiter.rci: (default 50) maximum number of iterations for outer EM
+#'     algorithm for biclustering with interactions.
+#' @param tol.rci: (default 1e-4) absolute tolerance for convergence of outer EM
+#'     algorithm for biclustering with interactions.
+#' @param maxiter.rc: (default 50) if formula has no interactions, maximum number
+#'     of iterations for outer EM algorithm for biclustering without interactions;
+#'     otherwise, maximum number of iterations for inner EM algorithm without
+#'     interactions, which is used as a starting point for the EM algorithm with interactions.
+#' @param tol.rc: (default 1e-4) if formula has no interactions, absolute tolerance
+#'     for convergence for outer EM algorithm for biclustering without interactions;
+#'     otherwise, absolute tolerance for convergence for inner EM algorithm without
+#'     interactions, which is used as a starting point for the EM algorithm with interactions.
+#' @param maxiter.rs: (default 20) maximum number of iterations for inner EM
+#'     algorithm for row clustering, used as starting point for biclustering.
+#' @param tol.rs: (default 1e-4) absolute tolerance for convergence of inner EM
+#'     algorithm for row clustering, used as starting point for biclustering.
+#' @param maxiter.sc: (default 20) maximum number of iterations for inner EM
+#'     algorithm for column clustering, used as starting point for biclustering.
+#' @param tol.sc: (default 1e-4) absolute tolerance for convergence of inner EM
+#'     algorithm for column clustering, used as starting point for biclustering.
 #' @return fitted values of parameters pi, kappa, theta, mu and alpha, as well as
 #'     `ppr` and `ppc`, the posterior probabilities of membership of the row and column clusters,
 #'     and `RowClusters`, the assigned row clusters based on maximum posterior probability,
@@ -25,7 +44,10 @@ pombiclustering <- function(pomformula,
                             rowcluster,
                             columncluster,
                             data,
-                            maxiter=50, tol=1e-04){
+                            maxiter.rci=50, tol.rci=1e-4,
+                            maxiter.rc=50, tol.rc=1e-4,
+                            maxiter.rs=20, tol.rs=1e-4,
+                            maxiter.sc=20, tol.sc=1e-4){
     if(pomformula=="Y~row+column"){
         #transform data set to matrix form #
         colnames(data)<-c("y","subject","question")
@@ -117,7 +139,7 @@ pombiclustering <- function(pomformula,
             Rcluster.ll(y.mat, this.theta, ppr.m, pi.v, RG)
         }
 
-        fit.POFM.rs.model <- function(invect, y.mat, RG, maxiter=50){
+        fit.POFM.rs.model <- function(invect, y.mat, RG, maxiter.rs=50, tol.rs=1e-4){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
@@ -147,7 +169,7 @@ pombiclustering <- function(pomformula,
             # Run the EM cycle:
             iter=1
 
-            while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>tol)))&(iter<maxiter))
+            while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>tol.rs)))&(iter<maxiter.rs))
             {
 
                 # E-step - Update posterior probabilities
@@ -310,7 +332,7 @@ pombiclustering <- function(pomformula,
             Ccluster.ll(y.mat, this.theta, ppc.m, kappa.v, CG)
         }
 
-        fit.POFM.sc.model <- function(invect, y.mat, CG, maxiter=50){
+        fit.POFM.sc.model <- function(invect, y.mat, CG, maxiter.sc=50, tol.sc=1e-4){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
@@ -342,7 +364,7 @@ pombiclustering <- function(pomformula,
 
             # Run the EM cycle:
             iter=1
-            while(((iter==1)|(any(abs(invect-outvect)>tol)))&(iter<maxiter))
+            while(((iter==1)|(any(abs(invect-outvect)>tol.sc)))&(iter<maxiter.sc))
             {
 
                 # E-step - Update posterior probabilities
@@ -623,7 +645,10 @@ pombiclustering <- function(pomformula,
             Bicluster.ll(y.mat, this.theta, ppr.m, ppc.m, pi.v, kappa.v, RG, CG)
         }
 
-        fit.POFM.rc.model <- function(invect, y.mat, RG, CG, maxiter=50){
+        fit.POFM.rc.model <- function(invect, y.mat, RG, CG,
+                                      maxiter.rc=50, tol.rc=1e-4,
+                                      maxiter.rs=20, tol.rs=1e-4,
+                                      maxiter.sc=20, tol.sc=1e-4){
             n<-nrow(y.mat)
             p<-ncol(y.mat)
             q<-length(unique(as.vector(y.mat)))
@@ -639,8 +664,8 @@ pombiclustering <- function(pomformula,
             alpha.kmeans=apply(kmeans.data$centers,1,mean)
             alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
 
-            #POFM.rs.out[[RG]]=fit.POFM.rs.model(invect=c(PO.ss.out$mu,alpha.kmeans[-1]),y.mat,RG, maxiter=20)
-            POFM.rs.out <- fit.POFM.rs.model(invect=c(PO.ss.out$mu,alpha.kmeans[-1]),y.mat,RG, maxiter=20)
+            #POFM.rs.out[[RG]]=fit.POFM.rs.model(invect=c(PO.ss.out$mu,alpha.kmeans[-1]),y.mat,RG, maxiter.rs=maxiter.rs, tol.rs=tol.rs)
+            POFM.rs.out <- fit.POFM.rs.model(invect=c(PO.ss.out$mu,alpha.kmeans[-1]),y.mat,RG, maxiter.rs=maxiter.rs, tol.rs=tol.rs)
             ppr.m <- POFM.rs.out$ppr
             pi.v <- POFM.rs.out$pi
             #pi.v=rep(1/RG,RG)
@@ -651,8 +676,8 @@ pombiclustering <- function(pomformula,
             #beta.kmeans=apply(kmeans.data$centers,1,mean)
             #beta.kmeans=beta.kmeans-beta.kmeans[1] #beta1=0
 
-            #POFM.sc.out[[CG]]=POFM.sc.F(invect=c(PO.ss.out$mu),rep(1,CG-1),y.mat,CG, maxiter=20)
-            POFM.sc.out <- fit.POFM.sc.model(invect=c(PO.ss.out$mu),rep(1,CG-1),y.mat,CG, maxiter=20)
+            #POFM.sc.out[[CG]]=POFM.sc.F(invect=c(PO.ss.out$mu),rep(1,CG-1),y.mat,CG, maxiter.sc=maxiter.sc, tol.sc=tol.sc)
+            POFM.sc.out <- fit.POFM.sc.model(invect=c(PO.ss.out$mu),rep(1,CG-1),y.mat,CG, maxiter.sc=maxiter.sc, tol.sc=tol.sc)
             ppc.m <- POFM.sc.out$ppc
             kappa.v <- POFM.sc.out$kappa
             #plot(rep(0,RG),pi.v,xlim=c(0,500),ylim=c(0,1))
@@ -662,7 +687,7 @@ pombiclustering <- function(pomformula,
 
             # Run the EM cycle:
             iter=1
-            while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>tol)))&(iter<maxiter))
+            while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>tol.rc)))&(iter<maxiter.rc))
             {
 
                 invect=outvect
@@ -818,7 +843,7 @@ pombiclustering <- function(pomformula,
         beta.init=beta.kmeans
         invect=c(mu.init,alpha.init,beta.init)
 
-        fit.POFM.rc.model(invect, y.mat, RG, CG, maxiter=maxiter)
+        fit.POFM.rc.model(invect, y.mat, RG, CG, maxiter.rc=maxiter, tol.rc=tol)
     }
 
     else if(pomformula=="Y~row+column+row:column"){
@@ -883,7 +908,11 @@ pombiclustering <- function(pomformula,
             Bicluster.ll(y.mat, this.theta, ppr.m, ppc.m, pi.v, kappa.v, RG, CG)
         }
 
-        fit.POFM.rci.model <- function(invect, y.mat, RG, CG){
+        fit.POFM.rci.model <- function(invect, y.mat, RG, CG,
+                                       maxiter.rci=50, tol.rci=1e-4,
+                                       maxiter.rc=20, tol.rc=1e-4,
+                                       maxiter.rs=20, tol.rs=1e-4,
+                                       maxiter.sc=20, tol.sc=1e-4){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
@@ -910,7 +939,10 @@ pombiclustering <- function(pomformula,
             mu.init=PO.ss.out$mu
             alpha.init=alpha.kmeans
             beta.init=beta.kmeans
-            POFM.rc.out <- fit.POFM.rc.model(invect=c(mu.init,alpha.init,beta.init), y.mat, RG, CG, maxiter=20)
+            POFM.rc.out <- fit.POFM.rc.model(invect=c(mu.init,alpha.init,beta.init), y.mat, RG, CG,
+                                             maxiter.rc=maxiter.rc, tol.rc=tol.rc,
+                                             maxiter.rs=maxiter.rs, tol.rs=tol.rs,
+                                             maxiter.sc=maxiter.sc, tol.sc=tol.sc)
 
             ppr.m=POFM.rc.out$ppr
             pi.v=POFM.rc.out$pi
@@ -923,7 +955,7 @@ pombiclustering <- function(pomformula,
 
             # Run the EM cycle:
             iter=1
-            while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>tol)))&(iter<maxiter))
+            while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>tol.rci)))&(iter<maxiter.rci))
             {
 
                 invect=outvect
@@ -1084,7 +1116,11 @@ pombiclustering <- function(pomformula,
         gamma.init=rep(0,(RG-1)*(CG-1))
         invect=c(mu.init,alpha.init,beta.init,gamma.init)
 
-        fit.POFM.rci.model(invect, y.mat, RG, CG, maxiter=maxiter)
+        fit.POFM.rci.model(invect, y.mat, RG, CG,
+                           maxiter.rci=maxiter.rci, tol.rci=tol.rci,
+                           maxiter.rc=maxiter.rc, tol.rc=tol.rc,
+                           maxiter.rs=maxiter.rs, tol.rs=tol.rs,
+                           maxiter.sc=maxiter.sc, tol.sc=tol.sc)
 
     }
     else {
