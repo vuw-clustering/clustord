@@ -7,5 +7,6 @@ Author: Ying, Louise McMillan
 Maintainer: Louise McMillan <louise.mcmillan@vuw.ac.nz>
 Description: Biclustering, row clustering and column clustering using the proportional odds model (POM) for ordinal categorical data.
 License: What license is it under?
-Imports: Rcpp (>= 1.0.1)
+Imports: Rcpp (>= 1.0.1), 
+         MASS
 LinkingTo: Rcpp, RcppArmadillo
