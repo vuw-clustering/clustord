@@ -117,7 +117,7 @@ pombiclustering <- function(pomformula,
             Rcluster.ll(y.mat, this.theta, ppr.m, pi.v, RG)
         }
 
-        POFM.rs.F <- function(invect, y.mat, RG){
+        POFM.rs.F <- function(invect, y.mat, RG, maxiter=50){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
@@ -310,7 +310,7 @@ pombiclustering <- function(pomformula,
             Ccluster.ll(y.mat, this.theta, ppc.m, kappa.v, CG)
         }
 
-        POFM.sc.F <- function(invect, y.mat, CG){
+        POFM.sc.F <- function(invect, y.mat, CG, maxiter=50){
             n=nrow(y.mat)
             p=ncol(y.mat)
             q=length(unique(as.vector(y.mat)))
@@ -623,7 +623,7 @@ pombiclustering <- function(pomformula,
             Bicluster.ll(y.mat, this.theta, ppr.m, ppc.m, pi.v, kappa.v, RG, CG)
         }
 
-        POFM.rc.F <- function(invect, y.mat, RG, CG){
+        POFM.rc.F <- function(invect, y.mat, RG, CG, maxiter=50){
             n<-nrow(y.mat)
             p<-ncol(y.mat)
             q<-length(unique(as.vector(y.mat)))
@@ -639,8 +639,8 @@ pombiclustering <- function(pomformula,
             alpha.kmeans=apply(kmeans.data$centers,1,mean)
             alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
 
-            #POFM.rs.out[[RG]]=POFM.rs.F(invect=c(PO.ss.out$mu,alpha.kmeans[-1]),y.mat,RG)
-            POFM.rs.F.out <- POFM.rs.F(invect=c(PO.ss.out$mu,alpha.kmeans[-1]),y.mat,RG)
+            #POFM.rs.out[[RG]]=POFM.rs.F(invect=c(PO.ss.out$mu,alpha.kmeans[-1]),y.mat,RG, maxiter=20)
+            POFM.rs.F.out <- POFM.rs.F(invect=c(PO.ss.out$mu,alpha.kmeans[-1]),y.mat,RG, maxiter=20)
             ppr.m <- POFM.rs.F.out$ppr
             pi.v <- POFM.rs.F.out$pi
             #pi.v=rep(1/RG,RG)
@@ -651,8 +651,8 @@ pombiclustering <- function(pomformula,
             #beta.kmeans=apply(kmeans.data$centers,1,mean)
             #beta.kmeans=beta.kmeans-beta.kmeans[1] #beta1=0
 
-            #POFM.sc.out[[CG]]=POFM.sc.F(invect=c(PO.ss.out$mu),rep(1,CG-1))
-            POFM.sc.out <- POFM.sc.F(invect=c(PO.ss.out$mu),rep(1,CG-1),y.mat,CG)
+            #POFM.sc.out[[CG]]=POFM.sc.F(invect=c(PO.ss.out$mu),rep(1,CG-1),y.mat,CG, maxiter=20)
+            POFM.sc.out <- POFM.sc.F(invect=c(PO.ss.out$mu),rep(1,CG-1),y.mat,CG, maxiter=20)
             ppc.m <- POFM.sc.F.out$ppc
             kappa.v <- POFM.sc.F.out$kappa
             #plot(rep(0,RG),pi.v,xlim=c(0,500),ylim=c(0,1))
@@ -818,7 +818,7 @@ pombiclustering <- function(pomformula,
         beta.init=beta.kmeans
         invect=c(mu.init,alpha.init,beta.init)
 
-        POFM.rc.F(invect, y.mat, RG, CG)
+        POFM.rc.F(invect, y.mat, RG, CG, maxiter=maxiter)
     }
 
     else if(pomformula=="Y~row+column+row:column"){
@@ -910,7 +910,7 @@ pombiclustering <- function(pomformula,
             mu.init=PO.ss.out$mu
             alpha.init=alpha.kmeans
             beta.init=beta.kmeans
-            POFM.rc.F.out <- POFM.rc.F(invect=c(mu.init,alpha.init,beta.init), y.mat, RG, CG)
+            POFM.rc.F.out <- POFM.rc.F(invect=c(mu.init,alpha.init,beta.init), y.mat, RG, CG, maxiter=20)
 
             ppr.m=POFM.rc.F.out$ppr
             pi.v=POFM.rc.F.out$pi
@@ -1084,7 +1084,7 @@ pombiclustering <- function(pomformula,
         gamma.init=rep(0,(RG-1)*(CG-1))
         invect=c(mu.init,alpha.init,beta.init,gamma.init)
 
-        POFM.rci.F(invect, y.mat, RG, CG)
+        POFM.rci.F(invect, y.mat, RG, CG, maxiter=maxiter)
 
     }
     else {
