@@ -239,16 +239,16 @@ pombiclustering <- function(pomformula,
         #aicc = aic + (2*(npar+1)*(npar+2))/(n*p - npar - 2)
         bic = -2*logl + npar*log(n*p)
         icl = 2*temp$value + npar*log(n*p)
-        out1 = round(c(n,p,logl,npar,aic,bic,icl,RG),2)
-        #out1 = round(c(n,p,logl,res.dev,npar,aic,aicc,bic,icl,RG),3)
+        out1 = c(n,p,logl,npar,aic,bic,icl,RG)
+        #out1 = c(n,p,logl,res.dev,npar,aic,aicc,bic,icl,RG)
         names(out1) = c("n","p","LogL","npar","AIC","BIC","ICL","R")
         #names(out1) = c("n","p","Max.ll","Res.Dev.","npar","AIC","AICc","BIC","ICL","R")
         list("info"=out1,
-             "pi"=round(pi.v,3),
-             "theta"=round(theta.arr,3),
+             "pi"=pi.v,
+             "theta"=theta.arr,
              "mu"=mu.out,
              "alpha"=alpha.out,
-             "ppr"=round(ppr.m,3),
+             "ppr"=ppr.m,
              "RowClusters"=Rclus)
     }
     #####the end of ppr.m########
@@ -424,15 +424,15 @@ pombiclustering <- function(pomformula,
         aicc = aic + (2*(npar+1)*(npar+2))/(n*p - npar - 2)
         bic = -2*logl + npar*log(n*p)
         icl = 2*temp$value + npar*log(n*p)
-        out1 = round(c(n,p,logl,res.dev,npar,aic,aicc,bic,icl,CG),3)
+        out1 = c(n,p,logl,res.dev,npar,aic,aicc,bic,icl,CG)
         names(out1) = c("n","p","Max.ll","Res.Dev.","npar","AIC","AICc","BIC","ICL",
                         "C")
         list("info"=out1,
-             "kappa"=round(kappa.v,3),
-             "theta"=round(theta.arr,3),
+             "kappa"=kappa.v,
+             "theta"=theta.arr,
              "mu"=mu.out,
              "beta"=beta.out,
-             "ppc"=round(ppc.m,3),
+             "ppc"=ppc.m,
              "ColumnClusters"=Cclus)
     }
     #######the end of ppc.m#####
@@ -766,7 +766,6 @@ pombiclustering <- function(pomformula,
         aicc = aic + (2*(npar+1)*(npar+2))/(n*p - npar - 2)
         bic = -2*logl + npar*log(n*p)
         icl = 2*temp$value + npar*log(n*p)
-        out1 = round(c(n,p,logl,res.dev,npar,aic,aicc,RG,CG),3)
         out1 = round(c(n,p,logl,res.dev,npar,aic,aicc,bic,icl,RG,CG),3)
         names(out1) = c("n","p","Max.ll","Res.Dev.","npar","AIC","AICc","BIC","ICL",
                         "R","C")
@@ -777,8 +776,8 @@ pombiclustering <- function(pomformula,
              "mu"=mu.out,
              "alpha"=alpha.out,
              "beta"=beta.out,
-             "ppr"=round(ppr.m,3),
-             "ppc"=round(ppc.m,3),
+             "ppr"=ppr.m,
+             "ppc"=ppc.m,
              "RowClusters"=Rclus,
              "ColumnClusters"=Cclus)
     }
@@ -869,7 +868,6 @@ pombiclustering <- function(pomformula,
         iter=1
         while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>tol.rci)))&(iter<maxiter.rci))
         {
-
             invect=outvect
             # M-step:
             #use numerical maximisation
@@ -990,31 +988,29 @@ pombiclustering <- function(pomformula,
              "alpha"=alpha.out,
              "beta"=beta.out,
              "gamma"=gamma.out,
-             "ppr"=round(ppr.m,3),
-             "ppc"=round(ppc.m,3),
+             "ppr"=ppr.m,
+             "ppc"=ppc.m,
              "RowClusters"=Rclus,
              "ColumnClusters"=Cclus)
     }
 
+    RG <- nclus.row
+    CG <- nclus.column
+
+    PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
+    PO.ss.out$mu=PO.ss.out$zeta
+
+    kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
+    pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
+    alpha.kmeans=apply(kmeans.data$centers,1,mean)
+    alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
+
+    kmeans.data=kmeans(y.mat,centers=CG,nstart=50)
+    kappa.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
+    beta.kmeans=apply(kmeans.data$centers,1,mean)
+    beta.kmeans=beta.kmeans-beta.kmeans[1] #beta1=0
+
     if(pomformula=="Y~row+column"){
-
-        RG <- nclus.row
-        CG <- nclus.column
-
-        PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
-        PO.ss.out$mu=PO.ss.out$zeta
-
-        kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
-
-        pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-        alpha.kmeans=apply(kmeans.data$centers,1,mean)
-        alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
-
-        kmeans.data=kmeans(y.mat,centers=CG,nstart=50)
-
-        kappa.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-        beta.kmeans=apply(kmeans.data$centers,1,mean)
-        beta.kmeans=beta.kmeans-beta.kmeans[1] #beta1=0
 
         #initial mu, alpha, beta#
         mu.init=PO.ss.out$mu
@@ -1022,25 +1018,12 @@ pombiclustering <- function(pomformula,
         beta.init=beta.kmeans
         invect=c(mu.init,alpha.init,beta.init)
 
-        fit.POFM.rc.model(invect, y.mat, RG, CG, maxiter.rc=maxiter.rc, tol.rc=tol.rc)
+        fit.POFM.rc.model(invect, y.mat, RG, CG,
+                          maxiter.rc=maxiter.rc, tol.rc=tol.rc,
+                          maxiter.rs=maxiter.rs, tol.rs=tol.rs,
+                          maxiter.sc=maxiter.sc, tol.sc=tol.sc)
 
     } else if(pomformula=="Y~row+column+row:column"){
-
-        RG <- nclus.row
-        CG <- nclus.column
-
-        PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
-        PO.ss.out$mu=PO.ss.out$zeta
-
-        kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
-        pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-        alpha.kmeans=apply(kmeans.data$centers,1,mean)
-        alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
-
-        kmeans.data=kmeans(y.mat,centers=CG,nstart=50)
-        kappa.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-        beta.kmeans=apply(kmeans.data$centers,1,mean)
-        beta.kmeans=beta.kmeans-beta.kmeans[1] #beta1=0
 
         #initial mu, alpha, beta#
         mu.init=PO.ss.out$mu
