@@ -10,8 +10,11 @@ lower.limit <- 0.00001
 #' @param pomformula: indicates bi-clustering models' formula.
 #' @param nclus.row: number of row clustering groups.
 #' @param nclus.column: number of column clustering groups.
-#' @param data: three columns data set(must be set in order). First column is
-#'     response, second column is subject, and last column is question.
+#' @param data: data frame with three columns, which must be in the correct order.
+#'     First column is response, second column is subject, and last column is question.
+#' @param y.mat: can be provided as an input instead of data, y.mat is a data
+#'     matrix with named columns corresponding to questions, and rows
+#'     corresponding to subjects.
 #' @param maxiter.rci: (default 50) maximum number of iterations for outer EM
 #'     algorithm for biclustering with interactions.
 #' @param tol.rci: (default 1e-4) absolute tolerance for convergence of outer EM
@@ -43,27 +46,32 @@ lower.limit <- 0.00001
 pombiclustering <- function(pomformula,
                             nclus.row,
                             nclus.column,
-                            data,
+                            data=NULL,y.mat=NULL,
                             maxiter.rci=50, tol.rci=1e-4,
                             maxiter.rc=50, tol.rc=1e-4,
                             maxiter.rs=20, tol.rs=1e-4,
                             maxiter.sc=20, tol.sc=1e-4){
-    if(pomformula=="Y~row+column"){
-        #transform data set to matrix form #
-        colnames(data)<-c("y","subject","question")
-        df2mat <- function(data,y,subject,question){
-            row <- length(levels(subject))
-            col<- length(levels(question))
-            my.mat <- matrix(NA,row,col,byrow=T)
-            for (i in 1:row) for (j in 1:col){
-                leveli <- levels(subject)[i]
-                levelj <- levels(question)[j]
-                temp.df <- data[(subject==leveli)&(question==levelj),]
-                if (length(temp.df$y)>0) my.mat[i,j] <- temp.df$y
-            }
-            return(my.mat)
+
+    #transform data set to matrix form #
+    df2mat <- function(data,y,subject,question){
+        row <- length(levels(subject))
+        col<- length(levels(question))
+        my.mat <- matrix(NA,row,col,byrow=T)
+        for (i in 1:row) for (j in 1:col){
+            leveli <- levels(subject)[i]
+            levelj <- levels(question)[j]
+            temp.df <- data[(subject==leveli)&(question==levelj),]
+            if (length(temp.df$y)>0) my.mat[i,j] <- temp.df$y
         }
-        y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$question))
+        return(my.mat)
+    }
+
+    if(is.null(y.mat)) {
+        if (!is.null(data)) {
+            colnames(data)<-c("y","subject","question")
+            y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$question))
+        } else stop("y.mat and data cannot both be null. Please provide either a data matrix or a data frame.")
+    }
 
 
         ###initial value of ppr.m ####
@@ -674,8 +682,8 @@ pombiclustering <- function(pomformula,
             #beta.kmeans=apply(kmeans.data$centers,1,mean)
             #beta.kmeans=beta.kmeans-beta.kmeans[1] #beta1=0
 
-            #POFM.sc.out[[CG]]=POFM.sc.F(invect=c(PO.ss.out$mu),rep(1,CG-1),y.mat,CG, maxiter.sc=maxiter.sc, tol.sc=tol.sc)
-            POFM.sc.out <- fit.POFM.sc.model(invect=c(PO.ss.out$mu),rep(1,CG-1),y.mat,CG, maxiter.sc=maxiter.sc, tol.sc=tol.sc)
+            #POFM.sc.out[[CG]]=POFM.sc.F(invect=c(PO.ss.out$mu,rep(1,CG-1)),y.mat,CG, maxiter.sc=maxiter.sc, tol.sc=tol.sc)
+            POFM.sc.out <- fit.POFM.sc.model(invect=c(PO.ss.out$mu,rep(1,CG-1)),y.mat,CG, maxiter.sc=maxiter.sc, tol.sc=tol.sc)
             ppc.m <- POFM.sc.out$ppc
             kappa.v <- POFM.sc.out$kappa
             #plot(rep(0,RG),pi.v,xlim=c(0,500),ylim=c(0,1))
@@ -818,6 +826,8 @@ pombiclustering <- function(pomformula,
                  "ColumnClusters"=Cclus)
         }
 
+    if(pomformula=="Y~row+column"){
+
         RG <- nclus.row
         CG <- nclus.column
 
@@ -843,29 +853,8 @@ pombiclustering <- function(pomformula,
         invect=c(mu.init,alpha.init,beta.init)
 
         fit.POFM.rc.model(invect, y.mat, RG, CG, maxiter.rc=maxiter, tol.rc=tol)
-    }
 
-    else if(pomformula=="Y~row+column+row:column"){
-        #transform data set to matrix form #
-        colnames(data)<-c("y","subject","question")
-        df2mat <- function(data,y,subject,question){
-            row <- length(levels(subject))
-            col<- length(levels(question))
-            my.mat <- matrix(NA,row,col,byrow=T)
-            for (i in 1:row) for (j in 1:col){
-                leveli <- levels(subject)[i]
-                levelj <- levels(question)[j]
-                temp.df <- data[(subject==leveli)&(question==levelj),]
-                if (length(temp.df$y)>0) my.mat[i,j] <- temp.df$y
-            }
-            return(my.mat)
-        }
-        y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$question))
-
-        ###initial value of ppr.m and ppc.m####
-
-        #############end of ppc.m and ppr.m#####################
-
+    } else if(pomformula=="Y~row+column+row:column"){
 
         POFM.rci <- function(invect,y.mat, ppr.m, ppc.m, pi.v, kappa.v, RG, CG){
             n=nrow(y.mat)
@@ -878,7 +867,6 @@ pombiclustering <- function(pomformula,
             gamma.in=matrix(gamma.in,nrow=RG-1,ncol=CG-1,byrow=T)
             gamma.in=cbind(gamma.in,-apply(gamma.in,1,sum))
             gamma.in=rbind(gamma.in,-apply(gamma.in,2,sum))
-
 
             this.theta=array(NA,c(RG,CG,q))
             for(r in 1:RG){
