@@ -28,3 +28,6 @@ pombiclustering("Y~row+column+row:column",
 
 ### TODO:: add code to check none of the data matrix is NAs otherwise kmeans will
 ### fall over...
+
+
+#### TODO: get rid of use of "round" in outputs from inner fitting functions.

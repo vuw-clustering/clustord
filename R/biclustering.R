@@ -73,7 +73,6 @@ pombiclustering <- function(pomformula,
         } else stop("y.mat and data cannot both be null. Please provide either a data matrix or a data frame.")
     }
 
-
         ###initial value of ppr.m ####
         Rcluster.ll <- function(y.mat, theta, ppr.m, pi.v, RG){
             n=nrow(y.mat)
@@ -84,15 +83,11 @@ pombiclustering <- function(pomformula,
             llc=0
             for(i in 1:n){
                 for(j in 1:p){
-                    for(r in 1:RG){
-                        llc=llc+ppr.m[i,r]*log(theta[r,j,y.mat[i,j]])
-                    }
+                    llc <- llc+sum(ppr.m[i,]*log(theta[,j,y.mat[i,j]]))
                 }
             }
             for(i in 1:n){
-                for(r in 1:RG){
-                    llc=llc+ppr.m[i,r]*log(pi.v[r])
-                }
+                llc <- llc+sum(ppr.m[i,]*log(pi.v))
             }
             -llc
         }
@@ -108,10 +103,7 @@ pombiclustering <- function(pomformula,
             for(i in 1:n){
                 sumoverR=0
                 for(r in 1:RG){
-                    prodoverp=1
-                    for(j in 1:p)
-                        if(!is.na(y.mat[i,j])){prodoverp=prodoverp*theta[r,j,y.mat[i,j]]}
-                    sumoverR=sumoverR+pi.v[r]*prodoverp
+                    sumoverR=sumoverR+pi.v[r]*prod(diag(theta[r,,y.mat[i,]]),na.rm=TRUE)
                 }
                 logl=logl+log(sumoverR)
             }
@@ -133,7 +125,8 @@ pombiclustering <- function(pomformula,
 
             for(r in 1:RG){
                 for(k in 2:(q-1)){
-                    this.theta[r,1:p,k]=exp(mu.in[k]-alpha.in[r])/(1+exp(mu.in[k]-alpha.in[r]))-exp(mu.in[k-1]-alpha.in[r])/(1+exp(mu.in[k-1]-alpha.in[r]))
+                    this.theta[r,1:p,k]=exp(mu.in[k]-alpha.in[r])/(1+exp(mu.in[k]-alpha.in[r])) -
+                                        exp(mu.in[k-1]-alpha.in[r])/(1+exp(mu.in[k-1]-alpha.in[r]))
                 }
             }
 
@@ -165,7 +158,8 @@ pombiclustering <- function(pomformula,
 
             for(r in 1:RG){
                 for(k in 2:(q-1)){
-                    theta.arr[r,1:p,k]=exp(mu.in[k]-alpha.in[r])/(1+exp(mu.in[k]-alpha.in[r]))-exp(mu.in[k-1]-alpha.in[r])/(1+exp(mu.in[k-1]-alpha.in[r]))
+                    theta.arr[r,1:p,k]=exp(mu.in[k]-alpha.in[r])/(1+exp(mu.in[k]-alpha.in[r])) -
+                                       exp(mu.in[k-1]-alpha.in[r])/(1+exp(mu.in[k-1]-alpha.in[r]))
                 }
             }
 
@@ -179,15 +173,12 @@ pombiclustering <- function(pomformula,
 
             while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>tol.rs)))&(iter<maxiter.rs))
             {
-
                 # E-step - Update posterior probabilities
                 num.r=matrix(log(pi.v),n,RG,byrow=T)
 
                 for(i in 1:n){
                     for(r in 1:RG){
-                        for(j in 1:p){
-                            num.r[i,r]=num.r[i,r]+log(theta.arr[r,j,y.mat[i,j]])
-                        }
+                        num.r[i,r]=num.r[i,r]+sum(log(diag(theta.arr[r,,y.mat[i,]])))
                     }
                 }
                 for(i in 1:n) ppr.m[i,]=num.r[i,]-log(sum(exp(num.r[i,] + min(abs(num.r[i,]))))) + min(abs(num.r[i,]))
@@ -218,17 +209,14 @@ pombiclustering <- function(pomformula,
 
                 theta.arr=array(1, c(RG,p,q))
                 for(r in 1:RG){
-
                     theta.arr[r,1:p,1]=exp(mu.out[1]-alpha.out[r])/(1+exp(mu.out[1]-alpha.out[r]))
-
                 }
 
                 for(r in 1:RG){
-
                     for(k in 2:(q-1)){
-                        theta.arr[r,1:p,k]=exp(mu.out[k]-alpha.out[r])/(1+exp(mu.out[k]-alpha.out[r]))-exp(mu.out[k-1]-alpha.out[r])/(1+exp(mu.out[k-1]-alpha.out[r]))
+                        theta.arr[r,1:p,k]=exp(mu.out[k]-alpha.out[r])/(1+exp(mu.out[k]-alpha.out[r]))-
+                                           exp(mu.out[k-1]-alpha.out[r])/(1+exp(mu.out[k-1]-alpha.out[r]))
                     }
-
                 }
 
                 for(r in 1:RG){
@@ -237,13 +225,12 @@ pombiclustering <- function(pomformula,
                     }
                 }
                 iter=iter+1
-                #if ( floor(iter/5)==(iter/5) ) cat('iter=',iter, ' log.like=', temp$value ,'\n')
+                #if (iter%%5 ==0) cat('iter=',iter, ' log.like=', temp$value ,'\n')
                 #print(iter)
             }
             # Find cluster groupings:
             Rclus = vector("list",RG)
-            for (rr in 1:RG) Rclus[[rr]] =
-                (1:n)[ppr.m[,rr]==apply(ppr.m,1,max)]
+            for (rr in 1:RG) Rclus[[rr]] = (1:n)[ppr.m[,rr]==apply(ppr.m,1,max)]
             # Save results:
             logl=Rcluster.Incll(y.mat, theta.arr, pi.v, RG)
             res.dev = -2*logl
@@ -276,15 +263,11 @@ pombiclustering <- function(pomformula,
             llc=0
             for(i in 1:n){
                 for(j in 1:p){
-                    for(c in 1:CG){
-                        llc=llc+ppc.m[j,c]*log(theta[i,c,y.mat[i,j]])
-                    }
+                    llc <- llc+sum(ppc.m[j,]*log(theta[i,,y.mat[i,j]]))
                 }
             }
             for(j in 1:p){
-                for(c in 1:CG){
-                    llc=llc+ppc.m[j,c]*log(kappa.v[c])
-                }
+                llc <- llc+sum(ppc.m[j,]*log(kappa.v))
             }
             -llc
         }
@@ -300,10 +283,7 @@ pombiclustering <- function(pomformula,
             for(j in 1:p){
                 sumoverC=0
                 for(c in 1:CG){
-                    prodovern=1
-                    for(i in 1:n)
-                        if(!is.na(y.mat[i,j])){prodovern=prodovern*theta[i,c,y.mat[i,j]]}
-                    sumoverC=sumoverC+kappa.v[c]*prodovern
+                    sumoverC=sumoverC+kappa.v[c]*prod(diag(theta[,c,y.mat[,j]]),na.rm=TRUE)
                 }
                 logl=logl+log(sumoverC)
             }
@@ -318,7 +298,6 @@ pombiclustering <- function(pomformula,
             beta.in=c(0,invect[(q):(q+CG-2)])
 
             this.theta=array(NA,c(n,CG,q)) # Col-clustering: Setting initial theta with NA's
-            #this.theta=array(NA,c(RG,p,q)) # Row-clustering: Setting initial theta with NA's
 
             for(c in 1:CG){
                 this.theta[1:n,c,1]=exp(mu.in[1]-beta.in[c])/(1+exp(mu.in[1]-beta.in[c]))
@@ -326,7 +305,8 @@ pombiclustering <- function(pomformula,
 
             for(c in 1:CG){
                 for(k in 2:(q-1)){
-                    this.theta[1:n,c,k]=exp(mu.in[k]-beta.in[c])/(1+exp(mu.in[k]-beta.in[c]))-exp(mu.in[k-1]-beta.in[c])/(1+exp(mu.in[k-1]-beta.in[c]))
+                    this.theta[1:n,c,k]=exp(mu.in[k]-beta.in[c])/(1+exp(mu.in[k]-beta.in[c])) -
+                                        exp(mu.in[k-1]-beta.in[c])/(1+exp(mu.in[k-1]-beta.in[c]))
                 }
             }
 
@@ -360,7 +340,8 @@ pombiclustering <- function(pomformula,
 
             for(c in 1:CG){
                 for(k in 2:(q-1)){
-                    theta.arr[1:n,c,k]=exp(mu.in[k]-beta.in[c])/(1+exp(mu.in[k]-beta.in[c]))-exp(mu.in[k-1]-beta.in[c])/(1+exp(mu.in[k-1]-beta.in[c]))
+                    theta.arr[1:n,c,k]=exp(mu.in[k]-beta.in[c])/(1+exp(mu.in[k]-beta.in[c])) -
+                                       exp(mu.in[k-1]-beta.in[c])/(1+exp(mu.in[k-1]-beta.in[c]))
                 }
             }
 
@@ -374,7 +355,6 @@ pombiclustering <- function(pomformula,
             iter=1
             while(((iter==1)|(any(abs(invect-outvect)>tol.sc)))&(iter<maxiter.sc))
             {
-
                 # E-step - Update posterior probabilities
                 num.c=matrix(log(kappa.v),p,CG,byrow=T)
 
@@ -395,7 +375,6 @@ pombiclustering <- function(pomformula,
                 invect=outvect
                 # M-step:
                 #use numerical maximisation
-
                 temp=optim(par=invect,
                            fn=POFM.sc,
                            y.mat=y.mat,
@@ -415,14 +394,13 @@ pombiclustering <- function(pomformula,
                 theta.arr=array(NA,c(n,CG,q))
 
                 for(c in 1:CG){
-
                     theta.arr[1:n,c,1]=exp(mu.out[1]-beta.out[c])/(1+exp(mu.out[1]-beta.out[c]))
-
                 }
 
                 for(c in 1:CG){
                     for(k in 2:(q-1)){
-                        theta.arr[1:n,c,k]=exp(mu.out[k]-beta.out[c])/(1+exp(mu.out[k]-beta.out[c]))-exp(mu.out[k-1]-beta.out[c])/(1+exp(mu.out[k-1]-beta.out[c]))
+                        theta.arr[1:n,c,k]=exp(mu.out[k]-beta.out[c])/(1+exp(mu.out[k]-beta.out[c])) -
+                                           exp(mu.out[k-1]-beta.out[c])/(1+exp(mu.out[k-1]-beta.out[c]))
                     }
                 }
 
@@ -437,8 +415,7 @@ pombiclustering <- function(pomformula,
 
             # Find cluster groupings:
             Cclus = vector("list",CG)
-            for (cc in 1:CG) Cclus[[cc]] =
-                (1:p)[ppc.m[,cc]==apply(ppc.m,1,max)]
+            for (cc in 1:CG) Cclus[[cc]] = (1:p)[ppc.m[,cc]==apply(ppc.m,1,max)]
             # Save results:
             logl=Ccluster.Incll(y.mat, theta.arr, kappa.v, CG)
             res.dev = -2*logl
@@ -470,22 +447,14 @@ pombiclustering <- function(pomformula,
             llc=0
             for(i in 1:n){
                 for(j in 1:p){
-                    for(r in 1:RG){
-                        for(c in 1:CG){
-                            llc=llc+ppr.m[i,r]*ppc.m[j,c]*log(theta[r,c,y.mat[i,j]])
-                        }
-                    }
+                    llc <- llc + t(ppr.m[i,])%*%log(theta[,,y.mat[i,j]])%*%ppc.m[j,]
                 }
             }
             for(i in 1:n){
-                for(r in 1:RG){
-                    llc=llc+ppr.m[i,r]*log(pi.v[r])
-                }
+                llc <- llc + sum(ppr.m[i,]*log(pi.v))
             }
             for(j in 1:p){
-                for(c in 1:CG){
-                    llc=llc+ppc.m[j,c]*log(kappa.v[c])
-                }
+                llc <- llc + sum(ppc.m[j,]*log(kappa.v))
             }
             -llc
         }
@@ -502,8 +471,6 @@ pombiclustering <- function(pomformula,
             # Use if CG^p is small enough.
             # Construct n*p*RG*CG*q array of Multinomial terms:
             multi.arr = array(0,c(n,p,RG,CG))
-            #this.theta=array(NA,c(RG,p,q)) # Row-clustering: Setting initial theta with NA's
-            #this.theta=array(NA,c(n,CG,q)) # Col-clustering: Setting initial theta with NA's
             for(i in 1:n){
                 for(j in 1:p){
                     for(r in 1:RG){
@@ -636,7 +603,8 @@ pombiclustering <- function(pomformula,
             for(r in 1:RG){
                 for(c in 1:CG){
                     for(k in 2:(q-1)){
-                        this.theta[r,c,k]=exp(mu.in[k]-alpha.in[r]-beta.in[c])/(1+exp(mu.in[k]-alpha.in[r]-beta.in[c]))-exp(mu.in[k-1]-alpha.in[r]-beta.in[c])/(1+exp(mu.in[k-1]-alpha.in[r]-beta.in[c]))
+                        this.theta[r,c,k]=exp(mu.in[k]-alpha.in[r]-beta.in[c])/(1+exp(mu.in[k]-alpha.in[r]-beta.in[c])) -
+                                          exp(mu.in[k-1]-alpha.in[r]-beta.in[c])/(1+exp(mu.in[k-1]-alpha.in[r]-beta.in[c]))
                     }
                 }
             }
@@ -695,7 +663,6 @@ pombiclustering <- function(pomformula,
             iter=1
             while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>tol.rc)))&(iter<maxiter.rc))
             {
-
                 invect=outvect
 
                 # M-step:
@@ -729,7 +696,8 @@ pombiclustering <- function(pomformula,
                 for(r in 1:RG){
                     for(c in 1:CG){
                         for(k in 2:(q-1)){
-                            theta.arr[r,c,k]=exp(mu.out[k]-alpha.out[r]-beta.out[c])/(1+exp(mu.out[k]-alpha.out[r]-beta.out[c]))-exp(mu.out[k-1]-alpha.out[r]-beta.out[c])/(1+exp(mu.out[k-1]-alpha.out[r]-beta.out[c]))
+                            theta.arr[r,c,k]=exp(mu.out[k]-alpha.out[r]-beta.out[c])/(1+exp(mu.out[k]-alpha.out[r]-beta.out[c])) -
+                                             exp(mu.out[k-1]-alpha.out[r]-beta.out[c])/(1+exp(mu.out[k-1]-alpha.out[r]-beta.out[c]))
                         }
                     }
                 }
@@ -744,13 +712,8 @@ pombiclustering <- function(pomformula,
                 num.c=matrix(log(kappa.v),p,CG,byrow=T)
                 for(j in 1:p){
                     for(c in 1:CG){
-
                         for(i in 1:n){
-                            term=0
-                            for(r in 1:RG){
-                                term=term+pi.v[r]*theta.arr[r,c,y.mat[i,j]]
-                            }
-
+                            term <- sum(pi.v*theta.arr[,c,y.mat[i,j]])
                             num.c[j,c]=num.c[j,c] + log(term)
                         }
                     }
@@ -759,7 +722,7 @@ pombiclustering <- function(pomformula,
 
                 ppc.m <- exp(ppc.m)
 
-                kappa.v = apply(ppc.m,2,mean)
+                kappa.v <- colMeans(ppc.m)
 
                 #point(rep(iter,CG),kappa.v,pch=2,col="red")
 
@@ -768,12 +731,8 @@ pombiclustering <- function(pomformula,
 
                 for(i in 1:n){
                     for(r in 1:RG){
-
                         for(j in 1:p){
-                            term=0
-                            for(c in 1:CG){
-                                term=term+kappa.v[c]*theta.arr[r,c,y.mat[i,j]]
-                            }
+                            term <- sum(kappa.v*theta.arr[r,,y.mat[i,j]])
                             num.r[i,r]=num.r[i,r] + log(term)
                         }
                     }
@@ -782,26 +741,24 @@ pombiclustering <- function(pomformula,
 
                 ppr.m <- exp(ppr.m)
 
-                pi.v = apply(ppr.m,2,mean)
+                pi.v <- colMeans(ppr.m)
 
                 #point(rep(iter,RG),pi.v,pch=1,col="black")
 
                 iter=iter+1
-                if(floor(iter/5)==(iter/5)) cat('iter=',iter,' log.like=',temp$value,'\n')
+                if(iter%%5 == 0) cat('iter=',iter,' log.like=',temp$value,'\n')
                 #print(iter)
             }
             # Find cluster groupings:
             Rclus = vector("list",RG)
-            for (rr in 1:RG) Rclus[[rr]] =
-                (1:n)[ppr.m[,rr]==apply(ppr.m,1,max)]
+            for (rr in 1:RG) Rclus[[rr]] = (1:n)[ppr.m[,rr]==apply(ppr.m,1,max)]
             Cclus = vector("list",CG)
-            for (cc in 1:CG) Cclus[[cc]] =
-                (1:p)[ppc.m[,cc]==apply(ppc.m,1,max)]
+            for (cc in 1:CG) Cclus[[cc]] = (1:p)[ppc.m[,cc]==apply(ppc.m,1,max)]
             # Save results:
             logl=0
             if((n<16)|(p<16)) {
                 if(CG^p<RG^n) logl <- Bicluster.IncllC(y.mat, theta.arr, pi.v, kappa.v, RG, CG)
-                else logl - Bicluster.IncllR(y.mat, theta.arr, pi.v, kappa.v, RG, CG)
+                else logl <- Bicluster.IncllR(y.mat, theta.arr, pi.v, kappa.v, RG, CG)
             }
             res.dev = -2*logl
             npar = q+2*CG+2*RG-5
@@ -980,7 +937,8 @@ pombiclustering <- function(pomformula,
                 for(r in 1:RG){
                     for(c in 1:CG){
                         for(k in 2:(q-1)){
-                            theta.arr[r,c,k]=exp(mu.out[k]-alpha.out[r]-beta.out[c]-gamma.out[r,c])/(1+exp(mu.out[k]-alpha.out[r]-beta.out[c]-gamma.out[r,c]))-exp(mu.out[k-1]-alpha.out[r]-beta.out[c]-gamma.out[r,c])/(1+exp(mu.out[k-1]-alpha.out[r]-beta.out[c]-gamma.out[r,c]))
+                            theta.arr[r,c,k]=exp(mu.out[k]-alpha.out[r]-beta.out[c]-gamma.out[r,c])/(1+exp(mu.out[k]-alpha.out[r]-beta.out[c]-gamma.out[r,c])) -
+                                             exp(mu.out[k-1]-alpha.out[r]-beta.out[c]-gamma.out[r,c])/(1+exp(mu.out[k-1]-alpha.out[r]-beta.out[c]-gamma.out[r,c]))
                         }
                     }
                 }
@@ -995,13 +953,8 @@ pombiclustering <- function(pomformula,
                 num.c=matrix(log(kappa.v),p,CG,byrow=T)
                 for(j in 1:p){
                     for(c in 1:CG){
-
                         for(i in 1:n){
-                            term=0
-                            for(r in 1:RG){
-                                term=term+pi.v[r]*theta.arr[r,c,y.mat[i,j]]
-                            }
-
+                            term <- sum(pi.v*theta.arr[,c,y.mat[i,j]])
                             num.c[j,c]=num.c[j,c] + log(term)
                         }
                     }
@@ -1010,7 +963,7 @@ pombiclustering <- function(pomformula,
 
                 ppc.m <- exp(ppc.m)
 
-                kappa.v = apply(ppc.m,2,mean)
+                kappa.v = colMeans(ppc.m)
 
                 #point(rep(iter,CG),kappa.v,pch=2,col="red")
 
@@ -1019,12 +972,8 @@ pombiclustering <- function(pomformula,
 
                 for(i in 1:n){
                     for(r in 1:RG){
-
                         for(j in 1:p){
-                            term=0
-                            for(c in 1:CG){
-                                term=term+kappa.v[c]*theta.arr[r,c,y.mat[i,j]]
-                            }
+                            term <- sum(kappa.v*theta.arr[r,,y.mat[i,j]])
                             num.r[i,r]=num.r[i,r] + log(term)
                         }
                     }
@@ -1033,23 +982,21 @@ pombiclustering <- function(pomformula,
 
                 ppr.m <- exp(ppr.m)
 
-                pi.v = apply(ppr.m,2,mean)
+                pi.v = colMeans(ppr.m)
 
                 #point(rep(iter,RG),pi.v,pch=1,col="black")
 
 
                 iter=iter+1
-                if(floor(iter/5)==(iter/5)) cat('iter=',iter,' log.like=',temp$value,'\n')
+                if(iter%%5==0) cat('iter=',iter,' log.like=',temp$value,'\n')
                 #print(iter)
             }
 
             # Find cluster groupings:
             Rclus = vector("list",RG)
-            for (rr in 1:RG) Rclus[[rr]] =
-                (1:n)[ppr.m[,rr]==apply(ppr.m,1,max)]
+            for (rr in 1:RG) Rclus[[rr]] <- (1:n)[ppr.m[,rr]==apply(ppr.m,1,max)]
             Cclus = vector("list",CG)
-            for (cc in 1:CG) Cclus[[cc]] =
-                (1:p)[ppc.m[,cc]==apply(ppc.m,1,max)]
+            for (cc in 1:CG) Cclus[[cc]] <- (1:p)[ppc.m[,cc]==apply(ppc.m,1,max)]
             # Save results:
             logl=0
             if((n<16)|(p<16)) {
