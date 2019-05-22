@@ -86,9 +86,7 @@ pombiclustering <- function(pomformula,
                 llc <- llc+sum(ppr.m[i,]*log(theta[,j,y.mat[i,j]]))
             }
         }
-        for(i in 1:n){
-            llc <- llc+sum(ppr.m[i,]*log(pi.v))
-        }
+        llc <- llc + sum(ppr.m%*%log(pi.v))
         -llc
     }
 
@@ -272,9 +270,7 @@ pombiclustering <- function(pomformula,
                 llc <- llc+sum(ppc.m[j,]*log(theta[i,,y.mat[i,j]]))
             }
         }
-        for(j in 1:p){
-            llc <- llc+sum(ppc.m[j,]*log(kappa.v))
-        }
+        llc <- llc + sum(ppc.m%*%log(kappa.v))
         -llc
     }
 
@@ -463,12 +459,8 @@ pombiclustering <- function(pomformula,
                 llc <- llc + t(ppr.m[i,])%*%log(theta[,,y.mat[i,j]])%*%ppc.m[j,]
             }
         }
-        for(i in 1:n){
-            llc <- llc + sum(ppr.m[i,]*log(pi.v))
-        }
-        for(j in 1:p){
-            llc <- llc + sum(ppc.m[j,]*log(kappa.v))
-        }
+        llc <- llc + sum(ppr.m%*%log(pi.v))
+        llc <- llc + sum(ppc.m%*%log(kappa.v))
         -llc
     }
 
