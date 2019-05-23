@@ -454,11 +454,27 @@ pombiclustering <- function(pomformula,
         theta[theta<=0]=lower.limit
 
         llc=0
+        # for(i in 1:n){
+        #     for(j in 1:p){
+        #         llc <- llc + t(ppr.m[i,])%*%log(theta[,,y.mat[i,j]])%*%ppc.m[j,]
+        #     }
+        # }
         for(i in 1:n){
             for(j in 1:p){
-                llc <- llc + t(ppr.m[i,])%*%log(theta[,,y.mat[i,j]])%*%ppc.m[j,]
+                for(r in 1:RG) {
+                    llc <- llc + ppr.m[i,r]*sum(log(theta[r,,y.mat[i,j]])%*%ppc.m[j,])
+                }
             }
         }
+    # for(i in 1:n){
+    #   for(j in 1:p){
+    #     for(r in 1:RG){
+    #       for(c in 1:CG){
+    #         llc=llc+ppr.m[i,r]*ppc.m[j,c]*log(theta[r,c,y.mat[i,j]])
+    #       }
+    #     }
+    #   }
+    # }
         llc <- llc + sum(ppr.m%*%log(pi.v))
         llc <- llc + sum(ppc.m%*%log(kappa.v))
         -llc
@@ -973,7 +989,7 @@ pombiclustering <- function(pomformula,
 
 
             iter=iter+1
-            if(iter%%5==0) cat('iter=',iter,' log.like=',temp$value,'\n')
+            if(iter%%5==0) cat('RCI model iter=',iter,' log.like=',temp$value,'\n')
             #print(iter)
         }
 
