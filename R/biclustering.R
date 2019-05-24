@@ -44,13 +44,14 @@ lower.limit <- 0.00001
 #' pombiclustering("Y~row+column+row:column",3,2,data) indicates formula Logit=mu_k-alpha_r-beta_c-gamma_rc with 3 row clustering groups and 2 column clustering groups
 #' @export
 pombiclustering <- function(pomformula,
-                            nclus.row,
-                            nclus.column,
-                            data=NULL,y.mat=NULL,
-                            maxiter.rci=50, tol.rci=1e-4,
-                            maxiter.rc=50, tol.rc=1e-4,
-                            maxiter.rs=20, tol.rs=1e-4,
-                            maxiter.sc=20, tol.sc=1e-4){
+    nclus.row,
+    nclus.column,
+    data=NULL,y.mat=NULL,
+    maxiter.rci=50, tol.rci=1e-4,
+    maxiter.rc=50, tol.rc=1e-4,
+    maxiter.rs=20, tol.rs=1e-4,
+    maxiter.sc=20, tol.sc=1e-4,
+    use.matrix=TRUE){
 
     #transform data set to matrix form #
     df2mat <- function(data,y,subject,question){
@@ -196,13 +197,13 @@ pombiclustering <- function(pomformula,
             # M-step:
             #use numerical maximisation
             temp=optim(par=invect,
-                       fn=POFM.rs,
-                       y.mat=y.mat,
-                       ppr.m=ppr.m,
-                       pi.v=pi.v,
-                       RG=RG,
-                       method="L-BFGS-B",
-                       hessian=F,control=list(maxit=10000))
+                fn=POFM.rs,
+                y.mat=y.mat,
+                ppr.m=ppr.m,
+                pi.v=pi.v,
+                RG=RG,
+                method="L-BFGS-B",
+                hessian=F,control=list(maxit=10000))
             #print(temp)
             outvect=temp$par
             #print(abs(invect-outvect))
@@ -248,12 +249,12 @@ pombiclustering <- function(pomformula,
         names(out1) = c("n","p","LogL","npar","AIC","BIC","ICL","R")
         #names(out1) = c("n","p","Max.ll","Res.Dev.","npar","AIC","AICc","BIC","ICL","R")
         list("info"=out1,
-             "pi"=pi.v,
-             "theta"=theta.arr,
-             "mu"=mu.out,
-             "alpha"=alpha.out,
-             "ppr"=ppr.m,
-             "RowClusters"=Rclus)
+            "pi"=pi.v,
+            "theta"=theta.arr,
+            "mu"=mu.out,
+            "alpha"=alpha.out,
+            "ppr"=ppr.m,
+            "RowClusters"=Rclus)
     }
     #####the end of ppr.m########
 
@@ -384,13 +385,13 @@ pombiclustering <- function(pomformula,
             # M-step:
             #use numerical maximisation
             temp=optim(par=invect,
-                       fn=POFM.sc,
-                       y.mat=y.mat,
-                       ppc.m=ppc.m,
-                       kappa.v=kappa.v,
-                       CG=CG,
-                       method="L-BFGS-B",
-                       hessian=F,control=list(maxit=10000))
+                fn=POFM.sc,
+                y.mat=y.mat,
+                ppc.m=ppc.m,
+                kappa.v=kappa.v,
+                CG=CG,
+                method="L-BFGS-B",
+                hessian=F,control=list(maxit=10000))
             #                  hessian=F,control=list(maxit=10000, trace=TRUE))
 
             outvect=temp$par
@@ -435,46 +436,43 @@ pombiclustering <- function(pomformula,
         icl = 2*temp$value + npar*log(n*p)
         out1 = c(n,p,logl,res.dev,npar,aic,aicc,bic,icl,CG)
         names(out1) = c("n","p","Max.ll","Res.Dev.","npar","AIC","AICc","BIC","ICL",
-                        "C")
+            "C")
         list("info"=out1,
-             "kappa"=kappa.v,
-             "theta"=theta.arr,
-             "mu"=mu.out,
-             "beta"=beta.out,
-             "ppc"=ppc.m,
-             "ColumnClusters"=Cclus)
+            "kappa"=kappa.v,
+            "theta"=theta.arr,
+            "mu"=mu.out,
+            "beta"=beta.out,
+            "ppc"=ppc.m,
+            "ColumnClusters"=Cclus)
     }
     #######the end of ppc.m#####
 
     #The Log-likelihood #
-    Bicluster.ll <- function(y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, RG, CG){
+    Bicluster.ll <- function(y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, RG, CG,
+        use.matrix=TRUE){
         n=nrow(y.mat)
         p=ncol(y.mat)
         q=length(unique(as.vector(y.mat)))
         theta[theta<=0]=lower.limit
 
         llc=0
-        # for(i in 1:n){
-        #     for(j in 1:p){
-        #         llc <- llc + t(ppr.m[i,])%*%log(theta[,,y.mat[i,j]])%*%ppc.m[j,]
-        #     }
-        # }
-        for(i in 1:n){
-            for(j in 1:p){
-                for(r in 1:RG) {
-                    llc <- llc + ppr.m[i,r]*sum(log(theta[r,,y.mat[i,j]])%*%ppc.m[j,])
+        if (use.matrix) {
+            for(i in 1:n){
+                for(j in 1:p){
+                    llc <- llc + t(ppr.m[i,])%*%log(theta[,,y.mat[i,j]])%*%ppc.m[j,]
+                }
+            }
+        } else {
+            for(i in 1:n){
+                for(j in 1:p){
+                    for(r in 1:RG){
+                        for(c in 1:CG){
+                            llc=llc+ppr.m[i,r]*ppc.m[j,c]*log(theta[r,c,y.mat[i,j]])
+                        }
+                    }
                 }
             }
         }
-    # for(i in 1:n){
-    #   for(j in 1:p){
-    #     for(r in 1:RG){
-    #       for(c in 1:CG){
-    #         llc=llc+ppr.m[i,r]*ppc.m[j,c]*log(theta[r,c,y.mat[i,j]])
-    #       }
-    #     }
-    #   }
-    # }
         llc <- llc + sum(ppr.m%*%log(pi.v))
         llc <- llc + sum(ppc.m%*%log(kappa.v))
         -llc
@@ -611,7 +609,7 @@ pombiclustering <- function(pomformula,
     ## optimization, and use them to calculate theta and thus the likelihood
     ## using row + column clustering model,
     ## mu_k + alpha_r + beta_c
-    POFM.rc <- function(invect,y.mat, ppr.m, ppc.m, pi.v, kappa.v, RG, CG){
+    POFM.rc <- function(invect,y.mat, ppr.m, ppc.m, pi.v, kappa.v, RG, CG, use.matrix){
         n=nrow(y.mat)
         p=ncol(y.mat)
         q=length(unique(as.vector(y.mat)))
@@ -643,15 +641,16 @@ pombiclustering <- function(pomformula,
         pi.v[pi.v==0]=lower.limit
         kappa.v[kappa.v==0]=lower.limit
 
-        Bicluster.ll(y.mat, this.theta, ppr.m, ppc.m, pi.v, kappa.v, RG, CG)
+        Bicluster.ll(y.mat, this.theta, ppr.m, ppc.m, pi.v, kappa.v, RG, CG, use.matrix=use.matrix)
     }
 
     ## Fit row + column clustering model,
     ## mu_k + alpha_r + beta_c
     fit.POFM.rc.model <- function(invect, y.mat, RG, CG,
-                                  maxiter.rc=50, tol.rc=1e-4,
-                                  maxiter.rs=20, tol.rs=1e-4,
-                                  maxiter.sc=20, tol.sc=1e-4){
+        maxiter.rc=50, tol.rc=1e-4,
+        maxiter.rs=20, tol.rs=1e-4,
+        maxiter.sc=20, tol.sc=1e-4,
+        use.matrix){
         n<-nrow(y.mat)
         p<-ncol(y.mat)
         q<-length(unique(as.vector(y.mat)))
@@ -695,16 +694,17 @@ pombiclustering <- function(pomformula,
             # M-step:
             #use numerical maximisation
             temp=optim(par=invect,
-                       fn=POFM.rc,
-                       y.mat=y.mat,
-                       ppr.m=ppr.m,
-                       ppc.m=ppc.m,
-                       pi.v=pi.v,
-                       kappa.v=kappa.v,
-                       RG=RG,
-                       CG=CG,
-                       method="L-BFGS-B",
-                       hessian=F,control=list(maxit=10000))
+                fn=POFM.rc,
+                y.mat=y.mat,
+                ppr.m=ppr.m,
+                ppc.m=ppc.m,
+                pi.v=pi.v,
+                kappa.v=kappa.v,
+                RG=RG,
+                CG=CG,
+                use.matrix=use.matrix,
+                method="L-BFGS-B",
+                hessian=F,control=list(maxit=10000))
 
             outvect=temp$par
             #print(abs(abs(invect)-abs(outvect)))
@@ -795,25 +795,25 @@ pombiclustering <- function(pomformula,
         icl = 2*temp$value + npar*log(n*p)
         out1 = round(c(n,p,logl,res.dev,npar,aic,aicc,bic,icl,RG,CG),3)
         names(out1) = c("n","p","Max.ll","Res.Dev.","npar","AIC","AICc","BIC","ICL",
-                        "R","C")
+            "R","C")
         list("info"=out1,
-             "pi"=round(pi.v,3),
-             "kappa"=round(kappa.v,3),
-             "theta"=round(theta.arr,3),
-             "mu"=mu.out,
-             "alpha"=alpha.out,
-             "beta"=beta.out,
-             "ppr"=ppr.m,
-             "ppc"=ppc.m,
-             "RowClusters"=Rclus,
-             "ColumnClusters"=Cclus)
+            "pi"=round(pi.v,3),
+            "kappa"=round(kappa.v,3),
+            "theta"=round(theta.arr,3),
+            "mu"=mu.out,
+            "alpha"=alpha.out,
+            "beta"=beta.out,
+            "ppr"=ppr.m,
+            "ppc"=ppc.m,
+            "RowClusters"=Rclus,
+            "ColumnClusters"=Cclus)
     }
 
     ## Unpack mu_k, alpha_r, beta_c and gamma_rc from "invect", the vector for
     ## optimization, and use them to calculate theta and thus the likelihood
     ## using row*column clustering model,
     ## mu_k + alpha_r + beta_c gamma_rc
-    POFM.rci <- function(invect,y.mat, ppr.m, ppc.m, pi.v, kappa.v, RG, CG){
+    POFM.rci <- function(invect,y.mat, ppr.m, ppc.m, pi.v, kappa.v, RG, CG, use.matrix=use.matrix){
         n=nrow(y.mat)
         p=ncol(y.mat)
         q=length(unique(as.vector(y.mat)))
@@ -849,16 +849,17 @@ pombiclustering <- function(pomformula,
         pi.v[pi.v==0]=lower.limit
         kappa.v[kappa.v==0]=lower.limit
 
-        Bicluster.ll(y.mat, this.theta, ppr.m, ppc.m, pi.v, kappa.v, RG, CG)
+        Bicluster.ll(y.mat, this.theta, ppr.m, ppc.m, pi.v, kappa.v, RG, CG, use.matrix=use.matrix)
     }
 
     ## Fit row*column clustering model,
     ## mu_k + alpha_r + beta_c + gamma_rc
     fit.POFM.rci.model <- function(invect, y.mat, RG, CG,
-                                   maxiter.rci=50, tol.rci=1e-4,
-                                   maxiter.rc=20, tol.rc=1e-4,
-                                   maxiter.rs=20, tol.rs=1e-4,
-                                   maxiter.sc=20, tol.sc=1e-4){
+        maxiter.rci=50, tol.rci=1e-4,
+        maxiter.rc=20, tol.rc=1e-4,
+        maxiter.rs=20, tol.rs=1e-4,
+        maxiter.sc=20, tol.sc=1e-4,
+        use.matrix){
         n=nrow(y.mat)
         p=ncol(y.mat)
         q=length(unique(as.vector(y.mat)))
@@ -884,9 +885,9 @@ pombiclustering <- function(pomformula,
         alpha.init=alpha.kmeans
         beta.init=beta.kmeans
         POFM.rc.out <- fit.POFM.rc.model(invect=c(mu.init,alpha.init,beta.init), y.mat, RG, CG,
-                                         maxiter.rc=maxiter.rc, tol.rc=tol.rc,
-                                         maxiter.rs=maxiter.rs, tol.rs=tol.rs,
-                                         maxiter.sc=maxiter.sc, tol.sc=tol.sc)
+            maxiter.rc=maxiter.rc, tol.rc=tol.rc,
+            maxiter.rs=maxiter.rs, tol.rs=tol.rs,
+            maxiter.sc=maxiter.sc, tol.sc=tol.sc, use.matrix=use.matrix)
 
         ppr.m=POFM.rc.out$ppr
         pi.v=POFM.rc.out$pi
@@ -906,16 +907,17 @@ pombiclustering <- function(pomformula,
             #use numerical maximisation
 
             temp=optim(par=invect,
-                       fn=POFM.rci,
-                       y.mat=y.mat,
-                       ppr.m=ppr.m,
-                       ppc.m=ppc.m,
-                       pi.v=pi.v,
-                       kappa.v=kappa.v,
-                       RG=RG,
-                       CG=CG,
-                       method="L-BFGS-B",
-                       hessian=F,control=list(maxit=10000))
+                fn=POFM.rci,
+                y.mat=y.mat,
+                ppr.m=ppr.m,
+                ppc.m=ppc.m,
+                pi.v=pi.v,
+                kappa.v=kappa.v,
+                RG=RG,
+                CG=CG,
+                use.matrix=use.matrix,
+                method="L-BFGS-B",
+                hessian=F,control=list(maxit=10000))
             #control=list(maxit=10000,trace=TRUE)
             outvect=temp$par
             #print(abs(invect-outvect))
@@ -1012,19 +1014,19 @@ pombiclustering <- function(pomformula,
         icl = 2*temp$value + npar*log(n*p)
         out1 = round(c(n,p,logl,res.dev,npar,aic,aicc,bic,icl,RG,CG),3)
         names(out1) = c("n","p","Max.ll","Res.Dev.","npar","AIC","AICc","BIC","ICL",
-                        "R","C")
+            "R","C")
         list("info"=out1,
-             "pi"=round(pi.v,3),
-             "kappa"=round(kappa.v,3),
-             "theta"=round(theta.arr,3),
-             "mu"=mu.out,
-             "alpha"=alpha.out,
-             "beta"=beta.out,
-             "gamma"=gamma.out,
-             "ppr"=ppr.m,
-             "ppc"=ppc.m,
-             "RowClusters"=Rclus,
-             "ColumnClusters"=Cclus)
+            "pi"=round(pi.v,3),
+            "kappa"=round(kappa.v,3),
+            "theta"=round(theta.arr,3),
+            "mu"=mu.out,
+            "alpha"=alpha.out,
+            "beta"=beta.out,
+            "gamma"=gamma.out,
+            "ppr"=ppr.m,
+            "ppc"=ppc.m,
+            "RowClusters"=Rclus,
+            "ColumnClusters"=Cclus)
     }
 
     RG <- nclus.row
@@ -1052,9 +1054,9 @@ pombiclustering <- function(pomformula,
         invect=c(mu.init,alpha.init,beta.init)
 
         fit.POFM.rc.model(invect, y.mat, RG, CG,
-                          maxiter.rc=maxiter.rc, tol.rc=tol.rc,
-                          maxiter.rs=maxiter.rs, tol.rs=tol.rs,
-                          maxiter.sc=maxiter.sc, tol.sc=tol.sc)
+            maxiter.rc=maxiter.rc, tol.rc=tol.rc,
+            maxiter.rs=maxiter.rs, tol.rs=tol.rs,
+            maxiter.sc=maxiter.sc, tol.sc=tol.sc,use.matrix=use.matrix)
 
     } else if(pomformula=="Y~row+column+row:column"){
 
@@ -1066,10 +1068,11 @@ pombiclustering <- function(pomformula,
         invect=c(mu.init,alpha.init,beta.init,gamma.init)
 
         fit.POFM.rci.model(invect, y.mat, RG, CG,
-                           maxiter.rci=maxiter.rci, tol.rci=tol.rci,
-                           maxiter.rc=maxiter.rc, tol.rc=tol.rc,
-                           maxiter.rs=maxiter.rs, tol.rs=tol.rs,
-                           maxiter.sc=maxiter.sc, tol.sc=tol.sc)
+            maxiter.rci=maxiter.rci, tol.rci=tol.rci,
+            maxiter.rc=maxiter.rc, tol.rc=tol.rc,
+            maxiter.rs=maxiter.rs, tol.rs=tol.rs,
+            maxiter.sc=maxiter.sc, tol.sc=tol.sc,
+            use.matrix=use.matrix)
 
     }
     else {
