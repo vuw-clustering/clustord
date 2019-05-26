@@ -189,7 +189,7 @@ pombiclustering <- function(pomformula,
 
             ppr.m <- exp(ppr.m)
 
-            pi.v=apply(ppr.m,2,mean)
+            pi.v <- colMeans(ppr.m, na.rm=TRUE)
 
             #point(rep(iter,RG),pi.v,pch=1,col="black")
             invect=outvect
@@ -376,7 +376,7 @@ pombiclustering <- function(pomformula,
 
             ppc.m <- exp(ppc.m)
 
-            kappa.v = apply(ppc.m,2,mean)
+            kappa.v <- colMeans(ppc.m, na.rm=TRUE)
 
             #point(rep(iter,CG),kappa.v,pch=1,col="black")
             invect=outvect
@@ -660,7 +660,7 @@ pombiclustering <- function(pomformula,
         kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
 
         pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-        alpha.kmeans=apply(kmeans.data$centers,1,mean)
+        alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
         alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
 
         #POFM.rs.out[[RG]]=fit.POFM.rs.model(invect=c(PO.ss.out$mu,alpha.kmeans[-1]),y.mat,RG, maxiter.rs=maxiter.rs, tol.rs=tol.rs)
@@ -672,7 +672,7 @@ pombiclustering <- function(pomformula,
 
         #kmeans.data=kmeans(y.mat,centers=CG,nstart=50)
         #kappa.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-        #beta.kmeans=apply(kmeans.data$centers,1,mean)
+        #beta.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
         #beta.kmeans=beta.kmeans-beta.kmeans[1] #beta1=0
 
         #POFM.sc.out[[CG]]=POFM.sc.F(invect=c(PO.ss.out$mu,rep(1,CG-1)),y.mat,CG, maxiter.sc=maxiter.sc, tol.sc=tol.sc)
@@ -748,7 +748,7 @@ pombiclustering <- function(pomformula,
 
             ppc.m <- exp(ppc.m)
 
-            kappa.v <- colMeans(ppc.m)
+            kappa.v <- colMeans(ppc.m, na.rm=TRUE)
 
             #point(rep(iter,CG),kappa.v,pch=2,col="red")
 
@@ -767,7 +767,7 @@ pombiclustering <- function(pomformula,
 
             ppr.m <- exp(ppr.m)
 
-            pi.v <- colMeans(ppr.m)
+            pi.v <- colMeans(ppr.m, na.rm=TRUE)
 
             #point(rep(iter,RG),pi.v,pch=1,col="black")
 
@@ -821,8 +821,8 @@ pombiclustering <- function(pomformula,
         beta.in=c(0,invect[(q+RG-1):(q+CG+RG-3)])
         gamma.in=c(invect[(q+CG+RG-2):(q+RG+CG+(RG-1)*(CG-1)-3)])
         gamma.in=matrix(gamma.in,nrow=RG-1,ncol=CG-1,byrow=T)
-        gamma.in=cbind(gamma.in,-apply(gamma.in,1,sum))
-        gamma.in=rbind(gamma.in,-apply(gamma.in,2,sum))
+        gamma.in <- cbind(gamma.in,-rowSums(gamma.in))
+        gamma.in <- rbind(gamma.in,-colSums(gamma.in))
 
         this.theta=array(NA,c(RG,CG,q))
         for(r in 1:RG){
@@ -869,14 +869,14 @@ pombiclustering <- function(pomformula,
         kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
 
         pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-        alpha.kmeans=apply(kmeans.data$centers,1,mean)
+        alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
         alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
 
 
         kmeans.data=kmeans(y.mat,centers=CG,nstart=50)
 
         kappa.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-        beta.kmeans=apply(kmeans.data$centers,1,mean)
+        beta.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
         beta.kmeans=beta.kmeans-beta.kmeans[1] #beta1=0
 
         #initial mu, alpha, beta#
@@ -926,8 +926,8 @@ pombiclustering <- function(pomformula,
             beta.out=c(0,outvect[(q+RG-1):(q+RG+CG-3)])
             gamma.out=c(invect[(q+CG+RG-2):(q+RG+CG+(RG-1)*(CG-1)-3)])
             gamma.out=matrix(gamma.out,nrow=RG-1,ncol=CG-1,byrow=T)
-            gamma.out=cbind(gamma.out,-apply(gamma.out,1,sum))
-            gamma.out=rbind(gamma.out,-apply(gamma.out,2,sum))
+            gamma.out <- cbind(gamma.out,-rowSums(gamma.out))
+            gamma.out <- rbind(gamma.out,-colSums(gamma.out))
 
             theta.arr=array(NA,c(RG,CG,q))
 
@@ -965,7 +965,7 @@ pombiclustering <- function(pomformula,
 
             ppc.m <- exp(ppc.m)
 
-            kappa.v = colMeans(ppc.m)
+            kappa.v = colMeans(ppc.m, na.rm=TRUE)
 
             #point(rep(iter,CG),kappa.v,pch=2,col="red")
 
@@ -984,7 +984,7 @@ pombiclustering <- function(pomformula,
 
             ppr.m <- exp(ppr.m)
 
-            pi.v = colMeans(ppr.m)
+            pi.v = colMeans(ppr.m, na.rm=TRUE)
 
             #point(rep(iter,RG),pi.v,pch=1,col="black")
 
@@ -1036,12 +1036,12 @@ pombiclustering <- function(pomformula,
 
     kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
     pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-    alpha.kmeans=apply(kmeans.data$centers,1,mean)
+    alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
     alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
 
     kmeans.data=kmeans(y.mat,centers=CG,nstart=50)
     kappa.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-    beta.kmeans=apply(kmeans.data$centers,1,mean)
+    beta.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
     beta.kmeans=beta.kmeans-beta.kmeans[1] #beta1=0
 
     if(pomformula=="Y~row+column"){
