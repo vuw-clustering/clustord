@@ -845,7 +845,8 @@ pombiclustering <- function(pomformula,
         for(r in 1:RG){
             for(c in 1:CG){
                 for(k in 2:(q-1)){
-                    this.theta[r,c,k]=exp(mu.in[k]-alpha.in[r]-beta.in[c]-gamma.in[r,c])/(1+exp(mu.in[k]-alpha.in[r]-beta.in[c]-gamma.in[r,c]))-exp(mu.in[k-1]-alpha.in[r]-beta.in[c]-gamma.in[r,c])/(1+exp(mu.in[k-1]-alpha.in[r]-beta.in[c]-gamma.in[r,c]))
+                    this.theta[r,c,k]=exp(mu.in[k]-alpha.in[r]-beta.in[c]-gamma.in[r,c])/(1+exp(mu.in[k]-alpha.in[r]-beta.in[c]-gamma.in[r,c])) -
+                        exp(mu.in[k-1]-alpha.in[r]-beta.in[c]-gamma.in[r,c])/(1+exp(mu.in[k-1]-alpha.in[r]-beta.in[c]-gamma.in[r,c]))
                 }
             }
         }
