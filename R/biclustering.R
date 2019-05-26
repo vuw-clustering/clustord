@@ -189,7 +189,10 @@ pombiclustering <- function(pomformula,
 
             ppr.m <- exp(ppr.m)
 
-            pi.v <- colMeans(ppr.m, na.rm=TRUE)
+            ## Now set any NA values in the posterior probabilities matrix to 0
+            ppr.m[is.na(ppr.m)] <- 0
+
+            pi.v <- colMeans(ppr.m)
 
             #point(rep(iter,RG),pi.v,pch=1,col="black")
             invect=outvect
@@ -376,7 +379,10 @@ pombiclustering <- function(pomformula,
 
             ppc.m <- exp(ppc.m)
 
-            kappa.v <- colMeans(ppc.m, na.rm=TRUE)
+            ## Now set any NA values in the posterior probabilities matrix to 0
+            ppc.m[is.na(ppc.m)] <- 0
+
+            kappa.v <- colMeans(ppc.m)
 
             #point(rep(iter,CG),kappa.v,pch=1,col="black")
             invect=outvect
@@ -748,6 +754,9 @@ pombiclustering <- function(pomformula,
 
             ppc.m <- exp(ppc.m)
 
+            ## Now set any NA values in the posterior probabilities matrix to 0
+            ppc.m[is.na(ppc.m)] <- 0
+
             kappa.v <- colMeans(ppc.m, na.rm=TRUE)
 
             #point(rep(iter,CG),kappa.v,pch=2,col="red")
@@ -766,6 +775,9 @@ pombiclustering <- function(pomformula,
             for(i in 1:n) ppr.m[i,]=num.r[i,]-log(sum(exp(num.r[i,] + min(abs(num.r[i,]))))) + min(abs(num.r[i,]))
 
             ppr.m <- exp(ppr.m)
+
+            ## Now set any NA values in the posterior probabilities matrix to 0
+            ppr.m[is.na(ppr.m)] <- 0
 
             pi.v <- colMeans(ppr.m, na.rm=TRUE)
 
@@ -965,6 +977,9 @@ pombiclustering <- function(pomformula,
 
             ppc.m <- exp(ppc.m)
 
+            ## Now set any NA values in the posterior probabilities matrix to 0
+            ppc.m[is.na(ppc.m)] <- 0
+
             kappa.v = colMeans(ppc.m, na.rm=TRUE)
 
             #point(rep(iter,CG),kappa.v,pch=2,col="red")
@@ -983,6 +998,9 @@ pombiclustering <- function(pomformula,
             for(i in 1:n) ppr.m[i,]=num.r[i,]-log(sum(exp(num.r[i,] + min(abs(num.r[i,]))))) + min(abs(num.r[i,]))
 
             ppr.m <- exp(ppr.m)
+
+            ## Now set any NA values in the posterior probabilities matrix to 0
+            ppr.m[is.na(ppr.m)] <- 0
 
             pi.v = colMeans(ppr.m, na.rm=TRUE)
 
