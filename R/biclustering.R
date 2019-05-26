@@ -82,10 +82,9 @@ pombiclustering <- function(pomformula,
         theta[theta<=0]=lower.limit
         pi.v[pi.v==0]=lower.limit
         llc=0
-        for(i in 1:n){
-            for(j in 1:p){
-                llc <- llc+sum(ppr.m[i,]*log(theta[,j,y.mat[i,j]]))
-            }
+        for (r in 1:RG) {
+            theta.y.mat <- sapply(1:p,function(j) theta[r,j,y.mat[,j]])
+            llc <- llc + sum(t(ppr.m[,r])%*%log(theta.y.mat))
         }
         llc <- llc + sum(ppr.m%*%log(pi.v))
         -llc
@@ -266,10 +265,9 @@ pombiclustering <- function(pomformula,
         theta[theta<=0]=lower.limit
         kappa.v[kappa.v==0]=lower.limit
         llc=0
-        for(i in 1:n){
-            for(j in 1:p){
-                llc <- llc+sum(ppc.m[j,]*log(theta[i,,y.mat[i,j]]))
-            }
+        for (c in 1:CG) {
+            theta.y.mat <- sapply(1:n,function(i) theta[i,c,y.mat[i,]])
+            llc <- llc + sum(t(ppc.m[,c])%*%log(theta.y.mat))
         }
         llc <- llc + sum(ppc.m%*%log(kappa.v))
         -llc
@@ -457,9 +455,10 @@ pombiclustering <- function(pomformula,
 
         llc=0
         if (use.matrix) {
-            for(i in 1:n){
-                for(j in 1:p){
-                    llc <- llc + t(ppr.m[i,])%*%log(theta[,,y.mat[i,j]])%*%ppc.m[j,]
+            for (r in 1:RG) {
+                for (c in 1:CG) {
+                    theta.y.mat <- matrix(theta[r,c,y.mat],nrow=n)
+                    llc <- llc + t(ppr.m[,r])%*%log(theta.y.mat)%*%ppc.m[,c]
                 }
             }
         } else {
