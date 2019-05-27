@@ -232,9 +232,12 @@ pombiclustering <- function(pomformula,
                     theta.arr[r,1:p,q]=1-sum(theta.arr[r,1,1:(q-1)])
                 }
             }
+
+            ## Report the current incomplete-data log-likelihood, which is the
+            ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
+            ## of the output of optim
+            if (iter == 1 | iter%%5 ==0) cat('RS model iter=',iter, ' log.like=', -temp$value ,'\n')
             iter=iter+1
-            if (iter%%5 ==0) cat('RS model iter=',iter, ' log.like=', temp$value ,'\n')
-            #print(iter)
         }
         # Find cluster groupings:
         Rclus = vector("list",RG)
@@ -423,9 +426,12 @@ pombiclustering <- function(pomformula,
                     theta.arr[i,c,q]=1-sum(theta.arr[i,c,1:(q-1)])
                 }
             }
+
+            ## Report the current incomplete-data log-likelihood, which is the
+            ## NEGATIVE of the latest value of Ccluster.ll i.e. the NEGATIVE
+            ## of the output of optim
+            if (iter == 1 | iter%%5 == 0) cat('SC model iter=',iter, ' log.like=', -temp$value ,'\n')
             iter=iter+1
-            if (iter%%5 ==0) cat('SC model iter=',iter, ' log.like=', temp$value ,'\n')
-            #print(iter)
         }
 
         # Find cluster groupings:
@@ -783,8 +789,11 @@ pombiclustering <- function(pomformula,
 
             #point(rep(iter,RG),pi.v,pch=1,col="black")
 
+            ## Report the current incomplete-data log-likelihood, which is the
+            ## NEGATIVE of the latest value of Bicluster.ll i.e. the NEGATIVE
+            ## of the output of optim
+            if(iter == 1 | iter%%5 == 0) cat('RC model iter=',iter,' log.like=',-temp$value,'\n')
             iter=iter+1
-            if(iter%%5 == 0) cat('RC model iter=',iter,' log.like=',temp$value,'\n')
             #print(iter)
         }
         # Find cluster groupings:
@@ -1007,9 +1016,11 @@ pombiclustering <- function(pomformula,
 
             #point(rep(iter,RG),pi.v,pch=1,col="black")
 
+            ## Report the current incomplete-data log-likelihood, which is the
+            ## NEGATIVE of the latest value of Bicluster.ll i.e. the NEGATIVE
+            ## of the output of optim
+            if (iter == 1 | iter%%5 == 0 ) cat('RCI model iter=',iter,' log.like=',-temp$value,'\n')
             iter=iter+1
-            if(iter%%5==0) cat('RCI model iter=',iter,' log.like=',temp$value,'\n')
-            #print(iter)
         }
 
         # Find cluster groupings:
