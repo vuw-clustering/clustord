@@ -112,7 +112,7 @@ pombiclustering <- function(pomformula,
     ## Unpack mu_k and alpha_r from "invect", the vector for optimization,
     ## and use them to calculate theta_rc and thus likelihood using simple row
     ## clustering model,
-    ## mu_k + alpha_r (i.e. with no column or column-cluster effects)
+    ## mu_k - alpha_r (i.e. with no column or column-cluster effects)
     POFM.rs <- function(invect, y.mat, ppr.m, pi.v, RG){
         n=nrow(y.mat)
         p=ncol(y.mat)
@@ -144,7 +144,7 @@ pombiclustering <- function(pomformula,
     }
 
     ## Fit simple row clustering model,
-    ## mu_k + alpha_r (i.e. with no column or column-cluster effects)
+    ## mu_k - alpha_r (i.e. with no column or column-cluster effects)
     fit.POFM.rs.model <- function(invect, y.mat, RG, maxiter.rs=50, tol.rs=1e-4){
         n=nrow(y.mat)
         p=ncol(y.mat)
@@ -236,7 +236,7 @@ pombiclustering <- function(pomformula,
             ## Report the current incomplete-data log-likelihood, which is the
             ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
             ## of the output of optim
-            if (iter == 1 | iter%%5 ==0) cat('RS model iter=',iter, ' log.like=', -temp$value ,'\n')
+            if (iter == 1 | iter%%5 == 0) cat('RS model iter=',iter, ' log.like=', -temp$value ,'\n')
             iter=iter+1
         }
         # Find cluster groupings:
@@ -301,7 +301,7 @@ pombiclustering <- function(pomformula,
     ## Unpack mu_k and beta_c from "invect", the vector for optimization,
     ## and use them to calculate theta_rc and thus likelihood using simple column
     ## clustering model,
-    ## mu_k + beta_c (i.e. with no row or row-cluster effects)
+    ## mu_k - beta_c (i.e. with no row or row-cluster effects)
     POFM.sc <- function(invect, y.mat, ppc.m, kappa.v, CG){
         n=nrow(y.mat)
         p=ncol(y.mat)
@@ -333,7 +333,7 @@ pombiclustering <- function(pomformula,
     }
 
     ## Fit simple column clustering model,
-    ## mu_k + beta_c (i.e. with no row or row-cluster effects)
+    ## mu_k - beta_c (i.e. with no row or row-cluster effects)
     fit.POFM.sc.model <- function(invect, y.mat, CG, maxiter.sc=50, tol.sc=1e-4){
         n=nrow(y.mat)
         p=ncol(y.mat)
@@ -620,7 +620,7 @@ pombiclustering <- function(pomformula,
     ## Unpack mu_k, alpha_r and beta_c from "invect", the vector for
     ## optimization, and use them to calculate theta and thus the likelihood
     ## using row + column clustering model,
-    ## mu_k + alpha_r + beta_c
+    ## mu_k - alpha_r - beta_c
     POFM.rc <- function(invect,y.mat, ppr.m, ppc.m, pi.v, kappa.v, RG, CG, use.matrix){
         n=nrow(y.mat)
         p=ncol(y.mat)
@@ -657,7 +657,7 @@ pombiclustering <- function(pomformula,
     }
 
     ## Fit row + column clustering model,
-    ## mu_k + alpha_r + beta_c
+    ## mu_k - alpha_r - beta_c
     fit.POFM.rc.model <- function(invect, y.mat, RG, CG,
                                   ppr.m=NULL, ppc.m=NULL, pi.v=NULL, kappa.v=NULL,
         maxiter.rc=50, tol.rc=1e-4,
@@ -832,7 +832,7 @@ pombiclustering <- function(pomformula,
     ## Unpack mu_k, alpha_r, beta_c and gamma_rc from "invect", the vector for
     ## optimization, and use them to calculate theta and thus the likelihood
     ## using row*column clustering model,
-    ## mu_k + alpha_r + beta_c gamma_rc
+    ## mu_k - alpha_r - beta_c - gamma_rc
     POFM.rci <- function(invect,y.mat, ppr.m, ppc.m, pi.v, kappa.v, RG, CG, use.matrix=use.matrix){
         n=nrow(y.mat)
         p=ncol(y.mat)
@@ -873,7 +873,7 @@ pombiclustering <- function(pomformula,
     }
 
     ## Fit row*column clustering model,
-    ## mu_k + alpha_r + beta_c + gamma_rc
+    ## mu_k - alpha_r - beta_c - gamma_rc
     fit.POFM.rci.model <- function(invect, y.mat, RG, CG,
                                    ppr.m=NULL, ppc.m=NULL, pi.v=NULL, kappa.v=NULL,
         maxiter.rci=50, tol.rci=1e-4,
