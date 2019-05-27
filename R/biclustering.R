@@ -35,7 +35,8 @@ lower.limit <- 0.00001
 #'     algorithm for column clustering, used as starting point for biclustering.
 #' @param tol.sc: (default 1e-4) absolute tolerance for convergence of inner EM
 #'     algorithm for column clustering, used as starting point for biclustering.
-#' @return fitted values of parameters pi, kappa, theta, mu and alpha, as well as
+#' @return fitted values of parameters pi, kappa, theta, mu,  alpha and beta and
+#'     gamma (as applicable), as well as
 #'     `ppr` and `ppc`, the posterior probabilities of membership of the row and column clusters,
 #'     and `RowClusters`, the assigned row clusters based on maximum posterior probability,
 #'     and `ColumnClusters`, the assigned column clusters based on maximum posterior probability.
@@ -652,6 +653,7 @@ pombiclustering <- function(pomformula,
     ## Fit row + column clustering model,
     ## mu_k + alpha_r + beta_c
     fit.POFM.rc.model <- function(invect, y.mat, RG, CG,
+                                  ppr.m=NULL, ppc.m=NULL, pi.v=NULL, kappa.v=NULL,
         maxiter.rc=50, tol.rc=1e-4,
         maxiter.rs=20, tol.rs=1e-4,
         maxiter.sc=20, tol.sc=1e-4,
@@ -660,33 +662,31 @@ pombiclustering <- function(pomformula,
         p<-ncol(y.mat)
         q<-length(unique(as.vector(y.mat)))
 
-        PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
-        PO.ss.out$mu=PO.ss.out$zeta
+        if (is.null(ppr.m) | is.null(pi.v)) {
+            PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
+            PO.ss.out$mu=PO.ss.out$zeta
 
-        kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
+            kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
 
-        pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-        alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
-        alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
+            pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
+            alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
+            alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
 
-        #POFM.rs.out[[RG]]=fit.POFM.rs.model(invect=c(PO.ss.out$mu,alpha.kmeans[-1]),y.mat,RG, maxiter.rs=maxiter.rs, tol.rs=tol.rs)
-        POFM.rs.out <- fit.POFM.rs.model(invect=c(PO.ss.out$mu,alpha.kmeans[-1]),y.mat,RG, maxiter.rs=maxiter.rs, tol.rs=tol.rs)
-        ppr.m <- POFM.rs.out$ppr
-        pi.v <- POFM.rs.out$pi
-        #pi.v=rep(1/RG,RG)
-        #pi.v= c(0.01,0.09,0.1,0.1,0.70)
+            POFM.rs.out <- fit.POFM.rs.model(invect=c(PO.ss.out$mu,alpha.kmeans[-1]),y.mat,RG, maxiter.rs=maxiter.rs, tol.rs=tol.rs)
+            cat("=== End of RS model fitting ===\n")
+            ppr.m <- POFM.rs.out$ppr
+            pi.v <- POFM.rs.out$pi
+        }
 
-        #kmeans.data=kmeans(y.mat,centers=CG,nstart=50)
-        #kappa.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-        #beta.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
-        #beta.kmeans=beta.kmeans-beta.kmeans[1] #beta1=0
+        if (is.null(ppc.m) | is.null(kappa.v)) {
+            PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
+            PO.ss.out$mu=PO.ss.out$zeta
 
-        #POFM.sc.out[[CG]]=POFM.sc.F(invect=c(PO.ss.out$mu,rep(1,CG-1)),y.mat,CG, maxiter.sc=maxiter.sc, tol.sc=tol.sc)
-        POFM.sc.out <- fit.POFM.sc.model(invect=c(PO.ss.out$mu,rep(1,CG-1)),y.mat,CG, maxiter.sc=maxiter.sc, tol.sc=tol.sc)
-        ppc.m <- POFM.sc.out$ppc
-        kappa.v <- POFM.sc.out$kappa
-        #plot(rep(0,RG),pi.v,xlim=c(0,500),ylim=c(0,1))
-        #point(rep(0,CG),kappa.v,col="red",pch=2)
+            POFM.sc.out <- fit.POFM.sc.model(invect=c(PO.ss.out$mu,rep(1,CG-1)),y.mat,CG, maxiter.sc=maxiter.sc, tol.sc=tol.sc)
+            cat("=== End of SC model fitting ===\n")
+            ppc.m <- POFM.sc.out$ppc
+            kappa.v <- POFM.sc.out$kappa
+        }
 
         outvect=invect
 
@@ -856,8 +856,7 @@ pombiclustering <- function(pomformula,
             }
         }
 
-        this.theta[this.theta==0]=lower.limit
-        this.theta[this.theta<0]=lower.limit
+        this.theta[this.theta<=0]=lower.limit
         pi.v[pi.v==0]=lower.limit
         kappa.v[kappa.v==0]=lower.limit
 
@@ -867,6 +866,7 @@ pombiclustering <- function(pomformula,
     ## Fit row*column clustering model,
     ## mu_k + alpha_r + beta_c + gamma_rc
     fit.POFM.rci.model <- function(invect, y.mat, RG, CG,
+                                   ppr.m=NULL, ppc.m=NULL, pi.v=NULL, kappa.v=NULL,
         maxiter.rci=50, tol.rci=1e-4,
         maxiter.rc=20, tol.rc=1e-4,
         maxiter.rs=20, tol.rs=1e-4,
@@ -876,37 +876,37 @@ pombiclustering <- function(pomformula,
         p=ncol(y.mat)
         q=length(unique(as.vector(y.mat)))
 
-        PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
-        PO.ss.out$mu=PO.ss.out$zeta
+        if (is.null(ppr.m) | is.null(pi.v) | is.null(ppc.m) | is.null(kappa.v)) {
+            PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
+            PO.ss.out$mu=PO.ss.out$zeta
 
-        kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
+            kmeans.data=kmeans(y.mat,centers=RG,nstart=100)
 
-        pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-        alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
-        alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
+            pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
+            alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
+            alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
 
+            kmeans.data=kmeans(y.mat,centers=CG,nstart=100)
 
-        kmeans.data=kmeans(y.mat,centers=CG,nstart=50)
+            kappa.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
+            beta.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
+            beta.kmeans=beta.kmeans-beta.kmeans[1] #beta1=0
 
-        kappa.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-        beta.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
-        beta.kmeans=beta.kmeans-beta.kmeans[1] #beta1=0
+            #initial mu, alpha, beta#
+            mu.init=PO.ss.out$mu
+            alpha.init=alpha.kmeans
+            beta.init=beta.kmeans
+            POFM.rc.out <- fit.POFM.rc.model(invect=c(mu.init,alpha.init,beta.init), y.mat, RG, CG,
+                                             maxiter.rc=maxiter.rc, tol.rc=tol.rc,
+                                             maxiter.rs=maxiter.rs, tol.rs=tol.rs,
+                                             maxiter.sc=maxiter.sc, tol.sc=tol.sc, use.matrix=use.matrix)
+            cat("=== End of RC model fitting ===\n")
 
-        #initial mu, alpha, beta#
-        mu.init=PO.ss.out$mu
-        alpha.init=alpha.kmeans
-        beta.init=beta.kmeans
-        POFM.rc.out <- fit.POFM.rc.model(invect=c(mu.init,alpha.init,beta.init), y.mat, RG, CG,
-            maxiter.rc=maxiter.rc, tol.rc=tol.rc,
-            maxiter.rs=maxiter.rs, tol.rs=tol.rs,
-            maxiter.sc=maxiter.sc, tol.sc=tol.sc, use.matrix=use.matrix)
-
-        ppr.m=POFM.rc.out$ppr
-        pi.v=POFM.rc.out$pi
-        ppc.m=POFM.rc.out$ppc
-        kappa.v=POFM.rc.out$kappa
-        #plot(rep(0,RG),pi.v,xlim=c(0,500),ylim=c(0,1))
-        #point(rep(0,CG),kappa.v,col="red",pch=2)
+            ppr.m=POFM.rc.out$ppr
+            pi.v=POFM.rc.out$pi
+            ppc.m=POFM.rc.out$ppc
+            kappa.v=POFM.rc.out$kappa
+        }
 
         outvect=invect
 
@@ -1007,7 +1007,6 @@ pombiclustering <- function(pomformula,
 
             #point(rep(iter,RG),pi.v,pch=1,col="black")
 
-
             iter=iter+1
             if(iter%%5==0) cat('RCI model iter=',iter,' log.like=',temp$value,'\n')
             #print(iter)
@@ -1071,6 +1070,10 @@ pombiclustering <- function(pomformula,
         beta.init=beta.kmeans
         invect=c(mu.init,alpha.init,beta.init)
 
+        ## When fitting the RC model, feed in as parameter starting values the
+        ## outputs of kmeans, but the RC fitting function will also calculate
+        ## starting values for ppr.m, pi.v, ppc.m and kappa.v based on fitting
+        ## RS and SC models
         fit.POFM.rc.model(invect, y.mat, RG, CG,
             maxiter.rc=maxiter.rc, tol.rc=tol.rc,
             maxiter.rs=maxiter.rs, tol.rs=tol.rs,
@@ -1085,6 +1088,10 @@ pombiclustering <- function(pomformula,
         gamma.init=rep(0,(RG-1)*(CG-1))
         invect=c(mu.init,alpha.init,beta.init,gamma.init)
 
+        ## When fitting the RCI model, feed in as parameter starting values the
+        ## outputs of kmeans, but the RCI fitting function will also calculate
+        ## starting values for ppr.m, pi.v, ppc.m and kappa.v based on fitting
+        ## RS and SC models and then the RC model
         fit.POFM.rci.model(invect, y.mat, RG, CG,
             maxiter.rci=maxiter.rci, tol.rci=tol.rci,
             maxiter.rc=maxiter.rc, tol.rc=tol.rc,
