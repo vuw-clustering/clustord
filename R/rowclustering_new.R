@@ -128,16 +128,7 @@ pomrowclustering <- function(pomformula,
         while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>tol.rs)))&(iter<maxiter.rs))
         {
             # E-step - Update posterior probabilities
-            num.r=matrix(log(pi.v),n,RG,byrow=T)
-
-            for(i in 1:n){
-                for(r in 1:RG){
-                    num.r[i,r]=num.r[i,r]+sum(log(diag(theta.arr[r,,y.mat[i,]])))
-                }
-            }
-            for(i in 1:n) ppr.m[i,]=num.r[i,]-log(sum(exp(num.r[i,] + min(abs(num.r[i,]))))) + min(abs(num.r[i,]))
-
-            ppr.m <- exp(ppr.m)
+            ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
 
             ## Now set any NA values in the posterior probabilities matrix to 0
             ppr.m[is.na(ppr.m)] <- 0
@@ -301,19 +292,7 @@ pomrowclustering <- function(pomformula,
 
             # E-step - Update posterior probabilities
             #Rows:
-            num.r=matrix(log(pi.v),n,RG,byrow=T)
-
-            for(i in 1:n){
-                for(r in 1:RG){
-                    for(j in 1:p){
-                        num.r[i,r]=num.r[i,r]+log(theta.arr[r,j,y.mat[i,j]])
-                    }
-                }
-            }
-
-            for(i in 1:n) ppr.m[i,]=num.r[i,]-log(sum(exp(num.r[i,] + min(abs(num.r[i,]))))) + min(abs(num.r[i,]))
-
-            ppr.m <- exp(ppr.m)
+            ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
 
             ## Now set any NA values in the posterior probabilities matrix to 0
             ppr.m[is.na(ppr.m)] <- 0
@@ -496,18 +475,7 @@ pomrowclustering <- function(pomformula,
             theta.arr <- theta.POFM.rpi(mu.out, alpha.out, beta.out, gamma.out)
 
             # E-step - Update posterior probabilities
-            num.r=matrix(log(pi.v),n,RG,byrow=T)
-
-            for(i in 1:n){
-                for(r in 1:RG){
-                    for(j in 1:p){
-                        num.r[i,r]=num.r[i,r]+log(theta.arr[r,j,y.mat[i,j]])
-                    }
-                }
-            }
-            for(i in 1:n) ppr.m[i,]=num.r[i,]-log(sum(exp(num.r[i,] + min(abs(num.r[i,]))))) + min(abs(num.r[i,]))
-
-            ppr.m <- exp(ppr.m)
+            ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
 
             ## Now set any NA values in the posterior probabilities matrix to 0
             ppr.m[is.na(ppr.m)] <- 0

@@ -1,6 +1,6 @@
 source("R/biclustering.R")
 source("R/rowclustering_new.R")
-source("R/likelihoods.R")
+source("R/likelihoods_memberships.R")
 source("R/utils.R")
 
 set.seed(100)

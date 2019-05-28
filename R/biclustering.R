@@ -124,16 +124,7 @@ pombiclustering <- function(pomformula,
         while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>tol.rs)))&(iter<maxiter.rs))
         {
             # E-step - Update posterior probabilities
-            num.r=matrix(log(pi.v),n,RG,byrow=T)
-
-            for(i in 1:n){
-                for(r in 1:RG){
-                    num.r[i,r]=num.r[i,r]+sum(log(diag(theta.arr[r,,y.mat[i,]])))
-                }
-            }
-            for(i in 1:n) ppr.m[i,]=num.r[i,]-log(sum(exp(num.r[i,] + min(abs(num.r[i,]))))) + min(abs(num.r[i,]))
-
-            ppr.m <- exp(ppr.m)
+            ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
 
             ## Now set any NA values in the posterior probabilities matrix to 0
             ppr.m[is.na(ppr.m)] <- 0
@@ -256,18 +247,7 @@ pombiclustering <- function(pomformula,
         while(((iter==1)|(any(abs(invect-outvect)>tol.sc)))&(iter<maxiter.sc))
         {
             # E-step - Update posterior probabilities
-            num.c=matrix(log(kappa.v),p,CG,byrow=T)
-
-            for(j in 1:p){
-                for(c in 1:CG){
-                    for(i in 1:n){
-                        num.c[j,c]=num.c[j,c]+log(theta.arr[i,c,y.mat[i,j]])
-                    }
-                }
-            }
-            for(j in 1:p) ppc.m[j,]=num.c[j,]-log(sum(exp(num.c[j,] + min(abs(num.c[j,]))))) + min(abs(num.c[j,]))
-
-            ppc.m <- exp(ppc.m)
+            ppc.m <- onemode.membership.pp(y.mat, theta.arr, kappa.v, p, row=FALSE)
 
             ## Now set any NA values in the posterior probabilities matrix to 0
             ppc.m[is.na(ppc.m)] <- 0
@@ -447,18 +427,7 @@ pombiclustering <- function(pomformula,
 
             # E-step - Update posterior probabilities
             #Columns:
-            num.c=matrix(log(kappa.v),p,CG,byrow=T)
-            for(j in 1:p){
-                for(c in 1:CG){
-                    for(i in 1:n){
-                        term <- sum(pi.v*theta.arr[,c,y.mat[i,j]])
-                        num.c[j,c]=num.c[j,c] + log(term)
-                    }
-                }
-            }
-            for(j in 1:p) ppc.m[j,]=num.c[j,]-log(sum(exp(num.c[j,] + min(abs(num.c[j,]))))) + min(abs(num.c[j,]))
-
-            ppc.m <- exp(ppc.m)
+            ppc.m <- twomode.membership.pp(y.mat, theta.arr, pi.v, kappa.v, nclus=CG, row=FALSE)
 
             ## Now set any NA values in the posterior probabilities matrix to 0
             ppc.m[is.na(ppc.m)] <- 0
@@ -468,18 +437,7 @@ pombiclustering <- function(pomformula,
             #point(rep(iter,CG),kappa.v,pch=2,col="red")
 
             #Rows:
-            num.r=matrix(log(pi.v),n,RG,byrow=T)
-            for(i in 1:n){
-                for(r in 1:RG){
-                    for(j in 1:p){
-                        term <- sum(kappa.v*theta.arr[r,,y.mat[i,j]])
-                        num.r[i,r]=num.r[i,r] + log(term)
-                    }
-                }
-            }
-            for(i in 1:n) ppr.m[i,]=num.r[i,]-log(sum(exp(num.r[i,] + min(abs(num.r[i,]))))) + min(abs(num.r[i,]))
-
-            ppr.m <- exp(ppr.m)
+            ppr.m <- twomode.membership.pp(y.mat, theta.arr, pi.v, kappa.v, nclus=RG, row=TRUE)
 
             ## Now set any NA values in the posterior probabilities matrix to 0
             ppr.m[is.na(ppr.m)] <- 0
@@ -664,40 +622,17 @@ pombiclustering <- function(pomformula,
 
             # E-step - Update posterior probabilities
             #Columns:
-            num.c=matrix(log(kappa.v),p,CG,byrow=T)
-            for(j in 1:p){
-                for(c in 1:CG){
-                    for(i in 1:n){
-                        term <- sum(pi.v*theta.arr[,c,y.mat[i,j]])
-                        num.c[j,c]=num.c[j,c] + log(term)
-                    }
-                }
-            }
-            for(j in 1:p) ppc.m[j,]=num.c[j,]-log(sum(exp(num.c[j,] + min(abs(num.c[j,]))))) + min(abs(num.c[j,]))
-
-            ppc.m <- exp(ppc.m)
+            ppc.m <- twomode.membership.pp(y.mat, theta.arr, pi.v, kappa.v, nclus=CG, row=FALSE)
 
             ## Now set any NA values in the posterior probabilities matrix to 0
             ppc.m[is.na(ppc.m)] <- 0
 
-            kappa.v = colMeans(ppc.m, na.rm=TRUE)
+            kappa.v <- colMeans(ppc.m, na.rm=TRUE)
 
             #point(rep(iter,CG),kappa.v,pch=2,col="red")
 
             #Rows:
-            num.r=matrix(log(pi.v),n,RG,byrow=T)
-
-            for(i in 1:n){
-                for(r in 1:RG){
-                    for(j in 1:p){
-                        term <- sum(kappa.v*theta.arr[r,,y.mat[i,j]])
-                        num.r[i,r]=num.r[i,r] + log(term)
-                    }
-                }
-            }
-            for(i in 1:n) ppr.m[i,]=num.r[i,]-log(sum(exp(num.r[i,] + min(abs(num.r[i,]))))) + min(abs(num.r[i,]))
-
-            ppr.m <- exp(ppr.m)
+            ppr.m <- twomode.membership.pp(y.mat, theta.arr, pi.v, kappa.v, nclus=RG, row=TRUE)
 
             ## Now set any NA values in the posterior probabilities matrix to 0
             ppr.m[is.na(ppr.m)] <- 0

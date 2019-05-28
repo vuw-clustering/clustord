@@ -1,3 +1,53 @@
+onemode.membership.pp <- function(y.mat, theta, proportions, nelements, row){
+    nclus <- length(proportions)
+    pp.m <- matrix(NA, nelements, nclus)
+
+    pp.raw <- matrix(log(proportions),nelements,nclus,byrow=T)
+
+    for(idx in 1:nelements){
+        for(clus.idx in 1:nclus){
+            if (row) pp.raw[idx,clus.idx] <- pp.raw[idx,clus.idx] + sum(log(diag(theta[clus.idx,,y.mat[idx,]])))
+            else pp.raw[idx,clus.idx] <- pp.raw[idx,clus.idx] + sum(log(diag(theta[,clus.idx,y.mat[,idx]])))
+        }
+    }
+    for(idx in 1:nelements) pp.m[idx,] <- pp.raw[idx,] - log(sum(exp(pp.raw[idx,] + min(abs(pp.raw[idx,]))))) + min(abs(pp.raw[idx,]))
+
+    pp.m <- exp(pp.m)
+}
+
+twomode.membership.pp <- function(y.mat, theta, pi.v, kappa.v, nclus, row) {
+    n <- nrow(y.mat)
+    p <- ncol(y.mat)
+
+    if (row) {
+        pp.m <- matrix(NA,n,nclus)
+        pp.raw <- matrix(log(pi.v),n,nclus,byrow=T)
+        for(i in 1:n){
+            for(r in 1:nclus){
+                for(j in 1:p){
+                    term <- sum(kappa.v*theta[r,,y.mat[i,j]])
+                    pp.raw[i,r] <- pp.raw[i,r] + log(term)
+                }
+            }
+        }
+    } else {
+        pp.m <- matrix(NA,p,nclus)
+        pp.raw <- matrix(log(kappa.v),p,nclus,byrow=T)
+        for(j in 1:p){
+            for(c in 1:nclus){
+                for(i in 1:n){
+                    term <- sum(pi.v*theta[,c,y.mat[i,j]])
+                    pp.raw[j,c] <- pp.raw[j,c] + log(term)
+                }
+            }
+        }
+    }
+
+    for(idx in 1:nrow(pp.m)) pp.m[idx,] <- pp.raw[idx,]-log(sum(exp(pp.raw[idx,] + min(abs(pp.raw[idx,]))))) + min(abs(pp.raw[idx,]))
+
+    pp.m <- exp(pp.m)
+}
+
 Rcluster.ll <- function(y.mat, theta, ppr.m, pi.v, RG){
     n=nrow(y.mat)
     p=ncol(y.mat)
