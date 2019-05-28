@@ -11,3 +11,14 @@ df2mat <- function(data,y,subject,question){
     }
     return(my.mat)
 }
+
+# calculate model selection criteria
+calc.criteria <- function(ll, llc,  npar, n, p) {
+    Res.Dev <- -2*ll
+    AIC <- -2*ll + 2*npar
+    AICc <- AIC + (2*(npar+1)*(npar+2))/(n*p - npar - 2)
+    BIC <- -2*ll + npar*log(n*p)
+    ICL <- 2*llc + npar*log(n*p)
+
+    list(Res.Dev=Res.Dev, AIC=AIC, AICc=AICc, BIC=BIC, ICL=ICL)
+}

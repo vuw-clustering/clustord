@@ -139,7 +139,7 @@ pomrowclustering <- function(pomformula,
             invect=outvect
             # M-step:
             #use numerical maximisation
-            temp=optim(par=invect,
+            optim.fit <- optim(par=invect,
                        fn=POFM.rs,
                        y.mat=y.mat,
                        ppr.m=ppr.m,
@@ -147,8 +147,9 @@ pomrowclustering <- function(pomformula,
                        RG=RG,
                        method="L-BFGS-B",
                        hessian=F,control=list(maxit=10000))
-            #print(temp)
-            outvect=temp$par
+
+            outvect <- optim.fit$par
+            llc <- -optim.fit$value
             #print(abs(invect-outvect))
             #print(outvect)
 
@@ -160,26 +161,21 @@ pomrowclustering <- function(pomformula,
             ## Report the current incomplete-data log-likelihood, which is the
             ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
             ## of the output of optim
-            if (iter == 1 | iter%%5 == 0) cat('RS model iter=',iter, ' log.like=', -temp$value ,'\n')
+            if (iter == 1 | iter%%5 == 0) cat('RS model iter=',iter, ' log.like=', llc ,'\n')
             iter=iter+1
         }
 
         # Find cluster groupings:
-        Rclus = vector("list",RG)
-        for (rr in 1:RG) Rclus[[rr]] = (1:n)[ppr.m[,rr]==apply(ppr.m,1,max)]
+        Rclus <- assignments(ppr.m)
+
         # Save results:
-        logl=Rcluster.Incll(y.mat, theta.arr, pi.v, RG)
-        res.dev = -2*logl
-        npar = q+2*RG-3
-        aic  = -2*logl + 2*npar
-        #aicc = aic + (2*(npar+1)*(npar+2))/(n*p - npar - 2)
-        bic = -2*logl + npar*log(n*p)
-        icl = 2*temp$value + npar*log(n*p)
-        out1 = c(n,p,logl,npar,aic,bic,icl,RG)
-        #out1 = c(n,p,logl,res.dev,npar,aic,aicc,bic,icl,RG)
-        names(out1) = c("n","p","LogL","npar","AIC","BIC","ICL","R")
-        #names(out1) = c("n","p","Max.ll","Res.Dev.","npar","AIC","AICc","BIC","ICL","R")
+        logl <- Rcluster.Incll(y.mat, theta.arr, pi.v, RG)
+        npar <- q+2*RG-3
+        criteria <- calc.criteria(logl, llc, npar, n, p)
+        out1 <- c(n, p, logl, llc, npar, RG)
+        names(out1) <- c("n","p","Max.ll","Max.llc","npar","R")
         list("info"=out1,
+             "criteria"=unlist(criteria),
              "pi"=pi.v,
              "theta"=theta.arr,
              "mu"=mu.out,
@@ -272,7 +268,7 @@ pomrowclustering <- function(pomformula,
 
             # M-step:
             #use numerical maximisation
-            temp=optim(par=invect,
+            optim.fit <- optim(par=invect,
                 fn=POFM.rp,
                 y.mat=y.mat,
                 ppr.m=ppr.m,
@@ -281,7 +277,8 @@ pomrowclustering <- function(pomformula,
                 method="L-BFGS-B",
                 hessian=F,control=list(maxit=10000))
 
-            outvect=temp$par
+            outvect <- optim.fit$par
+            llc <- -optim.fit$value
             #print(abs(abs(invect)-abs(outvect)))
 
             mu.out=(outvect[1:(q-1)])
@@ -304,31 +301,26 @@ pomrowclustering <- function(pomformula,
             ## Report the current incomplete-data log-likelihood, which is the
             ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
             ## of the output of optim
-            if (iter == 1 | iter%%5 == 0) cat('RP model iter=',iter, ' log.like=', -temp$value ,'\n')
+            if (iter == 1 | iter%%5 == 0) cat('RP model iter=',iter, ' log.like=', llc ,'\n')
             iter=iter+1
         }
         # Find cluster groupings:
-        Rclus = vector("list",RG)
-        for (rr in 1:RG) Rclus[[rr]] = (1:n)[ppr.m[,rr]==apply(ppr.m,1,max)]
+        Rclus <- assignments(ppr.m)
+
         # Save results:
-        logl=Rcluster.Incll(y.mat, theta.arr, pi.v, RG)
-        res.dev = -2*logl
-        npar = q+2*RG+p-4
-        aic  = -2*logl + 2*npar
-        aicc = aic + (2*(npar+1)*(npar+2))/(n*p - npar - 2)
-        bic = -2*logl + npar*log(n*p)
-        icl = 2*temp$value + npar*log(n*p)
-        out1 = round(c(n,p,logl,res.dev,npar,aic,aicc,bic,icl,RG),3)
-        names(out1) = c("n","p","Max.ll","Res.Dev.","npar","AIC","AICc","BIC","ICL",
-            "R")
+        logl <- Rcluster.Incll(y.mat, theta.arr, pi.v, RG)
+        npar <- q+2*RG+p-4
+        criteria <- calc.criteria(logl, llc, npar, n, p)
+        out1 <- c(n, p, logl, llc, npar, RG)
+        names(out1) <- c("n","p","Max.ll","Max.llc","npar","R")
         list("info"=out1,
-            "pi"=round(pi.v,3),
-            "theta"=round(theta.arr,3),
-            "mu"=mu.out,
-            "alpha"=alpha.out,
-            "beta"=beta.out,
-            "ppr"=ppr.m,
-            "RowClusters"=Rclus)
+             "criteria"=unlist(criteria),
+             "pi"=pi.v,
+             "theta"=theta.arr,
+             "mu"=mu.out,
+             "alpha"=alpha.out,
+             "ppr"=ppr.m,
+             "RowClusters"=Rclus)
     }
 
     theta.POFM.rpi <- function(mu, alpha, beta, gamma) {
@@ -452,7 +444,7 @@ pomrowclustering <- function(pomformula,
             # M-step:
             #use numerical maximisation
 
-            temp=optim(par=invect,
+            optim.fit <- optim(par=invect,
                 fn=POFM.rpi,
                 y.mat=y.mat,
                 ppr.m=ppr.m,
@@ -461,7 +453,8 @@ pomrowclustering <- function(pomformula,
                 method="L-BFGS-B",
                 hessian=F,control=list(maxit=10000))
             #control=list(maxit=10000,trace=TRUE)
-            outvect=temp$par
+            outvect <- optim.fit$par
+            llc <- -optim.fit$value
             #print(abs(invect-outvect))
 
             mu.out=(outvect[1:(q-1)])
@@ -487,33 +480,27 @@ pomrowclustering <- function(pomformula,
             ## Report the current incomplete-data log-likelihood, which is the
             ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
             ## of the output of optim
-            if (iter == 1 | iter%%5 ==0) cat('RPI model iter=',iter, ' log.like=', -temp$value ,'\n')
+            if (iter == 1 | iter%%5 ==0) cat('RPI model iter=',iter, ' log.like=', llc ,'\n')
             iter=iter+1
         }
 
         # Find cluster groupings:
-        Rclus = vector("list",RG)
-        for (rr in 1:RG) Rclus[[rr]] = (1:n)[ppr.m[,rr]==apply(ppr.m,1,max)]
+        Rclus <- assignments(ppr.m)
+
         # Save results:
-        logl=Rcluster.Incll(y.mat, theta.arr, pi.v, RG)
-        res.dev = -2*logl
-        npar = q+RG+RG*p-3
-        aic  = -2*logl + 2*npar
-        aicc = aic + (2*(npar+1)*(npar+2))/(n*p - npar - 2)
-        bic = -2*logl + npar*log(n*p)
-        icl = 2*temp$value + npar*log(n*p)
-        out1 = round(c(n,p,logl,res.dev,npar,aic,aicc,bic,icl,RG),3)
-        names(out1) = c("n","p","Max.ll","Res.Dev.","npar","AIC","AICc","BIC","ICL",
-                        "R")
+        logl <- Rcluster.Incll(y.mat, theta.arr, pi.v, RG)
+        npar <- q+RG+RG*p-3
+        criteria <- calc.criteria(logl, llc, npar, n, p)
+        out1 <- c(n, p, logl, llc, npar, RG)
+        names(out1) <- c("n","p","Max.ll","Max.llc","npar","R")
         list("info"=out1,
-             "pi"=round(pi.v,3),
-             "theta"=round(theta.arr,3),
+             "criteria"=unlist(criteria),
+             "pi"=pi.v,
+             "theta"=theta.arr,
              "mu"=mu.out,
              "alpha"=alpha.out,
-             "beta"=beta.out,
-             "gamma"=gamma.out,
-             "ppr"=round(ppr.m,3),
-             "Row Clusters"=Rclus)
+             "ppr"=ppr.m,
+             "RowClusters"=Rclus)
     }
 
     RG <- nclus.row

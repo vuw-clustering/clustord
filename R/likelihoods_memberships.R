@@ -48,6 +48,15 @@ twomode.membership.pp <- function(y.mat, theta, pi.v, kappa.v, nclus, row) {
     pp.m <- exp(pp.m)
 }
 
+assignments <- function(pp.m) {
+    nelements <- nrow(pp.m)
+    nclus <- ncol(pp.m)
+
+    assignments <- vector("list",nclus)
+    for (idx in 1:nclus) assignments[[idx]] = (1:nelements)[pp.m[,idx]==apply(pp.m,1,max)]
+    assignments
+}
+
 Rcluster.ll <- function(y.mat, theta, ppr.m, pi.v, RG){
     n=nrow(y.mat)
     p=ncol(y.mat)
