@@ -58,59 +58,11 @@ pomrowclustering <- function(pomformula,
     maxiter.rs=20, tol.rs=1e-4,
     use.model.without.interactions=TRUE){
 
-    #transform data set to matrix form #
-    df2mat <- function(data,y,subject,VariableNameion){
-        row <- length(levels(subject))
-        col<- length(levels(VariableNameion))
-        my.mat <- matrix(NA,row,col,byrow=T)
-        for (i in 1:row) for (j in 1:col){
-            leveli <- levels(subject)[i]
-            levelj <- levels(VariableNameion)[j]
-            temp.df <- data[(subject==leveli)&(VariableNameion==levelj),]
-            if (length(temp.df$y)>0) my.mat[i,j] <- temp.df$y
-        }
-        return(my.mat)
-    }
-
     if(is.null(y.mat)) {
         if (!is.null(data)) {
             colnames(data)<-c("y","subject","VariableNameion")
             y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$VariableNameion))
         } else stop("y.mat and data cannot both be null. Please provide either a data matrix or a data frame.")
-    }
-
-    ###initial value of ppr.m ####
-    Rcluster.ll <- function(y.mat, theta, ppr.m, pi.v, RG){
-        n=nrow(y.mat)
-        p=ncol(y.mat)
-        q=length(unique(as.vector(y.mat)))
-        theta[theta<=0]=lower.limit
-        pi.v[pi.v==0]=lower.limit
-        llc=0
-        for (r in 1:RG) {
-            theta.y.mat <- sapply(1:p,function(j) theta[r,j,y.mat[,j]])
-            llc <- llc + sum(t(ppr.m[,r])%*%log(theta.y.mat))
-        }
-        llc <- llc + sum(ppr.m%*%log(pi.v))
-        -llc
-    }
-
-    Rcluster.Incll <- function(y.mat, theta, pi.v, RG)
-    {
-        n=nrow(y.mat)
-        p=ncol(y.mat)
-        q=length(unique(as.vector(y.mat)))
-        theta[theta<=0]=lower.limit
-        pi.v[pi.v==0]=lower.limit
-        logl = 0
-        for(i in 1:n){
-            sumoverR=0
-            for(r in 1:RG){
-                sumoverR=sumoverR+pi.v[r]*prod(diag(theta[r,,y.mat[i,]]),na.rm=TRUE)
-            }
-            logl=logl+log(sumoverR)
-        }
-        logl
     }
 
     theta.POFM.rs <- function(mu, alpha, p) {
@@ -244,7 +196,6 @@ pomrowclustering <- function(pomformula,
              "ppr"=ppr.m,
              "RowClusters"=Rclus)
     }
-    #####the end of ppr.m########
 
     theta.POFM.rp <- function(mu, alpha, beta) {
         q <- length(mu) + 1
