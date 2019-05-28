@@ -113,6 +113,27 @@ pomrowclustering <- function(pomformula,
         logl
     }
 
+    theta.POFM.rs <- function(mu, alpha, p) {
+        q <- length(mu) + 1
+        RG <- length(alpha)
+
+        theta <- array(NA,c(RG,p,q))
+        for(r in 1:RG){
+            theta[r,1:p,1] <- exp(mu[1]-alpha[r])/(1+exp(mu[1]-alpha[r]))
+        }
+        for(r in 1:RG){
+            for(k in 2:(q-1)){
+                theta[r,1:p,k] <- exp(mu[k]-alpha[r])/(1+exp(mu[k]-alpha[r])) -
+                    exp(mu[k-1]-alpha[r])/(1+exp(mu[k-1]-alpha[r]))
+            }
+        }
+        for(r in 1:RG){
+            theta[r,1:p,q] <- 1-sum(theta[r,1,1:(q-1)])
+        }
+
+        theta
+    }
+
     ## Unpack mu_k and alpha_r from "invect", the vector for optimization,
     ## and use them to calculate theta_rc and thus likelihood using simple row
     ## clustering model,
@@ -124,22 +145,7 @@ pomrowclustering <- function(pomformula,
         mu.in=(invect[1:(q-1)])
         alpha.in=c(0,invect[(q):(q+RG-2)])
 
-        this.theta=array(NA,c(RG,p,q))
-
-        for(r in 1:RG){
-            this.theta[r,1:p,1]=exp(mu.in[1]-alpha.in[r])/(1+exp(mu.in[1]-alpha.in[r]))
-        }
-
-        for(r in 1:RG){
-            for(k in 2:(q-1)){
-                this.theta[r,1:p,k]=exp(mu.in[k]-alpha.in[r])/(1+exp(mu.in[k]-alpha.in[r])) -
-                    exp(mu.in[k-1]-alpha.in[r])/(1+exp(mu.in[k-1]-alpha.in[r]))
-            }
-        }
-
-        for(r in 1:RG){
-            this.theta[r,1:p,q]=1-sum(this.theta[r,1,1:(q-1)])
-        }
+        this.theta <- theta.POFM.rs(mu.in, alpha.in, p)
 
         this.theta[this.theta<=0]=lower.limit
         pi.v[pi.v==0]=lower.limit
@@ -161,20 +167,7 @@ pomrowclustering <- function(pomformula,
         mu.in=(invect[1:(q-1)])
         alpha.in=c(0,invect[(q):(q+RG-2)])
 
-        for(r in 1:RG){
-            theta.arr[r,1:p,1]=exp(mu.in[1]-alpha.in[r])/(1+exp(mu.in[1]-alpha.in[r]))
-        }
-
-        for(r in 1:RG){
-            for(k in 2:(q-1)){
-                theta.arr[r,1:p,k]=exp(mu.in[k]-alpha.in[r])/(1+exp(mu.in[k]-alpha.in[r])) -
-                    exp(mu.in[k-1]-alpha.in[r])/(1+exp(mu.in[k-1]-alpha.in[r]))
-            }
-        }
-
-        for(r in 1:RG){
-            theta.arr[r,1:p,q]=1-sum(theta.arr[r,1,1:(q-1)])
-        }
+        theta.arr <- theta.POFM.rs(mu.in, alpha.in, p)
 
         outvect=invect
         # Run the EM cycle:
@@ -204,13 +197,13 @@ pomrowclustering <- function(pomformula,
             # M-step:
             #use numerical maximisation
             temp=optim(par=invect,
-                fn=POFM.rs,
-                y.mat=y.mat,
-                ppr.m=ppr.m,
-                pi.v=pi.v,
-                RG=RG,
-                method="L-BFGS-B",
-                hessian=F,control=list(maxit=10000))
+                       fn=POFM.rs,
+                       y.mat=y.mat,
+                       ppr.m=ppr.m,
+                       pi.v=pi.v,
+                       RG=RG,
+                       method="L-BFGS-B",
+                       hessian=F,control=list(maxit=10000))
             #print(temp)
             outvect=temp$par
             #print(abs(invect-outvect))
@@ -219,23 +212,7 @@ pomrowclustering <- function(pomformula,
             mu.out=(outvect[1:(q-1)])
             alpha.out=c(0,outvect[(q):(q+RG-2)])
 
-            theta.arr=array(1, c(RG,p,q))
-            for(r in 1:RG){
-                theta.arr[r,1:p,1]=exp(mu.out[1]-alpha.out[r])/(1+exp(mu.out[1]-alpha.out[r]))
-            }
-
-            for(r in 1:RG){
-                for(k in 2:(q-1)){
-                    theta.arr[r,1:p,k]=exp(mu.out[k]-alpha.out[r])/(1+exp(mu.out[k]-alpha.out[r]))-
-                        exp(mu.out[k-1]-alpha.out[r])/(1+exp(mu.out[k-1]-alpha.out[r]))
-                }
-            }
-
-            for(r in 1:RG){
-                for(j in 1:p){
-                    theta.arr[r,1:p,q]=1-sum(theta.arr[r,1,1:(q-1)])
-                }
-            }
+            theta.arr <- theta.POFM.rs(mu.out, alpha.out, p)
 
             ## Report the current incomplete-data log-likelihood, which is the
             ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
@@ -243,6 +220,7 @@ pomrowclustering <- function(pomformula,
             if (iter == 1 | iter%%5 == 0) cat('RS model iter=',iter, ' log.like=', -temp$value ,'\n')
             iter=iter+1
         }
+
         # Find cluster groupings:
         Rclus = vector("list",RG)
         for (rr in 1:RG) Rclus[[rr]] = (1:n)[ppr.m[,rr]==apply(ppr.m,1,max)]
@@ -259,14 +237,42 @@ pomrowclustering <- function(pomformula,
         names(out1) = c("n","p","LogL","npar","AIC","BIC","ICL","R")
         #names(out1) = c("n","p","Max.ll","Res.Dev.","npar","AIC","AICc","BIC","ICL","R")
         list("info"=out1,
-            "pi"=pi.v,
-            "theta"=theta.arr,
-            "mu"=mu.out,
-            "alpha"=alpha.out,
-            "ppr"=ppr.m,
-            "RowClusters"=Rclus)
+             "pi"=pi.v,
+             "theta"=theta.arr,
+             "mu"=mu.out,
+             "alpha"=alpha.out,
+             "ppr"=ppr.m,
+             "RowClusters"=Rclus)
     }
     #####the end of ppr.m########
+
+    theta.POFM.rp <- function(mu, alpha, beta) {
+        q <- length(mu) + 1
+        RG <- length(alpha)
+        p <- length(beta)
+
+        theta <- array(NA,c(RG,p,q))
+        for(r in 1:RG){
+            for(j in 1:p){
+                theta[r,j,1]=exp(mu[1]-alpha[r]-beta[j])/(1+exp(mu[1]-alpha[r]-beta[j]))
+            }
+        }
+        for(r in 1:RG){
+            for(j in 1:p){
+                for(k in 2:(q-1)){
+                    theta[r,j,k]=exp(mu[k]-alpha[r]-beta[j])/(1+exp(mu[k]-alpha[r]-beta[j])) -
+                        exp(mu[k-1]-alpha[r]-beta[j])/(1+exp(mu[k-1]-alpha[r]-beta[j]))
+                }
+            }
+        }
+        for(r in 1:RG){
+            for(j in 1:p){
+                theta[r,j,q]=1-sum(theta[r,j,1:(q-1)])
+            }
+        }
+
+        theta
+    }
 
     ## Unpack mu_k, alpha_r and beta_j from "invect", the vector for
     ## optimization, and use them to calculate theta and thus the likelihood
@@ -280,25 +286,7 @@ pomrowclustering <- function(pomformula,
         alpha.in=c(0,invect[(q):(q+RG-2)])
         beta.in=c(0,invect[(q+RG-1):(q+RG+p-3)])
 
-        this.theta=array(NA,c(RG,p,q))
-        for(r in 1:RG){
-            for(j in 1:p){
-                this.theta[r,j,1]=exp(mu.in[1]-alpha.in[r]-beta.in[j])/(1+exp(mu.in[1]-alpha.in[r]-beta.in[j]))
-            }
-        }
-        for(r in 1:RG){
-            for(j in 1:p){
-                for(k in 2:(q-1)){
-                    this.theta[r,j,k]=exp(mu.in[k]-alpha.in[r]-beta.in[j])/(1+exp(mu.in[k]-alpha.in[r]-beta.in[j])) -
-                        exp(mu.in[k-1]-alpha.in[r]-beta.in[j])/(1+exp(mu.in[k-1]-alpha.in[r]-beta.in[j]))
-                }
-            }
-        }
-        for(r in 1:RG){
-            for(j in 1:p){
-                this.theta[r,j,q]=1-sum(this.theta[r,j,1:(q-1)])
-            }
-        }
+        this.theta <- theta.POFM.rp(mu.in, alpha.in, beta.in)
 
         this.theta[this.theta<=0]=lower.limit
         pi.v[pi.v==0]=lower.limit
@@ -358,26 +346,7 @@ pomrowclustering <- function(pomformula,
             alpha.out=c(0,outvect[(q):(q+RG-2)])
             beta.out=c(0,outvect[(q+RG-1):(q+RG+p-3)])
 
-            theta.arr=array(NA,c(RG,p,q))
-
-            for(r in 1:RG){
-                for(j in 1:p){
-                    theta.arr[r,j,1]=exp(mu.out[1]-alpha.out[r]-beta.out[j])/(1+exp(mu.out[1]-alpha.out[r]-beta.out[j]))
-                }
-            }
-            for(r in 1:RG){
-                for(j in 1:p){
-                    for(k in 2:(q-1)){
-                        theta.arr[r,j,k]=exp(mu.out[k]-alpha.out[r]-beta.out[j])/(1+exp(mu.out[k]-alpha.out[r]-beta.out[j])) -
-                            exp(mu.out[k-1]-alpha.out[r]-beta.out[j])/(1+exp(mu.out[k-1]-alpha.out[r]-beta.out[j]))
-                    }
-                }
-            }
-            for(r in 1:RG){
-                for(j in 1:p){
-                    theta.arr[r,j,q]=1-sum(theta.arr[r,j,1:(q-1)])
-                }
-            }
+            theta.arr <- theta.POFM.rp(mu.out, alpha.out, beta.out)
 
             # E-step - Update posterior probabilities
             #Rows:
@@ -432,6 +401,36 @@ pomrowclustering <- function(pomformula,
             "RowClusters"=Rclus)
     }
 
+    theta.POFM.rpi <- function(mu, alpha, beta, gamma) {
+        q <- length(mu) + 1
+        RG <- length(alpha)
+        p <- length(beta)
+
+        theta <- array(NA,c(RG,p,q))
+
+        for(r in 1:RG){
+            for(j in 1:p){
+                theta[r,j,1]=exp(mu[1]-alpha[r]-beta[j]-gamma[r,j])/(1+exp(mu[1]-alpha[r]-beta[j]-gamma[r,j]))
+            }
+        }
+
+        for(r in 1:RG){
+            for(j in 1:p){
+                for(k in 2:(q-1)){
+                    theta[r,j,k]=exp(mu[k]-alpha[r]-beta[j]-gamma[r,j])/(1+exp(mu[k]-alpha[r]-beta[j]-gamma[r,j])) -
+                        exp(mu[k-1]-alpha[r]-beta[j]-gamma[r,j])/(1+exp(mu[k-1]-alpha[r]-beta[j]-gamma[r,j]))
+                }
+            }
+        }
+        for(r in 1:RG){
+            for(j in 1:p){
+                theta[r,j,q]=1-sum(theta[r,j,1:(q-1)])
+            }
+        }
+
+        theta
+    }
+
     ## Unpack mu_k, alpha_r, beta_j and gamma_rj from "invect", the vector for
     ## optimization, and use them to calculate theta and thus the likelihood
     ## using row clustering model with column effects and interactions,
@@ -447,27 +446,8 @@ pomrowclustering <- function(pomformula,
         gamma.in=matrix(gamma.in,nrow=RG-1,ncol=p-1,byrow=T)
         gamma.in <- cbind(gamma.in,-rowSums(gamma.in))
         gamma.in <- rbind(gamma.in,-colSums(gamma.in))
-        this.theta=array(NA,c(RG,p,q))
 
-        for(r in 1:RG){
-            for(j in 1:p){
-                this.theta[r,j,1]=exp(mu.in[1]-alpha.in[r]-beta.in[j]-gamma.in[r,j])/(1+exp(mu.in[1]-alpha.in[r]-beta.in[j]-gamma.in[r,j]))
-            }
-        }
-
-        for(r in 1:RG){
-            for(j in 1:p){
-                for(k in 2:(q-1)){
-                    this.theta[r,j,k]=exp(mu.in[k]-alpha.in[r]-beta.in[j]-gamma.in[r,j])/(1+exp(mu.in[k]-alpha.in[r]-beta.in[j]-gamma.in[r,j])) -
-                        exp(mu.in[k-1]-alpha.in[r]-beta.in[j]-gamma.in[r,j])/(1+exp(mu.in[k-1]-alpha.in[r]-beta.in[j]-gamma.in[r,j]))
-                }
-            }
-        }
-        for(r in 1:RG){
-            for(j in 1:p){
-                this.theta[r,j,q]=1-sum(this.theta[r,j,1:(q-1)])
-            }
-        }
+        this.theta <- theta.POFM.rpi(mu.in, alpha.in, beta.in, gamma.in)
 
         this.theta[this.theta<=0]=lower.limit
         pi.v[pi.v==0]=lower.limit
@@ -494,7 +474,7 @@ pomrowclustering <- function(pomformula,
                 PO.sp.out$mu=PO.sp.out$zeta
 
                 VariableName=as.factor(rep((1:ncol(y.mat)),each=nrow(y.mat)))
-                PO.sp.out=polr(as.factor(y.mat)~VariableName)
+                PO.sp.out <- MASS::polr(as.factor(y.mat)~VariableName)
                 PO.sp.out$mu=PO.sp.out$zeta
                 PO.sp.out$beta=c(0,PO.sp.out$coef[1:(ncol(y.mat)-1)]) #Individual column effect
 
@@ -517,11 +497,11 @@ pomrowclustering <- function(pomformula,
                 ppr.m=POFM.rp.out$ppr
                 pi.v=POFM.rp.out$pi
             } else {
-                PO.ss.out=polr(as.factor(y.mat)~1)
+                PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
                 PO.ss.out$mu=PO.ss.out$zeta
 
                 VariableName=as.factor(rep((1:ncol(y.mat)),each=nrow(y.mat)))
-                PO.sp.out=polr(as.factor(y.mat)~VariableName)
+                PO.sp.out <- MASS::polr(as.factor(y.mat)~VariableName)
                 PO.sp.out$beta=c(0,PO.sp.out$coef[1:(ncol(y.mat)-1)])
 
                 x1=POFM.rs.F(invect=c(PO.ss.out$mu,alpha.kmeans[-1]))
@@ -562,26 +542,7 @@ pomrowclustering <- function(pomformula,
             gamma.out <- cbind(gamma.out,-rowSums(gamma.out))
             gamma.out <- rbind(gamma.out,-colSums(gamma.out))
 
-            theta.arr=array(NA,c(RG,p,q))
-
-            for(r in 1:RG){
-                for(j in 1:p){
-                    theta.arr[r,j,1]=exp(mu.out[1]-alpha.out[r]-beta.out[j]-gamma.out[r,j])/(1+exp(mu.out[1]-alpha.out[r]-beta.out[j]-gamma.out[r,j]))
-                }
-            }
-            for(r in 1:RG){
-                for(j in 1:p){
-                    for(k in 2:(q-1)){
-                        theta.arr[r,j,k]=exp(mu.out[k]-alpha.out[r]-beta.out[j]-gamma.out[r,j])/(1+exp(mu.out[k]-alpha.out[r]-beta.out[j]-gamma.out[r,j])) -
-                            exp(mu.out[k-1]-alpha.out[r]-beta.out[j]-gamma.out[r,j])/(1+exp(mu.out[k-1]-alpha.out[r]-beta.out[j]-gamma.out[r,j]))
-                    }
-                }
-            }
-            for(r in 1:RG){
-                for(j in 1:p){
-                    theta.arr[r,j,q]=1-sum(theta.arr[r,j,1:(q-1)])
-                }
-            }
+            theta.arr <- theta.POFM.rpi(mu.out, alpha.out, beta.out, gamma.out)
 
             # E-step - Update posterior probabilities
             num.r=matrix(log(pi.v),n,RG,byrow=T)
@@ -642,7 +603,7 @@ pomrowclustering <- function(pomformula,
     PO.sp.out$mu=PO.sp.out$zeta
 
     VariableName=as.factor(rep((1:ncol(y.mat)),each=nrow(y.mat)))
-    PO.sp.out=polr(as.factor(y.mat)~VariableName)
+    PO.sp.out <- MASS::polr(as.factor(y.mat)~VariableName)
     PO.sp.out$mu=PO.sp.out$zeta
     PO.sp.out$beta=c(0,PO.sp.out$coef[1:(ncol(y.mat)-1)]) #Individual column effect
 
