@@ -165,10 +165,6 @@ pombiclustering <- function(pomformula,
 
         theta.arr <- theta.POFM.rs(mu.in, alpha.in, p)
 
-        for(r in 1:RG){
-            theta.arr[r,1:p,1]=exp(mu.in[1]-alpha.in[r])/(1+exp(mu.in[1]-alpha.in[r]))
-        }
-
         outvect=invect
         # Run the EM cycle:
         iter=1
