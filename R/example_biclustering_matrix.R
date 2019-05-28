@@ -1,5 +1,5 @@
-source("R/biclustering.R")
-source("R/rowclustering_new.R")
+source("R/POMbiclustering.R")
+source("R/POMrowclustering.R")
 source("R/likelihoods_memberships.R")
 source("R/utils.R")
 
