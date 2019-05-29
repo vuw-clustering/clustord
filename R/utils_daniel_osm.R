@@ -1,3 +1,9 @@
+rdirichlet <- function(ndraw, alphvec){
+    ## See Wikipedia on the Dirichlet distribution for confirmation:
+    gamdraw <- matrix(rgamma(ndraw*length(alphvec), shape=alphvec, rate=1),nrow=ndraw,byrow=TRUE)
+    gamdraw / rowSums(gamdraw)
+}
+
 ##############
 # INITIALISE #
 ##############

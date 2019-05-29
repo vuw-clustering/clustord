@@ -1,0 +1,19 @@
+Instructions for compiling Daniel's C code into a .dll
+
+1) Already have Rtools installed, navigate to the folder containing the mingw executable: C:\RBuildTools\3.5\mingw_64\bin
+
+2) Go to C:\Program Files\R\R-3.5.2\ and copy the "include" folder and all of its contents into wherever you've got Daniel's .c code.
+
+3) Go to Windows Search, type "cmd", and then right click on the command prompt icon and select "run as Administrator".
+Then you need to type "D:" to change to the D drive ("cd D:\" doesn't work for changing drives).
+Navigate to the folder containing the .c file and the "include folder.
+
+4) Run the first command, which includes the full path to the gcc compiler:
+
+>> C:\RBuildTools\3.5\mingw_64\bin\gcc -c -Iinclude -DBUILDING_EXAMPLE_DLL EMfuncsStereotype_in_C.c
+
+5) Run the second command, which again includes the full path to the gcc compiler:
+
+>> C:\RBuildTools\3.5\mingw_64\bin\gcc -shared -o EMfuncsStereotype_in_C.dll EMfuncsStereotype_in_C.o -Wl,--out-implib,EMfuncsStereotype_in_C.a
+
+Note that the "--Wl" option is W<<L>>, not W<<one>>.
