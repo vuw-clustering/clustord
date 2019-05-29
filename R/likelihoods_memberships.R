@@ -61,6 +61,8 @@ Rcluster.ll <- function(y.mat, theta, ppr.m, pi.v, RG){
     n=nrow(y.mat)
     p=ncol(y.mat)
     q=length(unique(as.vector(y.mat)))
+    ## TODO: these corrections of theta and pi are currently repeated from the
+    ## POFM.rs/OSM.rs functions
     theta[theta<=0]=lower.limit
     pi.v[pi.v==0]=lower.limit
     llc=0
@@ -77,6 +79,9 @@ Rcluster.Incll <- function(y.mat, theta, pi.v, RG)
     n=nrow(y.mat)
     p=ncol(y.mat)
     q=length(unique(as.vector(y.mat)))
+    ## TODO: these corrections of theta and pi are NOT repeated from the
+    ## fit.POFM.rs.model/fit.OSM.rs.model functions, unlike the corrections
+    ## in Rcluster.ll
     theta[theta<=0]=lower.limit
     pi.v[pi.v==0]=lower.limit
     logl = 0
