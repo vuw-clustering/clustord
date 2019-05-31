@@ -1,7 +1,7 @@
 source("R/OSMrowclustering.R")
 source("R/likelihoods_memberships.R")
 source("R/utils.R")
-source("R/rowclustering_lm_daniel_osm.R")
+source("R/rowclustering_lm_daniel_osm_rRcC1.R")
 source("R/utils_daniel_osm.R")
 
 set.seed(100)
