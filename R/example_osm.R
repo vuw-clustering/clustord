@@ -12,7 +12,14 @@ results <- osmrowclustering("Y~row",
                             y.mat=y.mat.sim,
                             use.model.without.interactions = TRUE)
 
-set.seed(1)
+results$info
+results$initvect
+
+#Initialize parameters for Daniel's original OSM code
+# Daniel's original OSM code has RG-1 of the pi values as the last part of row
+# clustering retval
+parstart <- c(results$initvect,results$pi[1])
+
 y.mat <- y.mat.sim
 min.numRows.to.test <- 2
 max.numRows.to.test <- 2
@@ -21,5 +28,6 @@ arraydata <- as.vector(y.mat)
 path.C.funcs <- "src/"
 path.results <- ""
 namefile <- "simulated_5by100"
-RowCluster.rRcC1(scale.pars=FALSE, type=0, polish=FALSE)
+set.seed(1)
+RowCluster.rRcC1(scale.pars=FALSE, type=0, polish=FALSE, R=2, parstart=parstart)
 
