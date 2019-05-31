@@ -1,6 +1,4 @@
 source("R/POMbiclustering.R")
-source("R/POMrowclustering.R")
-source("R/OSMrowclustering.R")
 source("R/likelihoods_memberships.R")
 source("R/utils.R")
 
@@ -10,13 +8,3 @@ set.seed(1)
 results <- pombiclustering("Y~row+column+row:column",
                             nclus.row=2,nclus.column=2,
                             y.mat=y.mat.sim, use.matrix=TRUE)
-
-results <- pomrowclustering("Y~row+column+row:column",
-                nclus.row=2,
-                y.mat=y.mat.sim,
-                use.model.without.interactions = TRUE)
-
-results <- osmrowclustering("Y~row",
-                            nclus.row=2,
-                            y.mat=y.mat.sim,
-                            use.model.without.interactions = TRUE)
