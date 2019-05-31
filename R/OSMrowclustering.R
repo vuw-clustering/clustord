@@ -78,10 +78,11 @@ osmrowclustering <- function(osmformula,
     PO.sp.out$mu=PO.sp.out$zeta
     PO.sp.out$beta=c(0,PO.sp.out$coef[1:(ncol(y.mat)-1)]) #Individual column effect
 
-    kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
+    kmeans.data=kmeans(y.mat,centers=RG,nstart=100)
     pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
     alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
-    alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
+    ## TODO: code for OSM models applies alpha sum to zero constraint, not
+    ## alpha1=0 constraint -- UNLIKE POM code -- so DON'T set alpha1 to zero here.
 
     if(osmformula=="Y~row"){
 
@@ -90,8 +91,9 @@ osmrowclustering <- function(osmformula,
                         to=runif(1,min=0.6,max=0.95), length.out = (q-2))
 
         ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-        ### POM which has alpha_1 = 0
-        alpha.init <- c(alpha.kmeans[-RG],-sum(alpha.kmeans[-RG]))
+        ### POM which has alpha_1 = 0, so feed in only the first RG-1 elements
+        ### of the initial alpha
+        alpha.init <- c(alpha.kmeans[-RG])
         invect <- c(mu.init, phi.init, alpha.init)
 
         fit.OSM.rs.model(invect, y.mat, RG,
@@ -212,6 +214,7 @@ fit.OSM.rs.model <- function(invect, y.mat, RG, maxiter.rs=50, tol.rs=1e-4){
 
     theta.arr <- theta.OSM.rs(mu.in, phi.in, alpha.in, p)
 
+    initvect <- invect
     outvect=invect
     # Run the EM cycle:
     iter=1
@@ -270,9 +273,10 @@ fit.OSM.rs.model <- function(invect, y.mat, RG, maxiter.rs=50, tol.rs=1e-4){
     npar <- q+2*RG-3
     criteria <- calc.criteria(logl, llc, npar, n, p)
     out1 <- c(n, p, logl, llc, npar, RG)
-    names(out1) <- c("n","p","Max.ll","Max.llc","npar","R")
+    names(out1) <- c("n","p","Final.ll","Final.llc","npar","R")
     list("info"=out1,
          "criteria"=unlist(criteria),
+         "initvect"=initvect,
          "pi"=pi.v,
          "theta"=theta.arr,
          "mu"=mu.out,
