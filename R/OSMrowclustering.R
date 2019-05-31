@@ -161,7 +161,7 @@ theta.OSM.rs <- function(mu, phi, alpha, p) {
         ## Normalize theta values
         theta[r,1:p,] <- theta[r,1:p,]/rowSums(theta[r,1:p,])
     }
-browser()
+
     theta
 }
 
