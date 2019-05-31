@@ -173,7 +173,7 @@ pomrowclustering <- function(pomformula,
         npar <- q+2*RG-3
         criteria <- calc.criteria(logl, llc, npar, n, p)
         out1 <- c(n, p, logl, llc, npar, RG)
-        names(out1) <- c("n","p","Max.ll","Max.llc","npar","R")
+        names(out1) <- c("n","p","Final.ll","Final.llc","npar","R")
         list("info"=out1,
              "criteria"=unlist(criteria),
              "pi"=pi.v,
@@ -312,7 +312,7 @@ pomrowclustering <- function(pomformula,
         npar <- q+2*RG+p-4
         criteria <- calc.criteria(logl, llc, npar, n, p)
         out1 <- c(n, p, logl, llc, npar, RG)
-        names(out1) <- c("n","p","Max.ll","Max.llc","npar","R")
+        names(out1) <- c("n","p","Final.ll","Final.llc","npar","R")
         list("info"=out1,
              "criteria"=unlist(criteria),
              "pi"=pi.v,
@@ -492,7 +492,7 @@ pomrowclustering <- function(pomformula,
         npar <- q+RG+RG*p-3
         criteria <- calc.criteria(logl, llc, npar, n, p)
         out1 <- c(n, p, logl, llc, npar, RG)
-        names(out1) <- c("n","p","Max.ll","Max.llc","npar","R")
+        names(out1) <- c("n","p","Final.ll","Final.llc","npar","R")
         list("info"=out1,
              "criteria"=unlist(criteria),
              "pi"=pi.v,

@@ -169,7 +169,7 @@ pombiclustering <- function(pomformula,
         npar <- q+2*RG-3
         criteria <- calc.criteria(logl, llc, npar, n, p)
         out1 <- c(n, p, logl, llc, npar, RG)
-        names(out1) <- c("n","p","Max.ll","Max.llc","npar","R")
+        names(out1) <- c("n","p","Final.ll","Final.llc","npar","R")
         list("info"=out1,
              "criteria"=unlist(criteria),
             "pi"=pi.v,
@@ -288,7 +288,7 @@ pombiclustering <- function(pomformula,
         npar <- q+2*CG-3
         criteria <- calc.criteria(logl, llc, npar, n, p)
         out1 <- c(n, p, logl, llc, npar, CG)
-        names(out1) <- c("n","p","Max.ll","Max.llc","npar","C")
+        names(out1) <- c("n","p","Final.ll","Final.llc","npar","C")
         list("info"=out1,
              "criteria"=unlist(criteria),
             "kappa"=kappa.v,
@@ -463,7 +463,7 @@ pombiclustering <- function(pomformula,
 
         criteria <- calc.criteria(logl, optim.fit$value, npar, n, p)
         out1 <- c(n, p, logl, llc, npar, RG, CG)
-        names(out1) <- c("n","p","Max.ll","Max.llc","npar","R","C")
+        names(out1) <- c("n","p","Final.ll","Final.llc","npar","R","C")
         list("info"=out1,
              "criteria"=unlist(criteria),
             "pi"=pi.v,
@@ -655,7 +655,7 @@ pombiclustering <- function(pomformula,
 
         criteria <- calc.criteria(logl, llc, npar, n, p)
         out1 <- c(n, p, logl, llc, npar, RG, CG)
-        names(out1) <- c("n","p","Max.ll","Max.llc","npar","R","C")
+        names(out1) <- c("n","p","Final.ll","Final.llc","npar","R","C")
         list("info"=out1,
              "criteria"=unlist(criteria),
              "pi"=pi.v,
