@@ -57,7 +57,7 @@ assignments <- function(pp.m) {
     assignments
 }
 
-Rcluster.ll <- function(y.mat, theta, ppr.m, pi.v, RG){
+Rcluster.ll <- function(y.mat, theta, ppr.m, pi.v, RG, partial=FALSE){
     n=nrow(y.mat)
     p=ncol(y.mat)
     q=length(unique(as.vector(y.mat)))
@@ -70,7 +70,7 @@ Rcluster.ll <- function(y.mat, theta, ppr.m, pi.v, RG){
         theta.y.mat <- sapply(1:p,function(j) theta[r,j,y.mat[,j]])
         llc <- llc + sum(t(ppr.m[,r])%*%log(theta.y.mat))
     }
-    llc <- llc + sum(ppr.m%*%log(pi.v))
+    if (!partial) llc <- llc + sum(ppr.m%*%log(pi.v))
     -llc
 }
 

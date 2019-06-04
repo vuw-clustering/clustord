@@ -53,6 +53,7 @@ lower.limit <- 0.00001
 osmrowclustering <- function(osmformula,
                              nclus.row,
                              data=NULL,y.mat=NULL,
+                             pi.init=NULL,
                              maxiter.rpi=50, tol.rpi=1e-4,
                              maxiter.rp=50, tol.rp=1e-4,
                              maxiter.rs=20, tol.rs=1e-4,
@@ -64,6 +65,7 @@ osmrowclustering <- function(osmformula,
             y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$VariableNameion))
         } else stop("y.mat and data cannot both be null. Please provide either a data matrix or a data frame.")
     }
+    if (!is.null(pi.init) & (length(pi.init) != nclus.row | sum(pi.init) != 1)) stop("pi.init must be the same length as the number of row clusters, and must add up to 1")
 
     RG <- nclus.row
     ## TODO: not good to set q equal to LENGTH of unique(y.mat) instead of to
@@ -96,7 +98,9 @@ osmrowclustering <- function(osmformula,
         alpha.init <- c(alpha.kmeans[-RG])
         invect <- c(mu.init, phi.init, alpha.init)
 
-        fit.OSM.rs.model(invect, y.mat, RG,
+        if (is.null(pi.init)) pi.init <- pi.kmeans
+
+        fit.OSM.rs.model(invect, y.mat, RG, pi.init=pi.init,
                          maxiter.rs=maxiter.rs, tol.rs=tol.rs)
 
     } else if(osmformula=="Y~row+column"){
@@ -169,7 +173,7 @@ theta.OSM.rs <- function(mu, phi, alpha, p) {
 ## and use them to calculate theta_rc and thus likelihood using simple row
 ## clustering model,
 ## mu_k - alpha_r (i.e. with no column or column-cluster effects)
-OSM.rs <- function(invect, y.mat, ppr.m, pi.v, RG){
+OSM.rs <- function(invect, y.mat, ppr.m, pi.v, RG, partial=FALSE){
     n=nrow(y.mat)
     p=ncol(y.mat)
     q=length(unique(as.vector(y.mat)))
@@ -188,17 +192,22 @@ OSM.rs <- function(invect, y.mat, ppr.m, pi.v, RG){
     this.theta[this.theta<=0]=lower.limit
     pi.v[pi.v==0]=lower.limit
 
-    Rcluster.ll(y.mat, this.theta, ppr.m, pi.v, RG)
+    Rcluster.ll(y.mat, this.theta, ppr.m, pi.v, RG, partial=partial)
 }
 
 ## Fit simple row clustering model,
 ## mu_k - alpha_r (i.e. with no column or column-cluster effects)
-fit.OSM.rs.model <- function(invect, y.mat, RG, maxiter.rs=50, tol.rs=1e-4){
+fit.OSM.rs.model <- function(invect, y.mat, RG, pi.init=NULL, maxiter.rs=50, tol.rs=1e-4){
     n=nrow(y.mat)
     p=ncol(y.mat)
     q=length(unique(as.vector(y.mat)))
-    pi.v=runif(RG-1,0,1/RG)
-    pi.v=c(pi.v,1-sum(pi.v))
+    if (is.null(pi.init)) {
+        pi.v <- runif(RG-1,0,1/RG)
+        pi.v <- c(pi.v,1-sum(pi.v))
+    } else {
+        if (sum(pi.init) != 1) stop("pi.init must add up to 1.")
+        pi.v <- pi.init
+    }
     #plot(rep(0,RG),pi.v,xlim=c(0,500),ylim=c(0,1))
     ppr.m=matrix(NA,n,RG)
     theta.arr=array(1, c(RG,p,q))
@@ -213,6 +222,16 @@ fit.OSM.rs.model <- function(invect, y.mat, RG, maxiter.rs=50, tol.rs=1e-4){
     alpha.in <- c(alpha.in, -sum(alpha.in))
 
     theta.arr <- theta.OSM.rs(mu.in, phi.in, alpha.in, p)
+
+    cat("Initial parameter values\n")
+    cat("mu",mu.in,"\n")
+    cat("phi",phi.in,"\n")
+    cat("alpha",alpha.in,"\n")
+    cat("pi",pi.v,"\n")
+
+    ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
+    cat("LLC partial",-OSM.rs(invect,y.mat,ppr.m,pi.v,RG, partial=TRUE),"\n")
+    cat("LLC",-OSM.rs(invect,y.mat,ppr.m,pi.v,RG, partial=FALSE),"\n")
 
     initvect <- invect
     outvect=invect
@@ -239,11 +258,12 @@ fit.OSM.rs.model <- function(invect, y.mat, RG, maxiter.rs=50, tol.rs=1e-4){
                            ppr.m=ppr.m,
                            pi.v=pi.v,
                            RG=RG,
+                           partial=TRUE,
                            method="L-BFGS-B",
                            hessian=F,control=list(maxit=10000))
 
         outvect <- optim.fit$par
-        llc <- -optim.fit$value
+        llc <- -OSM.rs(outvect,y.mat,ppr.m,pi.v,RG, partial=FALSE)
         #print(abs(invect-outvect))
         #print(outvect)
 
@@ -261,7 +281,13 @@ fit.OSM.rs.model <- function(invect, y.mat, RG, maxiter.rs=50, tol.rs=1e-4){
         ## Report the current incomplete-data log-likelihood, which is the
         ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
         ## of the output of optim
-        if (iter == 1 | iter%%5 == 0) cat('RS model iter=',iter, ' log.like=', llc ,'\n')
+        # if (iter == 1 | iter%%5 == 0) cat('RS model iter=',iter, ' log.like=', llc ,'\n')
+        cat('RS model iter=',iter, ' partial log.like=', -optim.fit$value ,'\n')
+        cat('RS model iter=',iter, ' log.like=', llc ,'\n')
+        cat("mu",mu.out,"\n")
+        cat("phi",phi.out,"\n")
+        cat("alpha",alpha.out,"\n")
+        cat("pi",pi.v,"\n")
         iter=iter+1
     }
 
