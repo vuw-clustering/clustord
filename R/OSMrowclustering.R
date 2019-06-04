@@ -53,6 +53,7 @@ lower.limit <- 0.00001
 osmrowclustering <- function(osmformula,
                              nclus.row,
                              data=NULL,y.mat=NULL,
+                             initvect=NULL,
                              pi.init=NULL,
                              maxiter.rpi=50, tol.rpi=1e-4,
                              maxiter.rp=50, tol.rp=1e-4,
@@ -72,6 +73,7 @@ osmrowclustering <- function(osmformula,
     ## the MAXIMUM value of unique(y.mat)
     q <- length(unique(as.vector(y.mat)))
 
+    if (is.null(initvect)) {
     PO.sp.out <- MASS::polr(as.factor(y.mat)~1)
     PO.sp.out$mu=PO.sp.out$zeta
 
@@ -86,8 +88,11 @@ osmrowclustering <- function(osmformula,
     ## TODO: code for OSM models applies alpha sum to zero constraint, not
     ## alpha1=0 constraint -- UNLIKE POM code -- so DON'T set alpha1 to zero here.
 
+    }
+
     if(osmformula=="Y~row"){
 
+        if (is.null(initvect)) {
         mu.init=PO.sp.out$mu
         phi.init <- seq(from=runif(1,min=0.05,max=0.5),
                         to=runif(1,min=0.6,max=0.95), length.out = (q-2))
@@ -97,6 +102,9 @@ osmrowclustering <- function(osmformula,
         ### of the initial alpha
         alpha.init <- c(alpha.kmeans[-RG])
         invect <- c(mu.init, phi.init, alpha.init)
+        } else {
+            invect <- initvect
+        }
 
         if (is.null(pi.init)) pi.init <- pi.kmeans
 

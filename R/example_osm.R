@@ -6,22 +6,25 @@ source("R/utils_daniel_osm.R")
 
 set.seed(100)
 y.mat.sim <- matrix(sample(1:3,5*100,replace=TRUE),nrow=100)
+initvect <- c(-0.8,0.7,0.2,2)
+pi.init <- c(0.1,0.9)
+
 set.seed(1)
 results <- osmrowclustering("Y~row",
                             nclus.row=2,
                             y.mat=y.mat.sim,
+                            initvect=initvect,
                             pi.init=c(0.1,0.9),
                             use.model.without.interactions = TRUE)
 
 
-
 results$info
-results$initvect
+
 
 #Initialize parameters for Daniel's original OSM code
 # Daniel's original OSM code has RG-1 of the pi values as the last part of row
 # clustering retval
-parstart <- c(results$initvect,0.1)
+parstart <- c(results$initvect,pi.init[1:(length(pi.init)-1)])
 
 y.mat <- y.mat.sim
 min.numRows.to.test <- 2
