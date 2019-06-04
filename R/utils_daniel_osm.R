@@ -26,9 +26,11 @@ initialise.opar <- function(scale.pars)
     retlist <- list()
     retlist$scale.pars <- scale.pars #Do we use scaled parameters?
     retlist$scalepars <- 1e-04
-    retlist$maxit <- 300
-    retlist$reltol <- 1e-04
-    retlist$method <- "BFGS"
+    # retlist$maxit <- 300
+    # retlist$reltol <- 1e-04
+    # retlist$method <- "BFGS"
+    retlist$maxit <- 10000
+    retlist$method <- "L-BFGS-B"
     retlist$hessian <- TRUE
     return(retlist)
 }
