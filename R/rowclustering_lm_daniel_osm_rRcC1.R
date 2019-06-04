@@ -25,7 +25,7 @@ unpack.param.Stereo.roweffectmodel <- function(param, n2, q2)
 }
 
 # Unpack the parameters in a Ordered Sterotype model with row effect model rRcC1
-unpack.param.Stereo.RowCluster.rRcC1 <- function(param, R2, q2)
+unpack.param.Stereo.Rowcluster.rRcC1 <- function(param, R2, q2)
 {
     mu <- c(0,param[1:(q2-1)])
 
@@ -105,7 +105,7 @@ Q.Stereo.RowCluster.rRcC1.inR <- function(param, arraydata, n, m, q, R, z, repar
     # Create a matrix of the data
     data <- matrix(data = arraydata, nrow = n, ncol = m, byrow = FALSE)
     #Read parameters
-    parlist <- unpack.param.Stereo.RowCluster.rRcC1(param, R, q)
+    parlist <- unpack.param.Stereo.Rowcluster.rRcC1(param, R, q)
 
     #if reparametrization, we built the new parameters (nu,z's)
     if (repar == TRUE) parlist <-  repar.phi.Stereo(parlist, q)
@@ -359,8 +359,8 @@ M.step.part2.RowCluster.rRcC1 <- function(parstart2, arraydata2, arrayz2, n2, m2
                         arraydata=arraydata2, arrayz=arrayz2, n=n2, m=m2, q=q2, R=R2, reparC=reparC,
                         fn=Q.Stereo.RowCluster.rRcC1, method=opar$method,
                         control=list(maxit=opar$maxit, reltol=opar$reltol), hessian=opar$hessian)
-        browser()
-        Q.Stereo.RowCluster.rRcC1.inR(retval$par, arraydata2, n2, m2, q2, R2, matrix(arrayz2,nrow=n2), reparC,verbose = TRUE)
+        Q <- Q.Stereo.RowCluster.rRcC1.inR(retval$par, arraydata2, n2, m2, q2, R2, matrix(arrayz2,nrow=n2), reparC,verbose = TRUE)
+        print(paste("After optim, Q =",Q))
     }else
     {
         par.scale <- rep(opar$scalepars,numpar2)
@@ -377,10 +377,12 @@ run.EM.algorithm.RowCluster.rRcC1 <- function(parstart1, R1, q1, n1, m1, numpar1
     repar <- reparC.to.repar(reparC)
     arraydata1 <- as.vector(y.mat1)
     parlist <- unpack.param.Stereo.Rowcluster.rRcC1(parstart1, R1, q1)
-
+    print(parlist)
     # E-step
     z1 <- E.step.RowCluster.rRcC1(parlist,n1,R1,q1,y.mat1)
     arrayz1 <- as.vector(z1)
+    Q <- Q.Stereo.RowCluster.rRcC1.inR(parstart1,arraydata1, n1, m1, q1, R1, z1, reparC, verbose=TRUE)
+    print(paste("Q =",Q))
     # if (sum(is.na(arrayz1)) > 0) #print("Error in the Z vector from RowCluster rRcC1. There are NaN, please change the parameters start values")
 
         # M-step
@@ -520,7 +522,6 @@ RowCluster.rRcC1 <- function(scale.pars,type,polish, R, parstart=NULL)
         ptm <- proc.time()
         while ( (abs(empar$changeL)>empar$tolerance) & (empar$convergence == 0) & (empar$numiterEM <empar$maxEMiter))
         {
-            browser()
             #Run EM algorithm iteration
             EM.iter.est <- run.EM.algorithm.RowCluster.rRcC1(parstart, R, q, n, m, numpar, y.mat, z, piR, reparC, opar, empar)
             #check the logLike change between this EM iteration and the previous one
@@ -534,7 +535,8 @@ RowCluster.rRcC1 <- function(scale.pars,type,polish, R, parstart=NULL)
                 z <- EM.iter.est$z
                 piR <- EM.iter.est$param.est$piR
                 empar$numiterEM <- empar$numiterEM+1
-                print(paste("Testing RowClust rRcC1 with R=",R,": EM iter=",empar$numiterEM-1," changeL=",empar$changeL," convergence=",ifelse(EM.iter.est$est$convergence==0, TRUE, FALSE),sep=""))
+                print(paste0("Testing RowClust rRcC1 with R=",R,": EM iter=",empar$numiterEM-1," LLC=",empar$Lold))
+                print(paste0("Testing RowClust rRcC1 with R=",R,": EM iter=",empar$numiterEM-1," changeL=",empar$changeL," convergence=",ifelse(EM.iter.est$est$convergence==0, TRUE, FALSE)))
             }else
             {
                 stop("Problem saving the EM iteration in RowClust rRcC1")
