@@ -303,7 +303,7 @@ expectedZ.Stereo.RowCluster.rRcm.without.interactions  <- function(parlist, i, r
 # Q FUNCTIONS # ----------------------------------------------------------------
 
 #Compute the Q function for Stereotype model with row-clustering which is used for the M-Step
-Q.Stereo.RowCluster <- function(param, arraydata, n, m, q, R, z, repar, verbose)
+Q.Stereo.RowCluster.rRcm.inR <- function(param, arraydata, n, m, q, R, z, repar, verbose)
 {
     # Create a matrix of the data
     data <- matrix(data = arraydata, nrow = n, ncol = m, byrow = FALSE)
@@ -326,6 +326,42 @@ Q.Stereo.RowCluster <- function(param, arraydata, n, m, q, R, z, repar, verbose)
                     if (data[i,j] == k)
                     {
                         theta <- compute.prob.Stereo.RowCluster.rRcm(parlist, r, j, k, q)
+                        Q.stereo <- Q.stereo + (log(theta)*z[i,r])
+                    }
+                }
+            }
+        }
+    }
+
+    if (verbose) print(-Q.stereo )
+
+    return(-Q.stereo )
+}
+
+#Compute the Q function for Stereotype model with row-clustering which is used for the M-Step
+Q.Stereo.RowCluster.rRcm.without.interactions.inR <- function(param, arraydata, n, m, q, R, z, repar, verbose)
+{
+    # Create a matrix of the data
+    data <- matrix(data = arraydata, nrow = n, ncol = m, byrow = FALSE)
+    #Read parameters
+    parlist <- unpack.param.Stereo.RowCluster.rRcm.without.interactions(param, m, R, q)
+
+    #if reparametrization, we built the new parameters (nu,z's)
+    if (repar == TRUE) parlist <-  repar.phi.Stereo(parlist, q)
+
+    #Compute the function to maximize
+    Q.stereo <- 0
+    for (i in 1:n)
+    {
+        for (j in 1:m)
+        {
+            for (k in 1:q)
+            {
+                for (r in 1:R)
+                {
+                    if (data[i,j] == k)
+                    {
+                        theta <- compute.prob.Stereo.RowCluster.rRcm.without.interactions(parlist, r, j, k, q)
                         Q.stereo <- Q.stereo + (log(theta)*z[i,r])
                     }
                 }
@@ -839,8 +875,8 @@ M.step.part2.RowCluster.rRcC1 <- function(parstart2, arraydata2, arrayz2, n2, m2
                         arraydata=arraydata2, arrayz=arrayz2, n=n2, m=m2, q=q2, R=R2, reparC=reparC,
                         fn=Q.Stereo.RowCluster.rRcC1, method=opar$method,
                         control=list(maxit=opar$maxit, reltol=opar$reltol), hessian=opar$hessian)
-        browser()
-        Q.Stereo.RowCluster.rRcC1.inR(retval$par, arraydata2, n2, m2, q2, R2, matrix(arrayz2,nrow=n2), reparC,verbose = TRUE)
+        Q <- Q.Stereo.RowCluster.rRcC1.inR(retval$par, arraydata2, n2, m2, q2, R2, matrix(arrayz2,nrow=n2), reparC,verbose = TRUE)
+        print(paste("After optim, Q =",Q))
     }else
     {
         par.scale <- rep(opar$scalepars,numpar2)
@@ -857,10 +893,12 @@ run.EM.algorithm.RowCluster.rRcC1 <- function(parstart1, R1, q1, n1, m1, numpar1
     repar <- reparC.to.repar(reparC)
     arraydata1 <- as.vector(y.mat1)
     parlist <- unpack.param.Stereo.Rowcluster.rRcC1(parstart1, R1, q1)
-
+print(parlist)
     # E-step
     z1 <- E.step.RowCluster.rRcC1(parlist,n1,R1,q1,y.mat1)
     arrayz1 <- as.vector(z1)
+    Q <- Q.Stereo.RowCluster.rRcC1.inR(parstart1,arraydata1, n1, m1, q1, R1, z1, reparC, verbose=TRUE)
+    print(paste("Q =",Q))
     # if (sum(is.na(arrayz1)) > 0) #print("Error in the Z vector from RowCluster rRcC1. There are NaN, please change the parameters start values")
 
         # M-step
@@ -1000,7 +1038,6 @@ RowCluster.rRcC1 <- function(scale.pars,type,polish, R, parstart=NULL)
         ptm <- proc.time()
         while ( (abs(empar$changeL)>empar$tolerance) & (empar$convergence == 0) & (empar$numiterEM <empar$maxEMiter))
         {
-            browser()
             #Run EM algorithm iteration
             EM.iter.est <- run.EM.algorithm.RowCluster.rRcC1(parstart, R, q, n, m, numpar, y.mat, z, piR, reparC, opar, empar)
             #check the logLike change between this EM iteration and the previous one
@@ -1014,7 +1051,8 @@ RowCluster.rRcC1 <- function(scale.pars,type,polish, R, parstart=NULL)
                 z <- EM.iter.est$z
                 piR <- EM.iter.est$param.est$piR
                 empar$numiterEM <- empar$numiterEM+1
-                print(paste("Testing RowClust rRcC1 with R=",R,": EM iter=",empar$numiterEM-1," changeL=",empar$changeL," convergence=",ifelse(EM.iter.est$est$convergence==0, TRUE, FALSE),sep=""))
+                print(paste0("Testing RowClust rRcC1 with R=",R,": EM iter=",empar$numiterEM-1," LLC=",empar$Lold))
+                print(paste0("Testing RowClust rRcC1 with R=",R,": EM iter=",empar$numiterEM-1," changeL=",empar$changeL," convergence=",ifelse(EM.iter.est$est$convergence==0, TRUE, FALSE)))
             }else
             {
                 stop("Problem saving the EM iteration in RowClust rRcC1")
@@ -1197,6 +1235,8 @@ M.step.part2.RowCluster.rRcm <- function(parstart2, arraydata2, arrayz2, n2, m2,
                         arraydata=arraydata2, arrayz=arrayz2, n=n2, m=m2, q=q2, R=R2, reparC=reparC,
                         fn=Q.Stereo.RowCluster.rRcm, method=opar$method,
                         control=list(maxit=opar$maxit, reltol=opar$reltol), hessian=opar$hessian)
+        Q <- Q.Stereo.RowCluster.rRcm.inR(retval$par, arraydata2, n2, m2, q2, R2, matrix(arrayz2,nrow=n2), reparC,verbose = TRUE)
+        print(paste("After optim, Q =",Q))
     }else
     {
         par.scale <- rep(opar$scalepars,numpar2)
@@ -1213,10 +1253,13 @@ run.EM.algorithm.RowCluster.rRcm <- function(parstart1, R1, q1, n1, m1, numpar1,
     repar <- reparC.to.repar(reparC)
     arraydata1 <- as.vector(y.mat1)
     parlist <-  unpack.param.Stereo.RowCluster.rRcm(parstart1, m1, R1, q1)
+    print(parlist)
 
     # E-step
     z1 <- E.step.RowCluster.rRcm(parlist,n1,R1,q1,y.mat1)
     arrayz1 <- as.vector(z1)
+    Q <- Q.Stereo.RowCluster.rRcm.inR(parstart1,arraydata1, n1, m1, q1, R1, z1, reparC, verbose=TRUE)
+    print(paste("Q =",Q))
     # if (sum(is.na(arrayz1)) > 0) #print("Error in the Z vector from RowCluster rRcm. There are NaN, please change the parameters start values")
 
         # M-step
@@ -1333,7 +1376,7 @@ save.results.EM.algorithm.RowCluster.rRcm <- function(par.hat1, par.hat.SE1, num
 }
 
 #Main program ------------------------------------------------------------------
-RowCluster.rRcm <- function(scale.pars,type,polish)
+RowCluster.rRcm <- function(scale.pars,type,polish, R, parstart=NULL)
 {
     #Configuration for the EM loop
     empar <- initialise.empar()
@@ -1344,8 +1387,6 @@ RowCluster.rRcm <- function(scale.pars,type,polish)
     retlist <- list()
     indexlist <- 1
 
-    for (R in min.numRows.to.test:max.numRows.to.test)
-    {
         # initialise parameters
         empar <- initialise.empar()
         q <- length(unique(c(y.mat)))
@@ -1359,7 +1400,9 @@ RowCluster.rRcm <- function(scale.pars,type,polish)
         #Initialize vectors
         z <- matrix(data = NA, nrow = n, ncol = R, byrow = TRUE)#The missing data. GLOBAL PARAMETER
         piR <- matrix(data = 1/R, nrow = 1, ncol = R, byrow = TRUE)#The membership probabilities. GLOBAL PARAMETER
-        parstart <- start.params.RowCluster.rRcm(R, q, m, piR)
+        if (is.null(parstart)) {
+            parstart <- start.params.RowCluster.rRcm(R, q, m, piR)
+        }
 
         # Measure time
         ptm <- proc.time()
@@ -1378,7 +1421,8 @@ RowCluster.rRcm <- function(scale.pars,type,polish)
                 z <- EM.iter.est$z
                 piR <- EM.iter.est$param.est$piR
                 empar$numiterEM <- empar$numiterEM+1
-                print(paste("Testing RowClust rRcm R=",R,": EM iter=",empar$numiterEM-1," changeL=",empar$changeL," convergence=",ifelse(EM.iter.est$est$convergence==0, TRUE, FALSE),sep=""))
+                print(paste0("Testing RowClust rRcm with R=",R,": EM iter=",empar$numiterEM-1," LLC=",empar$Lold))
+                print(paste0("Testing RowClust rRcm with R=",R,": EM iter=",empar$numiterEM-1," changeL=",empar$changeL," convergence=",ifelse(EM.iter.est$est$convergence==0, TRUE, FALSE)))
             }else
             {
                 stop("Problem saving the EM iteration in RowClust rRcm")
@@ -1491,7 +1535,7 @@ RowCluster.rRcm <- function(scale.pars,type,polish)
         retlist[[indexlist]]$logLcomplete <- logLincomplete.hat  #it DOESN'T matter complete or incomplete
 
         indexlist <- indexlist + 1
-    }
+
     ifelse(type<99,return(list(retlist=retlist,z=z,par.hat=par.hat,par.hat.SE=par.hat.SE)),return(retlist))
 }
 
@@ -1562,6 +1606,8 @@ M.step.part2.RowCluster.rRcm.without.interactions <- function(parstart2, arrayda
                         arraydata=arraydata2, arrayz=arrayz2, n=n2, m=m2, q=q2, R=R2, reparC=reparC,
                         fn=Q.Stereo.RowCluster.rRcm.without.interactions, method=opar$method,
                         control=list(maxit=opar$maxit, reltol=opar$reltol), hessian=opar$hessian)
+        Q <- Q.Stereo.RowCluster.rRcm.without.interactions.inR(retval$par, arraydata2, n2, m2, q2, R2, matrix(arrayz2,nrow=n2), reparC,verbose = TRUE)
+        print(paste("After optim, Q =",Q))
     }else
     {
         par.scale <- rep(opar$scalepars,numpar2)
@@ -1578,10 +1624,13 @@ run.EM.algorithm.RowCluster.rRcm.without.interactions <- function(parstart1, R1,
     repar <- reparC.to.repar(reparC)
     arraydata1 <- as.vector(y.mat1)
     parlist <-  unpack.param.Stereo.RowCluster.rRcm.without.interactions(parstart1, m1, R1, q1)
+    print(parlist)
 
     # E-step
     z1 <- E.step.RowCluster.rRcm.without.interactions(parlist,n1,R1,q1,y.mat1)
     arrayz1 <- as.vector(z1)
+    Q <- Q.Stereo.RowCluster.rRcm.without.interactions.inR(parstart1,arraydata1, n1, m1, q1, R1, z1, reparC, verbose=TRUE)
+    print(paste("Q =",Q))
     # if (sum(is.na(arrayz1)) > 0) #print("Error in the Z vector from RowCluster rRcm without interact. There are NaN, please change the parameters start values")
 
         # M-step
@@ -1671,7 +1720,7 @@ save.results.EM.algorithm.RowCluster.rRcm.without.interactions <- function(par.h
 }
 
 #Main program ------------------------------------------------------------------
-RowCluster.rRcm.without.interactions <- function(scale.pars,type,polish)
+RowCluster.rRcm.without.interactions <- function(scale.pars,type,polish, R, parstart=NULL)
 {
     #Configuration for the EM loop
     empar <- initialise.empar()
@@ -1682,8 +1731,6 @@ RowCluster.rRcm.without.interactions <- function(scale.pars,type,polish)
     retlist <- list()
     indexlist <- 1
 
-    for (R in min.numRows.to.test:max.numRows.to.test)
-    {
         # initialise parameters
         empar <- initialise.empar()
         q <- length(unique(c(y.mat)))
@@ -1697,7 +1744,9 @@ RowCluster.rRcm.without.interactions <- function(scale.pars,type,polish)
         #Initialize vectors
         z <- matrix(data = NA, nrow = n, ncol = R, byrow = TRUE)#The missing data. GLOBAL PARAMETER
         piR <- matrix(data = 1/R, nrow = 1, ncol = R, byrow = TRUE)#The membership probabilities. GLOBAL PARAMETER
-        parstart <- start.params.RowCluster.rRcm.without.interactions(R, q, m, piR)
+        if (is.null(parstart)) {
+            parstart <- start.params.RowCluster.rRcm.without.interactions(R, q, m, piR)
+        }
 
         # Measure time
         ptm <- proc.time()
@@ -1716,7 +1765,8 @@ RowCluster.rRcm.without.interactions <- function(scale.pars,type,polish)
                 z <- EM.iter.est$z
                 piR <- EM.iter.est$param.est$piR
                 empar$numiterEM <- empar$numiterEM+1
-                print(paste("Testing RowClust rRcm without interact with R=",R,": EM iter=",empar$numiterEM-1," changeL=",empar$changeL," convergence=",ifelse(EM.iter.est$est$convergence==0, TRUE, FALSE),sep=""))
+                print(paste0("Testing RowClust rRcm without interactions with R=",R,": EM iter=",empar$numiterEM-1," LLC=",empar$Lold))
+                print(paste0("Testing RowClust rRcm without interactions with R=",R,": EM iter=",empar$numiterEM-1," changeL=",empar$changeL," convergence=",ifelse(EM.iter.est$est$convergence==0, TRUE, FALSE)))
             }else
             {
                 stop("Problem saving the EM iteration in RowClust rRcm without interact")
@@ -1762,7 +1812,7 @@ RowCluster.rRcm.without.interactions <- function(scale.pars,type,polish)
         retlist[[indexlist]]$logLcomplete <- logLincomplete.hat  #it DOESN'T matter complete or incomplete
 
         indexlist <- indexlist + 1
-    }
+
     ifelse(type<99,return(list(retlist=retlist,z=z,par.hat=par.hat)),return(retlist))
 }
 
