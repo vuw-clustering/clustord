@@ -38,10 +38,11 @@ lower.limit <- 0.00001
 #'     column effects; otherwise, absolute tolerance for convergence for inner EM
 #'     algorithm without column effects, which is used as a starting point for
 #'     the EM algorithm with column effects.
-#' @param use.model.without.interactions (default TRUE) if true, fit the model
+#' @param use.alternative.start (default TRUE) if true, fit the model
 #'     without interactions first and use that to provide starting values of ppr.m
 #'     and pi.v for fitting the model with interactions; if false, use the polr
-#'     function to find starting values for fitting the model with interactions.
+#'     function and then the simple model, and then the model without
+#'     interactions, to find starting values for fitting the model with interactions.
 #' @return fitted values of parameters pi, kappa, theta, mu and alpha and gamma as applicable, as well as
 #'     `ppr`, the posterior probabilities of membership of the row clusters,
 #'     and `RowClusters`, the assigned row clusters based on maximum posterior probability.
@@ -56,7 +57,7 @@ pomrowclustering <- function(pomformula,
     maxiter.rpi=50, tol.rpi=1e-4,
     maxiter.rp=50, tol.rp=1e-4,
     maxiter.rs=20, tol.rs=1e-4,
-    use.model.without.interactions=TRUE){
+    use.alternative.start=TRUE){
 
     if(is.null(y.mat)) {
         if (!is.null(data)) {
@@ -243,16 +244,7 @@ pomrowclustering <- function(pomformula,
         q<-length(unique(as.vector(y.mat)))
 
         if (is.null(ppr.m) | is.null(pi.v)) {
-            PO.sp.out <- MASS::polr(as.factor(y.mat)~1)
-            PO.sp.out$mu=PO.sp.out$zeta
-
-            kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
-
-            pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-            alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
-            alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
-
-            POFM.rs.out <- fit.POFM.rs.model(invect=c(PO.sp.out$mu,alpha.kmeans[-1]),y.mat,RG, maxiter.rs=maxiter.rs, tol.rs=tol.rs)
+            POFM.rs.out <- fit.POFM.rs.model(invect=invect[1:(q-1+RG-1)],y.mat,RG, maxiter.rs=maxiter.rs, tol.rs=tol.rs)
             cat("=== End of RS model fitting ===\n")
             ppr.m <- POFM.rs.out$ppr
             pi.v <- POFM.rs.out$pi
@@ -384,34 +376,15 @@ pomrowclustering <- function(pomformula,
         maxiter.rpi=50, tol.rpi=1e-4,
         maxiter.rp=20, tol.rp=1e-4,
         maxiter.rs=20, tol.rs=1e-4,
-        use.model.without.interactions=TRUE){
+        use.alternative.start=TRUE){
         n=nrow(y.mat)
         p=ncol(y.mat)
         q=length(unique(as.vector(y.mat)))
 
         if (is.null(ppr.m) | is.null(pi.v)) {
-            if (use.model.without.interactions) {
+            if (use.alternative.start) {
 
-                PO.sp.out <- MASS::polr(as.factor(y.mat)~1)
-                PO.sp.out$mu=PO.sp.out$zeta
-
-                VariableName=as.factor(rep((1:ncol(y.mat)),each=nrow(y.mat)))
-                PO.sp.out <- MASS::polr(as.factor(y.mat)~VariableName)
-                PO.sp.out$mu=PO.sp.out$zeta
-                PO.sp.out$beta=c(0,PO.sp.out$coef[1:(ncol(y.mat)-1)]) #Individual column effect
-
-                kmeans.data=kmeans(y.mat,centers=RG,nstart=50)
-
-                pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-                alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
-                alpha.kmeans=alpha.kmeans-alpha.kmeans[1] #alpha1=0
-
-                #initial mu, alpha
-                mu.init=PO.sp.out$mu
-                alpha.init=alpha.kmeans[-1]
-                beta.init=PO.sp.out$beta[-1]
-
-                POFM.rp.out <- fit.POFM.rp.model(invect=c(mu.init,alpha.init,beta.init), y.mat, RG,
+                POFM.rp.out <- fit.POFM.rp.model(invect=invect[1:(q-1+RG-1+p-1)], y.mat, RG,
                                                  maxiter.rp=maxiter.rp, tol.rp=tol.rp,
                                                  maxiter.rs=maxiter.rs, tol.rs=tol.rs)
                 cat("=== End of RP model fitting ===\n")
@@ -430,7 +403,7 @@ pomrowclustering <- function(pomformula,
                 x2=POFM.rp.F(invect=c(x1$mu,x1$alpha[-1],PO.sp.out$beta[-1]))
                 ppr.m=x2$ppr
                 pi.v=x2$pi
-                cat("=== Used polr to find starting points ===\n")
+                cat("=== Used RS and RP models to find starting points ===\n")
             }
         }
 
@@ -558,7 +531,7 @@ pomrowclustering <- function(pomformula,
             maxiter.rpi=maxiter.rpi, tol.rpi=tol.rpi,
             maxiter.rp=maxiter.rp, tol.rp=tol.rp,
             maxiter.rs=maxiter.rs, tol.rs=tol.rs,
-            use.model.without.interactions=use.model.without.interactions)
+            use.alternative.start=use.alternative.start)
 
     }
     else {

@@ -14,9 +14,9 @@ results <- pombiclustering("Y~row+column+row:column",
 results <- pomrowclustering("Y~row+column+row:column",
                 nclus.row=2,
                 y.mat=y.mat.sim,
-                use.model.without.interactions = TRUE)
+                use.alternative.start = TRUE)
 
 results <- osmrowclustering("Y~row",
                             nclus.row=2,
                             y.mat=y.mat.sim,
-                            use.model.without.interactions = TRUE)
+                            use.alternative.start = TRUE)
