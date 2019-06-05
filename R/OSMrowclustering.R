@@ -177,13 +177,76 @@ osmrowclustering <- function(osmformula,
     }
 }
 
-theta.OSM.rs <- function(mu, phi, alpha, p) {
+unpack.parvec <- function(invect, model, submodel, n, p, q, RG, constraint.sum.zero=TRUE) {
+    switch(model,
+           "OSM"={
+               ### TODO: Noting that mu for original OSM code is defined differently
+               ### than mu for POM code, decide which version to use and make consistent
+               mu <- c(0,invect[1:(q-1)])
+               phi <- c(0,invect[(q-1+1):(q-1+q-2)],1)
+               switch(submodel,
+                      "rs"={
+                          alpha <- invect[(q-1+q-2+1):(q-1+q-2+RG-1)]
+                          ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
+                          ### POM which has alpha_1 = 0
+                          alpha <- c(alpha, -sum(alpha))
+                          list(n=n,p=p,mu=mu,phi=phi,alpha=alpha)
+                      },
+                      "rp"={
+                          alpha <- invect[(q-1+q-2+1):(q-1+q-2+RG-1)]
+                          ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
+                          ### POM which has alpha_1 = 0
+                          alpha <- c(alpha, -sum(alpha))
+                          beta <- invect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+p-1)]
+                          ### TODO: Original OSM code has sum to zero constraint on beta, unlike
+                          ### POM which has beta_1 = 0
+                          beta <- c(beta, -sum(beta))
+                          list(n=n,p=p,mu=mu,phi=phi,alpha=alpha,beta=beta)
+                      },
+                      "rpi"={
+                          alpha <- invect[(q-1+q-2+1):(q-1+q-2+RG-1)]
+                          ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
+                          ### POM which has alpha_1 = 0
+                          alpha <- c(alpha, -sum(alpha))
+                          beta <- invect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+p-1)]
+                          ### TODO: Original OSM code has sum to zero constraint on beta, unlike
+                          ### POM which has beta_1 = 0
+                          beta <- c(beta, -sum(beta))
+
+                          gamma <- c(invect[(q-1+q-2+RG-1+p-1+1):(q-1+q-2+RG-1+p-1+(RG-1)*(p-1))])
+                          gamma <- matrix(gamma,nrow=RG-1,ncol=p-1,byrow=T)
+                          gamma <- cbind(gamma,-rowSums(gamma))
+                          # POM code has final row of gamma equal to negative sum of other rows,
+                          # but original OSM code has FIRST row of gamma equal to negative sum of
+                          # other rows
+                          # gamma <- rbind(gamma,-colSums(gamma))
+                          gamma <- rbind(-colSums(gamma),gamma)
+
+                          list(n=n,p=p,mu=mu,phi=phi,alpha=alpha,beta=beta,gamma=gamma)
+                      })
+           },
+           "POM"={
+               switch(submodel,
+                      "rs"={
+
+                      },
+                      "rp"={
+
+                      },
+                      "rpi"={
+
+                      })
+           })
+}
+
+theta.OSM.rs <- function(parlist) {
+    p <- parlist$p
     ## TODO: Note that for POM code, mu is defined as length q-1,
     ## and probability for Y=q is defined based on the probabilities for
     ## Y=1,...,q-1, but for original OSM code, mu is defined as length q,
     ## with first element 0
-    q <- length(mu)
-    RG <- length(alpha)
+    q <- length(parlist$mu)
+    RG <- length(parlist$alpha)
 
     theta <- array(NA,c(RG,p,q))
     for(r in 1:RG){
@@ -191,7 +254,7 @@ theta.OSM.rs <- function(mu, phi, alpha, p) {
     }
     for(r in 1:RG){
         for(k in 2:q){
-            theta[r,1:p,k] <- exp(mu[k] + phi[k]*alpha[r])
+            theta[r,1:p,k] <- exp(parlist$mu[k] + parlist$phi[k]*parlist$alpha[r])
         }
     }
     for (r in 1:RG){
@@ -211,16 +274,9 @@ OSM.rs <- function(invect, y.mat, ppr.m, pi.v, RG, partial=FALSE){
     p=ncol(y.mat)
     q=length(unique(as.vector(y.mat)))
 
-    ### TODO: Noting that mu for original OSM code is defined differently
-    ### than mu for POM code, decide which version to use and make consistent
-    mu.in <- c(0,invect[1:(q-1)])
-    phi.in <- c(0,invect[(q-1+1):(q-1+q-2)],1)
-    alpha.in <- invect[(q-1+q-2+1):(q-1+q-2+RG-1)]
-    ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-    ### POM which has alpha_1 = 0
-    alpha.in <- c(alpha.in, -sum(alpha.in))
+    parlist <- unpack.parvec(invect,model="OSM",submodel="rs",n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
 
-    this.theta <- theta.OSM.rs(mu.in, phi.in, alpha.in, p)
+    this.theta <- theta.OSM.rs(parlist)
 
     this.theta[this.theta<=0]=lower.limit
     pi.v[pi.v==0]=lower.limit
@@ -245,21 +301,12 @@ fit.OSM.rs.model <- function(invect, y.mat, RG, pi.init=NULL, maxiter.rs=50, tol
     ppr.m=matrix(NA,n,RG)
     theta.arr=array(1, c(RG,p,q))
 
-    ### TODO: Noting that mu for original OSM code is defined differently
-    ### than mu for POM code, decide which version to use and make consistent
-    mu.in <- c(0,invect[1:(q-1)])
-    phi.in <- c(0,invect[(q-1+1):(q-1+q-2)],1)
-    alpha.in <- invect[(q-1+q-2+1):(q-1+q-2+RG-1)]
-    ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-    ### POM which has alpha_1 = 0
-    alpha.in <- c(alpha.in, -sum(alpha.in))
+    parlist.in <- unpack.parvec(invect,model="OSM",submodel="rs",n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
 
-    theta.arr <- theta.OSM.rs(mu.in, phi.in, alpha.in, p)
+    theta.arr <- theta.OSM.rs(parlist.in)
 
     cat("Initial parameter values\n")
-    cat("mu",mu.in,"\n")
-    cat("phi",phi.in,"\n")
-    cat("alpha",alpha.in,"\n")
+    print(parlist.in)
     cat("pi",pi.v,"\n")
 
     ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
@@ -300,16 +347,9 @@ fit.OSM.rs.model <- function(invect, y.mat, RG, pi.init=NULL, maxiter.rs=50, tol
         #print(abs(invect-outvect))
         #print(outvect)
 
-        ### TODO: Noting that mu for original OSM code is defined differently
-        ### than mu for POM code, decide which version to use and make consistent
-        mu.out <- c(0,outvect[1:(q-1)])
-        phi.out <- c(0,outvect[(q-1+1):(q-1+q-2)],1)
-        alpha.out <- outvect[(q-1+q-2+1):(q-1+q-2+RG-1)]
-        ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-        ### POM which has alpha_1 = 0
-        alpha.out <- c(alpha.out, -sum(alpha.out))
+        parlist.out <- unpack.parvec(outvect,model="OSM",submodel="rs",n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
 
-        theta.arr <- theta.OSM.rs(mu.out, phi.out, alpha.out, p)
+        theta.arr <- theta.OSM.rs(parlist.out)
 
         ## Report the current incomplete-data log-likelihood, which is the
         ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
@@ -317,9 +357,8 @@ fit.OSM.rs.model <- function(invect, y.mat, RG, pi.init=NULL, maxiter.rs=50, tol
         # if (iter == 1 | iter%%5 == 0) cat('RS model iter=',iter, ' log.like=', llc ,'\n')
         cat('RS model iter=',iter, ' partial log.like=', -optim.fit$value ,'\n')
         cat('RS model iter=',iter, ' log.like=', llc ,'\n')
-        cat("mu out",mu.out,"\n")
-        cat("phi out",phi.out,"\n")
-        cat("alpha out",alpha.out,"\n")
+        cat("parlist.out\n")
+        print(parlist.out)
         cat("pi",pi.v,"\n")
         iter=iter+1
     }
@@ -338,21 +377,21 @@ fit.OSM.rs.model <- function(invect, y.mat, RG, pi.init=NULL, maxiter.rs=50, tol
          "initvect"=initvect,
          "pi"=pi.v,
          "theta"=theta.arr,
-         "mu"=mu.out,
-         "phi"=phi.out,
-         "alpha"=alpha.out,
+         "mu"=parlist.out$mu,
+         "phi"=parlist.out$phi,
+         "alpha"=parlist.out$alpha,
          "ppr"=ppr.m,
          "RowClusters"=Rclus)
 }
 
-theta.OSM.rp <- function(mu, phi, alpha, beta) {
+theta.OSM.rp <- function(parlist) {
+    p <- parlist$p
     ## TODO: Note that for POM code, mu is defined as length q-1,
     ## and probability for Y=q is defined based on the probabilities for
     ## Y=1,...,q-1, but for original OSM code, mu is defined as length q,
     ## with first element 0
-    q <- length(mu)
-    RG <- length(alpha)
-    p <- length(beta)
+    q <- length(parlist$mu)
+    RG <- length(parlist$alpha)
 
     theta <- array(NA,c(RG,p,q))
     for(r in 1:RG){
@@ -361,7 +400,7 @@ theta.OSM.rp <- function(mu, phi, alpha, beta) {
     for(r in 1:RG){
         for(j in 1:p){
             for(k in 2:q){
-                theta[r,j,k] <- exp(mu[k] + phi[k]*(alpha[r] + beta[j]))
+                theta[r,j,k] <- exp(parlist$mu[k] + parlist$phi[k]*(parlist$alpha[r] + parlist$beta[j]))
             }
         }
     }
@@ -382,20 +421,9 @@ OSM.rp <- function(invect, y.mat, ppr.m, pi.v, RG, partial=FALSE){
     p=ncol(y.mat)
     q=length(unique(as.vector(y.mat)))
 
-    ### TODO: Noting that mu for original OSM code is defined differently
-    ### than mu for POM code, decide which version to use and make consistent
-    mu.in <- c(0,invect[1:(q-1)])
-    phi.in <- c(0,invect[(q-1+1):(q-1+q-2)],1)
-    alpha.in <- invect[(q-1+q-2+1):(q-1+q-2+RG-1)]
-    ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-    ### POM which has alpha_1 = 0
-    alpha.in <- c(alpha.in, -sum(alpha.in))
-    beta.in <- invect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+p-1)]
-    ### TODO: Original OSM code has sum to zero constraint on beta, unlike
-    ### POM which has beta_1 = 0
-    beta.in <- c(beta.in, -sum(beta.in))
+    parlist <- unpack.parvec(invect,model="OSM",submodel="rp",n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
 
-    this.theta <- theta.OSM.rp(mu.in, phi.in, alpha.in, beta.in)
+    this.theta <- theta.OSM.rp(parlist)
 
     this.theta[this.theta<=0]=lower.limit
     pi.v[pi.v==0]=lower.limit
@@ -423,26 +451,12 @@ fit.OSM.rp.model <- function(invect, y.mat, RG, pi.init=NULL,
         pi.v <- pi.init
     }
 
-    ### TODO: Noting that mu for original OSM code is defined differently
-    ### than mu for POM code, decide which version to use and make consistent
-    mu.in <- c(0,invect[1:(q-1)])
-    phi.in <- c(0,invect[(q-1+1):(q-1+q-2)],1)
-    alpha.in <- invect[(q-1+q-2+1):(q-1+q-2+RG-1)]
-    ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-    ### POM which has alpha_1 = 0
-    alpha.in <- c(alpha.in, -sum(alpha.in))
-    beta.in <- invect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+p-1)]
-    ### TODO: Original OSM code has sum to zero constraint on beta, unlike
-    ### POM which has beta_1 = 0
-    beta.in <- c(beta.in, -sum(beta.in))
+    parlist.in <- unpack.parvec(invect,model="OSM",submodel="rp",n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
 
-    theta.arr <- theta.OSM.rp(mu.in, phi.in, alpha.in, beta.in)
+    theta.arr <- theta.OSM.rp(parlist.in)
 
     cat("Initial parameter values\n")
-    cat("mu",mu.in,"\n")
-    cat("phi",phi.in,"\n")
-    cat("alpha",alpha.in,"\n")
-    cat("beta",beta.in,"\n")
+    print(parlist.in)
     cat("pi",pi.v,"\n")
 
     ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
@@ -483,20 +497,9 @@ fit.OSM.rp.model <- function(invect, y.mat, RG, pi.init=NULL,
         #print(abs(invect-outvect))
         #print(outvect)
 
-        ### TODO: Noting that mu for original OSM code is defined differently
-        ### than mu for POM code, decide which version to use and make consistent
-        mu.out <- c(0,outvect[1:(q-1)])
-        phi.out <- c(0,outvect[(q-1+1):(q-1+q-2)],1)
-        alpha.out <- outvect[(q-1+q-2+1):(q-1+q-2+RG-1)]
-        ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-        ### POM which has alpha_1 = 0
-        alpha.out <- c(alpha.out, -sum(alpha.out))
-        beta.out <- outvect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+p-1)]
-        ### TODO: Original OSM code has sum to zero constraint on beta, unlike
-        ### POM which has beta_1 = 0
-        beta.out <- c(beta.out, -sum(beta.out))
+        parlist.out <- unpack.parvec(outvect,model="OSM",submodel="rp",n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
 
-        theta.arr <- theta.OSM.rp(mu.out, phi.out, alpha.out, beta.out)
+        theta.arr <- theta.OSM.rp(parlist.out)
 
         ## Report the current incomplete-data log-likelihood, which is the
         ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
@@ -504,10 +507,8 @@ fit.OSM.rp.model <- function(invect, y.mat, RG, pi.init=NULL,
         # if (iter == 1 | iter%%5 == 0) cat('RP model iter=',iter, ' log.like=', llc ,'\n')
         cat('RP model iter=',iter, ' partial log.like=', -optim.fit$value ,'\n')
         cat('RP model iter=',iter, ' log.like=', llc ,'\n')
-        cat("mu out",mu.out,"\n")
-        cat("phi out",phi.out,"\n")
-        cat("alpha out",alpha.out,"\n")
-        cat("beta out",beta.out,"\n")
+        cat("parlist.out\n")
+        print(parlist.out)
         cat("pi",pi.v,"\n")
         iter=iter+1
     }
@@ -525,23 +526,22 @@ fit.OSM.rp.model <- function(invect, y.mat, RG, pi.init=NULL,
          "criteria"=unlist(criteria),
          "initvect"=initvect,
          "pi"=pi.v,
-         "theta"=theta.arr,
-         "mu"=mu.out,
-         "phi"=phi.out,
-         "alpha"=alpha.out,
-         "beta"=beta.out,
+         "mu"=parlist.out$mu,
+         "phi"=parlist.out$phi,
+         "alpha"=parlist.out$alpha,
+         "beta"=parlist.out$beta,
          "ppr"=ppr.m,
          "RowClusters"=Rclus)
 }
 
-theta.OSM.rpi <- function(mu, phi, alpha, beta, gamma) {
+theta.OSM.rpi <- function(parlist) {
+    p <- parlist$p
     ## TODO: Note that for POM code, mu is defined as length q-1,
     ## and probability for Y=q is defined based on the probabilities for
     ## Y=1,...,q-1, but for original OSM code, mu is defined as length q,
     ## with first element 0
-    q <- length(mu)
-    RG <- length(alpha)
-    p <- length(beta)
+    q <- length(parlist$mu)
+    RG <- length(parlist$alpha)
 
     theta <- array(NA,c(RG,p,q))
     for(r in 1:RG){
@@ -550,7 +550,7 @@ theta.OSM.rpi <- function(mu, phi, alpha, beta, gamma) {
     for(r in 1:RG){
         for(j in 1:p){
             for(k in 2:q){
-                theta[r,j,k] <- exp(mu[k] + phi[k]*(alpha[r] + beta[j] + gamma[r,j]))
+                theta[r,j,k] <- exp(parlist$mu[k] + parlist$phi[k]*(parlist$alpha[r] + parlist$beta[j] + parlist$gamma[r,j]))
             }
         }
     }
@@ -571,29 +571,9 @@ OSM.rpi <- function(invect, y.mat, ppr.m, pi.v, RG, partial=FALSE){
     p=ncol(y.mat)
     q=length(unique(as.vector(y.mat)))
 
-    ### TODO: Noting that mu for original OSM code is defined differently
-    ### than mu for POM code, decide which version to use and make consistent
-    mu.in <- c(0,invect[1:(q-1)])
-    phi.in <- c(0,invect[(q-1+1):(q-1+q-2)],1)
-    alpha.in <- invect[(q-1+q-2+1):(q-1+q-2+RG-1)]
-    ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-    ### POM which has alpha_1 = 0
-    alpha.in <- c(alpha.in, -sum(alpha.in))
-    beta.in <- invect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+p-1)]
-    ### TODO: Original OSM code has sum to zero constraint on beta, unlike
-    ### POM which has beta_1 = 0
-    beta.in <- c(beta.in, -sum(beta.in))
+    parlist <- unpack.parvec(invect,model="OSM",submodel="rpi",n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
 
-    gamma.in <- c(invect[(q-1+q-2+RG-1+p-1+1):(q-1+q-2+RG-1+p-1+(RG-1)*(p-1))])
-    gamma.in <- matrix(gamma.in,nrow=RG-1,ncol=p-1,byrow=T)
-    gamma.in <- cbind(gamma.in,-rowSums(gamma.in))
-    # POM code has final row of gamma equal to negative sum of other rows,
-    # but original OSM code has FIRST row of gamma equal to negative sum of
-    # other rows
-    # gamma.in <- rbind(gamma.in,-colSums(gamma.in))
-    gamma.in <- rbind(-colSums(gamma.in),gamma.in)
-
-    this.theta <- theta.OSM.rpi(mu.in, phi.in, alpha.in, beta.in, gamma.in)
+    this.theta <- theta.OSM.rpi(parlist)
 
     # this.theta[this.theta<=0]=lower.limit
     # pi.v[pi.v==0]=lower.limit
@@ -642,37 +622,12 @@ fit.OSM.rpi.model <- function(invect, y.mat, RG, pi.init=NULL,
         pi.v <- pi.init
     }
 
-    ### TODO: Noting that mu for original OSM code is defined differently
-    ### than mu for POM code, decide which version to use and make consistent
-    mu.in <- c(0,invect[1:(q-1)])
-    phi.in <- c(0,invect[(q-1+1):(q-1+q-2)],1)
-    alpha.in <- invect[(q-1+q-2+1):(q-1+q-2+RG-1)]
-    ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-    ### POM which has alpha_1 = 0
-    alpha.in <- c(alpha.in, -sum(alpha.in))
-    beta.in <- invect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+p-1)]
-    ### TODO: Original OSM code has sum to zero constraint on beta, unlike
-    ### POM which has beta_1 = 0
-    beta.in <- c(beta.in, -sum(beta.in))
+    parlist.in <- unpack.parvec(invect,model="OSM",submodel="rpi",n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
 
-    gamma.in <- c(invect[(q-1+q-2+RG-1+p-1+1):(q-1+q-2+RG-1+p-1+(RG-1)*(p-1))])
-    gamma.in <- matrix(gamma.in,nrow=RG-1,ncol=p-1,byrow=T)
-    gamma.in <- cbind(gamma.in,-rowSums(gamma.in))
-    # POM code has final row of gamma equal to negative sum of other rows,
-    # but original OSM code has FIRST row of gamma equal to negative sum of
-    # other rows
-    # gamma.in <- rbind(gamma.in,-colSums(gamma.in))
-    gamma.in <- rbind(-colSums(gamma.in),gamma.in)
-
-    theta.arr <- theta.OSM.rpi(mu.in, phi.in, alpha.in, beta.in, gamma.in)
+    theta.arr <- theta.OSM.rpi(parlist.in)
 
     cat("Initial parameter values\n")
-    cat("mu",mu.in,"\n")
-    cat("phi",phi.in,"\n")
-    cat("alpha",alpha.in,"\n")
-    cat("beta",beta.in,"\n")
-    cat("gamma\n")
-    print(gamma.in)
+    print(parlist.in)
     cat("pi",pi.v,"\n")
 
     ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
@@ -713,29 +668,9 @@ fit.OSM.rpi.model <- function(invect, y.mat, RG, pi.init=NULL,
         #print(abs(invect-outvect))
         #print(outvect)
 
-        ### TODO: Noting that mu for original OSM code is defined differently
-        ### than mu for POM code, decide which version to use and make consistent
-        mu.out <- c(0,outvect[1:(q-1)])
-        phi.out <- c(0,outvect[(q-1+1):(q-1+q-2)],1)
-        alpha.out <- outvect[(q-1+q-2+1):(q-1+q-2+RG-1)]
-        ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-        ### POM which has alpha_1 = 0
-        alpha.out <- c(alpha.out, -sum(alpha.out))
-        beta.out <- outvect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+p-1)]
-        ### TODO: Original OSM code has sum to zero constraint on beta, unlike
-        ### POM which has beta_1 = 0
-        beta.out <- c(beta.out, -sum(beta.out))
+        parlist.out <- unpack.parvec(outvect,model="OSM",submodel="rpi",n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
 
-        gamma.out <- c(outvect[(q-1+q-2+RG-1+p-1+1):(q-1+q-2+RG-1+p-1+(RG-1)*(p-1))])
-        gamma.out <- matrix(gamma.out,nrow=RG-1,ncol=p-1,byrow=T)
-        gamma.out <- cbind(gamma.out,-rowSums(gamma.out))
-        # POM code has final row of gamma equal to negative sum of other rows,
-        # but original OSM code has FIRST row of gamma equal to negative sum of
-        # other rows
-        # gamma.out <- rbind(gamma.in,-colSums(gamma.out))
-        gamma.out <- rbind(-colSums(gamma.out),gamma.out)
-
-        theta.arr <- theta.OSM.rpi(mu.out, phi.out, alpha.out, beta.out, gamma.out)
+        theta.arr <- theta.OSM.rpi(parlist.out)
 
         ## Report the current incomplete-data log-likelihood, which is the
         ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
@@ -743,12 +678,8 @@ fit.OSM.rpi.model <- function(invect, y.mat, RG, pi.init=NULL,
         # if (iter == 1 | iter%%5 == 0) cat('RPI model iter=',iter, ' log.like=', llc ,'\n')
         cat('RPI model iter=',iter, ' partial log.like=', -optim.fit$value ,'\n')
         cat('RPI model iter=',iter, ' log.like=', llc ,'\n')
-        cat("mu out",mu.out,"\n")
-        cat("phi out",phi.out,"\n")
-        cat("alpha out",alpha.out,"\n")
-        cat("beta out",beta.out,"\n")
-        cat("gamma out\n")
-        print(gamma.out)
+        cat("parlist.out\n")
+        print(parlist.out)
         cat("pi",pi.v,"\n")
         iter=iter+1
     }
@@ -767,11 +698,11 @@ fit.OSM.rpi.model <- function(invect, y.mat, RG, pi.init=NULL,
          "initvect"=initvect,
          "pi"=pi.v,
          "theta"=theta.arr,
-         "mu"=mu.out,
-         "phi"=phi.out,
-         "alpha"=alpha.out,
-         "beta"=beta.out,
-         "gamma"=gamma.out,
+         "mu"=parlist.out$mu,
+         "phi"=parlist.out$phi,
+         "alpha"=parlist.out$alpha,
+         "beta"=parlist.out$beta,
+         "gamma"=parlist.out$gamma,
          "ppr"=ppr.m,
          "RowClusters"=Rclus)
 }
