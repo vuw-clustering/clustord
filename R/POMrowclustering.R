@@ -399,8 +399,8 @@ pomrowclustering <- function(pomformula,
                 PO.sp.out <- MASS::polr(as.factor(y.mat)~VariableName)
                 PO.sp.out$beta=c(0,PO.sp.out$coef[1:(ncol(y.mat)-1)])
 
-                x1=POFM.rs.F(invect=c(PO.ss.out$mu,alpha.kmeans[-1]))
-                x2=POFM.rp.F(invect=c(x1$mu,x1$alpha[-1],PO.sp.out$beta[-1]))
+                x1=fit.POFM.rs.model(invect=c(PO.ss.out$mu,alpha.kmeans[-1]))
+                x2=fit.POFM.rp.model(invect=c(x1$mu,x1$alpha[-1],PO.sp.out$beta[-1]))
                 ppr.m=x2$ppr
                 pi.v=x2$pi
                 cat("=== Used RS and RP models to find starting points ===\n")
