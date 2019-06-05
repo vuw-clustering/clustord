@@ -402,7 +402,7 @@ fit.OSM.rp.model <- function(invect, y.mat, RG, pi.init=NULL,
 
     if (is.null(pi.init)) {
         cat("Fitting RS model to obtain starting values for pi.v\n")
-        OSM.rs.out <- fit.OSM.rs.model(invect=invect[1:(q+q+RG)],
+        OSM.rs.out <- fit.OSM.rs.model(invect=invect[1:(q-1+q-2+RG)],
                                        y.mat, RG, maxiter.rs=maxiter.rs, tol.rs=tol.rs)
         cat("=== End of RS model fitting ===\n")
 
@@ -489,9 +489,9 @@ fit.OSM.rp.model <- function(invect, y.mat, RG, pi.init=NULL,
         ## Report the current incomplete-data log-likelihood, which is the
         ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
         ## of the output of optim
-        # if (iter == 1 | iter%%5 == 0) cat('RS model iter=',iter, ' log.like=', llc ,'\n')
-        cat('RS model iter=',iter, ' partial log.like=', -optim.fit$value ,'\n')
-        cat('RS model iter=',iter, ' log.like=', llc ,'\n')
+        # if (iter == 1 | iter%%5 == 0) cat('RP model iter=',iter, ' log.like=', llc ,'\n')
+        cat('RP model iter=',iter, ' partial log.like=', -optim.fit$value ,'\n')
+        cat('RP model iter=',iter, ' log.like=', llc ,'\n')
         cat("mu out",mu.out,"\n")
         cat("phi out",phi.out,"\n")
         cat("alpha out",alpha.out,"\n")
