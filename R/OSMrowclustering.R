@@ -239,6 +239,34 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, constraint.sum.z
            })
 }
 
+calc.ll <- function(invect, y.mat, model, submodel, ppr.m, pi.v, RG, partial=FALSE) {
+    n=nrow(y.mat)
+    p=ncol(y.mat)
+    q=length(unique(as.vector(y.mat)))
+
+    parlist <- unpack.parvec(invect,model=model,submodel=submodel,
+                             n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
+
+    this.theta <- switch(model,
+                         "OSM"={
+                            switch(submodel,
+                                   "rs"=theta.OSM.rs(parlist),
+                                   "rp"=theta.OSM.rp(parlist),
+                                   "rpi"=theta.OSM.rpi(parlist))
+                         },
+                         "POM"={
+                             switch(submodel,
+                                    "rs"=theta.POFM.rs(parlist),
+                                    "rp"=theta.POFM.rp(parlist),
+                                    "rpi"=theta.POFM.rpi(parlist))
+                         })
+
+    this.theta[this.theta<=0]=lower.limit
+    pi.v[pi.v==0]=lower.limit
+
+    Rcluster.ll(y.mat, this.theta, ppr.m, pi.v, RG, partial=partial)
+}
+
 theta.OSM.rs <- function(parlist) {
     p <- parlist$p
     ## TODO: Note that for POM code, mu is defined as length q-1,
@@ -263,25 +291,6 @@ theta.OSM.rs <- function(parlist) {
     }
 
     theta
-}
-
-## Unpack mu_k and alpha_r from "invect", the vector for optimization,
-## and use them to calculate theta_rc and thus likelihood using simple row
-## clustering model,
-## mu_k - alpha_r (i.e. with no column or column-cluster effects)
-OSM.rs <- function(invect, y.mat, ppr.m, pi.v, RG, partial=FALSE){
-    n=nrow(y.mat)
-    p=ncol(y.mat)
-    q=length(unique(as.vector(y.mat)))
-
-    parlist <- unpack.parvec(invect,model="OSM",submodel="rs",n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
-
-    this.theta <- theta.OSM.rs(parlist)
-
-    this.theta[this.theta<=0]=lower.limit
-    pi.v[pi.v==0]=lower.limit
-
-    Rcluster.ll(y.mat, this.theta, ppr.m, pi.v, RG, partial=partial)
 }
 
 ## Fit simple row clustering model,
@@ -310,8 +319,8 @@ fit.OSM.rs.model <- function(invect, y.mat, RG, pi.init=NULL, maxiter.rs=50, tol
     cat("pi",pi.v,"\n")
 
     ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
-    cat("LLC partial",-OSM.rs(invect,y.mat,ppr.m,pi.v,RG, partial=TRUE),"\n")
-    cat("LLC",-OSM.rs(invect,y.mat,ppr.m,pi.v,RG, partial=FALSE),"\n")
+    cat("LLC partial",-calc.ll(invect,y.mat,model="OSM",submodel="rs",ppr.m,pi.v,RG, partial=TRUE),"\n")
+    cat("LLC",-calc.ll(invect,y.mat,model="OSM",submodel="rs",ppr.m,pi.v,RG, partial=FALSE),"\n")
 
     initvect <- invect
     outvect=invect
@@ -333,8 +342,10 @@ fit.OSM.rs.model <- function(invect, y.mat, RG, pi.init=NULL, maxiter.rs=50, tol
         # M-step:
         #use numerical maximisation
         optim.fit <- optim(par=invect,
-                           fn=OSM.rs,
+                           fn=calc.ll,
                            y.mat=y.mat,
+                           model="OSM",
+                           submodel="rs",
                            ppr.m=ppr.m,
                            pi.v=pi.v,
                            RG=RG,
@@ -343,7 +354,7 @@ fit.OSM.rs.model <- function(invect, y.mat, RG, pi.init=NULL, maxiter.rs=50, tol
                            hessian=F,control=list(maxit=10000))
 
         outvect <- optim.fit$par
-        llc <- -OSM.rs(outvect,y.mat,ppr.m,pi.v,RG, partial=FALSE)
+        llc <- -calc.ll(outvect,y.mat,model="OSM",submodel="rs",ppr.m,pi.v,RG, partial=FALSE)
         #print(abs(invect-outvect))
         #print(outvect)
 
@@ -412,25 +423,6 @@ theta.OSM.rp <- function(parlist) {
     theta
 }
 
-## Unpack mu_k and alpha_r and beta_j from "invect", the vector for optimization,
-## and use them to calculate theta_rc and thus likelihood using row clustering
-## model with column effects but no cluster/colum interaction,
-## mu_k - alpha_r - beta_j
-OSM.rp <- function(invect, y.mat, ppr.m, pi.v, RG, partial=FALSE){
-    n=nrow(y.mat)
-    p=ncol(y.mat)
-    q=length(unique(as.vector(y.mat)))
-
-    parlist <- unpack.parvec(invect,model="OSM",submodel="rp",n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
-
-    this.theta <- theta.OSM.rp(parlist)
-
-    this.theta[this.theta<=0]=lower.limit
-    pi.v[pi.v==0]=lower.limit
-
-    Rcluster.ll(y.mat, this.theta, ppr.m, pi.v, RG, partial=partial)
-}
-
 ## Fit row clustering model with column effects but no interaction,
 ## mu_k - alpha_r - beta_j
 fit.OSM.rp.model <- function(invect, y.mat, RG, pi.init=NULL,
@@ -460,8 +452,8 @@ fit.OSM.rp.model <- function(invect, y.mat, RG, pi.init=NULL,
     cat("pi",pi.v,"\n")
 
     ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
-    cat("LLC partial",-OSM.rp(invect,y.mat,ppr.m,pi.v,RG, partial=TRUE),"\n")
-    cat("LLC",-OSM.rp(invect,y.mat,ppr.m,pi.v,RG, partial=FALSE),"\n")
+    cat("LLC partial",-calc.ll(invect,y.mat,model="OSM",submodel="rp",ppr.m,pi.v,RG, partial=TRUE),"\n")
+    cat("LLC",-calc.ll(invect,y.mat,model="OSM",submodel="rp",ppr.m,pi.v,RG, partial=FALSE),"\n")
 
     initvect <- invect
     outvect=invect
@@ -483,8 +475,10 @@ fit.OSM.rp.model <- function(invect, y.mat, RG, pi.init=NULL,
         # M-step:
         #use numerical maximisation
         optim.fit <- optim(par=invect,
-                           fn=OSM.rp,
+                           fn=calc.ll,
                            y.mat=y.mat,
+                           model="OSM",
+                           submodel="rp",
                            ppr.m=ppr.m,
                            pi.v=pi.v,
                            RG=RG,
@@ -493,7 +487,7 @@ fit.OSM.rp.model <- function(invect, y.mat, RG, pi.init=NULL,
                            hessian=F,control=list(maxit=10000))
 
         outvect <- optim.fit$par
-        llc <- -OSM.rp(outvect,y.mat,ppr.m,pi.v,RG, partial=FALSE)
+        llc <- -calc.ll(outvect,y.mat,model="OSM",submodel="rp",ppr.m,pi.v,RG, partial=FALSE)
         #print(abs(invect-outvect))
         #print(outvect)
 
@@ -562,25 +556,6 @@ theta.OSM.rpi <- function(parlist) {
     theta
 }
 
-## Unpack mu_k and alpha_r and beta_j from "invect", the vector for optimization,
-## and use them to calculate theta_rc and thus likelihood using row clustering
-## model with column effects but no cluster/colum interaction,
-## mu_k - alpha_r - beta_j
-OSM.rpi <- function(invect, y.mat, ppr.m, pi.v, RG, partial=FALSE){
-    n=nrow(y.mat)
-    p=ncol(y.mat)
-    q=length(unique(as.vector(y.mat)))
-
-    parlist <- unpack.parvec(invect,model="OSM",submodel="rpi",n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
-
-    this.theta <- theta.OSM.rpi(parlist)
-
-    # this.theta[this.theta<=0]=lower.limit
-    # pi.v[pi.v==0]=lower.limit
-
-    Rcluster.ll(y.mat, this.theta, ppr.m, pi.v, RG, partial=partial)
-}
-
 ## Fit row clustering model with column effects and interaction,
 ## mu_k - alpha_r - beta_j - gamma_rj
 fit.OSM.rpi.model <- function(invect, y.mat, RG, pi.init=NULL,
@@ -631,8 +606,8 @@ fit.OSM.rpi.model <- function(invect, y.mat, RG, pi.init=NULL,
     cat("pi",pi.v,"\n")
 
     ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
-    cat("LLC partial",-OSM.rpi(invect,y.mat,ppr.m,pi.v,RG, partial=TRUE),"\n")
-    cat("LLC",-OSM.rpi(invect,y.mat,ppr.m,pi.v,RG, partial=FALSE),"\n")
+    cat("LLC partial",-calc.ll(invect,y.mat,model="OSM",submodel="rpi",ppr.m,pi.v,RG, partial=TRUE),"\n")
+    cat("LLC",-calc.ll(invect,y.mat,model="OSM",submodel="rpi",ppr.m,pi.v,RG, partial=FALSE),"\n")
 
     initvect <- invect
     outvect=invect
@@ -654,8 +629,10 @@ fit.OSM.rpi.model <- function(invect, y.mat, RG, pi.init=NULL,
         # M-step:
         #use numerical maximisation
         optim.fit <- optim(par=invect,
-                           fn=OSM.rpi,
+                           fn=calc.ll,
                            y.mat=y.mat,
+                           model="OSM",
+                           submodel="rpi",
                            ppr.m=ppr.m,
                            pi.v=pi.v,
                            RG=RG,
@@ -664,7 +641,7 @@ fit.OSM.rpi.model <- function(invect, y.mat, RG, pi.init=NULL,
                            hessian=F,control=list(maxit=10000))
 
         outvect <- optim.fit$par
-        llc <- -OSM.rpi(outvect,y.mat,ppr.m,pi.v,RG, partial=FALSE)
+        llc <- -calc.ll(outvect,y.mat,model="OSM",submodel="rpi",ppr.m,pi.v,RG, partial=FALSE)
         #print(abs(invect-outvect))
         #print(outvect)
 
