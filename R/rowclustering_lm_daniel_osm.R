@@ -875,7 +875,7 @@ M.step.part2.RowCluster.rRcC1 <- function(parstart2, arraydata2, arrayz2, n2, m2
                         arraydata=arraydata2, arrayz=arrayz2, n=n2, m=m2, q=q2, R=R2, reparC=reparC,
                         fn=Q.Stereo.RowCluster.rRcC1, method=opar$method,
                         control=list(maxit=opar$maxit, reltol=opar$reltol), hessian=opar$hessian)
-        Q <- Q.Stereo.RowCluster.rRcC1.inR(retval$par, arraydata2, n2, m2, q2, R2, matrix(arrayz2,nrow=n2), reparC,verbose = TRUE)
+        Q <- Q.Stereo.RowCluster.rRcC1.inR(retval$par, arraydata2, n2, m2, q2, R2, matrix(arrayz2,nrow=n2), reparC,verbose = FALSE)
         print(paste("After optim, Q =",Q))
     }else
     {
@@ -897,7 +897,7 @@ print(parlist)
     # E-step
     z1 <- E.step.RowCluster.rRcC1(parlist,n1,R1,q1,y.mat1)
     arrayz1 <- as.vector(z1)
-    Q <- Q.Stereo.RowCluster.rRcC1.inR(parstart1,arraydata1, n1, m1, q1, R1, z1, reparC, verbose=TRUE)
+    Q <- Q.Stereo.RowCluster.rRcC1.inR(parstart1,arraydata1, n1, m1, q1, R1, z1, reparC, verbose=FALSE)
     print(paste("Q =",Q))
     # if (sum(is.na(arrayz1)) > 0) #print("Error in the Z vector from RowCluster rRcC1. There are NaN, please change the parameters start values")
 
@@ -1235,7 +1235,11 @@ M.step.part2.RowCluster.rRcm <- function(parstart2, arraydata2, arrayz2, n2, m2,
                         arraydata=arraydata2, arrayz=arrayz2, n=n2, m=m2, q=q2, R=R2, reparC=reparC,
                         fn=Q.Stereo.RowCluster.rRcm, method=opar$method,
                         control=list(maxit=opar$maxit, reltol=opar$reltol), hessian=opar$hessian)
-        Q <- Q.Stereo.RowCluster.rRcm.inR(retval$par, arraydata2, n2, m2, q2, R2, matrix(arrayz2,nrow=n2), reparC,verbose = TRUE)
+        # retval <- optim(par=parstart2[1:(length(parstart2)-1)],
+        #                 arraydata=arraydata2, n=n2, m=m2, q=q2, R=R2, z=matrix(arrayz2,nrow=n2), repar=reparC, verbose=TRUE,
+        #                 fn=Q.Stereo.RowCluster.rRcm.inR, method=opar$method,
+        #                 control=list(maxit=opar$maxit, reltol=opar$reltol, trace=6), hessian=FALSE)
+        Q <- Q.Stereo.RowCluster.rRcm.inR(retval$par, arraydata2, n2, m2, q2, R2, matrix(arrayz2,nrow=n2), reparC,verbose = FALSE)
         print(paste("After optim, Q =",Q))
     }else
     {
@@ -1258,8 +1262,11 @@ run.EM.algorithm.RowCluster.rRcm <- function(parstart1, R1, q1, n1, m1, numpar1,
     # E-step
     z1 <- E.step.RowCluster.rRcm(parlist,n1,R1,q1,y.mat1)
     arrayz1 <- as.vector(z1)
-    Q <- Q.Stereo.RowCluster.rRcm.inR(parstart1,arraydata1, n1, m1, q1, R1, z1, reparC, verbose=TRUE)
+    Q <- Q.Stereo.RowCluster.rRcm.inR(parstart1,arraydata1, n1, m1, q1, R1, z1, reparC, verbose=FALSE)
     print(paste("Q =",Q))
+    logLLC.hat <- logLike.Stereo.RowCluster.rRcm(parstart1, arraydata1, n1, m1, q1, R1, z1, reparC, verbose=F)
+    print(paste("LLC =",logLLC.hat))
+
     # if (sum(is.na(arrayz1)) > 0) #print("Error in the Z vector from RowCluster rRcm. There are NaN, please change the parameters start values")
 
         # M-step
@@ -1606,7 +1613,11 @@ M.step.part2.RowCluster.rRcm.without.interactions <- function(parstart2, arrayda
                         arraydata=arraydata2, arrayz=arrayz2, n=n2, m=m2, q=q2, R=R2, reparC=reparC,
                         fn=Q.Stereo.RowCluster.rRcm.without.interactions, method=opar$method,
                         control=list(maxit=opar$maxit, reltol=opar$reltol), hessian=opar$hessian)
-        Q <- Q.Stereo.RowCluster.rRcm.without.interactions.inR(retval$par, arraydata2, n2, m2, q2, R2, matrix(arrayz2,nrow=n2), reparC,verbose = TRUE)
+        # retval <- optim(par=parstart2[1:(length(parstart2)-1)],
+        #                 arraydata=arraydata2, n=n2, m=m2, q=q2, R=R2, z=matrix(arrayz2,nrow=n2), repar=reparC, verbose=TRUE,
+        #                 fn=Q.Stereo.RowCluster.rRcm.without.interactions.inR, method=opar$method,
+        #                 control=list(maxit=opar$maxit, reltol=opar$reltol, trace=6), hessian=FALSE)
+        Q <- Q.Stereo.RowCluster.rRcm.without.interactions.inR(retval$par, arraydata2, n2, m2, q2, R2, matrix(arrayz2,nrow=n2), reparC,verbose = FALSE)
         print(paste("After optim, Q =",Q))
     }else
     {
@@ -1629,7 +1640,7 @@ run.EM.algorithm.RowCluster.rRcm.without.interactions <- function(parstart1, R1,
     # E-step
     z1 <- E.step.RowCluster.rRcm.without.interactions(parlist,n1,R1,q1,y.mat1)
     arrayz1 <- as.vector(z1)
-    Q <- Q.Stereo.RowCluster.rRcm.without.interactions.inR(parstart1,arraydata1, n1, m1, q1, R1, z1, reparC, verbose=TRUE)
+    Q <- Q.Stereo.RowCluster.rRcm.without.interactions.inR(parstart1,arraydata1, n1, m1, q1, R1, z1, reparC, verbose=FALSE)
     print(paste("Q =",Q))
     # if (sum(is.na(arrayz1)) > 0) #print("Error in the Z vector from RowCluster rRcm without interact. There are NaN, please change the parameters start values")
 
