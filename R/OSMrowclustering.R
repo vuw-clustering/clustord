@@ -1,12 +1,18 @@
 lower.limit <- 0.00001
 
-#' Row clustering using Ordered Stereotype Models.
+#' Row clustering using Ordered Stereotype Models or Proportional Odds Models.
 #'
-#' All parameters' initial values are set by this package, users need to enter their chosen formula:
+#' All parameters' initial values are set by this package, users need to enter their chosen formula and model:
+#' For Ordered Stereotype -- model = "OSM":
 #' Y~row: Log(P(Y=k)/P(Y=1))=mu_k-phi_k*alpha_r
 #' Y~row+column: Log(P(Y=k)/P(Y=1))=mu_k-phi_k*(alpha_r+beta_j)
 #' Y~row+column+row:column, or Y~row*column: Log(P(Y=k)/P(Y=1))=mu_k-phi_k(alpha_r+beta_j+gamma_rj)
-#' @param osmformula: model formula.
+#' For Proportional Odds -- model = "POM":
+#' Y~row: Logit=mu_k-alpha_r
+#' Y~row+column: Logit=mu_k-alpha_r+beta_j
+#' Y~row+column+row:column, or Y~row*column: Logit=mu_k-alpha_r+beta_j+gamma_rj
+#' @param formula: model formula.
+#' @param model: "OSM" for Ordered Stereotype Model or "POM" for Proportional Odds Model.
 #' @param nclus.row: number of row clustering groups.
 #' @param data: data frame with three columns, which must be in the correct order.
 #'     First column is response, second column is subject, and last column is VariableNameion.
@@ -46,17 +52,18 @@ lower.limit <- 0.00001
 #'     `ppr`, the posterior probabilities of membership of the row clusters,
 #'     and `RowClusters`, the assigned row clusters based on maximum posterior probability.
 #' @examples
-#' osmrowclustering("Y~row",3,data),indicates model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*alpha_r with 3 row clustering groups
-#' osmrowclustering("Y~row+column",3,data),indicates model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*(alpha_r+beta_j) with 3 row clustering groups
-#' osmrowclustering("Y~row+column+row:column",3,data),indicates model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*(alpha_r+beta_j+gamma_rj) with 3 row clustering groups
+#' rowclustering("Y~row",model="OSM",3,data),indicates model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*alpha_r with 3 row clustering groups
+#' rowclustering("Y~row+column",3,data),indicates model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*(alpha_r+beta_j) with 3 row clustering groups
+#' rowclustering("Y~row+column+row:column",model="POM,2,data),indicates model Logit=mu_k-alpha_r-beta_j-gamma_rj with 2 row clustering groups
 #' @export
-osmrowclustering <- function(osmformula,
-                             nclus.row,
-                             data=NULL,y.mat=NULL,
-                             initvect=NULL,
-                             pi.init=NULL,
-                             EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
-                             use.alternative.start=TRUE){
+rowclustering <- function(formula,
+                          model,
+                          nclus.row,
+                          data=NULL,y.mat=NULL,
+                          initvect=NULL,
+                          pi.init=NULL,
+                          EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
+                          use.alternative.start=TRUE){
 
     if(is.null(y.mat)) {
         if (!is.null(data)) {
@@ -68,11 +75,12 @@ osmrowclustering <- function(osmformula,
 
     ## Replace defaults with user-provided values, so that any control parameters
     ## the user did not specify are not left blank:
-    default.EM.control <- as.list(args(osmrowclustering))$EM.control
+    default.EM.control <- as.list(args(rowclustering))$EM.control
     EM.control <- replacedefaults(default.EM.control, EM.control)
 
-    model <- "OSM"
-    submodel <- switch(osmformula,
+    print(paste("EM algorithm for",model))
+
+    submodel <- switch(formula,
                        "Y~row"="rs",
                        "Y~row+column"="rp",
                        "Y~row+column+row:column"="rpi",
@@ -140,6 +148,7 @@ generate.start <- function(y.mat, model, submodel, RG, initvect=NULL, pi.init=NU
                           },
                           "rpi"={
                               p <- ncol(y.mat)
+
                               ### TODO: Original OSM code has sum to zero constraint on beta, unlike
                               ### POM which has beta_1 = 0, so feed in only the first p-1 elements
                               ### of the initial beta
@@ -148,6 +157,38 @@ generate.start <- function(y.mat, model, submodel, RG, initvect=NULL, pi.init=NU
                               gamma.init <- rep(0.1,(RG-1)*(p-1))
 
                               initvect <- c(mu.init,phi.init,alpha.init,beta.init,gamma.init)
+                          })
+               },
+               "POM"={
+                   ## TODO: POM, unlike OSM, imposes alpha1=0 constraint, and then
+                   ## only the 2,...,RG elements of alpha are passed in to initvect
+                   alpha.kmeans=alpha.kmeans-alpha.kmeans[1]
+                   mu.init <- PO.sp.out$mu
+                   alpha.init <- alpha.kmeans[-1]
+
+                   switch(submodel,
+                          "rs"={
+                              initvect <- c(mu.init,alpha.init)
+                          },
+                          "rp"={
+                              ## TODO: already have PO.sp.out$beta equal to only the
+                              ## first p-1 elements of the original PO.sp.out$coef,
+                              ## so now just pass those elements in as part of initvect
+                              ## and the beta1=0 constraint for POM will be added
+                              ## when the vector is unpacked
+                              beta.init <- PO.sp.out$beta
+                              initvect <- c(mu.init,alpha.init,beta.init)
+                          },
+                          "rpi"={
+                              p <- ncol(y.mat)
+                              ## TODO: already have PO.sp.out$beta equal to only the
+                              ## first p-1 elements of the original PO.sp.out$coef,
+                              ## so now just pass those elements in as part of initvect
+                              ## and the beta1=0 constraint for POM will be added
+                              ## when the vector is unpacked
+                              beta.init=PO.sp.out$beta
+                              gamma.init=rep(0.1,(RG-1)*(p-1))
+                              initvect=c(mu.init,alpha.init,beta.init,gamma.init)
                           })
                })
     }
@@ -219,6 +260,61 @@ generate.start <- function(y.mat, model, submodel, RG, initvect=NULL, pi.init=NU
                                   cat("=== Used RS and RP models to find starting points ===\n")
                               }
                           })
+               },
+               "POM"={
+                   switch(submodel,
+                          "rs"={
+                              ## No need to make any further changes to pi.init
+                          },
+                          "rp"={
+                              startEM.control <- list(EMcycles=EM.control$startEMcycles,
+                                                      EMstoppingpar=EM.control$EMstoppingpar)
+
+                              cat("Fitting RS model to obtain starting values for pi.v\n")
+                              POM.rs.out <- run.EM(invect=initvect[1:(q-1+RG)],
+                                                   y.mat, model="POM",submodel="rs",
+                                                   pi.v=pi.init,
+                                                   EM.control=startEM.control)
+                              cat("=== End of RS model fitting ===\n")
+
+                              pi.init <- POM.rs.out$pi
+                          },
+                          "rpi"={
+                              startEM.control <- list(EMcycles=EM.control$startEMcycles,
+                                                      EMstoppingpar=EM.control$EMstoppingpar)
+                              if (use.alternative.start) {
+
+                                  POM.rp.out <- run.EM(invect=initvect[1:(q-1+RG-1+p-1)],
+                                                       y.mat, model="POM",submodel="rp",
+                                                       pi.v=pi.init, EM.control=startEM.control)
+                                  cat("=== End of RP model fitting ===\n")
+
+                                  ppr.m=POM.rp.out$ppr
+                                  pi.init=POM.rp.out$pi
+                              } else {
+                                  PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
+                                  PO.ss.out$mu <- PO.ss.out$zeta
+
+                                  VariableName <- as.factor(rep((1:ncol(y.mat)),each=nrow(y.mat)))
+                                  PO.sp.out <- MASS::polr(as.factor(y.mat)~VariableName)
+                                  PO.sp.out$beta <- PO.sp.out$coef[1:(ncol(y.mat)-1)] #Individual column effect
+
+                                  PO.sp.out$beta <- c(0,PO.sp.out$coef[1:(ncol(y.mat)-1)])
+
+                                  POM.rs.out <- run.EM(invect=c(PO.ss.out$mu,alpha.kmeans[-RG]),
+                                                       y.mat, model="POM",submodel="rs",
+                                                       pi.v=pi.init, EM.control=startEM.control)
+                                  POM.rp.out <- run.EM(invect=c(POM.rs.out$parlist.out$mu,
+                                                                POM.rs.out$parlist.out$alpha[-RG],
+                                                                PO.sp.out$beta),
+                                                       y.mat, model="POM",submodel="rp",
+                                                       pi.v=pi.init, EM.control=startEM.control)
+
+                                  ppr.m <- POM.rp.out$ppr
+                                  pi.init <- POM.rp.out$pi
+                                  cat("=== Used RS and RP models to find starting points ===\n")
+                              }
+                          })
                })
     }
 
@@ -274,15 +370,27 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, constraint.sum.z
                       })
            },
            "POM"={
+               mu=(invect[1:(q-1)])
                switch(submodel,
                       "rs"={
-
+                          alpha=c(0,invect[(q):(q-1+RG-1)])
+                          list(n=n,p=p,mu=mu,alpha=alpha)
                       },
                       "rp"={
-
+                          alpha=c(0,invect[(q):(q-1+RG-1)])
+                          beta=c(0,invect[(q-1+RG-1+1):(q-1+RG-1+p-1)])
+                          list(n=n,p=p,mu=mu,alpha=alpha,beta=beta)
                       },
                       "rpi"={
+                          alpha=c(0,invect[(q):(q+RG-2)])
+                          beta=c(0,invect[(q-1+RG-1+1):(q-1+RG-1+p-1)])
 
+                          gamma=c(invect[(q-1+RG-1+p-1+1):(q-1+RG-1+p-1+(RG-1)*(p-1))])
+                          gamma=matrix(gamma,nrow=RG-1,ncol=p-1,byrow=T)
+                          gamma <- cbind(gamma,-rowSums(gamma))
+                          gamma <- rbind(gamma,-colSums(gamma))
+
+                          list(n=n,p=p,mu=mu,alpha=alpha,beta=beta,gamma=gamma)
                       })
            })
 }
@@ -328,6 +436,7 @@ run.EM <- function(invect, y.mat, model, submodel, pi.v,
 
     parlist.in <- unpack.parvec(invect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
     if (any(sapply(parlist.in,function(elt) any(is.na(elt))))) stop("Error unpacking parameters for model.")
+    if (any(sapply(parlist.in,function(elt) is.null(elt)))) stop("Error unpacking parameters for model.")
 
     theta.arr <- calc.theta(parlist.in,model=model,submodel=submodel)
 
@@ -474,6 +583,97 @@ theta.OSM.rpi <- function(parlist) {
     for (r in 1:RG){
         ## Normalize theta values
         theta[r,1:p,] <- theta[r,1:p,]/rowSums(theta[r,1:p,])
+    }
+
+    theta
+}
+
+theta.POFM.rs <- function(parlist) {
+    p <- parlist$p
+    mu <- parlist$mu
+    alpha <- parlist$alpha
+    q <- length(mu) + 1
+    RG <- length(alpha)
+
+    theta <- array(NA,c(RG,p,q))
+    for(r in 1:RG){
+        theta[r,1:p,1] <- exp(mu[1]-alpha[r])/(1+exp(mu[1]-alpha[r]))
+    }
+    for(r in 1:RG){
+        for(k in 2:(q-1)){
+            theta[r,1:p,k] <- exp(mu[k]-alpha[r])/(1+exp(mu[k]-alpha[r])) -
+                exp(mu[k-1]-alpha[r])/(1+exp(mu[k-1]-alpha[r]))
+        }
+    }
+    for(r in 1:RG){
+        theta[r,1:p,q] <- 1-sum(theta[r,1,1:(q-1)])
+    }
+
+    theta
+}
+
+theta.POFM.rp <- function(parlist) {
+    mu <- parlist$mu
+    alpha <- parlist$alpha
+    beta <- parlist$beta
+
+    q <- length(mu) + 1
+    RG <- length(alpha)
+    p <- length(beta)
+
+    theta <- array(NA,c(RG,p,q))
+    for(r in 1:RG){
+        for(j in 1:p){
+            theta[r,j,1]=exp(mu[1]-alpha[r]-beta[j])/(1+exp(mu[1]-alpha[r]-beta[j]))
+        }
+    }
+    for(r in 1:RG){
+        for(j in 1:p){
+            for(k in 2:(q-1)){
+                theta[r,j,k]=exp(mu[k]-alpha[r]-beta[j])/(1+exp(mu[k]-alpha[r]-beta[j])) -
+                    exp(mu[k-1]-alpha[r]-beta[j])/(1+exp(mu[k-1]-alpha[r]-beta[j]))
+            }
+        }
+    }
+    for(r in 1:RG){
+        for(j in 1:p){
+            theta[r,j,q]=1-sum(theta[r,j,1:(q-1)])
+        }
+    }
+
+    theta
+}
+
+theta.POFM.rpi <- function(parlist) {
+    mu <- parlist$mu
+    alpha <- parlist$alpha
+    beta <- parlist$beta
+    gamma <- parlist$gamma
+
+    q <- length(mu) + 1
+    RG <- length(alpha)
+    p <- length(beta)
+
+    theta <- array(NA,c(RG,p,q))
+
+    for(r in 1:RG){
+        for(j in 1:p){
+            theta[r,j,1]=exp(mu[1]-alpha[r]-beta[j]-gamma[r,j])/(1+exp(mu[1]-alpha[r]-beta[j]-gamma[r,j]))
+        }
+    }
+
+    for(r in 1:RG){
+        for(j in 1:p){
+            for(k in 2:(q-1)){
+                theta[r,j,k]=exp(mu[k]-alpha[r]-beta[j]-gamma[r,j])/(1+exp(mu[k]-alpha[r]-beta[j]-gamma[r,j])) -
+                    exp(mu[k-1]-alpha[r]-beta[j]-gamma[r,j])/(1+exp(mu[k-1]-alpha[r]-beta[j]-gamma[r,j]))
+            }
+        }
+    }
+    for(r in 1:RG){
+        for(j in 1:p){
+            theta[r,j,q]=1-sum(theta[r,j,1:(q-1)])
+        }
     }
 
     theta
