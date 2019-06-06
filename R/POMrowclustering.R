@@ -10,9 +10,9 @@ lower.limit <- 0.00001
 #' @param pomformula: indicates bi-clustering models' formula.
 #' @param nclus.row: number of row clustering groups.
 #' @param data: data frame with three columns, which must be in the correct order.
-#'     First column is response, second column is subject, and last column is VariableNameion.
+#'     First column is response, second column is subject, and last column is VariableName.
 #' @param y.mat: can be provided as an input instead of data, y.mat is a data
-#'     matrix with named columns corresponding to VariableNameions, and rows
+#'     matrix with named columns corresponding to VariableNames, and rows
 #'     corresponding to subjects.
 #' @param maxiter.rpi: (default 50) maximum number of iterations for outer EM
 #'     algorithm for rowclustering with interactions.
@@ -61,8 +61,8 @@ pomrowclustering <- function(pomformula,
 
     if(is.null(y.mat)) {
         if (!is.null(data)) {
-            colnames(data)<-c("y","subject","VariableNameion")
-            y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$VariableNameion))
+            colnames(data)<-c("y","subject","VariableName")
+            y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$VariableName))
         } else stop("y.mat and data cannot both be null. Please provide either a data matrix or a data frame.")
     }
 
