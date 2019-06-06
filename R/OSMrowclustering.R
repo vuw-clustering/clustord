@@ -5,7 +5,7 @@ lower.limit <- 0.00001
 #' All parameters' initial values are set by this package, users need to enter their chosen formula:
 #' Y~row: Logit=mu_k-phi_k*alpha_r
 #' Y~row+column: Logit=mu_k-phi_k*(alpha_r+beta_j)
-#' Y~row+column+row:column: Logit=mu_k-phi_k(alpha_r+beta_j+gamma_rj)
+#' Y~row+column+row:column, or Y~row*column: Logit=mu_k-phi_k(alpha_r+beta_j+gamma_rj)
 #' @param osmformula: model formula.
 #' @param nclus.row: number of row clustering groups.
 #' @param data: data frame with three columns, which must be in the correct order.
@@ -55,9 +55,7 @@ osmrowclustering <- function(osmformula,
                              data=NULL,y.mat=NULL,
                              initvect=NULL,
                              pi.init=NULL,
-                             maxiter.rpi=50, tol.rpi=1e-4,
-                             maxiter.rp=50, tol.rp=1e-4,
-                             maxiter.rs=20, tol.rs=1e-4,
+                             EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
                              use.alternative.start=TRUE){
 
     if(is.null(y.mat)) {
@@ -68,112 +66,175 @@ osmrowclustering <- function(osmformula,
     }
     if (!is.null(pi.init) & (length(pi.init) != nclus.row | sum(pi.init) != 1)) stop("pi.init must be the same length as the number of row clusters, and must add up to 1")
 
+    model <- "OSM"
+    submodel <- switch(osmformula,
+                       "Y~row"="rs",
+                       "Y~row+column"="rp",
+                       "Y~row+column+row:column"="rpi",
+                       "Y~row*column"="rpi",
+                       stop('Error in osmformula'))
+
     RG <- nclus.row
-    ## TODO: not good to set q equal to LENGTH of unique(y.mat) instead of to
-    ## the MAXIMUM value of unique(y.mat)
-    q <- length(unique(as.vector(y.mat)))
+
+    if (is.null(initvect) | is.null(pi.init)) {
+        ## generate.start will keep using whichever of initvect and pi.init is not null
+        start.par <- generate.start(y.mat, model=model, submodel=submodel, RG=RG,
+                                    initvect=initvect, pi.init=pi.init,
+                                    use.alternative.start=use.alternative.start)
+        initvect <- start.par$initvect
+        pi.init <- start.par$pi.init
+    }
+
+    run.EM(invect=initvect, y.mat, model=model, submodel=submodel, pi.v=pi.init, EM.control=EM.control)
+}
+
+generate.start <- function(y.mat, model, submodel, RG, initvect=NULL, pi.init=NULL,
+                           EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
+                           use.alternative.start=TRUE) {
 
     if (is.null(initvect)) {
-    PO.sp.out <- MASS::polr(as.factor(y.mat)~1)
-    PO.sp.out$mu=PO.sp.out$zeta
+        ## TODO: not good to set q equal to LENGTH of unique(y.mat) instead of to
+        ## the MAXIMUM value of unique(y.mat)
+        q <- length(unique(as.vector(y.mat)))
 
-    VariableName=as.factor(rep((1:ncol(y.mat)),each=nrow(y.mat)))
-    PO.sp.out <- MASS::polr(as.factor(y.mat)~VariableName)
-    PO.sp.out$mu=PO.sp.out$zeta
-    PO.sp.out$beta=PO.sp.out$coef[1:(ncol(y.mat)-1)] #Individual column effect
+        PO.sp.out <- MASS::polr(as.factor(y.mat)~1)
+        PO.sp.out$mu=PO.sp.out$zeta
 
-    kmeans.data=kmeans(y.mat,centers=RG,nstart=100)
-    pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-    alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
-    ## TODO: code for OSM models applies alpha sum to zero constraint, not
-    ## alpha1=0 constraint -- UNLIKE POM code -- so DON'T set alpha1 to zero here.
+        VariableName=as.factor(rep((1:ncol(y.mat)),each=nrow(y.mat)))
+        PO.sp.out <- MASS::polr(as.factor(y.mat)~VariableName)
+        PO.sp.out$mu=PO.sp.out$zeta
+        PO.sp.out$beta=PO.sp.out$coef[1:(ncol(y.mat)-1)] #Individual column effect
 
+        kmeans.data=kmeans(y.mat,centers=RG,nstart=100)
+        pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
+        alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
+        ## TODO: code for OSM models applies alpha sum to zero constraint, not
+        ## alpha1=0 constraint -- UNLIKE POM code -- so DON'T set alpha1 to zero here.
+
+        switch(model,
+               "OSM"={
+                   switch(submodel,
+                          "rs"={
+                              mu.init=PO.sp.out$mu
+                              phi.init <- seq(from=runif(1,min=0.05,max=0.5),
+                                              to=runif(1,min=0.6,max=0.95), length.out = (q-2))
+
+                              ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
+                              ### POM which has alpha_1 = 0, so feed in only the first RG-1 elements
+                              ### of the initial alpha
+                              alpha.init <- c(alpha.kmeans[-RG])
+                              initvect <- c(mu.init, phi.init, alpha.init)
+                          },
+                          "rp"={
+                              mu.init=PO.sp.out$mu
+                              phi.init <- seq(from=runif(1,min=0.05,max=0.5),
+                                              to=runif(1,min=0.6,max=0.95), length.out = (q-2))
+
+                              ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
+                              ### POM which has alpha_1 = 0, so feed in only the first RG-1 elements
+                              ### of the initial alpha
+                              alpha.init <- c(alpha.kmeans[-RG])
+
+                              ### TODO: Original OSM code has sum to zero constraint on beta, unlike
+                              ### POM which has beta_1 = 0, so feed in only the first p-1 elements
+                              ### of the initial beta
+                              beta.init <- c(PO.sp.out$beta)
+
+                              initvect <- c(mu.init, phi.init, alpha.init, beta.init)
+                          },
+                          "rpi"={
+                              p <- ncol(y.mat)
+                              mu.init <- PO.sp.out$mu
+                              phi.init <- seq(from=runif(1,min=0.05,max=0.5),
+                                              to=runif(1,min=0.6,max=0.95), length.out = (q-2))
+
+                              ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
+                              ### POM which has alpha_1 = 0, so feed in only the first RG-1 elements
+                              ### of the initial alpha
+                              alpha.init <- c(alpha.kmeans[-RG])
+                              ### TODO: Original OSM code has sum to zero constraint on beta, unlike
+                              ### POM which has beta_1 = 0, so feed in only the first p-1 elements
+                              ### of the initial beta
+                              beta.init <- c(PO.sp.out$beta)
+
+                              gamma.init <- rep(0.1,(RG-1)*(p-1))
+
+                              initvect <- c(mu.init,phi.init,alpha.init,beta.init,gamma.init)
+                          })
+               })
     }
 
-    if(osmformula=="Y~row"){
-
-        if (is.null(initvect)) {
-        mu.init=PO.sp.out$mu
-        phi.init <- seq(from=runif(1,min=0.05,max=0.5),
-                        to=runif(1,min=0.6,max=0.95), length.out = (q-2))
-
-        ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-        ### POM which has alpha_1 = 0, so feed in only the first RG-1 elements
-        ### of the initial alpha
-        alpha.init <- c(alpha.kmeans[-RG])
-        invect <- c(mu.init, phi.init, alpha.init)
+    if (is.null(pi.init)) {
+        if (!is.null(pi.kmeans))
+        {
+            pi.init <- pi.kmeans
         } else {
-            invect <- initvect
+            pi.init <- runif(RG-1,0,1/RG)
+            pi.init <- c(pi.init,1-sum(pi.init))
         }
+        switch(model,
+               "OSM"={
+                   switch(submodel,
+                          "rs"={
+                              ## No need to make any further changes to pi.init
+                          },
+                          "rp"={
+                              startEM.control <- list(EMcycles=EM.control$startEMcycles,
+                                                      EMstoppingpar=EM.control$EMstoppingpar)
 
-        if (is.null(pi.init)) pi.init <- pi.kmeans
+                              cat("Fitting RS model to obtain starting values for pi.v\n")
+                              OSM.rs.out <- run.EM(invect=initvect[1:(q-1+q-2+RG)],
+                                                   y.mat, model="OSM",submodel="rs",
+                                                   pi.v=pi.init,
+                                                   EM.control=startEM.control)
+                              cat("=== End of RS model fitting ===\n")
 
-        fit.OSM.rs.model(invect, y.mat, RG, pi.init=pi.init,
-                         maxiter.rs=maxiter.rs, tol.rs=tol.rs)
+                              pi.init <- OSM.rs.out$pi
+                          },
+                          "rpi"={
+                              startEM.control <- list(EMcycles=EM.control$startEMcycles,
+                                                      EMstoppingpar=EM.control$EMstoppingpar)
+                              if (use.alternative.start) {
 
-    } else if(osmformula=="Y~row+column"){
+                                  OSM.rp.out <- run.EM(invect=initvect[1:(q-1+q-2+RG-1+p-1)],
+                                                       y.mat, model="OSM",submodel="rp",
+                                                       pi.v=pi.init, EM.control=startEM.control)
+                                  cat("=== End of RP model fitting ===\n")
 
-        if (is.null(initvect)) {
-            mu.init=PO.sp.out$mu
-            phi.init <- seq(from=runif(1,min=0.05,max=0.5),
-                            to=runif(1,min=0.6,max=0.95), length.out = (q-2))
+                                  ppr.m=OSM.rp.out$ppr
+                                  pi.init=OSM.rp.out$pi
+                              } else {
+                                  PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
+                                  PO.ss.out$mu <- PO.ss.out$zeta
 
-            ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-            ### POM which has alpha_1 = 0, so feed in only the first RG-1 elements
-            ### of the initial alpha
-            alpha.init <- c(alpha.kmeans[-RG])
-            ### TODO: Original OSM code has sum to zero constraint on beta, unlike
-            ### POM which has beta_1 = 0, so feed in only the first p-1 elements
-            ### of the initial beta
-            beta.init <- c(PO.sp.out$beta,-sum(PO.sp.out$beta))
+                                  VariableName <- as.factor(rep((1:ncol(y.mat)),each=nrow(y.mat)))
+                                  PO.sp.out <- MASS::polr(as.factor(y.mat)~VariableName)
+                                  PO.sp.out$beta <- PO.sp.out$coef[1:(ncol(y.mat)-1)] #Individual column effect
 
-            invect <- c(mu.init, phi.init, alpha.init, beta.init)
-        } else {
-            invect <- initvect
-        }
+                                  PO.sp.out$beta <- c(0,PO.sp.out$coef[1:(ncol(y.mat)-1)])
 
-        ## When fitting the RP model, feed in as parameter starting values the
-        ## outputs of kmeans, but the RP fitting function will also calculate
-        ## starting values for ppr.m and pi.v based on fitting the RS model
-        fit.OSM.rp.model(invect, y.mat, RG, pi.init=pi.init,
-                         maxiter.rp=maxiter.rp, tol.rp=tol.rp,
-                         maxiter.rs=maxiter.rs, tol.rs=tol.rs)
+                                  phi.init <- seq(from=runif(1,min=0.05,max=0.5),
+                                                  to=runif(1,min=0.6,max=0.95), length.out = (q-2))
 
-    } else if(osmformula=="Y~row+column+row:column"){
+                                  OSM.rs.out <- run.EM(invect=c(PO.ss.out$mu,phi.init,alpha.kmeans[-RG]),
+                                                       y.mat, model="OSM",submodel="rs",
+                                                       pi.v=pi.init, EM.control=startEM.control)
+                                  OSM.rp.out <- run.EM(invect=c(OSM.rs.out$parlist.out$mu,
+                                                                phi.init,
+                                                                OSM.rs.out$parlist.out$alpha[-RG],
+                                                                PO.sp.out$beta),
+                                                       y.mat, model="OSM",submodel="rp",
+                                                       pi.v=pi.init, EM.control=startEM.control)
 
-        if (is.null(initvect)) {
-            p <- ncol(y.mat)
-            mu.init <- PO.sp.out$mu
-
-            ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-            ### POM which has alpha_1 = 0, so feed in only the first RG-1 elements
-            ### of the initial alpha
-            alpha.init <- c(alpha.kmeans[-RG])
-            ### TODO: Original OSM code has sum to zero constraint on beta, unlike
-            ### POM which has beta_1 = 0, so feed in only the first p-1 elements
-            ### of the initial beta
-            beta.init <- c(PO.sp.out$beta,-sum(PO.sp.out$beta))
-
-            gamma.init <- rep(0,(RG-1)*(p-1))
-
-            invect <- c(mu.init,alpha.init,beta.init,gamma.init)
-        } else {
-            invect <- initvect
-        }
-
-        ## When fitting the RPI model, feed in as parameter starting values the
-        ## outputs of kmeans, but the RPI fitting function will also calculate
-        ## starting values for ppr.m and pi.v based on fitting the RS model and
-        ## then the RP model
-        fit.OSM.rpi.model(invect, y.mat, RG, pi.init=pi.init,
-                          maxiter.rpi=maxiter.rpi, tol.rpi=tol.rpi,
-                          maxiter.rp=maxiter.rp, tol.rp=tol.rp,
-                          maxiter.rs=maxiter.rs, tol.rs=tol.rs,
-                          use.alternative.start=use.alternative.start)
+                                  ppr.m <- OSM.rp.out$ppr
+                                  pi.init <- OSM.rp.out$pi
+                                  cat("=== Used RS and RP models to find starting points ===\n")
+                              }
+                          })
+               })
     }
-    else {
-        stop('Error in osmformula or input variable ')
-    }
+
+    list(initvect=initvect, pi.init=pi.init)
 }
 
 unpack.parvec <- function(invect, model, submodel, n, p, q, RG, constraint.sum.zero=TRUE) {
@@ -238,6 +299,22 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, constraint.sum.z
            })
 }
 
+calc.theta <- function(parlist, model, submodel) {
+    switch(model,
+           "OSM"={
+               switch(submodel,
+                      "rs"=theta.OSM.rs(parlist),
+                      "rp"=theta.OSM.rp(parlist),
+                      "rpi"=theta.OSM.rpi(parlist))
+           },
+           "POM"={
+               switch(submodel,
+                      "rs"=theta.POFM.rs(parlist),
+                      "rp"=theta.POFM.rp(parlist),
+                      "rpi"=theta.POFM.rpi(parlist))
+           })
+}
+
 calc.ll <- function(invect, y.mat, model, submodel, ppr.m, pi.v, RG, partial=FALSE) {
     n=nrow(y.mat)
     p=ncol(y.mat)
@@ -246,24 +323,90 @@ calc.ll <- function(invect, y.mat, model, submodel, ppr.m, pi.v, RG, partial=FAL
     parlist <- unpack.parvec(invect,model=model,submodel=submodel,
                              n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
 
-    this.theta <- switch(model,
-                         "OSM"={
-                            switch(submodel,
-                                   "rs"=theta.OSM.rs(parlist),
-                                   "rp"=theta.OSM.rp(parlist),
-                                   "rpi"=theta.OSM.rpi(parlist))
-                         },
-                         "POM"={
-                             switch(submodel,
-                                    "rs"=theta.POFM.rs(parlist),
-                                    "rp"=theta.POFM.rp(parlist),
-                                    "rpi"=theta.POFM.rpi(parlist))
-                         })
+    this.theta <- calc.theta(parlist,model=model,submodel=submodel)
 
     this.theta[this.theta<=0]=lower.limit
     pi.v[pi.v==0]=lower.limit
 
     Rcluster.ll(y.mat, this.theta, ppr.m, pi.v, RG, partial=partial)
+}
+
+run.EM <- function(invect, y.mat, model, submodel, pi.v,
+                   EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10)) {
+    n=nrow(y.mat)
+    p=ncol(y.mat)
+    q=length(unique(as.vector(y.mat)))
+    RG=length(pi.v)
+
+    parlist.in <- unpack.parvec(invect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
+    if (any(sapply(parlist.in,function(elt) any(is.na(elt))))) stop("Error unpacking parameters for model.")
+
+    theta.arr <- calc.theta(parlist.in,model=model,submodel=submodel)
+
+    initvect <- invect
+    outvect=invect
+    # Run the EM cycle:
+    iter=1
+
+    while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>EM.control$EMstoppingpar)))&(iter<=EM.control$EMcycles))
+    {
+        # E-step - Update posterior probabilities
+        ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
+
+        ## Now set any NA values in the posterior probabilities matrix to 0
+        ppr.m[is.na(ppr.m)] <- 0
+
+        pi.v <- colMeans(ppr.m)
+
+        invect=outvect
+        # M-step:
+        #use numerical maximisation
+        optim.fit <- optim(par=invect,
+                           fn=calc.ll,
+                           y.mat=y.mat,
+                           model=model,
+                           submodel=submodel,
+                           ppr.m=ppr.m,
+                           pi.v=pi.v,
+                           RG=RG,
+                           partial=TRUE,
+                           method="L-BFGS-B",
+                           hessian=F,control=list(maxit=10000))
+
+        outvect <- optim.fit$par
+        llc <- -calc.ll(outvect,y.mat,model=model,submodel=submodel,ppr.m,pi.v,RG, partial=FALSE)
+
+        parlist.out <- unpack.parvec(outvect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
+        theta.arr <- calc.theta(parlist.out,model=model,submodel=submodel)
+
+        ## Report the current incomplete-data log-likelihood, which is the
+        ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
+        ## of the output of optim
+        # if (iter == 1 | iter%%5 == 0) cat(paste(toupper(submodel),'model iter=',iter, ' log.like=', llc ,'\n'))
+        cat(paste(toupper(submodel),'model iter=',iter, ' partial log.like=', -optim.fit$value ,'\n'))
+        cat(paste(toupper(submodel),'model iter=',iter, ' log.like=', llc ,'\n'))
+        cat("parlist.out\n")
+        print(parlist.out)
+        cat("pi",pi.v,"\n")
+        iter=iter+1
+    }
+
+    # Find cluster groupings:
+    Rclus <- assignments(ppr.m)
+
+    # Save results:
+    logl <- Rcluster.Incll(y.mat, theta.arr, pi.v, RG)
+    npar <- q+2*RG-3
+    criteria <- calc.criteria(logl, llc, npar, n, p)
+    out1 <- c(n, p, logl, llc, npar, RG)
+    names(out1) <- c("n","p","Final.ll","Final.llc","npar","R")
+    list("info"=out1,
+         "criteria"=unlist(criteria),
+         "initvect"=initvect,
+         "parlist.out"=parlist.out,
+         "pi"=pi.v,
+         "ppr"=ppr.m,
+         "RowClusters"=Rclus)
 }
 
 theta.OSM.rs <- function(parlist) {
@@ -290,108 +433,6 @@ theta.OSM.rs <- function(parlist) {
     }
 
     theta
-}
-
-## Fit simple row clustering model,
-## mu_k - alpha_r (i.e. with no column or column-cluster effects)
-fit.OSM.rs.model <- function(invect, y.mat, RG, pi.init=NULL, maxiter.rs=50, tol.rs=1e-4){
-    n=nrow(y.mat)
-    p=ncol(y.mat)
-    q=length(unique(as.vector(y.mat)))
-    if (is.null(pi.init)) {
-        pi.v <- runif(RG-1,0,1/RG)
-        pi.v <- c(pi.v,1-sum(pi.v))
-    } else {
-        if (sum(pi.init) != 1) stop("pi.init must add up to 1.")
-        pi.v <- pi.init
-    }
-    #plot(rep(0,RG),pi.v,xlim=c(0,500),ylim=c(0,1))
-    ppr.m=matrix(NA,n,RG)
-    theta.arr=array(1, c(RG,p,q))
-
-    parlist.in <- unpack.parvec(invect,model="OSM",submodel="rs",n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
-
-    theta.arr <- theta.OSM.rs(parlist.in)
-
-    cat("Initial parameter values\n")
-    print(parlist.in)
-    cat("pi",pi.v,"\n")
-
-    ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
-    cat("LLC partial",-calc.ll(invect,y.mat,model="OSM",submodel="rs",ppr.m,pi.v,RG, partial=TRUE),"\n")
-    cat("LLC",-calc.ll(invect,y.mat,model="OSM",submodel="rs",ppr.m,pi.v,RG, partial=FALSE),"\n")
-
-    initvect <- invect
-    outvect=invect
-    # Run the EM cycle:
-    iter=1
-
-    while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>tol.rs)))&(iter<maxiter.rs))
-    {
-        # E-step - Update posterior probabilities
-        ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
-
-        ## Now set any NA values in the posterior probabilities matrix to 0
-        ppr.m[is.na(ppr.m)] <- 0
-
-        pi.v <- colMeans(ppr.m)
-
-        #point(rep(iter,RG),pi.v,pch=1,col="black")
-        invect=outvect
-        # M-step:
-        #use numerical maximisation
-        optim.fit <- optim(par=invect,
-                           fn=calc.ll,
-                           y.mat=y.mat,
-                           model="OSM",
-                           submodel="rs",
-                           ppr.m=ppr.m,
-                           pi.v=pi.v,
-                           RG=RG,
-                           partial=TRUE,
-                           method="L-BFGS-B",
-                           hessian=F,control=list(maxit=10000))
-
-        outvect <- optim.fit$par
-        llc <- -calc.ll(outvect,y.mat,model="OSM",submodel="rs",ppr.m,pi.v,RG, partial=FALSE)
-        #print(abs(invect-outvect))
-        #print(outvect)
-
-        parlist.out <- unpack.parvec(outvect,model="OSM",submodel="rs",n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
-
-        theta.arr <- theta.OSM.rs(parlist.out)
-
-        ## Report the current incomplete-data log-likelihood, which is the
-        ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
-        ## of the output of optim
-        # if (iter == 1 | iter%%5 == 0) cat('RS model iter=',iter, ' log.like=', llc ,'\n')
-        cat('RS model iter=',iter, ' partial log.like=', -optim.fit$value ,'\n')
-        cat('RS model iter=',iter, ' log.like=', llc ,'\n')
-        cat("parlist.out\n")
-        print(parlist.out)
-        cat("pi",pi.v,"\n")
-        iter=iter+1
-    }
-
-    # Find cluster groupings:
-    Rclus <- assignments(ppr.m)
-
-    # Save results:
-    logl <- Rcluster.Incll(y.mat, theta.arr, pi.v, RG)
-    npar <- q+2*RG-3
-    criteria <- calc.criteria(logl, llc, npar, n, p)
-    out1 <- c(n, p, logl, llc, npar, RG)
-    names(out1) <- c("n","p","Final.ll","Final.llc","npar","R")
-    list("info"=out1,
-         "criteria"=unlist(criteria),
-         "initvect"=initvect,
-         "pi"=pi.v,
-         "theta"=theta.arr,
-         "mu"=parlist.out$mu,
-         "phi"=parlist.out$phi,
-         "alpha"=parlist.out$alpha,
-         "ppr"=ppr.m,
-         "RowClusters"=Rclus)
 }
 
 theta.OSM.rp <- function(parlist) {
@@ -422,111 +463,6 @@ theta.OSM.rp <- function(parlist) {
     theta
 }
 
-## Fit row clustering model with column effects but no interaction,
-## mu_k - alpha_r - beta_j
-fit.OSM.rp.model <- function(invect, y.mat, RG, pi.init=NULL,
-                             maxiter.rs=50, tol.rs=1e-4,
-                             maxiter.rp=50, tol.rp=1e-4){
-    n=nrow(y.mat)
-    p=ncol(y.mat)
-    q=length(unique(as.vector(y.mat)))
-
-    if (is.null(pi.init)) {
-        cat("Fitting RS model to obtain starting values for pi.v\n")
-        OSM.rs.out <- fit.OSM.rs.model(invect=invect[1:(q-1+q-2+RG)],
-                                       y.mat, RG, maxiter.rs=maxiter.rs, tol.rs=tol.rs)
-        cat("=== End of RS model fitting ===\n")
-
-        pi.v <- OSM.rs.out$pi
-    } else {
-        pi.v <- pi.init
-    }
-
-    parlist.in <- unpack.parvec(invect,model="OSM",submodel="rp",n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
-
-    theta.arr <- theta.OSM.rp(parlist.in)
-
-    cat("Initial parameter values\n")
-    print(parlist.in)
-    cat("pi",pi.v,"\n")
-
-    ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
-    cat("LLC partial",-calc.ll(invect,y.mat,model="OSM",submodel="rp",ppr.m,pi.v,RG, partial=TRUE),"\n")
-    cat("LLC",-calc.ll(invect,y.mat,model="OSM",submodel="rp",ppr.m,pi.v,RG, partial=FALSE),"\n")
-
-    initvect <- invect
-    outvect=invect
-    # Run the EM cycle:
-    iter=1
-
-    while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>tol.rs)))&(iter<maxiter.rs))
-    {
-        # E-step - Update posterior probabilities
-        ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
-
-        ## Now set any NA values in the posterior probabilities matrix to 0
-        ppr.m[is.na(ppr.m)] <- 0
-
-        pi.v <- colMeans(ppr.m)
-
-        #point(rep(iter,RG),pi.v,pch=1,col="black")
-        invect=outvect
-        # M-step:
-        #use numerical maximisation
-        optim.fit <- optim(par=invect,
-                           fn=calc.ll,
-                           y.mat=y.mat,
-                           model="OSM",
-                           submodel="rp",
-                           ppr.m=ppr.m,
-                           pi.v=pi.v,
-                           RG=RG,
-                           partial=TRUE,
-                           method="L-BFGS-B",
-                           hessian=F,control=list(maxit=10000))
-
-        outvect <- optim.fit$par
-        llc <- -calc.ll(outvect,y.mat,model="OSM",submodel="rp",ppr.m,pi.v,RG, partial=FALSE)
-        #print(abs(invect-outvect))
-        #print(outvect)
-
-        parlist.out <- unpack.parvec(outvect,model="OSM",submodel="rp",n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
-
-        theta.arr <- theta.OSM.rp(parlist.out)
-
-        ## Report the current incomplete-data log-likelihood, which is the
-        ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
-        ## of the output of optim
-        # if (iter == 1 | iter%%5 == 0) cat('RP model iter=',iter, ' log.like=', llc ,'\n')
-        cat('RP model iter=',iter, ' partial log.like=', -optim.fit$value ,'\n')
-        cat('RP model iter=',iter, ' log.like=', llc ,'\n')
-        cat("parlist.out\n")
-        print(parlist.out)
-        cat("pi",pi.v,"\n")
-        iter=iter+1
-    }
-
-    # Find cluster groupings:
-    Rclus <- assignments(ppr.m)
-
-    # Save results:
-    logl <- Rcluster.Incll(y.mat, theta.arr, pi.v, RG)
-    npar <- q+2*RG-3
-    criteria <- calc.criteria(logl, llc, npar, n, p)
-    out1 <- c(n, p, logl, llc, npar, RG)
-    names(out1) <- c("n","p","Final.ll","Final.llc","npar","R")
-    list("info"=out1,
-         "criteria"=unlist(criteria),
-         "initvect"=initvect,
-         "pi"=pi.v,
-         "mu"=parlist.out$mu,
-         "phi"=parlist.out$phi,
-         "alpha"=parlist.out$alpha,
-         "beta"=parlist.out$beta,
-         "ppr"=ppr.m,
-         "RowClusters"=Rclus)
-}
-
 theta.OSM.rpi <- function(parlist) {
     p <- parlist$p
     ## TODO: Note that for POM code, mu is defined as length q-1,
@@ -553,132 +489,4 @@ theta.OSM.rpi <- function(parlist) {
     }
 
     theta
-}
-
-## Fit row clustering model with column effects and interaction,
-## mu_k - alpha_r - beta_j - gamma_rj
-fit.OSM.rpi.model <- function(invect, y.mat, RG, pi.init=NULL,
-                             maxiter.rs=50, tol.rs=1e-4,
-                             maxiter.rp=50, tol.rp=1e-4,
-                             maxiter.rpi=50, tol.rpi=1e-4,
-                             use.alternative.start=TRUE){
-    n=nrow(y.mat)
-    p=ncol(y.mat)
-    q=length(unique(as.vector(y.mat)))
-
-    if (is.null(pi.init)) {
-        if (use.alternative.start) {
-
-            OSM.rp.out <- fit.OSM.rp.model(invect=invect[1:(q-1+q-2+RG-1+p-1)], y.mat, RG,
-                                             maxiter.rp=maxiter.rp, tol.rp=tol.rp,
-                                             maxiter.rs=maxiter.rs, tol.rs=tol.rs)
-            cat("=== End of RP model fitting ===\n")
-
-            ppr.m=OSM.rp.out$ppr
-            pi.v=OSM.rp.out$pi
-        } else {
-            PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
-            PO.ss.out$mu <- PO.ss.out$zeta
-
-            VariableName <- as.factor(rep((1:ncol(y.mat)),each=nrow(y.mat)))
-            PO.sp.out <- MASS::polr(as.factor(y.mat)~VariableName)
-            PO.sp.out$beta <- PO.sp.out$coef[1:(ncol(y.mat)-1)] #Individual column effect
-
-            PO.sp.out$beta <- c(0,PO.sp.out$coef[1:(ncol(y.mat)-1)])
-
-            x1 <- fit.OSM.rs.model(invect=c(PO.ss.out$mu,alpha.kmeans[-RG]))
-            x2 <- fit.OSM.rp.model(invect=c(x1$mu,x1$alpha[-RG],PO.sp.out$beta))
-            ppr.m <- x2$ppr
-            pi.v <- x2$pi
-            cat("=== Used RS and RP models to find starting points ===\n")
-        }
-    } else {
-        pi.v <- pi.init
-    }
-
-    parlist.in <- unpack.parvec(invect,model="OSM",submodel="rpi",n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
-
-    theta.arr <- theta.OSM.rpi(parlist.in)
-
-    cat("Initial parameter values\n")
-    print(parlist.in)
-    cat("pi",pi.v,"\n")
-
-    ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
-    cat("LLC partial",-calc.ll(invect,y.mat,model="OSM",submodel="rpi",ppr.m,pi.v,RG, partial=TRUE),"\n")
-    cat("LLC",-calc.ll(invect,y.mat,model="OSM",submodel="rpi",ppr.m,pi.v,RG, partial=FALSE),"\n")
-
-    initvect <- invect
-    outvect=invect
-    # Run the EM cycle:
-    iter=1
-
-    while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>tol.rs)))&(iter<maxiter.rs))
-    {
-        # E-step - Update posterior probabilities
-        ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
-
-        ## Now set any NA values in the posterior probabilities matrix to 0
-        ppr.m[is.na(ppr.m)] <- 0
-
-        pi.v <- colMeans(ppr.m)
-
-        #point(rep(iter,RG),pi.v,pch=1,col="black")
-        invect=outvect
-        # M-step:
-        #use numerical maximisation
-        optim.fit <- optim(par=invect,
-                           fn=calc.ll,
-                           y.mat=y.mat,
-                           model="OSM",
-                           submodel="rpi",
-                           ppr.m=ppr.m,
-                           pi.v=pi.v,
-                           RG=RG,
-                           partial=TRUE,
-                           method="L-BFGS-B",
-                           hessian=F,control=list(maxit=10000))
-
-        outvect <- optim.fit$par
-        llc <- -calc.ll(outvect,y.mat,model="OSM",submodel="rpi",ppr.m,pi.v,RG, partial=FALSE)
-        #print(abs(invect-outvect))
-        #print(outvect)
-
-        parlist.out <- unpack.parvec(outvect,model="OSM",submodel="rpi",n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
-
-        theta.arr <- theta.OSM.rpi(parlist.out)
-
-        ## Report the current incomplete-data log-likelihood, which is the
-        ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
-        ## of the output of optim
-        # if (iter == 1 | iter%%5 == 0) cat('RPI model iter=',iter, ' log.like=', llc ,'\n')
-        cat('RPI model iter=',iter, ' partial log.like=', -optim.fit$value ,'\n')
-        cat('RPI model iter=',iter, ' log.like=', llc ,'\n')
-        cat("parlist.out\n")
-        print(parlist.out)
-        cat("pi",pi.v,"\n")
-        iter=iter+1
-    }
-
-    # Find cluster groupings:
-    Rclus <- assignments(ppr.m)
-
-    # Save results:
-    logl <- Rcluster.Incll(y.mat, theta.arr, pi.v, RG)
-    npar <- q+2*RG-3
-    criteria <- calc.criteria(logl, llc, npar, n, p)
-    out1 <- c(n, p, logl, llc, npar, RG)
-    names(out1) <- c("n","p","Final.ll","Final.llc","npar","R")
-    list("info"=out1,
-         "criteria"=unlist(criteria),
-         "initvect"=initvect,
-         "pi"=pi.v,
-         "theta"=theta.arr,
-         "mu"=parlist.out$mu,
-         "phi"=parlist.out$phi,
-         "alpha"=parlist.out$alpha,
-         "beta"=parlist.out$beta,
-         "gamma"=parlist.out$gamma,
-         "ppr"=ppr.m,
-         "RowClusters"=Rclus)
 }
