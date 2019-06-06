@@ -18,9 +18,9 @@ lower.limit <- 0.00001
 #' @param model: "OSM" for Ordered Stereotype Model or "POM" for Proportional Odds Model.
 #' @param nclus.row: number of row clustering groups.
 #' @param data: data frame with three columns, which must be in the correct order.
-#'     First column is response, second column is subject, and last column is VariableNameion.
+#'     First column is response, second column is subject, and last column is question.
 #' @param y.mat: can be provided as an input instead of data, y.mat is a data
-#'     matrix with named columns corresponding to VariableNameions, and rows
+#'     matrix with named columns corresponding to questions, and rows
 #'     corresponding to subjects.
 #' @param initvect: (default NULL) vector of starting parameter values for the model.
 #'     If NULL, starting parameter values will be generated automatically.
