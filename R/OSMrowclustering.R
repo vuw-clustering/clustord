@@ -90,7 +90,7 @@ rowclustering <- function(formula,
                        "Y~row+column"="rp",
                        "Y~row+column+row:column"="rpi",
                        "Y~row*column"="rpi",
-                       stop('Error in osmformula'))
+                       stop('Error in formula'))
 
     RG <- nclus.row
 
