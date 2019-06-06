@@ -1,13 +1,12 @@
 lower.limit <- 0.00001
 
-#' Proportional Odds Models:bi-clustering models for two-mode ordinal data.
+#' Row clustering using Ordered Stereotype Models.
 #'
-#' This function contains bi-clustering models(row clustering and column clustering models), with interaction terms.
-#'
-#' All parameters' initial values are set by this package, users need to enter the row clustering formula.
-#' Y~row+column: Logit=mu_k-alpha_r-beta_c
-#' Y~row+column+row:column: Logit=mu_k-alpha_r-beta_c-gamma_rc
-#' @param osmformula: indicates bi-clustering models' formula.
+#' All parameters' initial values are set by this package, users need to enter their chosen formula:
+#' Y~row: Logit=mu_k-phi_k*alpha_r
+#' Y~row+column: Logit=mu_k-phi_k*(alpha_r+beta_j)
+#' Y~row+column+row:column: Logit=mu_k-phi_k(alpha_r+beta_j+gamma_rj)
+#' @param osmformula: model formula.
 #' @param nclus.row: number of row clustering groups.
 #' @param data: data frame with three columns, which must be in the correct order.
 #'     First column is response, second column is subject, and last column is VariableNameion.
@@ -47,9 +46,9 @@ lower.limit <- 0.00001
 #'     `ppr`, the posterior probabilities of membership of the row clusters,
 #'     and `RowClusters`, the assigned row clusters based on maximum posterior probability.
 #' @examples
-#' osmrowclustering("Y~row",3,data),indicates model Logit=mu_k-alpha_r with 3 row clustering groups
-#' osmrowclustering("Y~row+column",3,data),indicates model Logit=mu_k-alpha_r-beta_j with 3 row clustering groups
-#' osmrowclustering("Y~row+column+row:column",3,data),indicates model Logit=mu_k-alpha_r-beta_j-gamma_rj with 3 row clustering groups
+#' osmrowclustering("Y~row",3,data),indicates model Logit=mu_k-phi_k*alpha_r with 3 row clustering groups
+#' osmrowclustering("Y~row+column",3,data),indicates model Logit=mu_k-phi_k*(alpha_r+beta_j) with 3 row clustering groups
+#' osmrowclustering("Y~row+column+row:column",3,data),indicates model Logit=mu_k-phi_k*(alpha_r+beta_j+gamma_rj) with 3 row clustering groups
 #' @export
 osmrowclustering <- function(osmformula,
                              nclus.row,
@@ -63,8 +62,8 @@ osmrowclustering <- function(osmformula,
 
     if(is.null(y.mat)) {
         if (!is.null(data)) {
-            colnames(data)<-c("y","subject","VariableNameion")
-            y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$VariableNameion))
+            colnames(data)<-c("y","subject","question")
+            y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$question))
         } else stop("y.mat and data cannot both be null. Please provide either a data matrix or a data frame.")
     }
     if (!is.null(pi.init) & (length(pi.init) != nclus.row | sum(pi.init) != 1)) stop("pi.init must be the same length as the number of row clusters, and must add up to 1")
