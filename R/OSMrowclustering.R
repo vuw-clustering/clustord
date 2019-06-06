@@ -498,7 +498,7 @@ run.EM <- function(invect, y.mat, model, submodel, pi.v,
 
     # Save results:
     logl <- Rcluster.Incll(y.mat, theta.arr, pi.v, RG)
-    npar <- q+2*RG-3
+    npar <- length(invect) + length(pi.v)-1
     criteria <- calc.criteria(logl, llc, npar, n, p)
     out1 <- c(n, p, logl, llc, npar, RG)
     names(out1) <- c("n","p","Final.ll","Final.llc","npar","R")
