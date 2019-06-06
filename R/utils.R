@@ -22,3 +22,6 @@ calc.criteria <- function(ll, llc,  npar, n, p) {
 
     list(Res.Dev=Res.Dev, AIC=AIC, AICc=AICc, BIC=BIC, ICL=ICL)
 }
+
+## overwrite controls with user-selected values
+replacedefaults <- function (default, user) replace(default, names(user), user)

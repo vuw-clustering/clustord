@@ -66,6 +66,11 @@ osmrowclustering <- function(osmformula,
     }
     if (!is.null(pi.init) & (length(pi.init) != nclus.row | sum(pi.init) != 1)) stop("pi.init must be the same length as the number of row clusters, and must add up to 1")
 
+    ## Replace defaults with user-provided values, so that any control parameters
+    ## the user did not specify are not left blank:
+    default.EM.control <- as.list(args(osmrowclustering))$EM.control
+    EM.control <- replacedefaults(default.EM.control, EM.control)
+
     model <- "OSM"
     submodel <- switch(osmformula,
                        "Y~row"="rs",
