@@ -118,28 +118,19 @@ generate.start <- function(y.mat, model, submodel, RG, initvect=NULL, pi.init=NU
 
         switch(model,
                "OSM"={
+                   mu.init=PO.sp.out$mu
+                   phi.init <- seq(from=runif(1,min=0.05,max=0.5),
+                                   to=runif(1,min=0.6,max=0.95), length.out = (q-2))
+                   ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
+                   ### POM which has alpha_1 = 0, so feed in only the first RG-1 elements
+                   ### of the initial alpha
+                   alpha.init <- c(alpha.kmeans[-RG])
+
                    switch(submodel,
                           "rs"={
-                              mu.init=PO.sp.out$mu
-                              phi.init <- seq(from=runif(1,min=0.05,max=0.5),
-                                              to=runif(1,min=0.6,max=0.95), length.out = (q-2))
-
-                              ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-                              ### POM which has alpha_1 = 0, so feed in only the first RG-1 elements
-                              ### of the initial alpha
-                              alpha.init <- c(alpha.kmeans[-RG])
                               initvect <- c(mu.init, phi.init, alpha.init)
                           },
                           "rp"={
-                              mu.init=PO.sp.out$mu
-                              phi.init <- seq(from=runif(1,min=0.05,max=0.5),
-                                              to=runif(1,min=0.6,max=0.95), length.out = (q-2))
-
-                              ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-                              ### POM which has alpha_1 = 0, so feed in only the first RG-1 elements
-                              ### of the initial alpha
-                              alpha.init <- c(alpha.kmeans[-RG])
-
                               ### TODO: Original OSM code has sum to zero constraint on beta, unlike
                               ### POM which has beta_1 = 0, so feed in only the first p-1 elements
                               ### of the initial beta
@@ -149,14 +140,6 @@ generate.start <- function(y.mat, model, submodel, RG, initvect=NULL, pi.init=NU
                           },
                           "rpi"={
                               p <- ncol(y.mat)
-                              mu.init <- PO.sp.out$mu
-                              phi.init <- seq(from=runif(1,min=0.05,max=0.5),
-                                              to=runif(1,min=0.6,max=0.95), length.out = (q-2))
-
-                              ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-                              ### POM which has alpha_1 = 0, so feed in only the first RG-1 elements
-                              ### of the initial alpha
-                              alpha.init <- c(alpha.kmeans[-RG])
                               ### TODO: Original OSM code has sum to zero constraint on beta, unlike
                               ### POM which has beta_1 = 0, so feed in only the first p-1 elements
                               ### of the initial beta
