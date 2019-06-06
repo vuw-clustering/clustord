@@ -3,9 +3,9 @@ lower.limit <- 0.00001
 #' Row clustering using Ordered Stereotype Models.
 #'
 #' All parameters' initial values are set by this package, users need to enter their chosen formula:
-#' Y~row: Logit=mu_k-phi_k*alpha_r
-#' Y~row+column: Logit=mu_k-phi_k*(alpha_r+beta_j)
-#' Y~row+column+row:column, or Y~row*column: Logit=mu_k-phi_k(alpha_r+beta_j+gamma_rj)
+#' Y~row: Log(P(Y=k)/P(Y=1))=mu_k-phi_k*alpha_r
+#' Y~row+column: Log(P(Y=k)/P(Y=1))=mu_k-phi_k*(alpha_r+beta_j)
+#' Y~row+column+row:column, or Y~row*column: Log(P(Y=k)/P(Y=1))=mu_k-phi_k(alpha_r+beta_j+gamma_rj)
 #' @param osmformula: model formula.
 #' @param nclus.row: number of row clustering groups.
 #' @param data: data frame with three columns, which must be in the correct order.
@@ -46,9 +46,9 @@ lower.limit <- 0.00001
 #'     `ppr`, the posterior probabilities of membership of the row clusters,
 #'     and `RowClusters`, the assigned row clusters based on maximum posterior probability.
 #' @examples
-#' osmrowclustering("Y~row",3,data),indicates model Logit=mu_k-phi_k*alpha_r with 3 row clustering groups
-#' osmrowclustering("Y~row+column",3,data),indicates model Logit=mu_k-phi_k*(alpha_r+beta_j) with 3 row clustering groups
-#' osmrowclustering("Y~row+column+row:column",3,data),indicates model Logit=mu_k-phi_k*(alpha_r+beta_j+gamma_rj) with 3 row clustering groups
+#' osmrowclustering("Y~row",3,data),indicates model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*alpha_r with 3 row clustering groups
+#' osmrowclustering("Y~row+column",3,data),indicates model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*(alpha_r+beta_j) with 3 row clustering groups
+#' osmrowclustering("Y~row+column+row:column",3,data),indicates model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*(alpha_r+beta_j+gamma_rj) with 3 row clustering groups
 #' @export
 osmrowclustering <- function(osmformula,
                              nclus.row,
