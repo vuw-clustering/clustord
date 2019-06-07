@@ -191,9 +191,9 @@ generate.start <- function(y.mat, model, submodel, RG, initvect=NULL, pi.init=NU
                               ## so now just pass those elements in as part of initvect
                               ## and the beta1=0 constraint for POM will be added
                               ## when the vector is unpacked
-                              beta.init=PO.sp.out$beta
-                              gamma.init=rep(0.1,(RG-1)*(p-1))
-                              initvect=c(mu.init,alpha.init,beta.init,gamma.init)
+                              beta.init <- PO.sp.out$beta
+                              gamma.init <- rep(0.1,(RG-1)*(p-1))
+                              initvect <- c(mu.init,alpha.init,beta.init,gamma.init)
                           })
                })
     }
@@ -217,7 +217,7 @@ generate.start <- function(y.mat, model, submodel, RG, initvect=NULL, pi.init=NU
                                                       EMstoppingpar=EM.control$EMstoppingpar)
 
                               cat("Fitting RS model to obtain starting values for pi.v\n")
-                              OSM.rs.out <- run.EM(invect=initvect[1:(q-1+q-2+RG)],
+                              OSM.rs.out <- run.EM(invect=initvect[1:(q-1+q-2+RG-1)],
                                                    y.mat, model="OSM",submodel="rs",
                                                    pi.v=pi.init,
                                                    EM.control=startEM.control)
@@ -276,7 +276,7 @@ generate.start <- function(y.mat, model, submodel, RG, initvect=NULL, pi.init=NU
                                                       EMstoppingpar=EM.control$EMstoppingpar)
 
                               cat("Fitting RS model to obtain starting values for pi.v\n")
-                              POM.rs.out <- run.EM(invect=initvect[1:(q-1+RG)],
+                              POM.rs.out <- run.EM(invect=initvect[1:(q-1+RG-1)],
                                                    y.mat, model="POM",submodel="rs",
                                                    pi.v=pi.init,
                                                    EM.control=startEM.control)
