@@ -129,7 +129,7 @@ Ccluster.Incll <- function(y.mat, theta, kappa.v, CG){
 }
 
 #The Log-likelihood #
-Bicluster.ll <- function(y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v,
+Bicluster.ll <- function(y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, partial=FALSE,
                          use.matrix=TRUE){
     n=nrow(y.mat)
     p=ncol(y.mat)
@@ -137,7 +137,11 @@ Bicluster.ll <- function(y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v,
     RG <- length(pi.v)
     CG <- length(kappa.v)
 
+    ## TODO: these corrections of theta and pi and kappa are repeated from the
+    ## calc.ll function
     theta[theta<=0]=lower.limit
+    pi.v[pi.v==0]=lower.limit
+    kappa.v[kappa.v==0]=lower.limit
 
     llc=0
     if (use.matrix) {
@@ -158,18 +162,27 @@ Bicluster.ll <- function(y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v,
             }
         }
     }
-    llc <- llc + sum(ppr.m%*%log(pi.v))
-    llc <- llc + sum(ppc.m%*%log(kappa.v))
+    if (!partial) {
+        llc <- llc + sum(ppr.m%*%log(pi.v))
+        llc <- llc + sum(ppc.m%*%log(kappa.v))
+    }
     -llc
 }
 
 #The incomplete log-likelihood,used in model selection#
-Bicluster.IncllC <- function(y.mat, theta, pi.v, kappa.v, RG, CG)
+Bicluster.IncllC <- function(y.mat, theta, pi.v, kappa.v)
 {
     n=nrow(y.mat)
     p=ncol(y.mat)
     q=length(unique(as.vector(y.mat)))
+    RG <- length(pi.v)
+    CG <- length(kappa.v)
+
+    ## TODO: these corrections of theta and pi and kappa are repeated from the
+    ## calc.ll function
     theta[theta<=0]=lower.limit
+    pi.v[pi.v==0]=lower.limit
+    kappa.v[kappa.v==0]=lower.limit
 
     # Full evaluation using the columns.
     # Use if CG^p is small enough.
@@ -227,12 +240,19 @@ Bicluster.IncllC <- function(y.mat, theta, pi.v, kappa.v, RG, CG)
 }
 
 # Rows expansion (use if RG^n small enough):
-Bicluster.IncllR <- function(y.mat, theta,pi.v,kappa.v, RG, CG)
+Bicluster.IncllR <- function(y.mat, theta, pi.v, kappa.v)
 {
     n=nrow(y.mat)
     p=ncol(y.mat)
     q=length(unique(as.vector(y.mat)))
+    RG <- length(pi.v)
+    CG <- length(kappa.v)
+
+    ## TODO: these corrections of theta and pi and kappa are repeated from the
+    ## calc.ll function
     theta[theta<=0]=lower.limit
+    pi.v[pi.v==0]=lower.limit
+    kappa.v[kappa.v==0]=lower.limit
 
     # Full evaluation using the rows.
     # Use if RG^n is small enough.
