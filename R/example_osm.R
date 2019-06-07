@@ -12,16 +12,16 @@ initvect <- c(-0.8,0.7,0.2,2,rep(0.25,times=4),rep(0.4,times=4))
 pi.init <- c(0.1,0.9)
 
 set.seed(1)
-# results <- osmrowclustering("Y~row",
-# results <- osmrowclustering("Y~row+column",
-results <- osmrowclustering("Y~row+column+row:column",
+# results <- rowclustering("Y~row",
+# results <- rowclustering("Y~row+column",
+results <- rowclustering("Y~row+column+row:column", model="OSM",
                             nclus.row=2,
                             y.mat=y.mat.sim,
                             initvect=initvect,
                             pi.init=c(0.1,0.9))
 
 
-results2 <- osmrowclustering("Y~row+column+row:column",
+results2 <- rowclustering("Y~row+column+row:column", model="OSM",
                             nclus.row=2,
                             y.mat=y.mat.sim)
 
