@@ -12,8 +12,12 @@ Navigate to the folder containing the .c file and the "include folder.
 
 >> C:\RBuildTools\3.5\mingw_64\bin\gcc -c -Iinclude -DBUILDING_EXAMPLE_DLL EMfuncsStereotype_in_C.c
 
+(or on Windows laptop, running more recent version of Windows, 10,
+>> C:\Rtools\mingw_64\bin\gcc -c -Iinclude -DBUILDING_EXAMPLE_DLL EMfuncsStereotype_in_C.c)
+
 5) Run the second command, which again includes the full path to the gcc compiler:
 
 >> C:\RBuildTools\3.5\mingw_64\bin\gcc -shared -o EMfuncsStereotype_in_C.dll EMfuncsStereotype_in_C.o -Wl,--out-implib,EMfuncsStereotype_in_C.a
 
 Note that the "--Wl" option is W<<L>>, not W<<one>>.
+(Again change the path to Rtools for laptop.)
