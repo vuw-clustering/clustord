@@ -216,7 +216,7 @@ columnclustering <- function(formula,
         "Y~row*column"="rpi",
         stop('Error in formula'))
 
-    RG <- nclus.row
+    RG <- nclus.column
     pi.init <- kappa.init
     y.mat.transp <- t(y.mat)
 
