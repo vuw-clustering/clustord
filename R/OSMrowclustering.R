@@ -96,7 +96,7 @@ rowclustering <- function(formula,
 
     if (is.null(initvect) | is.null(pi.init)) {
         ## generate.start will keep using whichever of initvect and pi.init is not null
-        start.par <- generate.start(y.mat, model=model, submodel=submodel, RG=RG,
+        start.par <- generate.start.rowcluster(y.mat, model=model, submodel=submodel, RG=RG,
                                     initvect=initvect, pi.init=pi.init,
                                     use.alternative.start=use.alternative.start)
         initvect <- start.par$initvect
@@ -443,7 +443,6 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                               initvect <- c(mu.init,alpha.init,beta.init,gamma.init)
                     },stop("Invalid model for row/column clustering"))
             })
-               })
     }
 
     if (is.null(pi.init)) {
@@ -465,7 +464,7 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                                                       EMstoppingpar=EM.control$EMstoppingpar)
 
                               cat("Fitting RS model to obtain starting values for pi.v\n")
-                              OSM.rs.out <- run.EM(invect=initvect[1:(q-1+q-2+RG-1)],
+                              OSM.rs.out <- run.EM.rowcluster(invect=initvect[1:(q-1+q-2+RG-1)],
                                                    y.mat, model="OSM",submodel="rs",
                                                    pi.v=pi.init,
                                                    EM.control=startEM.control)
@@ -478,7 +477,7 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                                                       EMstoppingpar=EM.control$EMstoppingpar)
                               if (use.alternative.start) {
 
-                                  OSM.rp.out <- run.EM(invect=initvect[1:(q-1+q-2+RG-1+p-1)],
+                                  OSM.rp.out <- run.EM.rowcluster(invect=initvect[1:(q-1+q-2+RG-1+p-1)],
                                                        y.mat, model="OSM",submodel="rp",
                                                        pi.v=pi.init, EM.control=startEM.control)
                                   cat("=== End of RP model fitting ===\n")
@@ -498,10 +497,10 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                                   phi.init <- seq(from=runif(1,min=0.05,max=0.5),
                                                   to=runif(1,min=0.6,max=0.95), length.out = (q-2))
 
-                                  OSM.rs.out <- run.EM(invect=c(PO.ss.out$mu,phi.init,alpha.kmeans[-RG]),
+                                  OSM.rs.out <- run.EM.rowcluster(invect=c(PO.ss.out$mu,phi.init,alpha.kmeans[-RG]),
                                                        y.mat, model="OSM",submodel="rs",
                                                        pi.v=pi.init, EM.control=startEM.control)
-                                  OSM.rp.out <- run.EM(invect=c(OSM.rs.out$parlist.out$mu,
+                                  OSM.rp.out <- run.EM.rowcluster(invect=c(OSM.rs.out$parlist.out$mu,
                                                                 phi.init,
                                                                 OSM.rs.out$parlist.out$alpha[-RG],
                                                                 PO.sp.out$beta),
@@ -524,7 +523,7 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                                                       EMstoppingpar=EM.control$EMstoppingpar)
 
                               cat("Fitting RS model to obtain starting values for pi.v\n")
-                              POM.rs.out <- run.EM(invect=initvect[1:(q-1+RG-1)],
+                              POM.rs.out <- run.EM.rowcluster(invect=initvect[1:(q-1+RG-1)],
                                                    y.mat, model="POM",submodel="rs",
                                                    pi.v=pi.init,
                                                    EM.control=startEM.control)
@@ -537,7 +536,7 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                                                       EMstoppingpar=EM.control$EMstoppingpar)
                               if (use.alternative.start) {
 
-                                  POM.rp.out <- run.EM(invect=initvect[1:(q-1+RG-1+p-1)],
+                                  POM.rp.out <- run.EM.rowcluster(invect=initvect[1:(q-1+RG-1+p-1)],
                                                        y.mat, model="POM",submodel="rp",
                                                        pi.v=pi.init, EM.control=startEM.control)
                                   cat("=== End of RP model fitting ===\n")
@@ -554,7 +553,7 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
 
                                   PO.sp.out$beta <- c(0,PO.sp.out$coef[1:(ncol(y.mat)-1)])
 
-                                  POM.rs.out <- run.EM(invect=c(PO.ss.out$mu,alpha.kmeans[-RG]),
+                                  POM.rs.out <- run.EM.rowcluster(invect=c(PO.ss.out$mu,alpha.kmeans[-RG]),
                                                        y.mat, model="POM",submodel="rs",
                                                        pi.v=pi.init, EM.control=startEM.control)
                                   POM.rp.out <- run.EM(invect=c(POM.rs.out$parlist.out$mu,
