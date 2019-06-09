@@ -47,6 +47,12 @@ lower.limit <- 0.00001
 #'     list of parameters controlling the EM algorithm. `startEMcycles` controls
 #'     how many EM iterations are used when fitting the simpler models to get
 #'     starting values for fitting models with interaction.
+#' @param constraint.sum.zero (default TRUE) if true, use constraints that alpha
+#'     sums to zero and beta sums to zero; if false, use constraints alpha_1=0
+#'     and beta_1 = 0. Both versions have the final column of gamma equal to the
+#'     negative sum of the other columns (so gamma columns sum to zero) and first
+#'     row of gamma equal to the negative sum of the other rows (so gamma rows
+#'     sum to zero).
 #' @param use.alternative.start: (default TRUE) if true, fit the model
 #'     without interactions first and use that to provide starting values of ppr.m
 #'     and pi.v for fitting the model with interactions; if false, use the polr
@@ -68,7 +74,7 @@ rowclustering <- function(formula,
                           initvect=NULL,
                           pi.init=NULL,
                           EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
-                          use.alternative.start=TRUE){
+                          constraint.sum.zero=TRUE, use.alternative.start=TRUE){
 
     if(is.null(y.mat)) {
         if (!is.null(data)) {
@@ -98,12 +104,15 @@ rowclustering <- function(formula,
         ## generate.start will keep using whichever of initvect and pi.init is not null
         start.par <- generate.start.rowcluster(y.mat, model=model, submodel=submodel, RG=RG,
                                     initvect=initvect, pi.init=pi.init,
+                                    constraint.sum.zero=constraint.sum.zero,
                                     use.alternative.start=use.alternative.start)
         initvect <- start.par$initvect
         pi.init <- start.par$pi.init
     }
 
-    run.EM.rowcluster(invect=initvect, y.mat, model=model, submodel=submodel, pi.v=pi.init, EM.control=EM.control)
+    run.EM.rowcluster(invect=initvect, y.mat, model=model, submodel=submodel,
+                      pi.v=pi.init, constraint.sum.zero=constraint.sum.zero,
+                      EM.control=EM.control)
 }
 
 #' Column clustering using Ordered Stereotype Models or Proportional Odds Models.
@@ -155,6 +164,12 @@ rowclustering <- function(formula,
 #'     list of parameters controlling the EM algorithm. `startEMcycles` controls
 #'     how many EM iterations are used when fitting the simpler models to get
 #'     starting values for fitting models with interaction.
+#' @param constraint.sum.zero (default TRUE) if true, use constraints that alpha
+#'     sums to zero and beta sums to zero; if false, use constraints alpha_1=0
+#'     and beta_1 = 0. Both versions have the final column of gamma equal to the
+#'     negative sum of the other columns (so gamma columns sum to zero) and first
+#'     row of gamma equal to the negative sum of the other rows (so gamma rows
+#'     sum to zero).
 #' @param use.alternative.start: (default TRUE) if true, fit the model
 #'     without interactions first and use that to provide starting values of ppr.m
 #'     and pi.v for fitting the model with interactions; if false, use the polr
@@ -176,7 +191,7 @@ columnclustering <- function(formula,
     initvect=NULL,
     kappa.init=NULL,
     EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
-    use.alternative.start=TRUE){
+    constraint.sum.zero=TRUE, use.alternative.start=TRUE){
 
     if(is.null(y.mat)) {
         if (!is.null(data)) {
@@ -207,14 +222,16 @@ columnclustering <- function(formula,
 
     if (is.null(initvect) | is.null(pi.init)) {
         ## generate.start will keep using whichever of initvect and kappa.init is not null
-        start.par <- generate.start(y.mat.transp, model=model, submodel=submodel, RG=RG,
-            initvect=initvect, pi.init=kappa.init,
+        start.par <- generate.start.rowcluster(y.mat.transp, model=model, submodel=submodel, RG=RG,
+            initvect=initvect, pi.init=kappa.init, constraint.sum.zero=constraint.sum.zero,
             use.alternative.start=use.alternative.start)
         initvect <- start.par$initvect
         pi.init <- start.par$pi.init
     }
 
-    results <- run.EM.rowcluster(invect=initvect, y.mat.transp, model=model, submodel=submodel, pi.v=pi.init, EM.control=EM.control)
+    results <- run.EM.rowcluster(invect=initvect, y.mat.transp, model=model, submodel=submodel,
+                                 pi.v=pi.init, constraint.sum.zero=constraint.sum.zero,
+                                 EM.control=EM.control)
 
     ## Now convert the results back to row clustering
     column.parlist <- results$parlist.out
@@ -283,6 +300,12 @@ columnclustering <- function(formula,
 #'     list of parameters controlling the EM algorithm. `startEMcycles` controls
 #'     how many EM iterations are used when fitting the simpler models to get
 #'     starting values for fitting models with interaction.
+#' @param constraint.sum.zero (default TRUE) if true, use constraints that alpha
+#'     sums to zero and beta sums to zero; if false, use constraints alpha_1=0
+#'     and beta_1 = 0. Both versions have the final column of gamma equal to the
+#'     negative sum of the other columns (so gamma columns sum to zero) and first
+#'     row of gamma equal to the negative sum of the other rows (so gamma rows
+#'     sum to zero).
 #' @param use.alternative.start: (default TRUE) if true, fit the model
 #'     without interactions first and use that to provide starting values of ppr.m
 #'     and pi.v for fitting the model with interactions; if false, use the polr
@@ -312,6 +335,7 @@ biclustering <- function(formula,
     pi.init=NULL,
     kappa.init=NULL,
     EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
+    constraint.sum.zero=TRUE,
     use.alternative.start=TRUE){
 
     if(is.null(y.mat)) {
@@ -340,7 +364,8 @@ biclustering <- function(formula,
     CG <- nclus.column
 
     if (is.null(initvect) | is.null(pi.init) | is.null(kappa.init)) {
-        ## generate.start will keep using whichever of initvect and pi.init is not null
+        ## generate.start will keep using whichever of initvect and pi.init and
+        ## kappa.init are not null
         start.par <- generate.start.bicluster(y.mat, model=model, submodel=submodel,
             RG=RG, CG=CG, initvect=initvect, pi.init=pi.init, kappa.init=kappa.init,
             use.alternative.start=use.alternative.start)
@@ -355,7 +380,7 @@ biclustering <- function(formula,
 
 generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL, pi.init=NULL,
     EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
-    use.alternative.start=TRUE) {
+    constraint.sum.zero=TRUE, use.alternative.start=TRUE) {
 
     if (is.null(initvect)) {
         ## TODO: not good to set q equal to LENGTH of unique(y.mat) instead of to
@@ -368,43 +393,45 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
         VariableName=as.factor(rep((1:ncol(y.mat)),each=nrow(y.mat)))
         PO.sp.out <- MASS::polr(as.factor(y.mat)~VariableName)
         PO.sp.out$mu=PO.sp.out$zeta
-        PO.sp.out$beta=PO.sp.out$coef[1:(ncol(y.mat)-1)] #Individual column effect
 
         kmeans.data=kmeans(y.mat,centers=RG,nstart=100)
         pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
         alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
-        ## TODO: code for OSM models applies alpha sum to zero constraint, not
-        ## alpha1=0 constraint -- UNLIKE POM code -- so DON'T set alpha1 to zero here.
+        ## By default, use alpha sum to zero constraint, so DON'T set alpha1 to zero here.
+
+        mu.init=PO.sp.out$mu
+        if (constraint.sum.zero) alpha.init <- alpha.kmeans[-RG]
+        else {
+            alpha.kmeans <- alpha.kmeans-alpha.kmeans[1]
+            alpha.init <- alpha.kmeans[-1]
+        }
 
         switch(model,
                "OSM"={
-                   mu.init=PO.sp.out$mu
                    phi.init <- seq(from=runif(1,min=0.05,max=0.5),
                                    to=runif(1,min=0.6,max=0.95), length.out = (q-2))
-                   ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-                   ### POM which has alpha_1 = 0, so feed in only the first RG-1 elements
-                   ### of the initial alpha
-                   alpha.init <- c(alpha.kmeans[-RG])
 
                    switch(submodel,
                           "rs"={
                               initvect <- c(mu.init, phi.init, alpha.init)
                           },
                           "rp"={
-                              ### TODO: Original OSM code has sum to zero constraint on beta, unlike
-                              ### POM which has beta_1 = 0, so feed in only the first p-1 elements
-                              ### of the initial beta
-                              beta.init <- c(PO.sp.out$beta)
+                              ## If not using constraint that beta sum to zero,
+                              ## beta1 will be 0 so need to correct other elements
+                              ## of beta accordingly
+                              if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(ncol(y.mat)-1)]
+                              else beta.init <- PO.sp.out$coef[2:(ncol(y.mat)-1)] - PO.sp.out$coef[1]
 
                               initvect <- c(mu.init, phi.init, alpha.init, beta.init)
                           },
                           "rpi"={
                               p <- ncol(y.mat)
 
-                              ### TODO: Original OSM code has sum to zero constraint on beta, unlike
-                              ### POM which has beta_1 = 0, so feed in only the first p-1 elements
-                              ### of the initial beta
-                              beta.init <- c(PO.sp.out$beta)
+                              ## If not using constraint that beta sum to zero,
+                              ## beta1 will be 0 so need to correct other elements
+                              ## of beta accordingly
+                              if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(ncol(y.mat)-1)]
+                              else beta.init <- PO.sp.out$coef[2:(ncol(y.mat)-1)] - PO.sp.out$coef[1]
 
                               gamma.init <- rep(0.1,(RG-1)*(p-1))
 
@@ -412,33 +439,25 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                     },stop("Invalid model for row/column clustering"))
                },
                "POM"={
-                   ## TODO: POM, unlike OSM, imposes alpha1=0 constraint, and then
-                   ## only the 2,...,RG elements of alpha are passed in to initvect
-                   alpha.kmeans=alpha.kmeans-alpha.kmeans[1]
-                   mu.init <- PO.sp.out$mu
-                   alpha.init <- alpha.kmeans[-1]
-
                    switch(submodel,
                           "rs"={
                               initvect <- c(mu.init,alpha.init)
                           },
                           "rp"={
-                              ## TODO: already have PO.sp.out$beta equal to only the
-                              ## first p-1 elements of the original PO.sp.out$coef,
-                              ## so now just pass those elements in as part of initvect
-                              ## and the beta1=0 constraint for POM will be added
-                              ## when the vector is unpacked
-                              beta.init <- PO.sp.out$beta
+                              ## If not using constraint that beta sum to zero,
+                              ## beta1 will be 0 so need to correct other elements
+                              ## of beta accordingly
+                              if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(ncol(y.mat)-1)]
+                              else beta.init <- PO.sp.out$coef[2:(ncol(y.mat)-1)] - PO.sp.out$coef[1]
                               initvect <- c(mu.init,alpha.init,beta.init)
                           },
                           "rpi"={
                               p <- ncol(y.mat)
-                              ## TODO: already have PO.sp.out$beta equal to only the
-                              ## first p-1 elements of the original PO.sp.out$coef,
-                              ## so now just pass those elements in as part of initvect
-                              ## and the beta1=0 constraint for POM will be added
-                              ## when the vector is unpacked
-                              beta.init <- PO.sp.out$beta
+                              ## If not using constraint that beta sum to zero,
+                              ## beta1 will be 0 so need to correct other elements
+                              ## of beta accordingly
+                              if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(ncol(y.mat)-1)]
+                              else beta.init <- PO.sp.out$coef[2:(ncol(y.mat)-1)] - PO.sp.out$coef[1]
                               gamma.init <- rep(0.1,(RG-1)*(p-1))
                               initvect <- c(mu.init,alpha.init,beta.init,gamma.init)
                     },stop("Invalid model for row/column clustering"))
@@ -556,7 +575,7 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                                   POM.rs.out <- run.EM.rowcluster(invect=c(PO.ss.out$mu,alpha.kmeans[-RG]),
                                                        y.mat, model="POM",submodel="rs",
                                                        pi.v=pi.init, EM.control=startEM.control)
-                                  POM.rp.out <- run.EM(invect=c(POM.rs.out$parlist.out$mu,
+                                  POM.rp.out <- run.EM.rowcluster(invect=c(POM.rs.out$parlist.out$mu,
                                                                 POM.rs.out$parlist.out$alpha[-RG],
                                                                 PO.sp.out$beta),
                                                        y.mat, model="POM",submodel="rp",
@@ -576,7 +595,7 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
 generate.start.bicluster <- function(y.mat, model, submodel, RG, CG,
     initvect=NULL, pi.init=NULL, kappa.init=NULL,
     EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
-    use.alternative.start=TRUE) {
+    constraint.sum.zero=TRUE, use.alternative.start=TRUE) {
 
     if (is.null(initvect)) {
         ## TODO: not good to set q equal to LENGTH of unique(y.mat) instead of to
@@ -589,28 +608,29 @@ generate.start.bicluster <- function(y.mat, model, submodel, RG, CG,
         row.kmeans <- kmeans(y.mat,centers=RG,nstart=50)
         pi.kmeans <- (row.kmeans$size)/sum(row.kmeans$size)
         alpha.kmeans <- rowMeans(row.kmeans$centers, na.rm=TRUE)
-        ## TODO: code for OSM models applies alpha sum to zero constraint, not
-        ## alpha1=0 constraint -- UNLIKE POM code -- so DON'T set alpha1 to zero here.
+        ## By default, use constraint that alpha sum to zero so DON'T set alpha1 to zero here.
 
         column.kmeans <- kmeans(y.mat,centers=CG,nstart=50)
         kappa.kmeans <- (column.kmeans$size)/sum(column.kmeans$size)
         beta.kmeans <- rowMeans(column.kmeans$centers, na.rm=TRUE)
-        ## TODO: code for OSM models applies beta sum to zero constraint, not
-        ## beta1=0 constraint -- UNLIKE POM code -- so DON'T set beta1 to zero here.
+        ## By default, use constraint that beta sum to zero so DON'T set beta1 to zero here.
+
+        mu.init <- PO.ss.out$mu
+        if (constraint.sum.zero) alpha.init <- alpha.kmeans[-RG]
+        else {
+            alpha.kmeans <- alpha.kmeans-alpha.kmeans[1]
+            alpha.init <- alpha.kmeans[-1]
+        }
+        if (constraint.sum.zero) beta.init <- beta.kmeans[-RG]
+        else {
+            beta.kmeans <- beta.kmeans-beta.kmeans[1]
+            beta.init <- beta.kmeans[-1]
+        }
 
         switch(model,
             "OSM"={
-                mu.init <- PO.ss.out$mu
                 phi.init <- seq(from=runif(1,min=0.05,max=0.5),
                     to=runif(1,min=0.6,max=0.95), length.out = (q-2))
-                ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-                ### POM which has alpha_1 = 0, so feed in only the first RG-1 elements
-                ### of the initial alpha
-                alpha.init <- c(alpha.kmeans[-RG])
-                ### TODO: Original OSM code has sum to zero constraint on beta, unlike
-                ### POM which has beta_1 = 0, so feed in only the first CG-1 elements
-                ### of the initial beta
-                beta.init <- c(beta.kmeans[-CG])
 
                 switch(submodel,
                     "rc"={
@@ -623,17 +643,6 @@ generate.start.bicluster <- function(y.mat, model, submodel, RG, CG,
                     },stop("Invalid model for biclustering"))
             },
             "POM"={
-                ## TODO: POM, unlike OSM, imposes alpha1=0 constraint, and then
-                ## only the 2,...,RG elements of alpha are passed in to initvect
-                alpha.kmeans <- alpha.kmeans-alpha.kmeans[1]
-                ## TODO: POM, unlike OSM imposes beta1=0 constraint, and then
-                ## only the 2,...,CG elements of beta are passed in to initvect
-                beta.kmeans <- beta.kmeans-beta.kmeans[1]
-
-                mu.init <- PO.ss.out$mu
-                alpha.init <- alpha.kmeans[-1]
-                beta.init <- beta.kmeans[-1]
-
                 switch(submodel,
                     "rc"={
                         initvect <- c(mu.init,alpha.init,beta.init)
@@ -743,115 +752,107 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constra
             ### than mu for POM code, decide which version to use and make consistent
             mu <- c(0,invect[1:(q-1)])
             phi <- c(0,invect[(q-1+1):(q-1+q-2)],1)
+            alpha <- invect[(q-1+q-2+1):(q-1+q-2+RG-1)]
+            if (constraint.sum.zero) alpha <- c(alpha, -sum(alpha))
+            else alpha <- c(0, alpha)
             switch(submodel,
                 "rs"={
-                    alpha <- invect[(q-1+q-2+1):(q-1+q-2+RG-1)]
-                    ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-                    ### POM which has alpha_1 = 0
-                    alpha <- c(alpha, -sum(alpha))
                     list(n=n,p=p,mu=mu,phi=phi,alpha=alpha)
                 },
                 "rp"={
-                    alpha <- invect[(q-1+q-2+1):(q-1+q-2+RG-1)]
-                    ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-                    ### POM which has alpha_1 = 0
-                    alpha <- c(alpha, -sum(alpha))
                     beta <- invect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+p-1)]
-                    ### TODO: Original OSM code has sum to zero constraint on beta, unlike
-                    ### POM which has beta_1 = 0
-                    beta <- c(beta, -sum(beta))
+                    if (constraint.sum.zero) beta <- c(beta, -sum(beta))
+                    else beta <- c(0, beta)
                     list(n=n,p=p,mu=mu,phi=phi,alpha=alpha,beta=beta)
                 },
                 "rpi"={
-                    alpha <- invect[(q-1+q-2+1):(q-1+q-2+RG-1)]
-                    ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-                    ### POM which has alpha_1 = 0
-                    alpha <- c(alpha, -sum(alpha))
                     beta <- invect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+p-1)]
-                    ### TODO: Original OSM code has sum to zero constraint on beta, unlike
-                    ### POM which has beta_1 = 0
-                    beta <- c(beta, -sum(beta))
+                    if (constraint.sum.zero) beta <- c(beta, -sum(beta))
+                    else beta <- c(0, beta)
 
                     gamma <- c(invect[(q-1+q-2+RG-1+p-1+1):(q-1+q-2+RG-1+p-1+(RG-1)*(p-1))])
                     gamma <- matrix(gamma,nrow=RG-1,ncol=p-1,byrow=T)
                     gamma <- cbind(gamma,-rowSums(gamma))
-                    # POM code has final row of gamma equal to negative sum of other rows,
-                    # but original OSM code has FIRST row of gamma equal to negative sum of
-                    # other rows
-                    # gamma <- rbind(gamma,-colSums(gamma))
+                    # Original POM code had final row of gamma equal to negative
+                    # sum of other rows, but this code follows original OSM code,
+                    # has FIRST row of gamma equal to negative sum of other rows
                     gamma <- rbind(-colSums(gamma),gamma)
 
                     list(n=n,p=p,mu=mu,phi=phi,alpha=alpha,beta=beta,gamma=gamma)
                 },
                 "rc"={
-                    alpha <- invect[(q-1+q-2+1):(q-1+q-2+RG-1)]
-                    ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-                    ### POM which has alpha_1 = 0
-                    alpha <- c(alpha, -sum(alpha))
                     beta <- invect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+CG-1)]
-                    ### TODO: Original OSM code has sum to zero constraint on beta, unlike
-                    ### POM which has beta_1 = 0
-                    beta <- c(beta, -sum(beta))
+                    if (constraint.sum.zero) beta <- c(beta, -sum(beta))
+                    else beta <- c(0, beta)
                     list(n=n,p=p,mu=mu,phi=phi,alpha=alpha,beta=beta)
                 },
                 "rci"={
-                    alpha <- invect[(q-1+q-2+1):(q-1+q-2+RG-1)]
-                    ### TODO: Original OSM code has sum to zero constraint on alpha, unlike
-                    ### POM which has alpha_1 = 0
-                    alpha <- c(alpha, -sum(alpha))
                     beta <- invect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+CG-1)]
-                    ### TODO: Original OSM code has sum to zero constraint on beta, unlike
-                    ### POM which has beta_1 = 0
-                    beta <- c(beta, -sum(beta))
+                    if (constraint.sum.zero) beta <- c(beta, -sum(beta))
+                    else beta <- c(0, beta)
 
-                    gamma <- c(invect[(q-1+q-2+RG-1+CG-1+1):(q-1+q-2+RG-1+CG-1+(RG-1)*(CG-1))])
+                    gamma <- invect[(q-1+q-2+RG-1+CG-1+1):(q-1+q-2+RG-1+CG-1+(RG-1)*(CG-1))]
                     gamma <- matrix(gamma,nrow=RG-1,ncol=CG-1,byrow=T)
                     gamma <- cbind(gamma,-rowSums(gamma))
-                    # POM code has final row of gamma equal to negative sum of other rows,
-                    # but original OSM code has FIRST row of gamma equal to negative sum of
-                    # other rows
-                    # gamma <- rbind(gamma,-colSums(gamma))
+                    # Original POM code had final row of gamma equal to negative
+                    # sum of other rows, but this code follows original OSM code,
+                    # has FIRST row of gamma equal to negative sum of other rows
                     gamma <- rbind(-colSums(gamma),gamma)
 
                     list(n=n,p=p,mu=mu,phi=phi,alpha=alpha,beta=beta,gamma=gamma)
                 })
         },
         "POM"={
-            mu=(invect[1:(q-1)])
+            mu <- invect[1:(q-1)]
+            alpha <- invect[(q-1+1):(q-1+RG-1)]
+            if (constraint.sum.zero) alpha <- c(alpha, -sum(alpha))
+            else alpha <- c(0, alpha)
+
             switch(submodel,
                 "rs"={
-                    alpha=c(0,invect[(q):(q-1+RG-1)])
                     list(n=n,p=p,mu=mu,alpha=alpha)
                 },
                 "rp"={
-                    alpha=c(0,invect[(q):(q-1+RG-1)])
-                    beta=c(0,invect[(q-1+RG-1+1):(q-1+RG-1+p-1)])
+                    beta <- invect[(q-1+RG-1+1):(q-1+RG-1+p-1)]
+                    if (constraint.sum.zero) beta <- c(beta, -sum(beta))
+                    else beta <- c(0, beta)
+
                     list(n=n,p=p,mu=mu,alpha=alpha,beta=beta)
                 },
                 "rpi"={
-                    alpha=c(0,invect[(q):(q+RG-2)])
-                    beta=c(0,invect[(q-1+RG-1+1):(q-1+RG-1+p-1)])
+                    beta <- invect[(q-1+RG-1+1):(q-1+RG-1+p-1)]
+                    if (constraint.sum.zero) beta <- c(beta, -sum(beta))
+                    else beta <- c(0, beta)
 
-                    gamma=c(invect[(q-1+RG-1+p-1+1):(q-1+RG-1+p-1+(RG-1)*(p-1))])
-                    gamma=matrix(gamma,nrow=RG-1,ncol=p-1,byrow=T)
+                    gamma <- invect[(q-1+RG-1+p-1+1):(q-1+RG-1+p-1+(RG-1)*(p-1))]
+                    gamma <- matrix(gamma,nrow=RG-1,ncol=p-1,byrow=T)
                     gamma <- cbind(gamma,-rowSums(gamma))
-                    gamma <- rbind(gamma,-colSums(gamma))
+                    # Original POM code had final row of gamma equal to negative
+                    # sum of other rows, but this code follows original OSM code,
+                    # has FIRST row of gamma equal to negative sum of other rows
+                    gamma <- rbind(-colSums(gamma),gamma)
 
                     list(n=n,p=p,mu=mu,alpha=alpha,beta=beta,gamma=gamma)
                 },
                 "rc"={
-                    alpha=c(0,invect[(q):(q-1+RG-1)])
-                    beta=c(0,invect[(q-1+RG-1+1):(q-1+RG-1+CG-1)])
+                    beta <- invect[(q-1+RG-1+1):(q-1+RG-1+CG-1)]
+                    if (constraint.sum.zero) beta <- c(beta, -sum(beta))
+                    else beta <- c(0, beta)
+
                     list(n=n,p=p,mu=mu,alpha=alpha,beta=beta)
                 },
                 "rci"={
-                    alpha=c(0,invect[(q):(q+RG-2)])
-                    beta=c(0,invect[(q-1+RG-1+1):(q-1+RG-1+CG-1)])
+                    beta <- invect[(q-1+RG-1+1):(q-1+RG-1+CG-1)]
+                    if (constraint.sum.zero) beta <- c(beta, -sum(beta))
+                    else beta <- c(0, beta)
 
-                    gamma=c(invect[(q-1+RG-1+CG-1+1):(q-1+RG-1+CG-1+(RG-1)*(CG-1))])
-                    gamma=matrix(gamma,nrow=RG-1,ncol=CG-1,byrow=T)
+                    gamma <- invect[(q-1+RG-1+CG-1+1):(q-1+RG-1+CG-1+(RG-1)*(CG-1))]
+                    gamma <- matrix(gamma,nrow=RG-1,ncol=CG-1,byrow=T)
                     gamma <- cbind(gamma,-rowSums(gamma))
-                    gamma <- rbind(gamma,-colSums(gamma))
+                    # Original POM code had final row of gamma equal to negative
+                    # sum of other rows, but this code follows original OSM code,
+                    # has FIRST row of gamma equal to negative sum of other rows
+                    gamma <- rbind(-colSums(gamma),gamma)
 
                     list(n=n,p=p,mu=mu,alpha=alpha,beta=beta,gamma=gamma)
                 })
@@ -879,13 +880,13 @@ calc.theta <- function(parlist, model, submodel) {
 }
 
 calc.ll <- function(invect, y.mat, model, submodel, ppr.m, pi.v, RG,
-    ppc.m=NULL, kappa.v=NULL, CG=NULL, partial=FALSE) {
+    ppc.m=NULL, kappa.v=NULL, CG=NULL, constraint.sum.zero=TRUE, partial=FALSE) {
     n=nrow(y.mat)
     p=ncol(y.mat)
     q=length(unique(as.vector(y.mat)))
 
     parlist <- unpack.parvec(invect,model=model,submodel=submodel,
-        n=n,p=p,q=q,RG=RG,CG=CG,constraint.sum.zero = TRUE)
+        n=n,p=p,q=q,RG=RG,CG=CG,constraint.sum.zero=constraint.sum.zero)
 
     this.theta <- calc.theta(parlist,model=model,submodel=submodel)
 
@@ -900,13 +901,15 @@ calc.ll <- function(invect, y.mat, model, submodel, ppr.m, pi.v, RG,
 }
 
 run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
+                              constraint.sum.zero=TRUE,
     EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10)) {
     n=nrow(y.mat)
     p=ncol(y.mat)
     q=length(unique(as.vector(y.mat)))
     RG=length(pi.v)
 
-    parlist.in <- unpack.parvec(invect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
+    parlist.in <- unpack.parvec(invect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,
+                                constraint.sum.zero=constraint.sum.zero)
     if (any(sapply(parlist.in,function(elt) any(is.na(elt))))) stop("Error unpacking parameters for model.")
     if (any(sapply(parlist.in,function(elt) is.null(elt)))) stop("Error unpacking parameters for model.")
 
@@ -938,6 +941,7 @@ run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
                            ppr.m=ppr.m,
                            pi.v=pi.v,
                            RG=RG,
+                           constraint.sum.zero=constraint.sum.zero,
                            partial=TRUE,
                            method="L-BFGS-B",
                            hessian=F,control=list(maxit=10000))
@@ -945,7 +949,8 @@ run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
         outvect <- optim.fit$par
         llc <- -calc.ll(outvect,y.mat,model=model,submodel=submodel,ppr.m,pi.v,RG, partial=FALSE)
 
-        parlist.out <- unpack.parvec(outvect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,constraint.sum.zero = TRUE)
+        parlist.out <- unpack.parvec(outvect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,
+                                     constraint.sum.zero=constraint.sum.zero)
         theta.arr <- calc.theta(parlist.out,model=model,submodel=submodel)
 
         ## Report the current incomplete-data log-likelihood, which is the
@@ -971,6 +976,7 @@ run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
     names(out1) <- c("n","p","Final.ll","Final.llc","npar","R")
     list("info"=out1,
          "criteria"=unlist(criteria),
+         "constraint.sum.zero"=constraint.sum.zero,
          "initvect"=initvect,
          "parlist.out"=parlist.out,
          "pi"=pi.v,
@@ -979,6 +985,7 @@ run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
 }
 
 run.EM.bicluster <- function(invect, y.mat, model, submodel, pi.v, kappa.v,
+                             constraint.sum.zero=TRUE,
     EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10)) {
     n <- nrow(y.mat)
     p <- ncol(y.mat)
@@ -986,7 +993,8 @@ run.EM.bicluster <- function(invect, y.mat, model, submodel, pi.v, kappa.v,
     RG <- length(pi.v)
     CG <- length(kappa.v)
 
-    parlist.in <- unpack.parvec(invect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,CG=CG,constraint.sum.zero = TRUE)
+    parlist.in <- unpack.parvec(invect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,CG=CG,
+                                constraint.sum.zero=constraint.sum.zero)
     if (any(sapply(parlist.in,function(elt) any(is.na(elt))))) stop("Error unpacking parameters for model.")
     if (any(sapply(parlist.in,function(elt) is.null(elt)))) stop("Error unpacking parameters for model.")
 
@@ -1028,6 +1036,7 @@ run.EM.bicluster <- function(invect, y.mat, model, submodel, pi.v, kappa.v,
             ppc.m=ppc.m,
             kappa.v=kappa.v,
             CG=CG,
+            constraint.sum.zero=constraint.sum.zero,
             partial=TRUE,
             method="L-BFGS-B",
             hessian=F,control=list(maxit=10000))
@@ -1039,7 +1048,7 @@ run.EM.bicluster <- function(invect, y.mat, model, submodel, pi.v, kappa.v,
             partial=FALSE)
 
         parlist.out <- unpack.parvec(outvect,model=model,submodel=submodel,
-            n=n,p=p,q=q,RG=RG,CG=CG,constraint.sum.zero = TRUE)
+            n=n,p=p,q=q,RG=RG,CG=CG,constraint.sum.zero=constraint.sum.zero)
         theta.arr <- calc.theta(parlist.out,model=model,submodel=submodel)
 
         ## Report the current incomplete-data log-likelihood, which is the
@@ -1071,6 +1080,7 @@ run.EM.bicluster <- function(invect, y.mat, model, submodel, pi.v, kappa.v,
     names(out1) <- c("n","p","Final.ll","Final.llc","npar","R","C")
     list("info"=out1,
         "criteria"=unlist(criteria),
+        "constraint.sum.zero"=constraint.sum.zero,
         "initvect"=initvect,
         "parlist.out"=parlist.out,
         "pi"=pi.v,
