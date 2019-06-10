@@ -456,8 +456,8 @@ pombiclustering <- function(pomformula,
         # Save results:
         logl <- 0
         if((n<16)|(p<16)) {
-            if(CG^p<RG^n) logl <- Bicluster.IncllC(y.mat, theta.arr, pi.v, kappa.v, RG, CG)
-            else logl <- Bicluster.IncllR(y.mat, theta.arr, pi.v, kappa.v, RG, CG)
+            if(CG^p<RG^n) logl <- Bicluster.IncllC(y.mat, theta.arr, pi.v, kappa.v)
+            else logl <- Bicluster.IncllR(y.mat, theta.arr, pi.v, kappa.v)
         }
         npar <- q+2*CG+2*RG-5
 
@@ -648,8 +648,8 @@ pombiclustering <- function(pomformula,
         # Save results:
         logl <- 0
         if((n<16)|(p<16)) {
-            if(CG^p<RG^n) logl <- Bicluster.IncllC(y.mat, theta.arr, pi.v, kappa.v, RG, CG)
-            else logl <- Bicluster.IncllR(y.mat, theta.arr, pi.v, kappa.v, RG, CG)
+            if(CG^p<RG^n) logl <- Bicluster.IncllC(y.mat, theta.arr, pi.v, kappa.v)
+            else logl <- Bicluster.IncllR(y.mat, theta.arr, pi.v, kappa.v)
         }
         npar <- q+RG*CG+RG+CG-4
 
