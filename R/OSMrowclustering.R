@@ -76,13 +76,13 @@ rowclustering <- function(formula,
                           EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
                           constraint.sum.zero=TRUE, use.alternative.start=TRUE){
 
-    if(is.null(y.mat)) {
-        if (!is.null(data)) {
-            colnames(data)<-c("y","subject","question")
-            y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$question))
-        } else stop("y.mat and data cannot both be null. Please provide either a data matrix or a data frame.")
-    }
-    if (!is.null(pi.init) & (length(pi.init) != nclus.row | sum(pi.init) != 1)) stop("pi.init must be the same length as the number of row clusters, and must add up to 1")
+    validate.inputs(type="row",
+                    formula=formula, model=model, nclus.row=nclus.row,
+                    data=data, y.mat=y.mat, initvect=initvect, pi.init=pi.init,
+                    EM.control=EM.control, constraint.sum.zero=constraint.sum.zero,
+                    use.alternative.start=use.alternative.start)
+
+    if (is.null(y.mat)) y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$question))
 
     ## Replace defaults with user-provided values, so that any control parameters
     ## the user did not specify are not left blank:
@@ -193,13 +193,13 @@ columnclustering <- function(formula,
     EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
     constraint.sum.zero=TRUE, use.alternative.start=TRUE){
 
-    if(is.null(y.mat)) {
-        if (!is.null(data)) {
-            colnames(data)<-c("y","subject","question")
-            y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$question))
-        } else stop("y.mat and data cannot both be null. Please provide either a data matrix or a data frame.")
-    }
-    if (!is.null(kappa.init) & (length(kappa.init) != nclus.column | sum(kappa.init) != 1)) stop("kappa.init must be the same length as the number of column clusters, and must add up to 1")
+    validate.inputs(type="column",
+                    formula=formula, model=model, nclus.column=nclus.column,
+                    data=data, y.mat=y.mat, initvect=initvect, kappa.init=kappa.init,
+                    EM.control=EM.control, constraint.sum.zero=constraint.sum.zero,
+                    use.alternative.start=use.alternative.start)
+
+    if (is.null(y.mat)) y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$question))
 
     ## Replace defaults with user-provided values, so that any control parameters
     ## the user did not specify are not left blank:
@@ -237,12 +237,13 @@ columnclustering <- function(formula,
     column.parlist <- results$parlist.out
     column.parlist$beta <- results$parlist.out$alpha
     if (!is.null(results$parlist.out$beta)) column.parlist$alpha <- results$parlist.out$beta
+
     column.results <- list(info=results$info,criteria=results$criteria,
                            initvect=initvect, parlist.out=column.parlist,
                            kappa=results$pi, ppc=results$ppr,
                             ColumnClusters=results$RowClusters)
-    column.results$info$C <- column.results.info$R
-    column.results$info$R <- NULL
+    column.results$info['C'] <- column.results$info['R']
+    column.results$info <- column.results$info[-which(names(column.results$info) == "R")]
 
     column.results
 }
@@ -338,14 +339,15 @@ biclustering <- function(formula,
     constraint.sum.zero=TRUE,
     use.alternative.start=TRUE){
 
-    if(is.null(y.mat)) {
-        if (!is.null(data)) {
-            colnames(data)<-c("y","subject","question")
-            y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$question))
-        } else stop("y.mat and data cannot both be null. Please provide either a data matrix or a data frame.")
-    }
-    if (!is.null(pi.init) & (length(pi.init) != nclus.row | sum(pi.init) != 1)) stop("pi.init must be the same length as the number of row clusters, and must add up to 1")
-    if (!is.null(kappa.init) & (length(kappa.init) != nclus.column | sum(kappa.init) != 1)) stop("kappa.init must be the same length as the number of column clusters, and must add up to 1")
+    validate.inputs(type="bi",
+                    formula=formula, model=model,
+                    nclus.row=nclus.row, nclus.column=nclus.column,
+                    data=data, y.mat=y.mat, initvect=initvect,
+                    pi.init=bi.init,kappa.init=kappa.init,
+                    EM.control=EM.control, constraint.sum.zero=constraint.sum.zero,
+                    use.alternative.start=use.alternative.start)
+
+    if (is.null(y.mat)) y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$question))
 
     ## Replace defaults with user-provided values, so that any control parameters
     ## the user did not specify are not left blank:
@@ -376,6 +378,72 @@ biclustering <- function(formula,
 
     run.EM.bicluster(invect=initvect, y.mat=y.mat, model=model, submodel=submodel,
         pi.v=pi.init, kappa.v=kappa.init, EM.control=EM.control)
+}
+
+validate.inputs <- function(type,
+                            formula,
+                            model,
+                            nclus.row=NULL,nclus.column=NULL,
+                            data=NULL,y.mat=NULL,
+                            initvect=NULL,
+                            pi.init=NULL, kappa.init=NULL,
+                            EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
+                            constraint.sum.zero=TRUE, use.alternative.start=TRUE) {
+
+    ## Note the double-& and double-| which stops the later parts being checked
+    ## if the earlier parts are false
+
+
+    ## Check that model is valid
+    if (!is.character(model) || !is.vector(model) || length(model) != 1) stop("model must be a string, either 'OSM' or 'POM'.")
+    if (!(model %in% c("OSM","POM"))) stop("model must be either 'OSM' or POM' for the ordered stereotype and proportional odds models, respectively.")
+
+    ## Check that clustering settings are valid
+    if (!is.null(nclus.row)) {
+        if (!is.vector(nclus.row) || length(nclus.row) != 1 || nclus.row <= 1 ||
+            nclus.row %% 1 != 0 ) {
+            stop("nclus.row must be an integer from 2 to the number of rows/subjects in the data.")
+        }
+    }
+    if (!is.null(nclus.column)) {
+        if (!is.vector(nclus.column) || length(nclus.column) != 1 ||
+            nclus.column <= 1 || nclus.column %% 1 != 0) {
+            stop("nclus.column must be an integer from 2 to the number of columns/questions in the data.")
+        }
+    }
+
+    if(is.null(y.mat)) {
+        if (!is.null(data)) {
+            if (!is.data.frame(data) || ncol(data) != 3) stop("If supplied, data must be a data frame with 3 columns, in the order response, subject and question.")
+            colnames(data)<-c("y","subject","question")
+        } else stop("y.mat and data cannot both be null. Please provide either a data matrix or a data frame.")
+    } else {
+        if (!is.matrix(y.mat)) stop("If supplied, y.mat must be a matrix.")
+    }
+
+    if (!is.null(data) && !is.null(nclus.row) && nclus.row >= length(unique(data$subject))) stop("nclus.row must be smaller than the number of subjects in the data.")
+    if (!is.null(y.mat) && !is.null(nclus.row) && nclus.row >= nrow(y.mat)) stop("nclus.row must be smaller than the number of rows of y.mat.")
+    if (!is.null(data) && !is.null(nclus.column) && nclus.column >= length(unique(data$question))) stop("nclus.column must be smaller than the number of questions in the data.")
+    if (!is.null(y.mat) && !is.null(nclus.column) &&  nclus.column >= ncol(y.mat)) stop("nclus.column must be smaller than the number of columns of y.mat.")
+
+    if (!is.null(initvect)) {
+        if (!is.vector(initvect) || !is.numeric(initvect) || any(is.infinite(initvect))) stop("If supplied, initvect must be a numeric vector with finite values.")
+        if (length(initvect) > 20) stop("initvect is too long. Please check inputs and try again.")
+    }
+
+    if (!is.null(pi.init)) {
+        if (!is.vector(pi.init) || !is.numeric(pi.init) || any(pi.init < 0) || any(pi.init > 1)) stop("If supplied, pi.init must be a vector of numbers between 0 and 1.")
+        if (length(pi.init) != nclus.row || sum(pi.init) != 1) stop("pi.init must be the same length as the number of row clusters, and must add up to 1")
+    }
+    if (!is.null(kappa.init)) {
+        if (!is.vector(kappa.init) || !is.numeric(kappa.init) || any(kappa.init < 0) | any(kappa.init > 1)) stop("If supplied, kappa.init must be a vector of numbers between 0 and 1.")
+        if (length(kappa.init) != nclus.column || sum(kappa.init) != 1) stop("kappa.init must be the same length as the number of column clusters, and must add up to 1")
+    }
+
+    if (!is.logical(constraint.sum.zero) || !is.vector(constraint.sum.zero) || length(constraint.sum.zero) != 1) stop("constraint.sum.zero must be TRUE or FALSE.")
+    if (!is.logical(use.alternative.start) || !is.vector(use.alternative.start) || length(use.alternative.start) != 1) stop("use.alternative.start must be TRUE or FALSE.")
+
+    if (!is.list(EM.control) || length(EM.control) == 0 || length(EM.control) > 3) stop("If supplied, EM.control must be a list and can have no more than 3 elements10.")
 }
 
 generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL, pi.init=NULL,
