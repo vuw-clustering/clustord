@@ -10,3 +10,6 @@ License: What license is it under?
 Imports: Rcpp (>= 1.0.1), 
          MASS
 LinkingTo: Rcpp, RcppArmadillo
+Suggests: 
+    testthat (>= 2.1.0)
+RoxygenNote: 6.1.1
