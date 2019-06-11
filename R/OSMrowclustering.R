@@ -399,13 +399,15 @@ validate.inputs <- function(type,
     if (!(model %in% c("OSM","POM"))) stop("model must be either 'OSM' or POM' for the ordered stereotype and proportional odds models, respectively.")
 
     ## Check that clustering settings are valid
-    if (!is.null(nclus.row)) {
+    if (type %in% c("row","bi") && is.null(nclus.row)) stop("For row clustering or biclustering, nclus.row cannot be null.")
+    else if (!is.null(nclus.row)) {
         if (!is.vector(nclus.row) || length(nclus.row) != 1 || nclus.row <= 1 ||
             nclus.row %% 1 != 0 ) {
             stop("nclus.row must be an integer from 2 to the number of rows/subjects in the data.")
         }
     }
-    if (!is.null(nclus.column)) {
+    if (type %in% c("column","bi") && is.null(nclus.column)) stop("For column clustering or biclustering, nclus.column cannot be null.")
+    else if (!is.null(nclus.column)) {
         if (!is.vector(nclus.column) || length(nclus.column) != 1 ||
             nclus.column <= 1 || nclus.column %% 1 != 0) {
             stop("nclus.column must be an integer from 2 to the number of columns/questions in the data.")
