@@ -82,6 +82,7 @@ rowclustering <- function(formula,
                     EM.control=EM.control, constraint.sum.zero=constraint.sum.zero,
                     use.alternative.start=use.alternative.start)
 
+    if (!is.null(data)) colnames(data)<-c("y","subject","question")
     if (is.null(y.mat)) y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$question))
 
     ## Replace defaults with user-provided values, so that any control parameters
@@ -89,14 +90,14 @@ rowclustering <- function(formula,
     default.EM.control <- as.list(args(rowclustering))$EM.control
     EM.control <- replacedefaults(default.EM.control, EM.control)
 
-    print(paste("EM algorithm for",model))
-
     submodel <- switch(formula,
                        "Y~row"="rs",
                        "Y~row+column"="rp",
                        "Y~row+column+row:column"="rpi",
                        "Y~row*column"="rpi",
                        stop('Error in formula'))
+
+    print(paste("EM algorithm for",model))
 
     RG <- nclus.row
 
@@ -199,14 +200,13 @@ columnclustering <- function(formula,
                     EM.control=EM.control, constraint.sum.zero=constraint.sum.zero,
                     use.alternative.start=use.alternative.start)
 
+    if (!is.null(data)) colnames(data)<-c("y","subject","question")
     if (is.null(y.mat)) y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$question))
 
     ## Replace defaults with user-provided values, so that any control parameters
     ## the user did not specify are not left blank:
     default.EM.control <- as.list(args(rowclustering))$EM.control
     EM.control <- replacedefaults(default.EM.control, EM.control)
-
-    print(paste("EM algorithm for",model))
 
     ## Now switch to calling everything in terms of row clustering
     submodel <- switch(formula,
@@ -215,6 +215,8 @@ columnclustering <- function(formula,
         "Y~row+column+row:column"="rpi",
         "Y~row*column"="rpi",
         stop('Error in formula'))
+
+    print(paste("EM algorithm for",model))
 
     RG <- nclus.column
     pi.init <- kappa.init
@@ -343,10 +345,11 @@ biclustering <- function(formula,
                     formula=formula, model=model,
                     nclus.row=nclus.row, nclus.column=nclus.column,
                     data=data, y.mat=y.mat, initvect=initvect,
-                    pi.init=bi.init,kappa.init=kappa.init,
+                    pi.init=pi.init, kappa.init=kappa.init,
                     EM.control=EM.control, constraint.sum.zero=constraint.sum.zero,
                     use.alternative.start=use.alternative.start)
 
+    if (!is.null(data)) colnames(data)<-c("y","subject","question")
     if (is.null(y.mat)) y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$question))
 
     ## Replace defaults with user-provided values, so that any control parameters
@@ -354,13 +357,13 @@ biclustering <- function(formula,
     default.EM.control <- as.list(args(rowclustering))$EM.control
     EM.control <- replacedefaults(default.EM.control, EM.control)
 
-    print(paste("EM algorithm for",model))
-
     submodel <- switch(formula,
         "Y~row+column"="rc",
         "Y~row+column+row:column"="rci",
         "Y~row*column"="rci",
         stop('Error in formula'))
+
+    print(paste("EM algorithm for",model))
 
     RG <- nclus.row
     CG <- nclus.column
@@ -393,6 +396,7 @@ validate.inputs <- function(type,
     ## Note the double-& and double-| which stops the later parts being checked
     ## if the earlier parts are false
 
+    if (!is.character(formula) || !is.vector(formula) || length(formula) != 1) stop("formula must be a string.")
 
     ## Check that model is valid
     if (!is.character(model) || !is.vector(model) || length(model) != 1) stop("model must be a string, either 'OSM' or 'POM'.")
@@ -402,25 +406,30 @@ validate.inputs <- function(type,
     if (type %in% c("row","bi") && is.null(nclus.row)) stop("For row clustering or biclustering, nclus.row cannot be null.")
     else if (!is.null(nclus.row)) {
         if (!is.vector(nclus.row) || length(nclus.row) != 1 || nclus.row <= 1 ||
-            nclus.row %% 1 != 0 ) {
-            stop("nclus.row must be an integer from 2 to the number of rows/subjects in the data.")
+            nclus.row %% 1 != 0 || is.na(nclus.row)) {
+            stop("nclus.row must be an integer, from 2 to the number of rows/observations in the data.")
         }
     }
     if (type %in% c("column","bi") && is.null(nclus.column)) stop("For column clustering or biclustering, nclus.column cannot be null.")
     else if (!is.null(nclus.column)) {
         if (!is.vector(nclus.column) || length(nclus.column) != 1 ||
-            nclus.column <= 1 || nclus.column %% 1 != 0) {
-            stop("nclus.column must be an integer from 2 to the number of columns/questions in the data.")
+            nclus.column <= 1 || nclus.column %% 1 != 0 || is.na(nclus.column)) {
+            stop("nclus.column must be an integer, from 2 to the number of columns/questions in the data.")
         }
     }
 
     if(is.null(y.mat)) {
         if (!is.null(data)) {
-            if (!is.data.frame(data) || ncol(data) != 3) stop("If supplied, data must be a data frame with 3 columns, in the order response, subject and question.")
+            if (!is.data.frame(data) || ncol(data) != 3) stop("If supplied, data must be a data frame with 3 columns, in the order 'response', 'subject', 'question'.")
+            if (any(sapply(data,is.factor))) stop("data cannot have factor columns. Please convert to numeric values.")
+            if (any(sapply(data,is.list)) || any(is.na(data)) || any(sapply(data,is.infinite)) || any(data %% 1 != 0) ||
+                any(data < 1) || all(data[[1]] > 1)) stop("The first column of data must be integers from 1 to q, the second column must be integers from 1 to the number of observations, and the third column must be integers from 1 to the number of variables.")
             colnames(data)<-c("y","subject","question")
         } else stop("y.mat and data cannot both be null. Please provide either a data matrix or a data frame.")
     } else {
         if (!is.matrix(y.mat)) stop("If supplied, y.mat must be a matrix.")
+        if (any(is.character(y.mat)) || any(y.mat %% 1 != 0 || any(is.na(y.mat)) || any(y.mat < 1) || any(is.infinite(y.mat)) ||
+            all(y.mat > 1))) stop("If supplied, y.mat must be a matrix of integers, where every column/question can take values from 1 to q.")
     }
 
     if (!is.null(data) && !is.null(nclus.row) && nclus.row >= length(unique(data$subject))) stop("nclus.row must be smaller than the number of subjects in the data.")
@@ -429,23 +438,29 @@ validate.inputs <- function(type,
     if (!is.null(y.mat) && !is.null(nclus.column) &&  nclus.column >= ncol(y.mat)) stop("nclus.column must be smaller than the number of columns of y.mat.")
 
     if (!is.null(initvect)) {
-        if (!is.vector(initvect) || !is.numeric(initvect) || any(is.infinite(initvect))) stop("If supplied, initvect must be a numeric vector with finite values.")
+        if (!is.vector(initvect) || !is.numeric(initvect) || any(is.na(initvect)) ||
+            any(is.infinite(initvect))) stop("If supplied, initvect must be a numeric vector with finite values.")
         if (length(initvect) > 20) stop("initvect is too long. Please check inputs and try again.")
     }
 
     if (!is.null(pi.init)) {
-        if (!is.vector(pi.init) || !is.numeric(pi.init) || any(pi.init < 0) || any(pi.init > 1)) stop("If supplied, pi.init must be a vector of numbers between 0 and 1.")
+        if (!is.vector(pi.init) || !is.numeric(pi.init) || any(is.na(pi.init)) ||
+            any(pi.init < 0) || any(pi.init > 1)) stop("If supplied, pi.init must be a vector of numbers between 0 and 1.")
         if (length(pi.init) != nclus.row || sum(pi.init) != 1) stop("pi.init must be the same length as the number of row clusters, and must add up to 1")
     }
     if (!is.null(kappa.init)) {
-        if (!is.vector(kappa.init) || !is.numeric(kappa.init) || any(kappa.init < 0) | any(kappa.init > 1)) stop("If supplied, kappa.init must be a vector of numbers between 0 and 1.")
+        if (!is.vector(kappa.init) || !is.numeric(kappa.init) || any(is.na(kappa.init)) ||
+            any(kappa.init < 0) | any(kappa.init > 1)) stop("If supplied, kappa.init must be a vector of numbers between 0 and 1.")
         if (length(kappa.init) != nclus.column || sum(kappa.init) != 1) stop("kappa.init must be the same length as the number of column clusters, and must add up to 1")
     }
 
-    if (!is.logical(constraint.sum.zero) || !is.vector(constraint.sum.zero) || length(constraint.sum.zero) != 1) stop("constraint.sum.zero must be TRUE or FALSE.")
-    if (!is.logical(use.alternative.start) || !is.vector(use.alternative.start) || length(use.alternative.start) != 1) stop("use.alternative.start must be TRUE or FALSE.")
+    if (!is.logical(constraint.sum.zero) || !is.vector(constraint.sum.zero) ||
+        length(constraint.sum.zero) != 1 || is.na(constraint.sum.zero)) stop("constraint.sum.zero must be TRUE or FALSE.")
+    if (!is.logical(use.alternative.start) || !is.vector(use.alternative.start) ||
+        length(use.alternative.start) != 1 || is.na(use.alternative.start)) stop("use.alternative.start must be TRUE or FALSE.")
 
-    if (!is.list(EM.control) || length(EM.control) == 0 || length(EM.control) > 3) stop("If supplied, EM.control must be a list and can have no more than 3 elements10.")
+    if (!is.list(EM.control) || length(EM.control) == 0 || length(EM.control) > 3 ||
+        !any(names(EM.control) %in% c("EMcycles","EMstoppingpar","startEMcycles"))) stop("If supplied, EM.control must be a list of control parameters for the EM algorithm. Please see the manual for more info.")
 }
 
 generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL, pi.init=NULL,
