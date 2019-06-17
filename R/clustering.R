@@ -597,27 +597,6 @@ calc.theta <- function(parlist, model, submodel) {
         })
 }
 
-calc.ll <- function(invect, y.mat, model, submodel, ppr.m, pi.v, RG,
-    ppc.m=NULL, kappa.v=NULL, CG=NULL, constraint.sum.zero=TRUE, partial=FALSE) {
-    n=nrow(y.mat)
-    p=ncol(y.mat)
-    q=length(unique(as.vector(y.mat)))
-
-    parlist <- unpack.parvec(invect,model=model,submodel=submodel,
-        n=n,p=p,q=q,RG=RG,CG=CG,constraint.sum.zero=constraint.sum.zero)
-
-    this.theta <- calc.theta(parlist,model=model,submodel=submodel)
-
-    this.theta[this.theta<=0]=lower.limit
-    pi.v[pi.v==0]=lower.limit
-
-    if (submodel %in% c("rs","rp","rpi")) {
-        Rcluster.ll(y.mat, this.theta, ppr.m, pi.v, RG, partial=partial)
-    } else if (submodel %in% c("rc","rci")) {
-        Bicluster.ll(y.mat, this.theta, ppr.m, ppc.m, pi.v, kappa.v, partial=partial)
-    }
-}
-
 run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
                               constraint.sum.zero=TRUE,
     EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10)) {
