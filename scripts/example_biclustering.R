@@ -1,4 +1,6 @@
 source("R/clustering.R")
+source("R/ordinalmodels.R")
+source("R/generatestart.R")
 source("R/likelihoods_memberships.R")
 source("R/utils.R")
 

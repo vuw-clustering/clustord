@@ -1,4 +1,8 @@
-source("R/biclustering.R")
+source("R/clustering.R")
+source("R/ordinalmodels.R")
+source("R/generatestart.R")
+source("R/likelihoods_memberships.R")
+source("R/utils.R")
 
 y.mat=read.csv("R/STAT292eval.txt",F,sep="") # We read the data
 y.mat=matrix(unlist(y.mat),nrow=nrow(y.mat),byrow=F) # We read the data in a matrix
@@ -22,12 +26,10 @@ dim(y.mat)
 q <- length(table(y.mat)) # number of categories
 print(paste("q=",q,sep=""))
 
-pombiclustering("Y~row+column+row:column",
+biclustering("Y~row+column+row:column", model="OSM",
                             nclus.row=2,nclus.column=2,
                             y.mat=y.mat)
 
-### TODO:: add code to check none of the data matrix is NAs otherwise kmeans will
-### fall over...
-
-
-#### TODO: get rid of use of "round" in outputs from inner fitting functions.
+rowclustering("Y~row+column+row:column", model="OSM",
+             nclus.row=2,
+             y.mat=y.mat)
