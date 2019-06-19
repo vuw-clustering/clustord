@@ -118,9 +118,10 @@ rowclustering <- function(formula,
     if (is.null(initvect) | is.null(pi.init)) {
         ## generate.start will keep using whichever of initvect and pi.init is not null
         start.par <- generate.start.rowcluster(y.mat, model=model, submodel=submodel, RG=RG,
-                                    initvect=initvect, pi.init=pi.init,
-                                    constraint.sum.zero=constraint.sum.zero,
-                                    use.alternative.start=use.alternative.start)
+                                               initvect=initvect, pi.init=pi.init,
+                                               EM.control=EM.control,
+                                               constraint.sum.zero=constraint.sum.zero,
+                                               use.alternative.start=use.alternative.start)
         initvect <- start.par$initvect
         pi.init <- start.par$pi.init
     }
@@ -252,8 +253,10 @@ columnclustering <- function(formula,
     if (is.null(initvect) | is.null(pi.init)) {
         ## generate.start will keep using whichever of initvect and kappa.init is not null
         start.par <- generate.start.rowcluster(y.mat.transp, model=model, submodel=submodel, RG=RG,
-            initvect=initvect, pi.init=kappa.init, constraint.sum.zero=constraint.sum.zero,
-            use.alternative.start=use.alternative.start)
+                                               initvect=initvect, pi.init=kappa.init,
+                                               EM.control=EM.control,
+                                               constraint.sum.zero=constraint.sum.zero,
+                                               use.alternative.start=use.alternative.start)
         initvect <- start.par$initvect
         pi.init <- start.par$pi.init
     }
@@ -414,8 +417,11 @@ biclustering <- function(formula,
         ## generate.start will keep using whichever of initvect and pi.init and
         ## kappa.init are not null
         start.par <- generate.start.bicluster(y.mat, model=model, submodel=submodel,
-            RG=RG, CG=CG, initvect=initvect, pi.init=pi.init, kappa.init=kappa.init,
-            use.alternative.start=use.alternative.start)
+                                              RG=RG, CG=CG, initvect=initvect,
+                                              pi.init=pi.init, kappa.init=kappa.init,
+                                              EM.control=EM.control,
+                                              constraint.sum.zero=constraint.sum.zero,
+                                              use.alternative.start=use.alternative.start)
         initvect <- start.par$initvect
         pi.init <- start.par$pi.init
         kappa.init <- start.par$kappa.init
