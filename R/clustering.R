@@ -60,6 +60,11 @@ lower.limit <- 0.00001
 #'     likelihood have both converged.
 #'     `startEMcycles` controls how many EM iterations are used when fitting the
 #'     simpler submodels to get starting values for fitting models with interaction.
+#' @param optim.method: (default "L-BFGS-B") method to use in optim within the M
+#'     step of the EM algorithm. Must be one of 'L-BFGS-B', 'BFGS', 'CG' or
+#'     'Nelder-Mead' (i.e. not the SANN method).
+#' @param optim.control control list for the `optim` call within the M step of the
+#'     EM algorithm. See the control list Details in the `optim` manual for more info.
 #' @param constraint.sum.zero (default TRUE) if true, use constraints that alpha
 #'     sums to zero and beta sums to zero; if false, use constraints alpha_1=0
 #'     and beta_1 = 0. Both versions have the final column of gamma equal to the
@@ -88,12 +93,14 @@ rowclustering <- function(formula,
                           pi.init=NULL,
                           EM.control=list(EMcycles=50, EMstoppingpar=1e-4,
                                           paramstopping=TRUE, startEMcycles=10),
+                          optim.method="L-BFGS-B", optim.control=list(...),
                           constraint.sum.zero=TRUE, use.alternative.start=TRUE){
 
     validate.inputs(type="row",
                     formula=formula, model=model, nclus.row=nclus.row,
                     data=data, y.mat=y.mat, initvect=initvect, pi.init=pi.init,
-                    EM.control=EM.control, constraint.sum.zero=constraint.sum.zero,
+                    EM.control=EM.control, optim.method=optim.method,
+                    constraint.sum.zero=constraint.sum.zero,
                     use.alternative.start=use.alternative.start)
 
     if (!is.null(data)) colnames(data)<-c("y","subject","question")
@@ -120,6 +127,8 @@ rowclustering <- function(formula,
         start.par <- generate.start.rowcluster(y.mat, model=model, submodel=submodel, RG=RG,
                                                initvect=initvect, pi.init=pi.init,
                                                EM.control=EM.control,
+                                               optim.method=optim.method,
+                                               optim.control=optim.control,
                                                constraint.sum.zero=constraint.sum.zero,
                                                use.alternative.start=use.alternative.start)
         initvect <- start.par$initvect
@@ -128,7 +137,8 @@ rowclustering <- function(formula,
 
     run.EM.rowcluster(invect=initvect, y.mat, model=model, submodel=submodel,
                       pi.v=pi.init, constraint.sum.zero=constraint.sum.zero,
-                      EM.control=EM.control)
+                      EM.control=EM.control,
+                      optim.method=optim.method, optim.control=optim.control)
 }
 
 #' Column clustering using Ordered Stereotype Models or Proportional Odds Models.
@@ -193,6 +203,11 @@ rowclustering <- function(formula,
 #'     likelihood have both converged.
 #'     `startEMcycles` controls how many EM iterations are used when fitting the
 #'     simpler submodels to get starting values for fitting models with interaction.
+#' @param optim.method: (default "L-BFGS-B") method to use in optim within the M
+#'     step of the EM algorithm. Must be one of 'L-BFGS-B', 'BFGS', 'CG' or
+#'     'Nelder-Mead' (i.e. not the SANN method).
+#' @param optim.control control list for the `optim` call within the M step of the
+#'     EM algorithm. See the control list Details in the `optim` manual for more info.
 #' @param constraint.sum.zero (default TRUE) if true, use constraints that alpha
 #'     sums to zero and beta sums to zero; if false, use constraints alpha_1=0
 #'     and beta_1 = 0. Both versions have the final column of gamma equal to the
@@ -220,12 +235,14 @@ columnclustering <- function(formula,
     initvect=NULL,
     kappa.init=NULL,
     EM.control=list(EMcycles=50, EMstoppingpar=1e-4, paramstopping=TRUE, startEMcycles=10),
+    optim.method="L-BFGS-B", optim.control=list(...),
     constraint.sum.zero=TRUE, use.alternative.start=TRUE){
 
     validate.inputs(type="column",
                     formula=formula, model=model, nclus.column=nclus.column,
                     data=data, y.mat=y.mat, initvect=initvect, kappa.init=kappa.init,
-                    EM.control=EM.control, constraint.sum.zero=constraint.sum.zero,
+                    EM.control=EM.control, optim.method=optim.method,
+                    constraint.sum.zero=constraint.sum.zero,
                     use.alternative.start=use.alternative.start)
 
     if (!is.null(data)) colnames(data)<-c("y","subject","question")
@@ -255,6 +272,8 @@ columnclustering <- function(formula,
         start.par <- generate.start.rowcluster(y.mat.transp, model=model, submodel=submodel, RG=RG,
                                                initvect=initvect, pi.init=kappa.init,
                                                EM.control=EM.control,
+                                               optim.method=optim.method,
+                                               optim.control=optim.control,
                                                constraint.sum.zero=constraint.sum.zero,
                                                use.alternative.start=use.alternative.start)
         initvect <- start.par$initvect
@@ -263,7 +282,8 @@ columnclustering <- function(formula,
 
     results <- run.EM.rowcluster(invect=initvect, y.mat.transp, model=model, submodel=submodel,
                                  pi.v=pi.init, constraint.sum.zero=constraint.sum.zero,
-                                 EM.control=EM.control)
+                                 EM.control=EM.control,
+                                 optim.method=optim.method, optim.control=optim.control)
 
     ## Now convert the results back to row clustering
     column.parlist <- results$parlist.out
@@ -348,6 +368,11 @@ columnclustering <- function(formula,
 #'     likelihood have both converged.
 #'     `startEMcycles` controls how many EM iterations are used when fitting the
 #'     simpler submodels to get starting values for fitting models with interaction.
+#' @param optim.method: (default "L-BFGS-B") method to use in optim within the M
+#'     step of the EM algorithm. Must be one of 'L-BFGS-B', 'BFGS', 'CG' or
+#'     'Nelder-Mead' (i.e. not the SANN method).
+#' @param optim.control control list for the `optim` call within the M step of the
+#'     EM algorithm. See the control list Details in the `optim` manual for more info.
 #' @param constraint.sum.zero (default TRUE) if true, use constraints that alpha
 #'     sums to zero and beta sums to zero; if false, use constraints alpha_1=0
 #'     and beta_1 = 0. Both versions have the final column of gamma equal to the
@@ -383,6 +408,7 @@ biclustering <- function(formula,
     pi.init=NULL,
     kappa.init=NULL,
     EM.control=list(EMcycles=50, EMstoppingpar=1e-4, paramstopping=TRUE, startEMcycles=10),
+    optim.method="L-BFGS-B", optim.control=list(...),
     constraint.sum.zero=TRUE,
     use.alternative.start=TRUE){
 
@@ -391,7 +417,8 @@ biclustering <- function(formula,
                     nclus.row=nclus.row, nclus.column=nclus.column,
                     data=data, y.mat=y.mat, initvect=initvect,
                     pi.init=pi.init, kappa.init=kappa.init,
-                    EM.control=EM.control, constraint.sum.zero=constraint.sum.zero,
+                    EM.control=EM.control, optim.method=optim.method,
+                    constraint.sum.zero=constraint.sum.zero,
                     use.alternative.start=use.alternative.start)
 
     if (!is.null(data)) colnames(data)<-c("y","subject","question")
@@ -420,6 +447,8 @@ biclustering <- function(formula,
                                               RG=RG, CG=CG, initvect=initvect,
                                               pi.init=pi.init, kappa.init=kappa.init,
                                               EM.control=EM.control,
+                                              optim.method=optim.method,
+                                              optim.control=optim.control,
                                               constraint.sum.zero=constraint.sum.zero,
                                               use.alternative.start=use.alternative.start)
         initvect <- start.par$initvect
@@ -428,7 +457,12 @@ biclustering <- function(formula,
     }
 
     run.EM.bicluster(invect=initvect, y.mat=y.mat, model=model, submodel=submodel,
-        pi.v=pi.init, kappa.v=kappa.init, EM.control=EM.control)
+        pi.v=pi.init, kappa.v=kappa.init, EM.control=EM.control,
+        optim.method=optim.method, optim.control=optim.control)
+}
+
+default.optim.control <- function() {
+    list(maxit=100,trace=0)
 }
 
 validate.inputs <- function(type,
@@ -439,6 +473,7 @@ validate.inputs <- function(type,
                             initvect=NULL,
                             pi.init=NULL, kappa.init=NULL,
                             EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
+                            optim.method="L-BFGS-B",
                             constraint.sum.zero=TRUE, use.alternative.start=TRUE) {
 
     ## Note the double-& and double-| which stops the later parts being checked
@@ -511,6 +546,9 @@ validate.inputs <- function(type,
         !any(names(EM.control) %in% c("EMcycles","EMstoppingpar","paramstopping","startEMcycles"))) {
         stop("If supplied, EM.control must be a list of control parameters for the EM algorithm. Please see the manual for more info.")
     }
+
+    if (is.null(optim.method) || !is.character(optim.method) || !is.vector(optim.method) ||
+        length(optim.method) != 1 || !(optim.method %in% c("Nelder-Mead","BFGS","CG","L-BFGS-B"))) stop("If supplied, optim.method must be one of the valid methods for optim, 'Nelder-Mead', 'CG', 'BFGS' or 'L-BFGS-B'.")
 }
 
 new.EM.status <- function() {
@@ -553,7 +591,8 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect, EM.co
 
 run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
                               constraint.sum.zero=TRUE,
-    EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10)) {
+                              EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
+                              optim.method="L-BFGS-B", optim.control=default.optim.control()) {
     n=nrow(y.mat)
     p=ncol(y.mat)
     q=length(unique(as.vector(y.mat)))
@@ -594,8 +633,8 @@ run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
                            RG=RG,
                            constraint.sum.zero=constraint.sum.zero,
                            partial=TRUE,
-                           method="L-BFGS-B",
-                           hessian=F,control=list(maxit=10000))
+                           method=optim.method,
+                           hessian=F,control=optim.control)
 
         outvect <- optim.fit$par
         llc <- -calc.ll(outvect,y.mat,model=model,submodel=submodel,ppr.m,pi.v,RG, partial=FALSE)
@@ -645,7 +684,8 @@ run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
 
 run.EM.bicluster <- function(invect, y.mat, model, submodel, pi.v, kappa.v,
                              constraint.sum.zero=TRUE,
-    EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10)) {
+                             EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
+                             optim.method="L-BFGS-B", optim.control=default.optim.control()) {
     n <- nrow(y.mat)
     p <- ncol(y.mat)
     q <- length(unique(as.vector(y.mat)))
@@ -697,8 +737,8 @@ run.EM.bicluster <- function(invect, y.mat, model, submodel, pi.v, kappa.v,
             CG=CG,
             constraint.sum.zero=constraint.sum.zero,
             partial=TRUE,
-            method="L-BFGS-B",
-            hessian=F,control=list(maxit=10000))
+            method=optim.method,
+            hessian=F,control=optim.control)
 
         outvect <- optim.fit$par
 
