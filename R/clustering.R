@@ -535,8 +535,6 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect, EM.co
     if (abs(new.llc - new.lli) < 1E-10) new.llc <- new.lli + 1E-10
     likelihood.stopping.criterion <- abs(EM.status$previous.lli - new.lli)/abs(new.llc - new.lli)
 
-    if (is.na(likelihood.stopping.criterion  ) || is.na(param.stopping.criterion)) browser()
-
     if (likelihood.stopping.criterion < EM.control$EMstoppingpar &
         (!EM.control$paramstopping || param.stopping.criterion < EM.control$EMstoppingpar)) converged <- TRUE
 
@@ -604,7 +602,7 @@ run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
         ## log-likelihood, not the negative of the log-likelihood, so don't need
         ## to make it negative here
         lli <- Rcluster.Incll(y.mat, theta.arr, pi.v, RG)
-if (EM.status$iter >= 48) browser()
+
         EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
                                      invect=invect,outvect=outvect,EM.control=EM.control)
 
