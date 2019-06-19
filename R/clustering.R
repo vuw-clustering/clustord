@@ -43,10 +43,23 @@ lower.limit <- 0.00001
 #'     If NULL, starting values will be generated automatically.
 #'     User-specified values of pi.init must be of length (nclus.row-1) because
 #'     the final value will be automatically calculated so that the values of pi sum to 1.
-#' @param EM.control: (default = list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10))
-#'     list of parameters controlling the EM algorithm. `startEMcycles` controls
-#'     how many EM iterations are used when fitting the simpler models to get
-#'     starting values for fitting models with interaction.
+#' @param EM.control: (default = list(EMcycles=50, EMstoppingpar=1e-4,
+#'     paramstopping=TRUE, startEMcycles=10))
+#'     list of parameters controlling the EM algorithm.
+#'     `EMcycles` controls how many EM iterations of the main EM algorithm are
+#'     used to fit the chosen submodel.
+#'     `EMstoppingpar` is the tolerance for the stopping criteria in the EM algorithm.
+#'     `paramstopping`: if FALSE, indicates that the EM algorithm should only
+#'     check convergence based on the change in incomplete-data log-likelihood,
+#'     relative to the current difference between the complete-data and
+#'     incomplete-data log-likelihoods, i.e. abs(delta_lli)/abs(llc[iter] - lli[iter]);
+#'     if TRUE, indicates that as well as checking the likelihood criterion, the
+#'     EM algorithm should also check whether the relative change in the
+#'     exponentials of the absolute values of the current parameters is below
+#'     the tolerance `EMstoppingpar`, to see whether the parameters and the
+#'     likelihood have both converged.
+#'     `startEMcycles` controls how many EM iterations are used when fitting the
+#'     simpler submodels to get starting values for fitting models with interaction.
 #' @param constraint.sum.zero (default TRUE) if true, use constraints that alpha
 #'     sums to zero and beta sums to zero; if false, use constraints alpha_1=0
 #'     and beta_1 = 0. Both versions have the final column of gamma equal to the
@@ -73,7 +86,8 @@ rowclustering <- function(formula,
                           data=NULL,y.mat=NULL,
                           initvect=NULL,
                           pi.init=NULL,
-                          EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
+                          EM.control=list(EMcycles=50, EMstoppingpar=1e-4,
+                                          paramstopping=TRUE, startEMcycles=10),
                           constraint.sum.zero=TRUE, use.alternative.start=TRUE){
 
     validate.inputs(type="row",
@@ -161,10 +175,23 @@ rowclustering <- function(formula,
 #'     If NULL, starting values will be generated automatically.
 #'     User-specified values of pi.init must be of length (nclus.row-1) because
 #'     the final value will be automatically calculated so that the values of pi sum to 1.
-#' @param EM.control: (default = list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10))
-#'     list of parameters controlling the EM algorithm. `startEMcycles` controls
-#'     how many EM iterations are used when fitting the simpler models to get
-#'     starting values for fitting models with interaction.
+#' @param EM.control: (default = list(EMcycles=50, EMstoppingpar=1e-4,
+#'     paramstopping=TRUE, startEMcycles=10))
+#'     list of parameters controlling the EM algorithm.
+#'     `EMcycles` controls how many EM iterations of the main EM algorithm are
+#'     used to fit the chosen submodel.
+#'     `EMstoppingpar` is the tolerance for the stopping criteria in the EM algorithm.
+#'     `paramstopping`: if FALSE, indicates that the EM algorithm should only
+#'     check convergence based on the change in incomplete-data log-likelihood,
+#'     relative to the current difference between the complete-data and
+#'     incomplete-data log-likelihoods, i.e. abs(delta_lli)/abs(llc[iter] - lli[iter]);
+#'     if TRUE, indicates that as well as checking the likelihood criterion, the
+#'     EM algorithm should also check whether the relative change in the
+#'     exponentials of the absolute values of the current parameters is below
+#'     the tolerance `EMstoppingpar`, to see whether the parameters and the
+#'     likelihood have both converged.
+#'     `startEMcycles` controls how many EM iterations are used when fitting the
+#'     simpler submodels to get starting values for fitting models with interaction.
 #' @param constraint.sum.zero (default TRUE) if true, use constraints that alpha
 #'     sums to zero and beta sums to zero; if false, use constraints alpha_1=0
 #'     and beta_1 = 0. Both versions have the final column of gamma equal to the
@@ -191,7 +218,7 @@ columnclustering <- function(formula,
     data=NULL,y.mat=NULL,
     initvect=NULL,
     kappa.init=NULL,
-    EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
+    EM.control=list(EMcycles=50, EMstoppingpar=1e-4, paramstopping=TRUE, startEMcycles=10),
     constraint.sum.zero=TRUE, use.alternative.start=TRUE){
 
     validate.inputs(type="column",
@@ -238,9 +265,11 @@ columnclustering <- function(formula,
     ## Now convert the results back to row clustering
     column.parlist <- results$parlist.out
     column.parlist$beta <- results$parlist.out$alpha
+    column.parlist$alpha <- NULL
     if (!is.null(results$parlist.out$beta)) column.parlist$alpha <- results$parlist.out$beta
 
-    column.results <- list(info=results$info,criteria=results$criteria,
+    column.results <- list(info=results$info, EM.status=results$EM.status,
+                           criteria=results$criteria,
                            initvect=initvect, parlist.out=column.parlist,
                            kappa=results$pi, ppc=results$ppr,
                             ColumnClusters=results$RowClusters)
@@ -299,10 +328,23 @@ columnclustering <- function(formula,
 #'     If NULL, starting values will be generated automatically.
 #'     User-specified values of kappa.init must be of length (nclus.column-1) because
 #'     the final value will be automatically calculated so that the values of kappa sum to 1.
-#' @param EM.control: (default = list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10))
-#'     list of parameters controlling the EM algorithm. `startEMcycles` controls
-#'     how many EM iterations are used when fitting the simpler models to get
-#'     starting values for fitting models with interaction.
+#' @param EM.control: (default = list(EMcycles=50, EMstoppingpar=1e-4,
+#'     paramstopping=TRUE, startEMcycles=10))
+#'     list of parameters controlling the EM algorithm.
+#'     `EMcycles` controls how many EM iterations of the main EM algorithm are
+#'     used to fit the chosen submodel.
+#'     `EMstoppingpar` is the tolerance for the stopping criteria in the EM algorithm.
+#'     `paramstopping`: if FALSE, indicates that the EM algorithm should only
+#'     check convergence based on the change in incomplete-data log-likelihood,
+#'     relative to the current difference between the complete-data and
+#'     incomplete-data log-likelihoods, i.e. abs(delta_lli)/abs(llc[iter] - lli[iter]);
+#'     if TRUE, indicates that as well as checking the likelihood criterion, the
+#'     EM algorithm should also check whether the relative change in the
+#'     exponentials of the absolute values of the current parameters is below
+#'     the tolerance `EMstoppingpar`, to see whether the parameters and the
+#'     likelihood have both converged.
+#'     `startEMcycles` controls how many EM iterations are used when fitting the
+#'     simpler submodels to get starting values for fitting models with interaction.
 #' @param constraint.sum.zero (default TRUE) if true, use constraints that alpha
 #'     sums to zero and beta sums to zero; if false, use constraints alpha_1=0
 #'     and beta_1 = 0. Both versions have the final column of gamma equal to the
@@ -337,7 +379,7 @@ biclustering <- function(formula,
     initvect=NULL,
     pi.init=NULL,
     kappa.init=NULL,
-    EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
+    EM.control=list(EMcycles=50, EMstoppingpar=1e-4, paramstopping=TRUE, startEMcycles=10),
     constraint.sum.zero=TRUE,
     use.alternative.start=TRUE){
 
@@ -459,8 +501,50 @@ validate.inputs <- function(type,
     if (!is.logical(use.alternative.start) || !is.vector(use.alternative.start) ||
         length(use.alternative.start) != 1 || is.na(use.alternative.start)) stop("use.alternative.start must be TRUE or FALSE.")
 
-    if (!is.list(EM.control) || length(EM.control) == 0 || length(EM.control) > 3 ||
-        !any(names(EM.control) %in% c("EMcycles","EMstoppingpar","startEMcycles"))) stop("If supplied, EM.control must be a list of control parameters for the EM algorithm. Please see the manual for more info.")
+    if (!is.list(EM.control) || length(EM.control) == 0 || length(EM.control) > 4 ||
+        !any(names(EM.control) %in% c("EMcycles","EMstoppingpar","paramstopping","startEMcycles"))) {
+        stop("If supplied, EM.control must be a list of control parameters for the EM algorithm. Please see the manual for more info.")
+    }
+}
+
+new.EM.status <- function() {
+    list(iter=0,finished=FALSE,converged=FALSE, paramstopping=FALSE,
+         llc.for.best.lli=-.Machine$double.xmax,best.lli=-.Machine$double.xmax,
+         new.lli=-.Machine$double.xmax, previous.lli=-.Machine$double.xmax)
+}
+
+update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect, EM.control) {
+    iter <- EM.status$iter+1
+    finished <- FALSE
+    converged <- FALSE
+
+    if (new.lli > EM.status$best.lli) {
+        best.lli <- new.lli
+        llc.for.best.lli <- new.llc
+    } else {
+        best.lli <- EM.status$best.lli
+        llc.for.best.lli <- EM.status$llc.for.best.lli
+    }
+
+    param.exp.in <- exp(abs(invect))
+    param.exp.out <- exp(abs(outvect))
+    param.stopping.criterion <- sum(abs(param.exp.in - param.exp.out)/param.exp.out)
+
+    ## Check difference between llc and lli to avoid divide-by-zero error in
+    ## stopping criterion
+    if (abs(new.llc - new.lli) < 1E-10) new.llc <- new.lli + 1E-10
+    likelihood.stopping.criterion <- abs(EM.status$previous.lli - new.lli)/abs(new.llc - new.lli)
+
+    if (is.na(likelihood.stopping.criterion  ) || is.na(param.stopping.criterion)) browser()
+
+    if (likelihood.stopping.criterion < EM.control$EMstoppingpar &
+        (!EM.control$paramstopping || param.stopping.criterion < EM.control$EMstoppingpar)) converged <- TRUE
+
+    if (converged || iter >= EM.control$EMcycles) finished <- TRUE
+    list(iter=iter,finished=finished,converged=converged,
+         new.llc=new.llc, new.lli=new.lli, previous.lli=EM.status$new.lli,
+         llc.for.best.lli=llc.for.best.lli, best.lli=best.lli,
+         paramstopping=EM.control$paramstopping)
 }
 
 run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
@@ -481,9 +565,9 @@ run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
     initvect <- invect
     outvect=invect
     # Run the EM cycle:
-    iter=1
+    EM.status <- new.EM.status()
 
-    while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>EM.control$EMstoppingpar)))&(iter<=EM.control$EMcycles))
+    while(!EM.status$finished)
     {
         # E-step - Update posterior probabilities
         ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
@@ -516,29 +600,37 @@ run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
                                      constraint.sum.zero=constraint.sum.zero)
         theta.arr <- calc.theta(parlist.out,model=model,submodel=submodel)
 
+        ## Note that UNLIKE Rcluster.ll, Rcluster.Incll outputs the *actual*
+        ## log-likelihood, not the negative of the log-likelihood, so don't need
+        ## to make it negative here
+        lli <- Rcluster.Incll(y.mat, theta.arr, pi.v, RG)
+if (EM.status$iter >= 48) browser()
+        EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
+                                     invect=invect,outvect=outvect,EM.control=EM.control)
+
         ## Report the current incomplete-data log-likelihood, which is the
         ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
         ## of the output of optim
         # if (iter == 1 | iter%%5 == 0) cat(paste(toupper(submodel),'model iter=',iter, ' log.like=', llc ,'\n'))
-        cat(paste(toupper(submodel),'model iter=',iter, ' partial log.like=', -optim.fit$value ,'\n'))
-        cat(paste(toupper(submodel),'model iter=',iter, ' log.like=', llc ,'\n'))
+        cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' partial complete-data log.like=', -optim.fit$value ,'\n'))
+        cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' complete-data log.like=', llc ,'\n'))
+        cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' incomplete-data log.like=', lli ,'\n'))
         cat("parlist.out\n")
         print(parlist.out)
         cat("pi",pi.v,"\n")
-        iter=iter+1
     }
 
     # Find cluster groupings:
     Rclus <- assignments(ppr.m)
 
     # Save results:
-    logl <- Rcluster.Incll(y.mat, theta.arr, pi.v, RG)
     npar <- length(invect) + length(pi.v)-1
-    criteria <- calc.criteria(logl, llc, npar, n, p)
-    out1 <- c(n, p, logl, llc, npar, RG)
-    names(out1) <- c("n","p","Final.ll","Final.llc","npar","R")
-    list("info"=out1,
-         "criteria"=unlist(criteria),
+    criteria <- calc.criteria(lli, llc, npar, n, p)
+    info <- c(n, p, npar, RG)
+    names(info) <- c("n","p","npar","R")
+    list("info"=info,
+         "EM.status"=EM.status,
+         "criteria"=criteria,
          "constraint.sum.zero"=constraint.sum.zero,
          "initvect"=initvect,
          "parlist.out"=parlist.out,
@@ -566,9 +658,9 @@ run.EM.bicluster <- function(invect, y.mat, model, submodel, pi.v, kappa.v,
     initvect <- invect
     outvect=invect
     # Run the EM cycle:
-    iter=1
+    EM.status <- new.EM.status()
 
-    while(((iter==1)|(any(abs(abs(invect)-abs(outvect))>EM.control$EMstoppingpar)))&(iter<=EM.control$EMcycles))
+    while(!EM.status$finished)
     {
         # E-step - Update posterior probabilities
         ppr.m <- twomode.membership.pp(y.mat, theta.arr, pi.v, kappa.v, RG, row=TRUE)
@@ -614,17 +706,26 @@ run.EM.bicluster <- function(invect, y.mat, model, submodel, pi.v, kappa.v,
             n=n,p=p,q=q,RG=RG,CG=CG,constraint.sum.zero=constraint.sum.zero)
         theta.arr <- calc.theta(parlist.out,model=model,submodel=submodel)
 
+        ## Note that UNLIKE Bicluster.ll, Bicluster.Incll outputs the *actual*
+        ## log-likelihood, not the negative of the log-likelihood, so don't need
+        ## to make it negative here
+        if(CG^p<RG^n) lli <- Bicluster.IncllC(y.mat, theta.arr, pi.v, kappa.v)
+        else lli <- Bicluster.IncllR(y.mat, theta.arr, pi.v, kappa.v)
+if (is.na(lli)) browser()
+        EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
+                                     invect=invect,outvect=outvect,EM.control=EM.control)
+
         ## Report the current incomplete-data log-likelihood, which is the
         ## NEGATIVE of the latest value of Bicluster.ll i.e. the NEGATIVE
         ## of the output of optim
         # if (iter == 1 | iter%%5 == 0) cat(paste(toupper(submodel),'model iter=',iter, ' log.like=', llc ,'\n'))
-        cat(paste(toupper(submodel),'model iter=',iter, ' partial log.like=', -optim.fit$value ,'\n'))
-        cat(paste(toupper(submodel),'model iter=',iter, ' log.like=', llc ,'\n'))
+        cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' partial complete-data log.like=', -optim.fit$value ,'\n'))
+        cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' complete-data log.like=', llc ,'\n'))
+        cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' incomplete-data log.like=', lli ,'\n'))
         cat("parlist.out\n")
         print(parlist.out)
         cat("pi",pi.v,"\n")
         cat("kappa",kappa.v,"\n")
-        iter=iter+1
     }
 
     # Find cluster groupings:
@@ -632,17 +733,13 @@ run.EM.bicluster <- function(invect, y.mat, model, submodel, pi.v, kappa.v,
     Cclus <- assignments(ppc.m)
 
     # Save results:
-    logl <- 0
-    if((n<16)|(p<16)) {
-        if(CG^p<RG^n) logl <- Bicluster.IncllC(y.mat, theta.arr, pi.v, kappa.v)
-        else logl <- Bicluster.IncllR(y.mat, theta.arr, pi.v, kappa.v)
-    }
     npar <- length(invect) + length(pi.v)-1 + length(kappa.v)-1
-    criteria <- calc.criteria(logl, llc, npar, n, p)
-    out1 <- c(n, p, logl, llc, npar, RG, CG)
-    names(out1) <- c("n","p","Final.ll","Final.llc","npar","R","C")
-    list("info"=out1,
-        "criteria"=unlist(criteria),
+    criteria <- calc.criteria(lli, llc, npar, n, p)
+    info <- c(n, p, npar, RG, CG)
+    names(info) <- c("n","p","npar","R","C")
+    list("info"=info,
+         "EM.status"=EM.status,
+        "criteria"=criteria,
         "constraint.sum.zero"=constraint.sum.zero,
         "initvect"=initvect,
         "parlist.out"=parlist.out,

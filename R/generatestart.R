@@ -1,5 +1,6 @@
 generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL, pi.init=NULL,
-                                      EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
+                                      EM.control=list(EMcycles=50, EMstoppingpar=1e-4,
+                                                      paramstopping=TRUE, startEMcycles=10),
                                       constraint.sum.zero=TRUE, use.alternative.start=TRUE) {
 
     if (is.null(initvect)) {
@@ -100,7 +101,8 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                           },
                           "rp"={
                               startEM.control <- list(EMcycles=EM.control$startEMcycles,
-                                                      EMstoppingpar=EM.control$EMstoppingpar)
+                                                      EMstoppingpar=EM.control$EMstoppingpar,
+                                                      paramstopping=EM.control$paramstopping)
 
                               cat("Fitting RS model to obtain starting values for pi.v\n")
                               OSM.rs.out <- run.EM.rowcluster(invect=initvect[1:(q-1+q-2+RG-1)],
@@ -113,7 +115,8 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                           },
                           "rpi"={
                               startEM.control <- list(EMcycles=EM.control$startEMcycles,
-                                                      EMstoppingpar=EM.control$EMstoppingpar)
+                                                      EMstoppingpar=EM.control$EMstoppingpar,
+                                                      paramstopping=EM.control$paramstopping)
                               if (use.alternative.start) {
 
                                   OSM.rp.out <- run.EM.rowcluster(invect=initvect[1:(q-1+q-2+RG-1+p-1)],
@@ -160,7 +163,8 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                           },
                           "rp"={
                               startEM.control <- list(EMcycles=EM.control$startEMcycles,
-                                                      EMstoppingpar=EM.control$EMstoppingpar)
+                                                      EMstoppingpar=EM.control$EMstoppingpar,
+                                                      paramstopping=EM.control$paramstopping)
 
                               cat("Fitting RS model to obtain starting values for pi.v\n")
                               POM.rs.out <- run.EM.rowcluster(invect=initvect[1:(q-1+RG-1)],
@@ -173,7 +177,8 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                           },
                           "rpi"={
                               startEM.control <- list(EMcycles=EM.control$startEMcycles,
-                                                      EMstoppingpar=EM.control$EMstoppingpar)
+                                                      EMstoppingpar=EM.control$EMstoppingpar,
+                                                      paramstopping=EM.control$paramstopping)
                               if (use.alternative.start) {
 
                                   POM.rp.out <- run.EM.rowcluster(invect=initvect[1:(q-1+RG-1+p-1)],
@@ -215,7 +220,8 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
 
 generate.start.bicluster <- function(y.mat, model, submodel, RG, CG,
                                      initvect=NULL, pi.init=NULL, kappa.init=NULL,
-                                     EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
+                                     EM.control=list(EMcycles=50, EMstoppingpar=1e-4,
+                                                     paramstopping=TRUE, startEMcycles=10),
                                      constraint.sum.zero=TRUE, use.alternative.start=TRUE) {
 
     if (is.null(initvect)) {
@@ -304,7 +310,8 @@ generate.start.bicluster <- function(y.mat, model, submodel, RG, CG,
     }
     if (generate.pi | generate.kappa) {
         startEM.control <- list(EMcycles=EM.control$startEMcycles,
-                                EMstoppingpar=EM.control$EMstoppingpar)
+                                EMstoppingpar=EM.control$EMstoppingpar,
+                                paramstopping=EM.control$paramstopping)
         switch(submodel,
                "rc"={
                    if (generate.pi) {
