@@ -131,7 +131,8 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                                   PO.sp.out <- MASS::polr(as.factor(y.mat)~VariableName)
                                   PO.sp.out$beta <- PO.sp.out$coef[1:(ncol(y.mat)-1)] #Individual column effect
 
-                                  PO.sp.out$beta <- c(0,PO.sp.out$coef[1:(ncol(y.mat)-1)])
+                                  if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(ncol(y.mat)-1)]
+                                  else beta.init <- PO.sp.out$coef[2:(ncol(y.mat)-1)] - PO.sp.out$coef[1]
 
                                   phi.init <- seq(from=runif(1,min=0.05,max=0.5),
                                                   to=runif(1,min=0.6,max=0.95), length.out = (q-2))
@@ -142,7 +143,7 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                                   OSM.rp.out <- run.EM.rowcluster(invect=c(OSM.rs.out$parlist.out$mu,
                                                                            phi.init,
                                                                            OSM.rs.out$parlist.out$alpha[-RG],
-                                                                           PO.sp.out$beta),
+                                                                           beta.init),
                                                                   y.mat, model="OSM",submodel="rp",
                                                                   pi.v=pi.init, EM.control=startEM.control)
 
@@ -188,16 +189,16 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
 
                                   VariableName <- as.factor(rep((1:ncol(y.mat)),each=nrow(y.mat)))
                                   PO.sp.out <- MASS::polr(as.factor(y.mat)~VariableName)
-                                  PO.sp.out$beta <- PO.sp.out$coef[1:(ncol(y.mat)-1)] #Individual column effect
 
-                                  PO.sp.out$beta <- c(0,PO.sp.out$coef[1:(ncol(y.mat)-1)])
+                                  if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(ncol(y.mat)-1)]
+                                  else beta.init <- PO.sp.out$coef[2:(ncol(y.mat)-1)] - PO.sp.out$coef[1]
 
                                   POM.rs.out <- run.EM.rowcluster(invect=c(PO.ss.out$mu,alpha.kmeans[-RG]),
                                                                   y.mat, model="POM",submodel="rs",
                                                                   pi.v=pi.init, EM.control=startEM.control)
                                   POM.rp.out <- run.EM.rowcluster(invect=c(POM.rs.out$parlist.out$mu,
                                                                            POM.rs.out$parlist.out$alpha[-RG],
-                                                                           PO.sp.out$beta),
+                                                                           beta.init),
                                                                   y.mat, model="POM",submodel="rp",
                                                                   pi.v=pi.init, EM.control=startEM.control)
 
