@@ -93,7 +93,7 @@ rowclustering <- function(formula,
                           pi.init=NULL,
                           EM.control=list(EMcycles=50, EMstoppingpar=1e-4,
                                           paramstopping=TRUE, startEMcycles=10),
-                          optim.method="L-BFGS-B", optim.control=list(...),
+                          optim.method="L-BFGS-B", optim.control=default.optim.control(),
                           constraint.sum.zero=TRUE, use.alternative.start=TRUE){
 
     validate.inputs(type="row",
@@ -235,7 +235,7 @@ columnclustering <- function(formula,
     initvect=NULL,
     kappa.init=NULL,
     EM.control=list(EMcycles=50, EMstoppingpar=1e-4, paramstopping=TRUE, startEMcycles=10),
-    optim.method="L-BFGS-B", optim.control=list(...),
+    optim.method="L-BFGS-B", optim.control=default.optim.control(),
     constraint.sum.zero=TRUE, use.alternative.start=TRUE){
 
     validate.inputs(type="column",
@@ -408,7 +408,7 @@ biclustering <- function(formula,
     pi.init=NULL,
     kappa.init=NULL,
     EM.control=list(EMcycles=50, EMstoppingpar=1e-4, paramstopping=TRUE, startEMcycles=10),
-    optim.method="L-BFGS-B", optim.control=list(...),
+    optim.method="L-BFGS-B", optim.control=default.optim.control(),
     constraint.sum.zero=TRUE,
     use.alternative.start=TRUE){
 
