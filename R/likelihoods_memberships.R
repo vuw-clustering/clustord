@@ -116,39 +116,6 @@ Rcluster.Incll <- function(y.mat, theta, pi.v, RG)
     logl
 }
 
-Ccluster.ll <- function(y.mat, theta, ppc.m, kappa.v, CG){
-    n=nrow(y.mat)
-    p=ncol(y.mat)
-    q=length(unique(as.vector(y.mat)))
-    theta[theta<=0]=lower.limit
-    kappa.v[kappa.v==0]=lower.limit
-    llc=0
-    for (c in 1:CG) {
-        theta.y.mat <- sapply(1:n,function(i) theta[i,c,y.mat[i,]])
-        llc <- llc + sum(t(ppc.m[,c])%*%log(theta.y.mat))
-    }
-    llc <- llc + sum(ppc.m%*%log(kappa.v))
-    -llc
-}
-
-#The incomplete log-likelihood, used in model selection #
-Ccluster.Incll <- function(y.mat, theta, kappa.v, CG){
-    n=nrow(y.mat)
-    p=ncol(y.mat)
-    q=length(unique(as.vector(y.mat)))
-    theta[theta<=0]=lower.limit
-    kappa.v[kappa.v==0]=lower.limit
-    logl = 0
-    for(j in 1:p){
-        sumoverC=0
-        for(c in 1:CG){
-            sumoverC=sumoverC+kappa.v[c]*prod(diag(theta[,c,y.mat[,j]]),na.rm=TRUE)
-        }
-        logl=logl+log(sumoverC)
-    }
-    logl
-}
-
 #The Log-likelihood #
 Bicluster.ll <- function(y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, partial=FALSE,
                          use.matrix=TRUE){
