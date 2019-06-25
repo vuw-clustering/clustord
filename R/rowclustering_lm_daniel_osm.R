@@ -925,6 +925,46 @@ print(parlist)
     return(list(est=est, param.est=param.est, parstart=parstart, z=z1))
 }
 
+run.EM.TWEAKED.RowCluster.rRcC1 <- function(parstart1, R1, q1, n1, m1, numpar1, y.mat1, z1 ,piR1, reparC, opar, empar)
+{
+    repar <- reparC.to.repar(reparC)
+    arraydata1 <- as.vector(y.mat1)
+    parlist <- unpack.param.Stereo.Rowcluster.rRcC1(parstart1, R1, q1)
+    print(parlist)
+
+    ### TEMPORARY ONLY!!! put in hard-coded reparametrized phi value for z calculations...
+    parlist <- repar.phi.Stereo(parlist,q1)
+
+    # E-step
+    z1 <- E.step.RowCluster.rRcC1(parlist,n1,R1,q1,y.mat1)
+    arrayz1 <- as.vector(z1)
+    Q <- Q.Stereo.RowCluster.rRcC1.inR(parstart1,arraydata1, n1, m1, q1, R1, z1, reparC, verbose=FALSE)
+    print(paste("Q =",Q))
+    # if (sum(is.na(arrayz1)) > 0) #print("Error in the Z vector from RowCluster rRcC1. There are NaN, please change the parameters start values")
+
+    # M-step
+    # It has two parts: 1) one for the MLE for the parameter pi and  2) maximization of the rest of the parameters
+
+    #1) MLE for pi=sum(z)/n
+    piR1 <- M.step.part1.RowCluster.rRcC1(n1,R1,z1)
+    if (sum(is.na(piR1)) > 0) {
+        stop("Error in the piR vector from RowCluster rRcC1. There are NaN")
+    }
+    #2) Maximization of the rest of the parameters
+    est <- M.step.part2.RowCluster.rRcC1(parstart1, arraydata1, arrayz1, n1, m1, q1, R1, numpar1, reparC, opar)
+
+    # Read the parameters estimation and prepare them for next iteration
+    param.est <- unpack.param.Stereo.Rowcluster.rRcC1(est$par, R1, q1)
+    param.est$piR <- piR1
+    # if (repar == TRUE) {
+    #     param.ordinal.phi <- array(data = NA, dim = q1, dimnames = NULL)
+    #     param.ordinal.phi <- inverse.repar.phi.Stereo(param.est,q1)
+    #     param.est$phi <- param.ordinal.phi
+    # }
+    parstart <- pack.param.Stereo.RowCluster.rRcC1(param.est, numpar1, R1, q1)
+    return(list(est=est, param.est=param.est, parstart=parstart, z=z1))
+}
+
 check.change.Loglike.RowCluster.rRcC1 <- function(EM.iter.est1, empar, arraydata1, n1, m1, q1, R1, reparC)
 {
     repar <- reparC.to.repar(reparC)
@@ -1039,7 +1079,7 @@ RowCluster.rRcC1 <- function(scale.pars,type,polish, R, parstart=NULL)
         while ( (abs(empar$changeL)>empar$tolerance) & (empar$convergence == 0) & (empar$numiterEM <empar$maxEMiter))
         {
             #Run EM algorithm iteration
-            EM.iter.est <- run.EM.algorithm.RowCluster.rRcC1(parstart, R, q, n, m, numpar, y.mat, z, piR, reparC, opar, empar)
+            EM.iter.est <- run.EM.TWEAKED.RowCluster.rRcC1(parstart, R, q, n, m, numpar, y.mat, z, piR, reparC, opar, empar)
             #check the logLike change between this EM iteration and the previous one
             empar <- check.change.Loglike.RowCluster.rRcC1(EM.iter.est, empar, arraydata, n, m, q, R, reparC)
             #Save results EM iteration
@@ -1291,6 +1331,48 @@ run.EM.algorithm.RowCluster.rRcm <- function(parstart1, R1, q1, n1, m1, numpar1,
     return(list(est=est, param.est=param.est, parstart=parstart, z=z1))
 }
 
+run.EM.TWEAKED.RowCluster.rRcm <- function(parstart1, R1, q1, n1, m1, numpar1, y.mat1, z1 ,piR1, reparC, opar, empar)
+{
+    repar <- reparC.to.repar(reparC)
+    arraydata1 <- as.vector(y.mat1)
+    parlist <-  unpack.param.Stereo.RowCluster.rRcm(parstart1, m1, R1, q1)
+    print(parlist)
+
+    ### TEMPORARY ONLY!!! put in hard-coded reparametrized phi value for z calculations...
+    parlist <- repar.phi.Stereo(parlist,q1)
+
+    # E-step
+    z1 <- E.step.RowCluster.rRcm(parlist,n1,R1,q1,y.mat1)
+    arrayz1 <- as.vector(z1)
+    Q <- Q.Stereo.RowCluster.rRcm.inR(parstart1,arraydata1, n1, m1, q1, R1, z1, reparC, verbose=FALSE)
+    print(paste("Q =",Q))
+    logLLC.hat <- logLike.Stereo.RowCluster.rRcm(parstart1, arraydata1, n1, m1, q1, R1, z1, reparC, verbose=F)
+    print(paste("LLC =",logLLC.hat))
+
+    # if (sum(is.na(arrayz1)) > 0) #print("Error in the Z vector from RowCluster rRcm. There are NaN, please change the parameters start values")
+
+    # M-step
+    # It has two parts: 1) one for the MLE for the parameter pi and  2) maximization of the rest of the parameters
+
+    #1) MLE for pi=sum(z)/n
+    piR1 <- M.step.part1.RowCluster.rRcm(n1,R1,z1)
+    if (sum(is.na(piR1)) > 0) print("Error in the piR vector from RowCluster rRcm. There are NaN")
+    #2) Maximization of the rest of the parameters
+    est <- M.step.part2.RowCluster.rRcm(parstart1, arraydata1, arrayz1, n1, m1, q1, R1, numpar1, reparC, opar)
+
+    # Read the parameters estimation and prepare them for next iteration
+    param.est <- unpack.param.Stereo.RowCluster.rRcm(est$par, m1, R1, q1)
+    param.est$piR <- piR1
+    # if (repar == TRUE) {
+    #     param.ordinal.phi <- array(data = NA, dim = q1, dimnames = NULL)
+    #     param.ordinal.phi <- inverse.repar.phi.Stereo(param.est,q1)
+    #     param.est$phi <- param.ordinal.phi
+    # }
+    parstart <- pack.param.Stereo.RowCluster.rRcm(param.est, numpar1, m1, R1, q1)
+
+    return(list(est=est, param.est=param.est, parstart=parstart, z=z1))
+}
+
 check.change.Loglike.RowCluster.rRcm <- function(EM.iter.est1, empar, arraydata1, n1, m1, q1, R1, reparC)
 {
     repar <- reparC.to.repar(reparC)
@@ -1416,7 +1498,7 @@ RowCluster.rRcm <- function(scale.pars,type,polish, R, parstart=NULL)
         while ( (abs(empar$changeL)>empar$tolerance) & (empar$convergence == 0) & (empar$numiterEM <empar$maxEMiter))
         {
             #Run EM algorithm iteration
-            EM.iter.est <- run.EM.algorithm.RowCluster.rRcm(parstart, R, q, n, m, numpar, y.mat, z, piR, reparC, opar, empar)
+            EM.iter.est <- run.EM.TWEAKED.RowCluster.rRcm(parstart, R, q, n, m, numpar, y.mat, z, piR, reparC, opar, empar)
             #check the logLike change between this EM iteration and the previous one
             empar <- check.change.Loglike.RowCluster.rRcm(EM.iter.est, empar, arraydata, n, m, q, R, reparC)
             #Save results EM iteration
@@ -1666,6 +1748,45 @@ run.EM.algorithm.RowCluster.rRcm.without.interactions <- function(parstart1, R1,
     return(list(est=est, param.est=param.est, parstart=parstart, z=z1))
 }
 
+run.EM.TWEAKED.RowCluster.rRcm.without.interactions <- function(parstart1, R1, q1, n1, m1, numpar1, y.mat1, z1 ,piR1, reparC, opar, empar)
+{
+    repar <- reparC.to.repar(reparC)
+    arraydata1 <- as.vector(y.mat1)
+    parlist <-  unpack.param.Stereo.RowCluster.rRcm.without.interactions(parstart1, m1, R1, q1)
+    print(parlist)
+
+    ### TEMPORARY ONLY!!! put in hard-coded reparametrized phi value for z calculations...
+    parlist <- repar.phi.Stereo(parlist,q1)
+
+    # E-step
+    z1 <- E.step.RowCluster.rRcm.without.interactions(parlist,n1,R1,q1,y.mat1)
+    arrayz1 <- as.vector(z1)
+    Q <- Q.Stereo.RowCluster.rRcm.without.interactions.inR(parstart1,arraydata1, n1, m1, q1, R1, z1, reparC, verbose=FALSE)
+    print(paste("Q =",Q))
+    # if (sum(is.na(arrayz1)) > 0) #print("Error in the Z vector from RowCluster rRcm without interact. There are NaN, please change the parameters start values")
+
+    # M-step
+    # It has two parts: 1) one for the MLE for the parameter pi and  2) maximization of the rest of the parameters
+
+    #1) MLE for pi=sum(z)/n
+    piR1 <- M.step.part1.RowCluster.rRcm.without.interactions(n1,R1,z1)
+    if (sum(is.na(piR1)) > 0) print("Error in the piR vector from RowCluster rRcm without interact. There are NaN")
+    #2) Maximization of the rest of the parameters
+    est <- M.step.part2.RowCluster.rRcm.without.interactions(parstart1, arraydata1, arrayz1, n1, m1, q1, R1, numpar1, reparC, opar)
+
+    # Read the parameters estimation and prepare them for next iteration
+    param.est <- unpack.param.Stereo.RowCluster.rRcm.without.interactions(est$par, m1, R1, q1)
+    param.est$piR <- piR1
+    # if (repar == TRUE) {
+    #     param.ordinal.phi <- array(data = NA, dim = q1, dimnames = NULL)
+    #     param.ordinal.phi <- inverse.repar.phi.Stereo(param.est,q1)
+    #     param.est$phi <- param.ordinal.phi
+    # }
+    parstart <- pack.param.Stereo.RowCluster.rRcm.without.interactions(param.est, numpar1, m1, R1, q1)
+
+    return(list(est=est, param.est=param.est, parstart=parstart, z=z1))
+}
+
 check.change.Loglike.RowCluster.rRcm.without.interactions <- function(EM.iter.est1, empar, arraydata1, n1, m1, q1, R1, reparC)
 {
     repar <- reparC.to.repar(reparC)
@@ -1764,7 +1885,7 @@ RowCluster.rRcm.without.interactions <- function(scale.pars,type,polish, R, pars
         while ( (abs(empar$changeL)>empar$tolerance) & (empar$convergence == 0) & (empar$numiterEM <empar$maxEMiter))
         {
             #Run EM algorithm iteration
-            EM.iter.est <- run.EM.algorithm.RowCluster.rRcm.without.interactions(parstart, R, q, n, m, numpar, y.mat, z, piR, reparC, opar, empar)
+            EM.iter.est <- run.EM.TWEAKED.RowCluster.rRcm.without.interactions(parstart, R, q, n, m, numpar, y.mat, z, piR, reparC, opar, empar)
             #check the logLike change between this EM iteration and the previous one
             empar <- check.change.Loglike.RowCluster.rRcm.without.interactions(EM.iter.est, empar, arraydata, n, m, q, R, reparC)
             #Save results EM iteration
