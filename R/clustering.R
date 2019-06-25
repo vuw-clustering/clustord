@@ -45,6 +45,8 @@ lower.limit <- 0.00001
 #'     (phi[1] = 0 and phi[q] = 1).
 #'     For POM,
 #'     use the same number of starting values as for OSM but exclude the phi components.
+#'     Also note that the mu values in POM correspond to the first q-1 levels,
+#'     whereas the mu values in OSM correspond to levels 2 to q, and mu_1 = 0.
 #' @param pi.init: (default NULL) starting parameter values for the proportions
 #'     of observations in the different row clusters.
 #'     If NULL, starting values will be generated automatically.
@@ -193,6 +195,8 @@ rowclustering <- function(formula,
 #'     (phi[1] = 0 and phi[q] = 1).
 #'     For POM,
 #'     use the same number of starting values as for OSM but exclude the phi components.
+#'     Also note that the mu values in POM correspond to the first q-1 levels,
+#'     whereas the mu values in OSM correspond to levels 2 to q, and mu_1 = 0.
 #'     NOTE THAT THIS ORDERING OF INITVECT IS DIFFERENT THAN FOR ROW CLUSTERING OR
 #'     BICLUSTERING.
 #' @param kappa.init: (default NULL) starting parameter values for the proportions
@@ -362,6 +366,8 @@ columnclustering <- function(formula,
 #'     (phi[1] = 0 and phi[q] = 1).
 #'     For POM,
 #'     use the same number of starting values as for OSM but exclude the phi components.
+#'     Also note that the mu values in POM correspond to the first q-1 levels,
+#'     whereas the mu values in OSM correspond to levels 2 to q, and mu_1 = 0.
 #' @param pi.init: (default NULL) starting parameter values for the proportions
 #'     of observations in the different row clusters.
 #'     If NULL, starting values will be generated automatically.

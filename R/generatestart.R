@@ -30,8 +30,9 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
 
         switch(model,
                "OSM"={
+                   mu.init <- runif(q-1,min=-2,max=2)
                    # phi.init <- sort(runif(q-2),decreasing=FALSE)
-                   u.init <- runif(q-2,min=-5,max=5)
+                   u.init <- runif(q-2,min=-1,max=1)
 
                    switch(submodel,
                           "rs"={
@@ -274,8 +275,9 @@ generate.start.bicluster <- function(y.mat, model, submodel, RG, CG,
 
         switch(model,
                "OSM"={
+                   mu.init <- runif(q-1,min=-2,max=2)
                    # phi.init <- sort(runif(q-2),decreasing=FALSE)
-                   u.init <- runif(q-2,min=-5,max=5)
+                   u.init <- runif(q-2,min=-1,max=1)
 
                    switch(submodel,
                           "rc"={
