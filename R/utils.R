@@ -24,4 +24,9 @@ calc.criteria <- function(ll, llc,  npar, n, p) {
 }
 
 ## overwrite controls with user-selected values
-replacedefaults <- function (default, user) replace(default, names(user), user)
+replacedefaults <- function(default, user) replace(default, names(user), user)
+
+# The inverse-logit function
+expit <- function(x) 1/(1+exp(-x))
+
+logit <- function(x) log(x/(1-x))

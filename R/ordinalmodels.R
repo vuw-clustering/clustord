@@ -4,7 +4,14 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constra
                ### TODO: Noting that mu for original OSM code is defined differently
                ### than mu for POM code, decide which version to use and make consistent
                mu <- c(0,invect[1:(q-1)])
-               phi <- c(0,invect[(q-1+1):(q-1+q-2)],1)
+
+               ## Convert to phi from u, where u can vary between -Inf and +Inf
+               ## but phi must be between 0 and 1, and phi_k >= phi_k-1
+               u <- c(0,invect[(q-1+1):(q-1+q-2)])
+               if (q == 3) phi <- c(0, expit(u[2]) ,1)
+               else if (q > 3) phi <- c(0, expit(u[2]), sapply(3:(q-1), function(k) expit(u[2] + sum(exp(u[3:k])))), 1)
+               else stop("q must be at least 3!")
+
                alpha <- invect[(q-1+q-2+1):(q-1+q-2+RG-1)]
                if (constraint.sum.zero) alpha <- c(alpha, -sum(alpha))
                else alpha <- c(0, alpha)

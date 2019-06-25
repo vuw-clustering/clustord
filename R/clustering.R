@@ -36,6 +36,13 @@ lower.limit <- 0.00001
 #'     "Y~row" has initvect = c(mu, phi, alpha)
 #'     "Y~row+column" has initvect = c(mu, phi, alpha, beta)
 #'     "Y~row+column+row:column" or "Y~row*column" has initvect = c(mu, phi, alpha, beta, gamma)
+#'     Note that the starting values for phi do not correspond directly to phi,
+#'     because phi is restricted to being increasing and between 0 and 1, so
+#'     instead the starting values are treated as elements u[2:q-1] of a vector
+#'     u which can be between -Inf and +Inf, and then
+#'     phi[2] <- expit(u[2]) and
+#'     phi[k] <- expit(u[2] + sum(exp(u[3:k]))) for k between 3 and q-1
+#'     (phi[1] = 0 and phi[q] = 1).
 #'     For POM,
 #'     use the same number of starting values as for OSM but exclude the phi components.
 #' @param pi.init: (default NULL) starting parameter values for the proportions
@@ -177,6 +184,13 @@ rowclustering <- function(formula,
 #'     "Y~row" has initvect = c(mu, phi, beta)
 #'     "Y~row+column" has initvect = c(mu, phi, beta, alpha)
 #'     "Y~row+column+row:column" or "Y~row*column" has initvect = c(mu, phi, beta, alpha, gamma)
+#'     Note that the starting values for phi do not correspond directly to phi,
+#'     because phi is restricted to being increasing and between 0 and 1, so
+#'     instead the starting values are treated as elements u[2:q-1] of a vector
+#'     u which can be between -Inf and +Inf, and then
+#'     phi[2] <- expit(u[2]) and
+#'     phi[k] <- expit(u[2] + sum(exp(u[3:k]))) for k between 3 and q-1
+#'     (phi[1] = 0 and phi[q] = 1).
 #'     For POM,
 #'     use the same number of starting values as for OSM but exclude the phi components.
 #'     NOTE THAT THIS ORDERING OF INITVECT IS DIFFERENT THAN FOR ROW CLUSTERING OR
@@ -339,6 +353,13 @@ columnclustering <- function(formula,
 #'     and the initvect for the different models is of the form:
 #'     "Y~row+column" has initvect = c(mu, phi, alpha, beta)
 #'     "Y~row+column+row:column" or "Y~row*column" has initvect = c(mu, phi, alpha, beta, gamma)
+#'     Note that the starting values for phi do not correspond directly to phi,
+#'     because phi is restricted to being increasing and between 0 and 1, so
+#'     instead the starting values are treated as elements u[2:q-1] of a vector
+#'     u which can be between -Inf and +Inf, and then
+#'     phi[2] <- expit(u[2]) and
+#'     phi[k] <- expit(u[2] + sum(exp(u[3:k]))) for k between 3 and q-1
+#'     (phi[1] = 0 and phi[q] = 1).
 #'     For POM,
 #'     use the same number of starting values as for OSM but exclude the phi components.
 #' @param pi.init: (default NULL) starting parameter values for the proportions

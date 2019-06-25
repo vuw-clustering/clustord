@@ -30,12 +30,12 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
 
         switch(model,
                "OSM"={
-                   phi.init <- seq(from=runif(1,min=0.05,max=0.5),
-                                   to=runif(1,min=0.6,max=0.95), length.out = (q-2))
+                   # phi.init <- sort(runif(q-2),decreasing=FALSE)
+                   u.init <- runif(q-2,min=-5,max=5)
 
                    switch(submodel,
                           "rs"={
-                              initvect <- c(mu.init, phi.init, alpha.init)
+                              initvect <- c(mu.init, u.init, alpha.init)
                           },
                           "rp"={
                               ## If not using constraint that beta sum to zero,
@@ -44,7 +44,7 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                               if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(ncol(y.mat)-1)]
                               else beta.init <- PO.sp.out$coef[2:(ncol(y.mat)-1)] - PO.sp.out$coef[1]
 
-                              initvect <- c(mu.init, phi.init, alpha.init, beta.init)
+                              initvect <- c(mu.init, u.init, alpha.init, beta.init)
                           },
                           "rpi"={
                               p <- ncol(y.mat)
@@ -57,7 +57,7 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
 
                               gamma.init <- rep(0.1,(RG-1)*(p-1))
 
-                              initvect <- c(mu.init,phi.init,alpha.init,beta.init,gamma.init)
+                              initvect <- c(mu.init,u.init,alpha.init,beta.init,gamma.init)
                           },stop("Invalid model for row/column clustering"))
                },
                "POM"={
@@ -274,17 +274,17 @@ generate.start.bicluster <- function(y.mat, model, submodel, RG, CG,
 
         switch(model,
                "OSM"={
-                   phi.init <- seq(from=runif(1,min=0.05,max=0.5),
-                                   to=runif(1,min=0.6,max=0.95), length.out = (q-2))
+                   # phi.init <- sort(runif(q-2),decreasing=FALSE)
+                   u.init <- runif(q-2,min=-5,max=5)
 
                    switch(submodel,
                           "rc"={
-                              initvect <- c(mu.init, phi.init, alpha.init, beta.init)
+                              initvect <- c(mu.init, u.init, alpha.init, beta.init)
                           },
                           "rci"={
                               gamma.init <- rep(0.1,(RG-1)*(CG-1))
 
-                              initvect <- c(mu.init,phi.init,alpha.init,beta.init,gamma.init)
+                              initvect <- c(mu.init,u.init,alpha.init,beta.init,gamma.init)
                           },stop("Invalid model for biclustering"))
                },
                "POM"={
