@@ -1,4 +1,4 @@
-onemode.membership.pp <- function(y.mat, theta, proportions, nelements, row){
+onemode.membership.pp <- function(long.df, theta, proportions, nelements, row){
     nclus <- length(proportions)
     pp.m <- matrix(NA, nelements, nclus)
 
@@ -6,8 +6,9 @@ onemode.membership.pp <- function(y.mat, theta, proportions, nelements, row){
 
     for(idx in 1:nelements){
         for(clus.idx in 1:nclus){
-            if (row) pp.raw[idx,clus.idx] <- pp.raw[idx,clus.idx] + sum(log(diag(theta[clus.idx,,y.mat[idx,]])))
-            else pp.raw[idx,clus.idx] <- pp.raw[idx,clus.idx] + sum(log(diag(theta[,clus.idx,y.mat[,idx]])))
+            yvals <- long.df$Y[long.df$ROW==idx]
+            if (row) pp.raw[idx,clus.idx] <- pp.raw[idx,clus.idx] + sum(log(diag(theta[clus.idx,,yvals])))
+            else pp.raw[idx,clus.idx] <- pp.raw[idx,clus.idx] + sum(log(diag(theta[,clus.idx,yvals])))
         }
     }
     for(idx in 1:nelements) pp.m[idx,] <- pp.raw[idx,] - log(sum(exp(pp.raw[idx,] + min(abs(pp.raw[idx,]))))) + min(abs(pp.raw[idx,]))
@@ -15,9 +16,9 @@ onemode.membership.pp <- function(y.mat, theta, proportions, nelements, row){
     pp.m <- exp(pp.m)
 }
 
-twomode.membership.pp <- function(y.mat, theta, pi.v, kappa.v, nclus, row) {
-    n <- nrow(y.mat)
-    p <- ncol(y.mat)
+twomode.membership.pp <- function(long.df, theta, pi.v, kappa.v, nclus, row) {
+    n <- max(long.df$ROW)
+    p <- max(long.df$COL)
 
     if (row) {
         pp.m <- matrix(NA,n,nclus)
@@ -25,7 +26,8 @@ twomode.membership.pp <- function(y.mat, theta, pi.v, kappa.v, nclus, row) {
         for(i in 1:n){
             for(r in 1:nclus){
                 for(j in 1:p){
-                    term <- sum(kappa.v*theta[r,,y.mat[i,j]])
+                    yval <- long.df$Y[long.df$ROW==i & long.df$COL==j]
+                    term <- sum(kappa.v*theta[r,,yval])
                     pp.raw[i,r] <- pp.raw[i,r] + log(term)
                 }
             }
@@ -36,7 +38,8 @@ twomode.membership.pp <- function(y.mat, theta, pi.v, kappa.v, nclus, row) {
         for(j in 1:p){
             for(c in 1:nclus){
                 for(i in 1:n){
-                    term <- sum(pi.v*theta[,c,y.mat[i,j]])
+                    yval <- long.df$Y[long.df$ROW==i & long.df$COL==j]
+                    term <- sum(pi.v*theta[,c,yval])
                     pp.raw[j,c] <- pp.raw[j,c] + log(term)
                 }
             }
@@ -57,11 +60,11 @@ assignments <- function(pp.m) {
     assignments
 }
 
-calc.ll <- function(invect, y.mat, model, submodel, ppr.m, pi.v, RG,
+calc.ll <- function(invect, long.df, y.mat, model, submodel, ppr.m, pi.v, RG,
                     ppc.m=NULL, kappa.v=NULL, CG=NULL, constraint.sum.zero=TRUE, partial=FALSE) {
-    n=nrow(y.mat)
-    p=ncol(y.mat)
-    q=length(unique(as.vector(y.mat)))
+    n <- max(long.df$ROW)
+    p <- max(long.df$COL)
+    q <- length(levels(long.df$Y))
 
     parlist <- unpack.parvec(invect,model=model,submodel=submodel,
                              n=n,p=p,q=q,RG=RG,CG=CG,constraint.sum.zero=constraint.sum.zero)
@@ -72,34 +75,44 @@ calc.ll <- function(invect, y.mat, model, submodel, ppr.m, pi.v, RG,
     pi.v[pi.v==0]=lower.limit
 
     if (submodel %in% c("rs","rp","rpi")) {
-        Rcluster.ll(y.mat, this.theta, ppr.m, pi.v, RG, partial=partial)
+        Rcluster.ll(long.df, y.mat, this.theta, ppr.m, pi.v, RG, partial=partial)
     } else if (submodel %in% c("rc","rci")) {
-        Bicluster.ll(y.mat, this.theta, ppr.m, ppc.m, pi.v, kappa.v, partial=partial)
+        Bicluster.ll(long.df, y.mat, this.theta, ppr.m, ppc.m, pi.v, kappa.v, partial=partial)
     }
 }
 
-Rcluster.ll <- function(y.mat, theta, ppr.m, pi.v, RG, partial=FALSE){
-    n=nrow(y.mat)
-    p=ncol(y.mat)
-    q=length(unique(as.vector(y.mat)))
+Rcluster.ll <- function(long.df, y.mat, theta, ppr.m, pi.v, RG, partial=FALSE){
+    n <- max(long.df$ROW)
+    p <- max(long.df$COL)
+    q <- length(levels(long.df$Y))
+
     ## TODO: these corrections of theta and pi are currently repeated from the
     ## POFM.rs/OSM.rs functions
     theta[theta<=0]=lower.limit
     pi.v[pi.v==0]=lower.limit
     llc=0
     for (r in 1:RG) {
-        theta.y.mat <- sapply(1:p,function(j) theta[r,j,y.mat[,j]])
+        # theta.y.mat <- sapply(1:p,function(j) {
+        #     yvals <- as.numeric(long.df$Y[long.df$COL==j])
+        #     theta[r,j,yvals]
+        # }) ## <-- THIS IS VERY VERY SLOW
+        theta.y.mat <- sapply(1:p,function(j) {
+            raw.theta <- theta[r,j,y.mat[,j]]
+            raw.theta[is.na(raw.theta)] <- 0
+            raw.theta
+        })
         llc <- llc + sum(t(ppr.m[,r])%*%log(theta.y.mat))
     }
     if (!partial) llc <- llc + sum(ppr.m%*%log(pi.v))
     -llc
 }
 
-Rcluster.Incll <- function(y.mat, theta, pi.v, RG)
+Rcluster.Incll <- function(long.df, theta, pi.v, RG)
 {
-    n=nrow(y.mat)
-    p=ncol(y.mat)
-    q=length(unique(as.vector(y.mat)))
+    n <- max(long.df$ROW)
+    p <- max(long.df$COL)
+    q <- length(levels(long.df$Y))
+
     ## TODO: these corrections of theta and pi are NOT repeated from the
     ## fit.POFM.rs.model/fit.OSM.rs.model functions, unlike the corrections
     ## in Rcluster.ll
@@ -109,7 +122,8 @@ Rcluster.Incll <- function(y.mat, theta, pi.v, RG)
     for(i in 1:n){
         sumoverR=0
         for(r in 1:RG){
-            sumoverR=sumoverR+pi.v[r]*prod(diag(theta[r,,y.mat[i,]]),na.rm=TRUE)
+            yvals <- long.df$Y[long.df$ROW==i]
+            sumoverR <- sumoverR+pi.v[r]*prod(diag(theta[r,,yvals]),na.rm=TRUE)
         }
         logl=logl+log(sumoverR)
     }
@@ -117,11 +131,11 @@ Rcluster.Incll <- function(y.mat, theta, pi.v, RG)
 }
 
 #The Log-likelihood #
-Bicluster.ll <- function(y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, partial=FALSE,
-                         use.matrix=TRUE){
-    n=nrow(y.mat)
-    p=ncol(y.mat)
-    q=length(unique(as.vector(y.mat)))
+Bicluster.ll <- function(long.df, y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, partial=FALSE){
+    n <- max(long.df$ROW)
+    p <- max(long.df$COL)
+    q <- length(levels(long.df$Y))
+
     RG <- length(pi.v)
     CG <- length(kappa.v)
 
@@ -132,22 +146,17 @@ Bicluster.ll <- function(y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, partial=FALS
     kappa.v[kappa.v==0]=lower.limit
 
     llc=0
-    if (use.matrix) {
-        for (r in 1:RG) {
-            for (c in 1:CG) {
-                theta.y.mat <- matrix(theta[r,c,y.mat],nrow=n)
-                llc <- llc + t(ppr.m[,r])%*%log(theta.y.mat)%*%ppc.m[,c]
-            }
-        }
-    } else {
-        for(i in 1:n){
-            for(j in 1:p){
-                for(r in 1:RG){
-                    for(c in 1:CG){
-                        llc=llc+ppr.m[i,r]*ppc.m[j,c]*log(theta[r,c,y.mat[i,j]])
-                    }
-                }
-            }
+
+    for (r in 1:RG) {
+        for (c in 1:CG) {
+            theta.y <- t(sapply(1:n, function(i) {
+                sapply(1:p, function(j) {
+                    # theta[r,c,long.df$Y[long.df$ROW==i & long.df$COL==j]] ## <-- THIS IS VERY VERY SLOW
+                    if (is.na(y.mat[i,j])) return(0)
+                    else return(theta[r,c,y.mat[i,j]])
+                })
+            }))
+            llc <- llc + t(ppr.m[,r])%*%log(theta.y)%*%ppc.m[,c]
         }
     }
     if (!partial) {
@@ -158,11 +167,11 @@ Bicluster.ll <- function(y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, partial=FALS
 }
 
 #The incomplete log-likelihood,used in model selection#
-Bicluster.IncllC <- function(y.mat, theta, pi.v, kappa.v)
+Bicluster.IncllC <- function(long.df, theta, pi.v, kappa.v)
 {
-    n=nrow(y.mat)
-    p=ncol(y.mat)
-    q=length(unique(as.vector(y.mat)))
+    n <- max(long.df$ROW)
+    p <- max(long.df$COL)
+    q <- length(levels(long.df$Y))
     RG <- length(pi.v)
     CG <- length(kappa.v)
 
@@ -181,7 +190,8 @@ Bicluster.IncllC <- function(y.mat, theta, pi.v, kappa.v)
             for(r in 1:RG){
                 for(c in 1:CG){
                     for(k in 1:q){
-                        if(y.mat[i,j]==k) multi.arr[i,j,r,c]=theta[r,c,k]
+                        yval <- long.df$Y[long.df$ROW==i & long.df$COL==j]
+                        if(yval==k) multi.arr[i,j,r,c]=theta[r,c,k]
                     }
                 }
             }
@@ -229,11 +239,11 @@ Bicluster.IncllC <- function(y.mat, theta, pi.v, kappa.v)
 }
 
 # Rows expansion (use if RG^n small enough):
-Bicluster.IncllR <- function(y.mat, theta, pi.v, kappa.v)
+Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
 {
-    n=nrow(y.mat)
-    p=ncol(y.mat)
-    q=length(unique(as.vector(y.mat)))
+    n <- max(long.df$ROW)
+    p <- max(long.df$COL)
+    q <- length(levels(long.df$Y))
     RG <- length(pi.v)
     CG <- length(kappa.v)
 
@@ -252,7 +262,8 @@ Bicluster.IncllR <- function(y.mat, theta, pi.v, kappa.v)
             for(r in 1:RG){
                 for(c in 1:CG){
                     for(k in 1:q){
-                        if(y.mat[i,j]==k) multi.arr[i,j,r,c]=theta[r,c,k]
+                        yval <- long.df$Y[long.df$ROW==i & long.df$COL==j]
+                        if(yval==k) multi.arr[i,j,r,c]=theta[r,c,k]
                     }
                 }
             }

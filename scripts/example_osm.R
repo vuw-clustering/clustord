@@ -10,7 +10,11 @@ source("R/utils_daniel_osm.R")
 
 set.seed(100)
 y.mat.sim <- matrix(sample(1:3,5*100,replace=TRUE),nrow=100)
-initvect <- c(-0.8,0.7,0.2,2)
+set.seed(100)
+long.df.sim <- data.frame(Y=factor(sample(1:3,5*100,replace=TRUE)),
+                          ROW=factor(rep(1:100,times=5)),COL=rep(1:5,each=100))
+
+# initvect <- c(-0.8,0.7,0.2,2)
 # initvect <- c(-0.8,0.7,0.2,2,0.25,0.25,0.25,0.25)
 initvect <- c(-0.8,0.7,0.2,2,rep(0.25,times=4),rep(0.4,times=4))
 pi.init <- c(0.1,0.9)
@@ -20,17 +24,9 @@ set.seed(1)
 # results <- rowclustering("Y~row+column",
 results <- rowclustering("Y~row+column+row:column",
                             model="OSM",nclus.row=2,
-                            y.mat=y.mat.sim,
+                            long.df=long.df.sim,
                             initvect=initvect,
-                            pi.init=c(0.1,0.9),EM.control=list(EMcycles=3))
-
-
-results2 <- rowclustering("Y~row+column+row:column", model="OSM",
-                            nclus.row=2,
-                            y.mat=y.mat.sim)
-
-results$info
-
+                            pi.init=c(0.1,0.9),EM.control=list(EMcycles=40))
 
 #Initialize parameters for Daniel's original OSM code
 # Daniel's original OSM code has RG-1 of the pi values as the last part of row
@@ -40,7 +36,6 @@ parstart <- c(initvect,pi.init[1:(length(pi.init)-1)])
 y.mat <- y.mat.sim
 min.numRows.to.test <- 2
 max.numRows.to.test <- 2
-# reparC <- 0 ## Reparametrization is NOT coded into new OSM yet so don't want to use it
 reparC <- 1
 arraydata <- as.vector(y.mat)
 path.C.funcs <- "src/"
@@ -79,9 +74,17 @@ dim(y.mat)
 q <- length(table(y.mat)) # number of categories
 print(paste("q=",q,sep=""))
 
+long.df <- data.frame(Y=factor(as.vector(y.mat)),ROW=rep(1:70,times=10),COL=rep(1:10,each=70))
+
 biclustering("Y~row+column+row:column", model="OSM",
-             nclus.row=2,nclus.column=2,
-             y.mat=y.mat)
+             nclus.row=2,nclus.column=2,long.df=long.df,
+             EM.control=list(EMcycles=5))
+
+initvect <- c(-0.5,-1,0.5,3,3,1)
+biclustering("Y~row+column+row:column", model="OSM",
+             nclus.row=2,nclus.column=3,long.df=long.df,
+             EM.control=list(EMcycles=5))
+
 
 rowclustering("Y~row+column+row:column", model="OSM",
               nclus.row=2,
@@ -94,9 +97,10 @@ y.mat <- t(y.mat)
 
 kappa.init <- c(0.4,0.6)
 initvect <- c(0.37,1.41,0.35,3.03)
+initvect <- c(-0.37,-1.41,0.35,3.03)
 results.new <- columnclustering("Y~column", model="OSM",
                                 nclus.column=2,
-                                y.mat=y.mat.original, initvect=initvect, kappa.init=kappa.init)
+                                long.df=long.df, initvect=initvect, kappa.init=kappa.init)
 
 
 source("R/rowclustering_lm_daniel_osm.R")

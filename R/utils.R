@@ -1,15 +1,13 @@
 #transform data set to matrix form #
-df2mat <- function(data,y,subject,question){
-    row <- length(levels(subject))
-    col<- length(levels(question))
-    my.mat <- matrix(NA,row,col,byrow=T)
-    for (i in 1:row) for (j in 1:col){
-        leveli <- levels(subject)[i]
-        levelj <- levels(question)[j]
-        temp.df <- data[(subject==leveli)&(question==levelj),]
-        if (length(temp.df$y)>0) my.mat[i,j] <- temp.df$y
+df2mat <- function(long.df){
+    n <- max(long.df$ROW)
+    p <- max(long.df$COL)
+    mat <- matrix(NA,n,p,byrow=T)
+    for (i in 1:n) for (j in 1:p){
+        yvals <- long.df$Y[long.df$ROW==i & long.df$COL==j]
+        if (length(yvals)==1) mat[i,j] <- yvals
     }
-    return(my.mat)
+    return(mat)
 }
 
 # calculate model selection criteria

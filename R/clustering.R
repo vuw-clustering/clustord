@@ -17,11 +17,11 @@ lower.limit <- 0.00001
 #' @param formula: model formula.
 #' @param model: "OSM" for Ordered Stereotype Model or "POM" for Proportional Odds Model.
 #' @param nclus.row: number of row clustering groups.
-#' @param data: data frame with three columns, which must be in the correct order.
-#'     First column is response, second column is subject, and last column is question.
-#' @param y.mat: can be provided as an input instead of data, y.mat is a data
-#'     matrix with named columns corresponding to questions, and rows
-#'     corresponding to subjects.
+#' @param long.df: data frame with at least three columns, Y and ROW and COL,
+#'     where Y is the response variable, ROW is the factor to be clustered and
+#'     COL is the additional factor included in the model. Typically, ROW will
+#'     correspond to the row index and COL to the column index of an original
+#'     data matrix whose values are given by Y.
 #' @param initvect: (default NULL) vector of starting parameter values for the model.
 #'     If NULL, starting parameter values will be generated automatically.
 #'     q is the number of levels in the values of y, and p is the number of
@@ -90,14 +90,14 @@ lower.limit <- 0.00001
 #'     as well as `ppr`, the posterior probabilities of membership of the row clusters,
 #'     and `RowClusters`, the assigned row clusters based on maximum posterior probability.
 #' @examples
-#' rowclustering("Y~row",model="OSM",3,data),indicates model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*alpha_r with 3 row clustering groups
-#' rowclustering("Y~row+column",model="OSM",3,data),indicates model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*(alpha_r+beta_j) with 3 row clustering groups
-#' rowclustering("Y~row+column+row:column",model="POM",2,data),indicates model Logit=mu_k-alpha_r-beta_j-gamma_rj with 2 row clustering groups
+#' rowclustering("Y~row",model="OSM",3,long.df),indicates model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*alpha_r with 3 row clustering groups
+#' rowclustering("Y~row+column",model="OSM",3,long.df),indicates model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*(alpha_r+beta_j) with 3 row clustering groups
+#' rowclustering("Y~row+column+row:column",model="POM",2,long.df),indicates model Logit=mu_k-alpha_r-beta_j-gamma_rj with 2 row clustering groups
 #' @export
 rowclustering <- function(formula,
                           model,
                           nclus.row,
-                          data=NULL,y.mat=NULL,
+                          long.df,
                           initvect=NULL,
                           pi.init=NULL,
                           EM.control=list(EMcycles=50, EMstoppingpar=1e-4,
@@ -107,13 +107,14 @@ rowclustering <- function(formula,
 
     validate.inputs(type="row",
                     formula=formula, model=model, nclus.row=nclus.row,
-                    data=data, y.mat=y.mat, initvect=initvect, pi.init=pi.init,
+                    long.df=long.df, initvect=initvect, pi.init=pi.init,
                     EM.control=EM.control, optim.method=optim.method,
                     constraint.sum.zero=constraint.sum.zero,
                     use.alternative.start=use.alternative.start)
 
-    if (!is.null(data)) colnames(data)<-c("y","subject","question")
-    if (is.null(y.mat)) y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$question))
+    ## If ROW and COL are factors, convert them to their numeric values before
+    ## running clustering
+    long.df <- check.factors(long.df)
 
     ## Replace defaults with user-provided values, so that any control parameters
     ## the user did not specify are not left blank:
@@ -133,7 +134,7 @@ rowclustering <- function(formula,
 
     if (is.null(initvect) | is.null(pi.init)) {
         ## generate.start will keep using whichever of initvect and pi.init is not null
-        start.par <- generate.start.rowcluster(y.mat, model=model, submodel=submodel, RG=RG,
+        start.par <- generate.start.rowcluster(long.df, model=model, submodel=submodel, RG=RG,
                                                initvect=initvect, pi.init=pi.init,
                                                EM.control=EM.control,
                                                optim.method=optim.method,
@@ -144,7 +145,7 @@ rowclustering <- function(formula,
         pi.init <- start.par$pi.init
     }
 
-    run.EM.rowcluster(invect=initvect, y.mat, model=model, submodel=submodel,
+    run.EM.rowcluster(invect=initvect, long.df=long.df, model=model, submodel=submodel,
                       pi.v=pi.init, constraint.sum.zero=constraint.sum.zero,
                       EM.control=EM.control,
                       optim.method=optim.method, optim.control=optim.control)
@@ -167,11 +168,11 @@ rowclustering <- function(formula,
 #' @param formula: model formula.
 #' @param model: "OSM" for Ordered Stereotype Model or "POM" for Proportional Odds Model.
 #' @param nclus.column: number of column clustering groups.
-#' @param data: data frame with three columns, which must be in the correct order.
-#'     First column is response, second column is subject, and last column is question
-#' @param y.mat: can be provided as an input instead of data, y.mat is a data
-#'     matrix with named columns corresponding to questions, and rows
-#'     corresponding to subjects.
+#' @param long.df: data frame with at least three columns, Y and ROW and COL,
+#'     where Y is the response variable, ROW is the factor to be clustered and
+#'     COL is the additional factor included in the model. Typically, ROW will
+#'     correspond to the row index and COL to the column index of an original
+#'     data matrix whose values are given by Y.
 #' @param initvect: (default NULL) vector of starting parameter values for the model.
 #'     If NULL, starting parameter values will be generated automatically.
 #'     q is the number of levels in the values of y, and n is the number of
@@ -242,14 +243,14 @@ rowclustering <- function(formula,
 #'     as well as `ppr`, the posterior probabilities of membership of the row clusters,
 #'     and `RowClusters`, the assigned row clusters based on maximum posterior probability.
 #' @examples
-#' columnclustering("Y~column",model="OSM",3,data),indicates model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*beta_c with 3 column clustering groups
-#' columnclustering("Y~row+column",model="OSM",3,data),indicates model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*(alpha_i+beta_c) with 3 column clustering groups
-#' columnclustering("Y~row+column+row:column",model="POM",2,data),indicates model Logit=mu_k-alpha_i-beta_c-gamma_ic with 2 column clustering groups
+#' columnclustering("Y~column",model="OSM",3,long.df),indicates model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*beta_c with 3 column clustering groups
+#' columnclustering("Y~row+column",model="OSM",3,long.df),indicates model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*(alpha_i+beta_c) with 3 column clustering groups
+#' columnclustering("Y~row+column+row:column",model="POM",2,long.df),indicates model Logit=mu_k-alpha_i-beta_c-gamma_ic with 2 column clustering groups
 #' @export
 columnclustering <- function(formula,
     model,
     nclus.column,
-    data=NULL,y.mat=NULL,
+    long.df,
     initvect=NULL,
     kappa.init=NULL,
     EM.control=list(EMcycles=50, EMstoppingpar=1e-4, paramstopping=TRUE, startEMcycles=10),
@@ -258,13 +259,14 @@ columnclustering <- function(formula,
 
     validate.inputs(type="column",
                     formula=formula, model=model, nclus.column=nclus.column,
-                    data=data, y.mat=y.mat, initvect=initvect, kappa.init=kappa.init,
+                    long.df=long.df, initvect=initvect, kappa.init=kappa.init,
                     EM.control=EM.control, optim.method=optim.method,
                     constraint.sum.zero=constraint.sum.zero,
                     use.alternative.start=use.alternative.start)
 
-    if (!is.null(data)) colnames(data)<-c("y","subject","question")
-    if (is.null(y.mat)) y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$question))
+    ## If ROW and COL are factors, convert them to their numeric values before
+    ## running clustering
+    long.df <- check.factors(long.df)
 
     ## Replace defaults with user-provided values, so that any control parameters
     ## the user did not specify are not left blank:
@@ -283,11 +285,13 @@ columnclustering <- function(formula,
 
     RG <- nclus.column
     pi.init <- kappa.init
-    y.mat.transp <- t(y.mat)
+    long.df.transp <- long.df
+    long.df.transp$ROW <- long.df$COL
+    long.df.transp$COL <- long.df$ROW
 
     if (is.null(initvect) | is.null(pi.init)) {
         ## generate.start will keep using whichever of initvect and kappa.init is not null
-        start.par <- generate.start.rowcluster(y.mat.transp, model=model, submodel=submodel, RG=RG,
+        start.par <- generate.start.rowcluster(long.df.transp, model=model, submodel=submodel, RG=RG,
                                                initvect=initvect, pi.init=kappa.init,
                                                EM.control=EM.control,
                                                optim.method=optim.method,
@@ -298,7 +302,8 @@ columnclustering <- function(formula,
         pi.init <- start.par$pi.init
     }
 
-    results <- run.EM.rowcluster(invect=initvect, y.mat.transp, model=model, submodel=submodel,
+    results <- run.EM.rowcluster(invect=initvect, long.df=long.df.transp,
+                                 model=model, submodel=submodel,
                                  pi.v=pi.init, constraint.sum.zero=constraint.sum.zero,
                                  EM.control=EM.control,
                                  optim.method=optim.method, optim.control=optim.control)
@@ -339,11 +344,11 @@ columnclustering <- function(formula,
 #' @param model: "OSM" for Ordered Stereotype Model or "POM" for Proportional Odds Model.
 #' @param nclus.row: number of row clustering groups.
 #' @param nclus.column: number of column clustering groups.
-#' @param data: data frame with three columns, which must be in the correct order.
-#'     First column is response, second column is subject, and last column is question
-#' @param y.mat: can be provided as an input instead of data, y.mat is a data
-#'     matrix with named columns corresponding to questions, and rows
-#'     corresponding to subjects.
+#' @param long.df: data frame with at least three columns, Y and ROW and COL,
+#'     where Y is the response variable, ROW is the factor to be clustered and
+#'     COL is the additional factor included in the model. Typically, ROW will
+#'     correspond to the row index and COL to the column index of an original
+#'     data matrix whose values are given by Y.
 #' @param initvect: (default NULL) vector of starting parameter values for the model.
 #'     If NULL, starting parameter values will be generated automatically.
 #'     q is the number of levels in the values of y, and p is the number of
@@ -419,10 +424,10 @@ columnclustering <- function(formula,
 #'     and `ColumnClusters`, the assigned column clusters based on maximum
 #'     posterior probability.
 #' @examples
-#' biclustering("Y~row+column",model="OSM",RG=3,CG=2,data),indicates model
+#' biclustering("Y~row+column",model="OSM",RG=3,CG=2,long.df),indicates model
 #'     Log(P(Y=k)/P(Y=1))=mu_k-phi_k*(alpha_r+beta_c)
 #'     with 3 row clustering groups and 2 column clustering groups.
-#' biclustering("Y~row+column+row:column",model="POM",RG=2,CG=4,y.mat=y.mat),
+#' biclustering("Y~row+column+row:column",model="POM",RG=2,CG=4,long.df),
 #'     indicates model Logit=mu_k-alpha_r-beta_c-gamma_rc
 #'     with 2 row clustering groups and 4 column clustering groups.
 #' @export
@@ -430,7 +435,7 @@ biclustering <- function(formula,
     model,
     nclus.row,
     nclus.column,
-    data=NULL,y.mat=NULL,
+    long.df,
     initvect=NULL,
     pi.init=NULL,
     kappa.init=NULL,
@@ -442,14 +447,15 @@ biclustering <- function(formula,
     validate.inputs(type="bi",
                     formula=formula, model=model,
                     nclus.row=nclus.row, nclus.column=nclus.column,
-                    data=data, y.mat=y.mat, initvect=initvect,
+                    long.df=long.df, initvect=initvect,
                     pi.init=pi.init, kappa.init=kappa.init,
                     EM.control=EM.control, optim.method=optim.method,
                     constraint.sum.zero=constraint.sum.zero,
                     use.alternative.start=use.alternative.start)
 
-    if (!is.null(data)) colnames(data)<-c("y","subject","question")
-    if (is.null(y.mat)) y.mat<-df2mat(data,data$y,as.factor(data$subject),as.factor(data$question))
+    ## If ROW and COL are factors, convert them to their numeric values before
+    ## running clustering
+    long.df <- check.factors(long.df)
 
     ## Replace defaults with user-provided values, so that any control parameters
     ## the user did not specify are not left blank:
@@ -470,7 +476,7 @@ biclustering <- function(formula,
     if (is.null(initvect) | is.null(pi.init) | is.null(kappa.init)) {
         ## generate.start will keep using whichever of initvect and pi.init and
         ## kappa.init are not null
-        start.par <- generate.start.bicluster(y.mat, model=model, submodel=submodel,
+        start.par <- generate.start.bicluster(long.df, model=model, submodel=submodel,
                                               RG=RG, CG=CG, initvect=initvect,
                                               pi.init=pi.init, kappa.init=kappa.init,
                                               EM.control=EM.control,
@@ -483,7 +489,7 @@ biclustering <- function(formula,
         kappa.init <- start.par$kappa.init
     }
 
-    run.EM.bicluster(invect=initvect, y.mat=y.mat, model=model, submodel=submodel,
+    run.EM.bicluster(invect=initvect, long.df=long.df, model=model, submodel=submodel,
         pi.v=pi.init, kappa.v=kappa.init, EM.control=EM.control,
         optim.method=optim.method, optim.control=optim.control)
 }
@@ -496,7 +502,7 @@ validate.inputs <- function(type,
                             formula,
                             model,
                             nclus.row=NULL,nclus.column=NULL,
-                            data=NULL,y.mat=NULL,
+                            long.df,
                             initvect=NULL,
                             pi.init=NULL, kappa.init=NULL,
                             EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
@@ -528,24 +534,30 @@ validate.inputs <- function(type,
         }
     }
 
-    if(is.null(y.mat)) {
-        if (!is.null(data)) {
-            if (!is.data.frame(data) || ncol(data) != 3) stop("If supplied, data must be a data frame with 3 columns, in the order 'response', 'subject', 'question'.")
-            if (any(sapply(data,is.factor))) stop("data cannot have factor columns. Please convert to numeric values.")
-            if (any(sapply(data,is.list)) || any(is.na(data)) || any(sapply(data,is.infinite)) || any(data %% 1 != 0) ||
-                any(data < 1) || all(data[[1]] > 1)) stop("The first column of data must be integers from 1 to q, the second column must be integers from 1 to the number of observations, and the third column must be integers from 1 to the number of variables.")
-            colnames(data)<-c("y","subject","question")
-        } else stop("y.mat and data cannot both be null. Please provide either a data matrix or a data frame.")
-    } else {
-        if (!is.matrix(y.mat)) stop("If supplied, y.mat must be a matrix.")
-        if (any(is.character(y.mat)) || any(y.mat %% 1 != 0 || any(is.na(y.mat)) || any(y.mat < 1) || any(is.infinite(y.mat)) ||
-            all(y.mat > 1))) stop("If supplied, y.mat must be a matrix of integers, where every column/question can take values from 1 to q.")
-    }
+    if (is.null(long.df)) stop("long.df cannot be null.")
+    if (!is.data.frame(long.df)) stop("long.df must be a data frame.")
+    if (length(long.df) < 3) stop("long.df must have at least 3 columns, Y and ROW and COL.")
+    if (!("Y" %in% names(long.df))) stop("long.df must have a column named 'Y' which contains the response values.")
+    if (!("ROW" %in% names(long.df))) stop("long.df must have a column named 'ROW' which indicates what observation (row in the data matrix) each value of Y corresponds to.")
+    if (!("COL" %in% names(long.df))) stop("long.df must have a column named 'COL' which indicates what variable (column in the data matrix) each value of Y corresponds to.")
 
-    if (!is.null(data) && !is.null(nclus.row) && nclus.row >= length(unique(data$subject))) stop("nclus.row must be smaller than the number of subjects in the data.")
-    if (!is.null(y.mat) && !is.null(nclus.row) && nclus.row >= nrow(y.mat)) stop("nclus.row must be smaller than the number of rows of y.mat.")
-    if (!is.null(data) && !is.null(nclus.column) && nclus.column >= length(unique(data$question))) stop("nclus.column must be smaller than the number of questions in the data.")
-    if (!is.null(y.mat) && !is.null(nclus.column) &&  nclus.column >= ncol(y.mat)) stop("nclus.column must be smaller than the number of columns of y.mat.")
+    if (!is.factor(long.df$Y)) stop("long.df$Y must be a factor.")
+
+    if (is.list(long.df$Y) || any(sapply(long.df$Y,is.list)) || any(is.na(long.df$Y)) ||
+        any(sapply(long.df$Y,is.infinite))) stop("long.df$Y must be a factor with q levels.")
+    if (!is.factor(long.df$ROW) &&
+        (is.list(long.df$ROW) || any(sapply(long.df$ROW,is.list)) || any(is.na(long.df$ROW)) ||
+        any(sapply(long.df$ROW,is.infinite)) || any(long.df$ROW %% 1 != 0) ||
+        any(long.df$ROW < 1) || all(long.df$ROW > 1))) stop("long.df$ROW must be a factor or integers from 1 to the number of observations, i.e. the number of rows in the original data matrix.")
+    if (!is.factor(long.df$COL) &&
+        is.list(long.df$COL) || any(sapply(long.df$COL,is.list)) || any(is.na(long.df$COL)) ||
+        any(sapply(long.df$COL,is.infinite)) || any(long.df$COL %% 1 != 0) ||
+        any(long.df$COL < 1) || all(long.df$COL > 1)) stop("long.df$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix.")
+
+    if (!all(table(long.df[,c("ROW","COL")]) == 1)) stop("Each element from the original data matrix must correspond to exactly 1 row in long.df.")
+
+    if (!is.null(nclus.row) && nclus.row >= max(as.numeric(long.df$ROW))) stop("nclus.row must be smaller than the maximum value of long.df$ROW.")
+    if (!is.null(nclus.column) && nclus.column >= max(as.numeric(long.df$COL))) stop("nclus.column must be smaller than the maximum value of long.df$COL.")
 
     if (!is.null(initvect)) {
         if (!is.vector(initvect) || !is.numeric(initvect) || any(is.na(initvect)) ||
@@ -576,6 +588,20 @@ validate.inputs <- function(type,
 
     if (is.null(optim.method) || !is.character(optim.method) || !is.vector(optim.method) ||
         length(optim.method) != 1 || !(optim.method %in% c("Nelder-Mead","BFGS","CG","L-BFGS-B"))) stop("If supplied, optim.method must be one of the valid methods for optim, 'Nelder-Mead', 'CG', 'BFGS' or 'L-BFGS-B'.")
+}
+
+check.factors <- function(long.df) {
+    if (is.factor(long.df$ROW)) {
+        print("Converting factor ROW to numeric.")
+        attributes(long.df)$ROWlevels <- levels(long.df$ROW)
+        long.df$ROW <- as.numeric(long.df$ROW)
+    }
+    if (is.factor(long.df$COL)) {
+        print("Converting factor COL to numeric")
+        attributes(long.df)$COLlevels <- levels(long.df$COL)
+        long.df$COL <- as.numeric(long.df$COL)
+    }
+    long.df
 }
 
 new.EM.status <- function() {
@@ -616,14 +642,14 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect, EM.co
          paramstopping=EM.control$paramstopping)
 }
 
-run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
+run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
                               constraint.sum.zero=TRUE,
                               EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
                               optim.method="L-BFGS-B", optim.control=default.optim.control()) {
-    n=nrow(y.mat)
-    p=ncol(y.mat)
-    q=length(unique(as.vector(y.mat)))
-    RG=length(pi.v)
+    n <- max(long.df$ROW)
+    p <- max(long.df$COL)
+    q <- length(levels(long.df$Y))
+    RG <- length(pi.v)
 
     parlist.in <- unpack.parvec(invect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,
                                 constraint.sum.zero=constraint.sum.zero)
@@ -631,6 +657,8 @@ run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
     if (any(sapply(parlist.in,function(elt) is.null(elt)))) stop("Error unpacking parameters for model.")
 
     theta.arr <- calc.theta(parlist.in,model=model,submodel=submodel)
+
+    y.mat <- df2mat(long.df)
 
     initvect <- invect
     outvect=invect
@@ -640,7 +668,7 @@ run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
     while(!EM.status$finished)
     {
         # E-step - Update posterior probabilities
-        ppr.m <- onemode.membership.pp(y.mat, theta.arr, pi.v, n, row=TRUE)
+        ppr.m <- onemode.membership.pp(long.df, theta.arr, pi.v, n, row=TRUE)
 
         ## Now set any NA values in the posterior probabilities matrix to 0
         ppr.m[is.na(ppr.m)] <- 0
@@ -652,6 +680,7 @@ run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
         #use numerical maximisation
         optim.fit <- optim(par=invect,
                            fn=calc.ll,
+                           long.df=long.df,
                            y.mat=y.mat,
                            model=model,
                            submodel=submodel,
@@ -664,7 +693,8 @@ run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
                            hessian=F,control=optim.control)
 
         outvect <- optim.fit$par
-        llc <- -calc.ll(outvect,y.mat,model=model,submodel=submodel,ppr.m,pi.v,RG, partial=FALSE)
+        llc <- -calc.ll(outvect,long.df=long.df,y.mat=y.mat,model=model,submodel=submodel,
+                        ppr.m,pi.v,RG, partial=FALSE)
 
         parlist.out <- unpack.parvec(outvect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,
                                      constraint.sum.zero=constraint.sum.zero)
@@ -673,7 +703,7 @@ run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
         ## Note that UNLIKE Rcluster.ll, Rcluster.Incll outputs the *actual*
         ## log-likelihood, not the negative of the log-likelihood, so don't need
         ## to make it negative here
-        lli <- Rcluster.Incll(y.mat, theta.arr, pi.v, RG)
+        lli <- Rcluster.Incll(long.df, theta.arr, pi.v, RG)
 
         EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
                                      invect=invect,outvect=outvect,EM.control=EM.control)
@@ -709,13 +739,13 @@ run.EM.rowcluster <- function(invect, y.mat, model, submodel, pi.v,
          "RowClusters"=Rclus)
 }
 
-run.EM.bicluster <- function(invect, y.mat, model, submodel, pi.v, kappa.v,
+run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
                              constraint.sum.zero=TRUE,
                              EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
                              optim.method="L-BFGS-B", optim.control=default.optim.control()) {
-    n <- nrow(y.mat)
-    p <- ncol(y.mat)
-    q <- length(unique(as.vector(y.mat)))
+    n <- max(long.df$ROW)
+    p <- max(long.df$COL)
+    q <- length(levels(long.df$Y))
     RG <- length(pi.v)
     CG <- length(kappa.v)
 
@@ -726,6 +756,8 @@ run.EM.bicluster <- function(invect, y.mat, model, submodel, pi.v, kappa.v,
 
     theta.arr <- calc.theta(parlist.in,model=model,submodel=submodel)
 
+    y.mat <- df2mat(long.df)
+
     initvect <- invect
     outvect=invect
     # Run the EM cycle:
@@ -734,14 +766,14 @@ run.EM.bicluster <- function(invect, y.mat, model, submodel, pi.v, kappa.v,
     while(!EM.status$finished)
     {
         # E-step - Update posterior probabilities
-        ppr.m <- twomode.membership.pp(y.mat, theta.arr, pi.v, kappa.v, RG, row=TRUE)
+        ppr.m <- twomode.membership.pp(long.df, theta.arr, pi.v, kappa.v, RG, row=TRUE)
 
         ## Now set any NA values in the posterior probabilities matrix to 0
         ppr.m[is.na(ppr.m)] <- 0
 
         pi.v <- colMeans(ppr.m)
 
-        ppc.m <- twomode.membership.pp(y.mat, theta.arr, pi.v, kappa.v, CG, row=FALSE)
+        ppc.m <- twomode.membership.pp(long.df, theta.arr, pi.v, kappa.v, CG, row=FALSE)
 
         ## Now set any NA values in the posterior probabilities matrix to 0
         ppc.m[is.na(ppc.m)] <- 0
@@ -753,6 +785,7 @@ run.EM.bicluster <- function(invect, y.mat, model, submodel, pi.v, kappa.v,
         #use numerical maximisation
         optim.fit <- optim(par=invect,
             fn=calc.ll,
+            long.df=long.df,
             y.mat=y.mat,
             model=model,
             submodel=submodel,
@@ -769,7 +802,7 @@ run.EM.bicluster <- function(invect, y.mat, model, submodel, pi.v, kappa.v,
 
         outvect <- optim.fit$par
 
-        llc <- -calc.ll(outvect,y.mat,model=model,submodel=submodel,
+        llc <- -calc.ll(outvect,long.df=long.df,y.mat=y.mat,model=model,submodel=submodel,
             ppr.m=ppr.m,pi.v=pi.v,RG=RG, ppc.m=ppc.m,kappa.v=kappa.v,CG=CG,
             partial=FALSE)
 
@@ -780,8 +813,8 @@ run.EM.bicluster <- function(invect, y.mat, model, submodel, pi.v, kappa.v,
         ## Note that UNLIKE Bicluster.ll, Bicluster.Incll outputs the *actual*
         ## log-likelihood, not the negative of the log-likelihood, so don't need
         ## to make it negative here
-        if(CG^p<RG^n) lli <- Bicluster.IncllC(y.mat, theta.arr, pi.v, kappa.v)
-        else lli <- Bicluster.IncllR(y.mat, theta.arr, pi.v, kappa.v)
+        if(CG^p<RG^n) lli <- Bicluster.IncllC(long.df, theta.arr, pi.v, kappa.v)
+        else lli <- Bicluster.IncllR(long.df, theta.arr, pi.v, kappa.v)
 if (is.na(lli)) browser()
         EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
                                      invect=invect,outvect=outvect,EM.control=EM.control)

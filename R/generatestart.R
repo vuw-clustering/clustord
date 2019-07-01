@@ -1,20 +1,23 @@
-generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL, pi.init=NULL,
+generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NULL, pi.init=NULL,
                                       EM.control=list(EMcycles=50, EMstoppingpar=1e-4,
                                                       paramstopping=TRUE, startEMcycles=10),
                                       optim.method="L-BFGS-B", optim.control=default.optim.control(),
                                       constraint.sum.zero=TRUE, use.alternative.start=TRUE) {
 
     if (is.null(initvect)) {
-        ## TODO: not good to set q equal to LENGTH of unique(y.mat) instead of to
-        ## the MAXIMUM value of unique(y.mat)
-        q <- length(unique(as.vector(y.mat)))
+        n <- max(long.df$ROW)
+        p <- max(long.df$COL)
 
-        PO.sp.out <- MASS::polr(as.factor(y.mat)~1)
+        q <- length(levels(long.df$Y))
+
+        PO.sp.out <- MASS::polr(Y~1,data=long.df)
         PO.sp.out$mu=PO.sp.out$zeta
 
-        VariableName=as.factor(rep((1:ncol(y.mat)),each=nrow(y.mat)))
-        PO.sp.out <- MASS::polr(as.factor(y.mat)~VariableName)
+        PO.sp.out <- MASS::polr(Y~as.factor(COL),data=long.df)
         PO.sp.out$mu=PO.sp.out$zeta
+
+        ## convert to data matrix
+        y.mat <- df2mat(long.df)
 
         kmeans.data=kmeans(y.mat,centers=RG,nstart=100)
         pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
@@ -42,19 +45,17 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                               ## If not using constraint that beta sum to zero,
                               ## beta1 will be 0 so need to correct other elements
                               ## of beta accordingly
-                              if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(ncol(y.mat)-1)]
-                              else beta.init <- PO.sp.out$coef[2:(ncol(y.mat)-1)] - PO.sp.out$coef[1]
+                              if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(p-1)]
+                              else beta.init <- PO.sp.out$coef[2:(p-1)] - PO.sp.out$coef[1]
 
                               initvect <- c(mu.init, u.init, alpha.init, beta.init)
                           },
                           "rpi"={
-                              p <- ncol(y.mat)
-
                               ## If not using constraint that beta sum to zero,
                               ## beta1 will be 0 so need to correct other elements
                               ## of beta accordingly
-                              if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(ncol(y.mat)-1)]
-                              else beta.init <- PO.sp.out$coef[2:(ncol(y.mat)-1)] - PO.sp.out$coef[1]
+                              if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(p-1)]
+                              else beta.init <- PO.sp.out$coef[2:(p-1)] - PO.sp.out$coef[1]
 
                               gamma.init <- rep(0.1,(RG-1)*(p-1))
 
@@ -70,17 +71,16 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                               ## If not using constraint that beta sum to zero,
                               ## beta1 will be 0 so need to correct other elements
                               ## of beta accordingly
-                              if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(ncol(y.mat)-1)]
-                              else beta.init <- PO.sp.out$coef[2:(ncol(y.mat)-1)] - PO.sp.out$coef[1]
+                              if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(p-1)]
+                              else beta.init <- PO.sp.out$coef[2:(p-1)] - PO.sp.out$coef[1]
                               initvect <- c(mu.init,alpha.init,beta.init)
                           },
                           "rpi"={
-                              p <- ncol(y.mat)
                               ## If not using constraint that beta sum to zero,
                               ## beta1 will be 0 so need to correct other elements
                               ## of beta accordingly
-                              if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(ncol(y.mat)-1)]
-                              else beta.init <- PO.sp.out$coef[2:(ncol(y.mat)-1)] - PO.sp.out$coef[1]
+                              if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(p-1)]
+                              else beta.init <- PO.sp.out$coef[2:(p-1)] - PO.sp.out$coef[1]
                               gamma.init <- rep(0.1,(RG-1)*(p-1))
                               initvect <- c(mu.init,alpha.init,beta.init,gamma.init)
                           },stop("Invalid model for row/column clustering"))
@@ -108,7 +108,7 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
 
                               cat("Fitting RS model to obtain starting values for pi.v\n")
                               OSM.rs.out <- run.EM.rowcluster(invect=initvect[1:(q-1+q-2+RG-1)],
-                                                              y.mat, model="OSM",submodel="rs",
+                                                              long.df, model="OSM",submodel="rs",
                                                               pi.v=pi.init,
                                                               EM.control=startEM.control,
                                                               optim.method=optim.method,
@@ -124,7 +124,7 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                               if (use.alternative.start) {
 
                                   OSM.rp.out <- run.EM.rowcluster(invect=initvect[1:(q-1+q-2+RG-1+p-1)],
-                                                                  y.mat, model="OSM",submodel="rp",
+                                                                  long.df, model="OSM",submodel="rp",
                                                                   pi.v=pi.init, EM.control=startEM.control,
                                                                   optim.method=optim.method,
                                                                   optim.control=optim.control)
@@ -133,21 +133,20 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                                   ppr.m=OSM.rp.out$ppr
                                   pi.init=OSM.rp.out$pi
                               } else {
-                                  PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
+                                  PO.ss.out <- MASS::polr(Y~1,data=long.df)
                                   PO.ss.out$mu <- PO.ss.out$zeta
 
-                                  VariableName <- as.factor(rep((1:ncol(y.mat)),each=nrow(y.mat)))
-                                  PO.sp.out <- MASS::polr(as.factor(y.mat)~VariableName)
-                                  PO.sp.out$beta <- PO.sp.out$coef[1:(ncol(y.mat)-1)] #Individual column effect
+                                  PO.sp.out <- MASS::polr(Y~as.factor(COL),data=long.df)
+                                  PO.sp.out$beta <- PO.sp.out$coef[1:(p-1)] #Individual column effect
 
-                                  if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(ncol(y.mat)-1)]
-                                  else beta.init <- PO.sp.out$coef[2:(ncol(y.mat)-1)] - PO.sp.out$coef[1]
+                                  if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(p-1)]
+                                  else beta.init <- PO.sp.out$coef[2:(p-1)] - PO.sp.out$coef[1]
 
                                   phi.init <- seq(from=runif(1,min=0.05,max=0.5),
                                                   to=runif(1,min=0.6,max=0.95), length.out = (q-2))
 
                                   OSM.rs.out <- run.EM.rowcluster(invect=c(PO.ss.out$mu,phi.init,alpha.kmeans[-RG]),
-                                                                  y.mat, model="OSM",submodel="rs",
+                                                                  long.df, model="OSM",submodel="rs",
                                                                   pi.v=pi.init, EM.control=startEM.control,
                                                                   optim.method=optim.method,
                                                                   optim.control=optim.control)
@@ -155,7 +154,7 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                                                                            phi.init,
                                                                            OSM.rs.out$parlist.out$alpha[-RG],
                                                                            beta.init),
-                                                                  y.mat, model="OSM",submodel="rp",
+                                                                  long.df, model="OSM",submodel="rp",
                                                                   pi.v=pi.init, EM.control=startEM.control,
                                                                   optim.method=optim.method,
                                                                   optim.control=optim.control)
@@ -178,7 +177,7 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
 
                               cat("Fitting RS model to obtain starting values for pi.v\n")
                               POM.rs.out <- run.EM.rowcluster(invect=initvect[1:(q-1+RG-1)],
-                                                              y.mat, model="POM",submodel="rs",
+                                                              long.df, model="POM",submodel="rs",
                                                               pi.v=pi.init,
                                                               EM.control=startEM.control,
                                                               optim.method=optim.method,
@@ -194,7 +193,7 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                               if (use.alternative.start) {
 
                                   POM.rp.out <- run.EM.rowcluster(invect=initvect[1:(q-1+RG-1+p-1)],
-                                                                  y.mat, model="POM",submodel="rp",
+                                                                  long.df, model="POM",submodel="rp",
                                                                   pi.v=pi.init, EM.control=startEM.control,
                                                                   optim.method=optim.method,
                                                                   optim.control=optim.control)
@@ -203,24 +202,23 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
                                   ppr.m=POM.rp.out$ppr
                                   pi.init=POM.rp.out$pi
                               } else {
-                                  PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
+                                  PO.ss.out <- MASS::polr(Y~1, data=long.df)
                                   PO.ss.out$mu <- PO.ss.out$zeta
 
-                                  VariableName <- as.factor(rep((1:ncol(y.mat)),each=nrow(y.mat)))
-                                  PO.sp.out <- MASS::polr(as.factor(y.mat)~VariableName)
+                                  PO.sp.out <- MASS::polr(Y~as.factor(COL), data=long.df)
 
-                                  if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(ncol(y.mat)-1)]
-                                  else beta.init <- PO.sp.out$coef[2:(ncol(y.mat)-1)] - PO.sp.out$coef[1]
+                                  if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(p-1)]
+                                  else beta.init <- PO.sp.out$coef[2:(p-1)] - PO.sp.out$coef[1]
 
                                   POM.rs.out <- run.EM.rowcluster(invect=c(PO.ss.out$mu,alpha.kmeans[-RG]),
-                                                                  y.mat, model="POM",submodel="rs",
+                                                                  long.df, model="POM",submodel="rs",
                                                                   pi.v=pi.init, EM.control=startEM.control,
                                                                   optim.method=optim.method,
                                                                   optim.control=optim.control)
                                   POM.rp.out <- run.EM.rowcluster(invect=c(POM.rs.out$parlist.out$mu,
                                                                            POM.rs.out$parlist.out$alpha[-RG],
                                                                            beta.init),
-                                                                  y.mat, model="POM",submodel="rp",
+                                                                  long.df, model="POM",submodel="rp",
                                                                   pi.v=pi.init, EM.control=startEM.control,
                                                                   optim.method=optim.method,
                                                                   optim.control=optim.control)
@@ -236,7 +234,7 @@ generate.start.rowcluster <- function(y.mat, model, submodel, RG, initvect=NULL,
     list(initvect=initvect, pi.init=pi.init)
 }
 
-generate.start.bicluster <- function(y.mat, model, submodel, RG, CG,
+generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
                                      initvect=NULL, pi.init=NULL, kappa.init=NULL,
                                      EM.control=list(EMcycles=50, EMstoppingpar=1e-4,
                                                      paramstopping=TRUE, startEMcycles=10),
@@ -244,12 +242,16 @@ generate.start.bicluster <- function(y.mat, model, submodel, RG, CG,
                                      constraint.sum.zero=TRUE, use.alternative.start=TRUE) {
 
     if (is.null(initvect)) {
-        ## TODO: not good to set q equal to LENGTH of unique(y.mat) instead of to
-        ## the MAXIMUM value of unique(y.mat)
-        q <- length(unique(as.vector(y.mat)))
+        n <- max(long.df$ROW)
+        p <- max(long.df$COL)
 
-        PO.ss.out <- MASS::polr(as.factor(y.mat)~1)
+        q <- length(levels(long.df$Y))
+
+        PO.ss.out <- MASS::polr(Y~1,data=long.df)
         PO.ss.out$mu <- PO.ss.out$zeta
+
+        ## convert to data matrix
+        y.mat <- df2mat(long.df)
 
         row.kmeans <- kmeans(y.mat,centers=RG,nstart=50)
         pi.kmeans <- (row.kmeans$size)/sum(row.kmeans$size)
@@ -340,7 +342,7 @@ generate.start.bicluster <- function(y.mat, model, submodel, RG, CG,
                                            "OSM"=initvect[1:(q-1+q-2+RG-1)],
                                            "POM"=initvect[1:(q-1+RG-1)])
                        rs.out <- run.EM.rowcluster(invect=rs.invect,
-                                                   y.mat, model=model,submodel="rs",
+                                                   long.df, model=model,submodel="rs",
                                                    pi.v=pi.init,
                                                    EM.control=startEM.control,
                                                    optim.method=optim.method,
@@ -349,13 +351,17 @@ generate.start.bicluster <- function(y.mat, model, submodel, RG, CG,
                        pi.init <- rs.out$pi
                    }
                    if (generate.kappa) {
-                       cat("Fitting SC model as RS model applied to transpose of y.mat,
-                           so fitted values of pi gives starting values for kappa.v\n")
+                       cat("Fitting SC model as RS model applied to y with ROW
+                            and COL switched, so fitted values of pi gives
+                            starting values for kappa.v\n")
+                       long.df.transp <- long.df
+                       long.df.transp$ROW <- long.df$COL
+                       long.df.transp$COL <- long.df$ROW
                        sc.invect <- switch(model,
                                            "OSM"=initvect[c(1:(q-1+q-2),(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+CG-1))],
                                            "POM"=initvect[c(1:(q-1),(q-1+RG-1+1):(q-1+RG-1+CG-1))])
                        sc.out <- run.EM.rowcluster(invect=sc.invect,
-                                                   t(y.mat), model=model,submodel="rs",
+                                                   long.df.transp, model=model,submodel="rs",
                                                    pi.v=kappa.init,
                                                    EM.control=startEM.control,
                                                    optim.method=optim.method,
@@ -378,7 +384,7 @@ generate.start.bicluster <- function(y.mat, model, submodel, RG, CG,
                                            c(mu.init,alpha.init,beta.init)
                                        })
                    rc.out <- run.EM.bicluster(invect=rc.invect,
-                                              y.mat, model=model, submodel="rc",
+                                              long.df, model=model, submodel="rc",
                                               pi.v=pi.init, kappa.v=kappa.init,
                                               EM.control=startEM.control,
                                               optim.method=optim.method,
