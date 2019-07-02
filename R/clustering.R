@@ -562,7 +562,6 @@ validate.inputs <- function(type,
     if (!is.null(initvect)) {
         if (!is.vector(initvect) || !is.numeric(initvect) || any(is.na(initvect)) ||
             any(is.infinite(initvect))) stop("If supplied, initvect must be a numeric vector with finite values.")
-        if (length(initvect) > 20) stop("initvect is too long. Please check inputs and try again.")
     }
 
     if (!is.null(pi.init)) {
