@@ -27,6 +27,13 @@ results <- biclustering("Y~row*column",
                          use.alternative.start = FALSE,
                         EM.control=list(EMcycles=3))
 
+rm(pi.init,kappa.init)
+initvect <- c(-0.8,0.7,0.2,2,0.25)
+results <- biclustering("Y~row+column",
+                        model="OSM", initvect=initvect,
+                        nclus.row=2, nclus.column=2, long.df=long.df.sim,
+                        EM.control=list(EMcycles=3))
+
 pi.init <- c(0.1,0.9)
 kappa.init <- c(0.4,0.6)
 initvect <- c(-0.8,0.7,0.2,2,0.25)

@@ -80,6 +80,12 @@ results <- rowclustering("Y~row*column",
                          nclus.row=2, long.df=long.df.sim,
                          use.alternative.start = FALSE)
 
+rm(pi.init)
+initvect <- c(-0.8,0.7,2,rep(0.25,times=4),rep(0.4,times=4))
+results <- rowclustering("Y~row+column+row:column",
+                         model="POM", initvect=initvect,
+                         nclus.row=2, long.df=long.df.sim)
+
 pi.init <- c(0.1,0.9)
 initvect <- c(-0.8,0.7,2)
 results <- rowclustering("Y~row",

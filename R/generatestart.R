@@ -4,11 +4,12 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
                                       optim.method="L-BFGS-B", optim.control=default.optim.control(),
                                       constraint.sum.zero=TRUE, use.alternative.start=TRUE) {
 
-    if (is.null(initvect)) {
-        n <- max(long.df$ROW)
-        p <- max(long.df$COL)
+    n <- max(long.df$ROW)
+    p <- max(long.df$COL)
 
-        q <- length(levels(long.df$Y))
+    q <- length(levels(long.df$Y))
+
+    if (is.null(initvect)) {
 
         PO.sp.out <- MASS::polr(Y~1,data=long.df)
         PO.sp.out$mu=PO.sp.out$zeta
@@ -88,7 +89,7 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
     }
 
     if (is.null(pi.init)) {
-        if (!is.null(pi.kmeans))
+        if (exists("pi.kmeans") && !is.null(pi.kmeans))
         {
             pi.init <- pi.kmeans
         } else {
@@ -240,12 +241,12 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
                                                      paramstopping=TRUE, startEMcycles=10),
                                      optim.method="L-BFGS-B", optim.control=default.optim.control(),
                                      constraint.sum.zero=TRUE, use.alternative.start=TRUE) {
+    n <- max(long.df$ROW)
+    p <- max(long.df$COL)
+
+    q <- length(levels(long.df$Y))
 
     if (is.null(initvect)) {
-        n <- max(long.df$ROW)
-        p <- max(long.df$COL)
-
-        q <- length(levels(long.df$Y))
 
         PO.ss.out <- MASS::polr(Y~1,data=long.df)
         PO.ss.out$mu <- PO.ss.out$zeta
@@ -311,7 +312,7 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
     ## If generating pi, first generate basic pi, then run simple models to get
     ## starting values for pi
     if (generate.pi) {
-        if (!is.null(pi.kmeans))
+        if (exists("pi.kmeans") && !is.null(pi.kmeans))
         {
             pi.init <- pi.kmeans
         } else {
@@ -322,7 +323,7 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
     ## If generating kappa, first generate basic kappa, then run simple models to get
     ## starting values for kappa
     if (generate.kappa) {
-        if (!is.null(kappa.kmeans))
+        if (exists("kappa.kmeans") && !is.null(kappa.kmeans))
         {
             kappa.init <- kappa.kmeans
         } else {
