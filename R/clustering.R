@@ -582,7 +582,7 @@ validate.inputs <- function(type,
         length(use.alternative.start) != 1 || is.na(use.alternative.start)) stop("use.alternative.start must be TRUE or FALSE.")
 
     if (!is.list(EM.control) || length(EM.control) == 0 || length(EM.control) > 4 ||
-        !any(names(EM.control) %in% c("EMcycles","EMstoppingpar","paramstopping","startEMcycles"))) {
+        !all(names(EM.control) %in% c("EMcycles","EMstoppingpar","paramstopping","startEMcycles"))) {
         stop("If supplied, EM.control must be a list of control parameters for the EM algorithm. Please see the manual for more info.")
     }
 
