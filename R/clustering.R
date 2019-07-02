@@ -660,6 +660,7 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
 
     y.mat <- df2mat(long.df)
 
+    parlist.init <- parlist.in
     initvect <- invect
     outvect=invect
     # Run the EM cycle:
@@ -733,6 +734,7 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
          "criteria"=criteria,
          "constraint.sum.zero"=constraint.sum.zero,
          "initvect"=initvect,
+         "parlist.init"=parlist.init,
          "parlist.out"=parlist.out,
          "pi"=pi.v,
          "ppr"=ppr.m,
@@ -758,6 +760,7 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
 
     y.mat <- df2mat(long.df)
 
+    parlist.init <- parlist.in
     initvect <- invect
     outvect=invect
     # Run the EM cycle:
@@ -846,6 +849,7 @@ if (is.na(lli)) browser()
         "criteria"=criteria,
         "constraint.sum.zero"=constraint.sum.zero,
         "initvect"=initvect,
+        "parlist.init"=parlist.init,
         "parlist.out"=parlist.out,
         "pi"=pi.v,
         "ppr"=ppr.m,
