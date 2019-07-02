@@ -335,73 +335,63 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
         startEM.control <- list(EMcycles=EM.control$startEMcycles,
                                 EMstoppingpar=EM.control$EMstoppingpar,
                                 paramstopping=EM.control$paramstopping)
-        switch(submodel,
-               "rc"={
-                   if (generate.pi) {
-                       cat("Fitting RS model to obtain starting values for pi.v\n")
-                       rs.invect <- switch(model,
-                                           "OSM"=initvect[1:(q-1+q-2+RG-1)],
-                                           "POM"=initvect[1:(q-1+RG-1)])
-                       rs.out <- run.EM.rowcluster(invect=rs.invect,
-                                                   long.df, model=model,submodel="rs",
-                                                   pi.v=pi.init,
-                                                   EM.control=startEM.control,
-                                                   optim.method=optim.method,
-                                                   optim.control=optim.control)
-                       cat("=== End of RS model fitting ===\n")
-                       pi.init <- rs.out$pi
-                   }
-                   if (generate.kappa) {
-                       cat("Fitting SC model as RS model applied to y with ROW
-                            and COL switched, so fitted values of pi gives
-                            starting values for kappa.v\n")
-                       long.df.transp <- long.df
-                       long.df.transp$ROW <- long.df$COL
-                       long.df.transp$COL <- long.df$ROW
-                       sc.invect <- switch(model,
-                                           "OSM"=initvect[c(1:(q-1+q-2),(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+CG-1))],
-                                           "POM"=initvect[c(1:(q-1),(q-1+RG-1+1):(q-1+RG-1+CG-1))])
-                       sc.out <- run.EM.rowcluster(invect=sc.invect,
-                                                   long.df.transp, model=model,submodel="rs",
-                                                   pi.v=kappa.init,
-                                                   EM.control=startEM.control,
-                                                   optim.method=optim.method,
-                                                   optim.control=optim.control)
-                       cat("=== End of SC model fitting ===\n")
-                       kappa.init <- sc.out$pi
-                   }
-               },
-               "rci"={
-                   mu.init <- PO.ss.out$mu
-                   alpha.init <- alpha.kmeans
-                   beta.init <- beta.kmeans
-                   rc.invect <- switch(model,
-                                       "OSM"={
-                                           phi.init <- seq(from=runif(1,min=0.05,max=0.5),
-                                                           to=runif(1,min=0.6,max=0.95), length.out = (q-2))
-                                           c(mu.init,phi.init,alpha.init,beta.init)
-                                       },
-                                       "POM"={
-                                           c(mu.init,alpha.init,beta.init)
-                                       })
-                   rc.out <- run.EM.bicluster(invect=rc.invect,
-                                              long.df, model=model, submodel="rc",
-                                              pi.v=pi.init, kappa.v=kappa.init,
-                                              EM.control=startEM.control,
-                                              optim.method=optim.method,
-                                              optim.control=optim.control)
-                   cat("=== End of RC model fitting ===\n")
+        if (generate.pi) {
+            cat("Fitting RS model to obtain starting values for pi.v\n")
+            rs.invect <- switch(model,
+                                "OSM"=initvect[1:(q-1+q-2+RG-1)],
+                                "POM"=initvect[1:(q-1+RG-1)])
+            rs.out <- run.EM.rowcluster(invect=rs.invect,
+                                        long.df, model=model,submodel="rs",
+                                        pi.v=pi.init,
+                                        EM.control=startEM.control,
+                                        optim.method=optim.method,
+                                        optim.control=optim.control)
+            cat("=== End of RS model fitting ===\n")
+            pi.init <- rs.out$pi
+        }
+        if (generate.kappa) {
+            cat("Fitting SC model as RS model applied to y with ROW
+                           and COL switched, so fitted values of pi gives
+                           starting values for kappa.v\n")
+            long.df.transp <- long.df
+            long.df.transp$ROW <- long.df$COL
+            long.df.transp$COL <- long.df$ROW
+            sc.invect <- switch(model,
+                                "OSM"=initvect[c(1:(q-1+q-2),(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+CG-1))],
+                                "POM"=initvect[c(1:(q-1),(q-1+RG-1+1):(q-1+RG-1+CG-1))])
+            sc.out <- run.EM.rowcluster(invect=sc.invect,
+                                        long.df.transp, model=model,submodel="rs",
+                                        pi.v=kappa.init,
+                                        EM.control=startEM.control,
+                                        optim.method=optim.method,
+                                        optim.control=optim.control)
+            cat("=== End of SC model fitting ===\n")
+            kappa.init <- sc.out$pi
+        }
 
-                   if (generate.pi) {
-                       ppr.m <- rc.out$ppr
-                       pi.init <- rc.out$pi
-                   }
-                   if (generate.kappa) {
-                       ppc.m <- rc.out$ppc
-                       kappa.init <- rc.out$kappa
-                   }
-                   cat("=== Used RS and RP models to find starting points ===\n")
-               })
+        if (submodel == "rci") {
+
+            rc.invect <- switch(model,
+                                "OSM"=initvect[1:(q-1+q-2+RG-1+CG-1)],
+                                "POM"=initvect[1:(q-1+RG-1+CG-1)])
+            rc.out <- run.EM.bicluster(invect=rc.invect,
+                                       long.df, model=model, submodel="rc",
+                                       pi.v=pi.init, kappa.v=kappa.init,
+                                       EM.control=startEM.control,
+                                       optim.method=optim.method,
+                                       optim.control=optim.control)
+            cat("=== End of RC model fitting ===\n")
+
+            if (generate.pi) {
+                ppr.m <- rc.out$ppr
+                pi.init <- rc.out$pi
+            }
+            if (generate.kappa) {
+                ppc.m <- rc.out$ppc
+                kappa.init <- rc.out$kappa
+            }
+            cat("=== Used RS, SC and RC models to find starting points ===\n")
+        }
     }
     list(initvect=initvect, pi.init=pi.init, kappa.init=kappa.init)
 }
