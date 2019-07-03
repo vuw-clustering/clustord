@@ -71,9 +71,6 @@ calc.ll <- function(invect, long.df, y.mat, model, submodel, ppr.m, pi.v, RG,
 
     this.theta <- calc.theta(parlist,model=model,submodel=submodel)
 
-    this.theta[this.theta<=0]=lower.limit
-    pi.v[pi.v==0]=lower.limit
-
     if (submodel %in% c("rs","rp","rpi")) {
         Rcluster.ll(long.df, y.mat, this.theta, ppr.m, pi.v, RG, partial=partial)
     } else if (submodel %in% c("rc","rci")) {
@@ -86,8 +83,6 @@ Rcluster.ll <- function(long.df, y.mat, theta, ppr.m, pi.v, RG, partial=FALSE){
     p <- max(long.df$COL)
     q <- length(levels(long.df$Y))
 
-    ## TODO: these corrections of theta and pi are currently repeated from the
-    ## POFM.rs/OSM.rs functions
     theta[theta<=0]=lower.limit
     pi.v[pi.v==0]=lower.limit
     llc=0
@@ -117,9 +112,6 @@ Rcluster.Incll <- function(long.df, theta, pi.v, RG)
     p <- max(long.df$COL)
     q <- length(levels(long.df$Y))
 
-    ## TODO: these corrections of theta and pi are NOT repeated from the
-    ## fit.POFM.rs.model/fit.OSM.rs.model functions, unlike the corrections
-    ## in Rcluster.ll
     theta[theta<=0]=lower.limit
     pi.v[pi.v==0]=lower.limit
     logl = 0
@@ -143,8 +135,6 @@ Bicluster.ll <- function(long.df, y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, par
     RG <- length(pi.v)
     CG <- length(kappa.v)
 
-    ## TODO: these corrections of theta and pi and kappa are repeated from the
-    ## calc.ll function
     theta[theta<=0]=lower.limit
     pi.v[pi.v==0]=lower.limit
     kappa.v[kappa.v==0]=lower.limit
@@ -186,8 +176,6 @@ Bicluster.IncllC <- function(long.df, theta, pi.v, kappa.v)
     RG <- length(pi.v)
     CG <- length(kappa.v)
 
-    ## TODO: these corrections of theta and pi and kappa are repeated from the
-    ## calc.ll function
     theta[theta<=0]=lower.limit
     pi.v[pi.v==0]=lower.limit
     kappa.v[kappa.v==0]=lower.limit
@@ -258,8 +246,6 @@ Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
     RG <- length(pi.v)
     CG <- length(kappa.v)
 
-    ## TODO: these corrections of theta and pi and kappa are repeated from the
-    ## calc.ll function
     theta[theta<=0]=lower.limit
     pi.v[pi.v==0]=lower.limit
     kappa.v[kappa.v==0]=lower.limit
