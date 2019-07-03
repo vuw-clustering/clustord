@@ -124,6 +124,12 @@ test_that("rowclustering runs without errors.", {
                                           nclus.row=2, long.df=long.df.sim,
                                           EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
+    ## Some rows in the dataset are missing
+    long.df.sim <- long.df.sim[-5,]
+    expect_error(results <- rowclustering("Y~row+column+row:column",
+                                          model="OSM", nclus.row=2, long.df=long.df.sim,
+                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
 })
 
 ## columnclustering testing ----------------------------------------------------
@@ -251,6 +257,12 @@ test_that("columnclustering runs without errors.", {
                                              model="POM", initvect=initvect, kappa.init=kappa.init,
                                              nclus.column=2, long.df=long.df.sim,
                                              EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
+    ## Some rows in the long data frame are missing
+    long.df.sim <- long.df.sim[-5,]
+    expect_error(results <- columnclustering("Y~row+column+row:column",
+                                             model="OSM", nclus.column=2, long.df=long.df.sim,
+                                             EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 })
 
 ## biclustering testing ----------------------------------------------------
@@ -352,5 +364,11 @@ test_that("biclustering runs without errors.", {
                                          model="POM", initvect=initvect,
                                          pi.init=pi.init, kappa.init=kappa.init,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
+                                         EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
+    ## Some rows in the long data frame are missing
+    long.df.sim <- long.df.sim[-5,]
+    expect_error(results <- biclustering("Y~row+column+row:column",
+                                         model="OSM", nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 })
