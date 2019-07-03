@@ -17,19 +17,26 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
         PO.sp.out <- MASS::polr(Y~as.factor(COL),data=long.df)
         PO.sp.out$mu=PO.sp.out$zeta
 
-        ## convert to data matrix
-        y.mat <- df2mat(long.df)
-
-        kmeans.data=kmeans(y.mat,centers=RG,nstart=100)
-        pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-        alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
-        ## By default, use alpha sum to zero constraint, so DON'T set alpha1 to zero here.
-
         mu.init=PO.sp.out$mu
-        if (constraint.sum.zero) alpha.init <- alpha.kmeans[-RG]
-        else {
-            alpha.kmeans <- alpha.kmeans-alpha.kmeans[1]
-            alpha.init <- alpha.kmeans[-1]
+
+        if (all(table(long.df[,c("ROW","COL")]) == 1)) {
+
+            ## convert to data matrix
+            y.mat <- df2mat(long.df)
+
+            kmeans.data=kmeans(y.mat,centers=RG,nstart=100)
+            pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
+            alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
+            ## By default, use alpha sum to zero constraint, so DON'T set alpha1 to zero here.
+
+            if (constraint.sum.zero) alpha.init <- alpha.kmeans[-RG]
+            else {
+                alpha.kmeans <- alpha.kmeans-alpha.kmeans[1]
+                alpha.init <- alpha.kmeans[-1]
+            }
+        } else {
+            print("Some data is missing, so generating random start instead of using kmeans.")
+            alpha.init <- runif(RG-1, min=-5, max=5)
         }
 
         switch(model,
@@ -251,29 +258,36 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
         PO.ss.out <- MASS::polr(Y~1,data=long.df)
         PO.ss.out$mu <- PO.ss.out$zeta
 
-        ## convert to data matrix
-        y.mat <- df2mat(long.df)
-
-        row.kmeans <- kmeans(y.mat,centers=RG,nstart=50)
-        pi.kmeans <- (row.kmeans$size)/sum(row.kmeans$size)
-        alpha.kmeans <- rowMeans(row.kmeans$centers, na.rm=TRUE)
-        ## By default, use constraint that alpha sum to zero so DON'T set alpha1 to zero here.
-
-        column.kmeans <- kmeans(y.mat,centers=CG,nstart=50)
-        kappa.kmeans <- (column.kmeans$size)/sum(column.kmeans$size)
-        beta.kmeans <- rowMeans(column.kmeans$centers, na.rm=TRUE)
-        ## By default, use constraint that beta sum to zero so DON'T set beta1 to zero here.
-
         mu.init <- PO.ss.out$mu
-        if (constraint.sum.zero) alpha.init <- alpha.kmeans[-RG]
-        else {
-            alpha.kmeans <- alpha.kmeans-alpha.kmeans[1]
-            alpha.init <- alpha.kmeans[-1]
-        }
-        if (constraint.sum.zero) beta.init <- beta.kmeans[-RG]
-        else {
-            beta.kmeans <- beta.kmeans-beta.kmeans[1]
-            beta.init <- beta.kmeans[-1]
+
+        if (all(table(long.df[,c("ROW","COL")]) == 1)) {
+            ## convert to data matrix
+            y.mat <- df2mat(long.df)
+
+            row.kmeans <- kmeans(y.mat,centers=RG,nstart=50)
+            pi.kmeans <- (row.kmeans$size)/sum(row.kmeans$size)
+            alpha.kmeans <- rowMeans(row.kmeans$centers, na.rm=TRUE)
+            ## By default, use constraint that alpha sum to zero so DON'T set alpha1 to zero here.
+
+            column.kmeans <- kmeans(y.mat,centers=CG,nstart=50)
+            kappa.kmeans <- (column.kmeans$size)/sum(column.kmeans$size)
+            beta.kmeans <- rowMeans(column.kmeans$centers, na.rm=TRUE)
+            ## By default, use constraint that beta sum to zero so DON'T set beta1 to zero here.
+
+            if (constraint.sum.zero) alpha.init <- alpha.kmeans[-RG]
+            else {
+                alpha.kmeans <- alpha.kmeans-alpha.kmeans[1]
+                alpha.init <- alpha.kmeans[-1]
+            }
+            if (constraint.sum.zero) beta.init <- beta.kmeans[-RG]
+            else {
+                beta.kmeans <- beta.kmeans-beta.kmeans[1]
+                beta.init <- beta.kmeans[-1]
+            }
+        } else {
+            print("Some data is missing, so generating random start instead of using kmeans.")
+            alpha.init <- runif(RG-1, min=-5, max=5)
+            beta.init <- runif(CG-1, min=-5, max=5)
         }
 
         switch(model,

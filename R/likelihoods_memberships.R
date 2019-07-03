@@ -96,14 +96,18 @@ Rcluster.ll <- function(long.df, y.mat, theta, ppr.m, pi.v, RG, partial=FALSE){
         #     yvals <- as.numeric(long.df$Y[long.df$COL==j])
         #     theta[r,j,yvals]
         # }) ## <-- THIS IS VERY VERY SLOW
-        theta.y.mat <- sapply(1:p,function(j) {
-            raw.theta <- theta[r,j,y.mat[,j]]
-            raw.theta[is.na(raw.theta)] <- 0
-            raw.theta
+        # llc <- llc + sum(t(ppr.m[,r])%*%log(theta.y.mat))
+        log.theta.y.mat <- sapply(1:p,function(j) {
+            raw.log.theta <- log(theta[r,j,y.mat[,j]])
+            raw.log.theta[is.na(raw.log.theta) | is.infinite(raw.log.theta)] <- 0
+            raw.log.theta
         })
-        llc <- llc + sum(t(ppr.m[,r])%*%log(theta.y.mat))
+        llc <- llc + sum(t(ppr.m[,r])%*%log.theta.y.mat)
     }
     if (!partial) llc <- llc + sum(ppr.m%*%log(pi.v))
+
+    if (!is.finite(llc)) browser()
+
     -llc
 }
 
@@ -149,14 +153,21 @@ Bicluster.ll <- function(long.df, y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, par
 
     for (r in 1:RG) {
         for (c in 1:CG) {
-            theta.y <- t(sapply(1:n, function(i) {
+            # theta.y <- t(sapply(1:n, function(i) {
+            #     sapply(1:p, function(j) {
+            #         # theta[r,c,long.df$Y[long.df$ROW==i & long.df$COL==j]] ## <-- THIS IS VERY VERY SLOW
+            #         if (is.na(y.mat[i,j])) return(0)
+            #         else return(theta[r,c,y.mat[i,j]])
+            #     })
+            # }))
+            # llc <- llc + t(ppr.m[,r])%*%log(theta.y)%*%ppc.m[,c]
+            log.theta.y <- t(sapply(1:n, function(i) {
                 sapply(1:p, function(j) {
-                    # theta[r,c,long.df$Y[long.df$ROW==i & long.df$COL==j]] ## <-- THIS IS VERY VERY SLOW
-                    if (is.na(y.mat[i,j])) return(0)
-                    else return(theta[r,c,y.mat[i,j]])
+                    if (is.na(y.mat[i,j] || y.mat[i,j] <= 0)) return(0)
+                    else return(log(theta[r,c,y.mat[i,j]]))
                 })
             }))
-            llc <- llc + t(ppr.m[,r])%*%log(theta.y)%*%ppc.m[,c]
+            llc <- llc + t(ppr.m[,r])%*%log.theta.y%*%ppc.m[,c]
         }
     }
     if (!partial) {
@@ -191,7 +202,7 @@ Bicluster.IncllC <- function(long.df, theta, pi.v, kappa.v)
                 for(c in 1:CG){
                     for(k in 1:q){
                         yval <- long.df$Y[long.df$ROW==i & long.df$COL==j]
-                        if(yval==k) multi.arr[i,j,r,c]=theta[r,c,k]
+                        if(length(yval) == 1 && yval==k) multi.arr[i,j,r,c]=theta[r,c,k]
                     }
                 }
             }
@@ -220,7 +231,7 @@ Bicluster.IncllC <- function(long.df, theta, pi.v, kappa.v)
                 m.a[ii,jj,rr] <- multi.arr[ii,jj,rr,c.v[jj]]
             # Calculate and store row aa of Aair.a:
             for (ii in 1:n) for (rr in 1:RG)
-                Aair.a[aa,ii,rr] <-  log(pi.v[rr]) + sum(log(m.a[ii,,rr]))
+                Aair.a[aa,ii,rr] <-  log(pi.v[rr]) + sum(log(m.a[ii,,rr]),na.rm=TRUE)
             # May have NA if pi.v[rr]=0, don't use those terms.
             for (ii in 1:n)
             {
@@ -263,7 +274,7 @@ Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
                 for(c in 1:CG){
                     for(k in 1:q){
                         yval <- long.df$Y[long.df$ROW==i & long.df$COL==j]
-                        if(yval==k) multi.arr[i,j,r,c]=theta[r,c,k]
+                        if(length(yval)==1 && yval==k) multi.arr[i,j,r,c]=theta[r,c,k]
                     }
                 }
             }
@@ -292,7 +303,7 @@ Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
                 m.a[ii,jj,cc] <- multi.arr[ii,jj,r.v[ii],cc]
             # Calculate and store row aa of Aair.a:
             for (jj in 1:p) for (cc in 1:CG)
-                Aajc.a[aa,jj,cc] <-  log(kappa.v[cc]) + sum(log(m.a[,jj,cc]))
+                Aajc.a[aa,jj,cc] <-  log(kappa.v[cc]) + sum(log(m.a[,jj,cc]),na.rm=TRUE)
             # May have NA if kappa.v[cc]=0, don't use those terms.
             for (jj in 1:p)
             {
