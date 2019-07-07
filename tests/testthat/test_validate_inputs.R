@@ -112,8 +112,8 @@ test_that("rowclustering, columnclustering and biclustering fail for an invalid 
     expect_that(rowclustering("Y~row+column","OSM",nclus.row=3,long.df=temp3), throws_error("long.df\\$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix."))
 
     temp <- data.frame(Y=factor(1:6),ROW=rep(1:3,times=2),COL=rep(1:2,each=3))
-    temp <- temp[-5,]
-    expect_that(rowclustering("Y~row+column","OSM",nclus.row=3,long.df=temp), throws_error("Each element from the original data matrix must correspond to exactly 1 row in long.df."))
+    temp <- rbind(temp,temp[6,])
+    expect_that(rowclustering("Y~row+column","OSM",nclus.row=3,long.df=temp), throws_error("Each element from the original data matrix must correspond to no more than 1 row in long.df."))
 
     expect_that(columnclustering("Y~row+column","OSM",nclus.column=3,long.df=NA), throws_error("long.df must be a data frame."))
     expect_that(columnclustering("Y~row+column","OSM",nclus.column=3,long.df=1), throws_error("long.df must be a data frame."))
@@ -154,8 +154,8 @@ test_that("rowclustering, columnclustering and biclustering fail for an invalid 
     expect_that(columnclustering("Y~row+column","OSM",nclus.column=3,long.df=temp3), throws_error("long.df\\$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix."))
 
     temp <- data.frame(Y=factor(1:6),ROW=rep(1:3,times=2),COL=rep(1:2,each=3))
-    temp <- temp[-5,]
-    expect_that(columnclustering("Y~row+column","OSM",nclus.column=3,long.df=temp), throws_error("Each element from the original data matrix must correspond to exactly 1 row in long.df."))
+    temp <- rbind(temp,temp[6,])
+    expect_that(columnclustering("Y~row+column","OSM",nclus.column=3,long.df=temp), throws_error("Each element from the original data matrix must correspond to no more than 1 row in long.df."))
 
     expect_that(biclustering("Y~row+column","OSM",nclus.row=3,nclus.column=2,long.df=NA), throws_error("long.df must be a data frame."))
     expect_that(biclustering("Y~row+column","OSM",nclus.row=3,nclus.column=2,long.df=1), throws_error("long.df must be a data frame."))
@@ -196,8 +196,8 @@ test_that("rowclustering, columnclustering and biclustering fail for an invalid 
     expect_that(biclustering("Y~row+column","OSM",nclus.row=3,nclus.column=2,long.df=temp3), throws_error("long.df\\$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix."))
 
     temp <- data.frame(Y=factor(1:6),ROW=rep(1:3,times=2),COL=rep(1:2,each=3))
-    temp <- temp[-5,]
-    expect_that(biclustering("Y~row+column","OSM",nclus.row=3,nclus.column=2,long.df=temp), throws_error("Each element from the original data matrix must correspond to exactly 1 row in long.df."))
+    temp <- rbind(temp,temp[6,])
+    expect_that(biclustering("Y~row+column","OSM",nclus.row=3,nclus.column=2,long.df=temp), throws_error("Each element from the original data matrix must correspond to no more than 1 row in long.df."))
 })
 
 ## Invalid model testing -------------------------------------------------------

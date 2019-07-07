@@ -554,6 +554,8 @@ validate.inputs <- function(type,
         any(sapply(long.df$COL,is.infinite)) || any(long.df$COL %% 1 != 0) ||
         any(long.df$COL < 1) || all(long.df$COL > 1)) stop("long.df$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix.")
 
+    if (any(table(long.df[,c("ROW","COL")]) > 1)) stop("Each element from the original data matrix must correspond to no more than 1 row in long.df.")
+
     if (!is.null(nclus.row) && nclus.row >= max(as.numeric(long.df$ROW))) stop("nclus.row must be smaller than the maximum value of long.df$ROW.")
     if (!is.null(nclus.column) && nclus.column >= max(as.numeric(long.df$COL))) stop("nclus.column must be smaller than the maximum value of long.df$COL.")
 
