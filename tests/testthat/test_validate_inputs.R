@@ -51,13 +51,13 @@ test_that("rowclustering, columnclustering and biclustering fail for a blank mod
 
     dat <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),ROW=rep(1:20,times=5),COL=rep(1:5,each=20))
 
-    expect_that(rowclustering("Y~row+column",NULL,nclus.row=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
-    expect_that(columnclustering("Y~row+column",NULL,nclus.column=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
-    expect_that(biclustering("Y~row+column",NULL,nclus.row=2,nclus.column=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
+    expect_that(rowclustering("Y~row+column",NULL,nclus.row=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary."))
+    expect_that(columnclustering("Y~row+column",NULL,nclus.column=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary."))
+    expect_that(biclustering("Y~row+column",NULL,nclus.row=2,nclus.column=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary."))
 
-    expect_that(rowclustering("Y~row+column",NULL,nclus.row=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
-    expect_that(columnclustering("Y~row+column",NULL,nclus.column=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
-    expect_that(biclustering("Y~row+column",NULL,nclus.row=2,nclus.column=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
+    expect_that(rowclustering("Y~row+column",NULL,nclus.row=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary."))
+    expect_that(columnclustering("Y~row+column",NULL,nclus.column=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary."))
+    expect_that(biclustering("Y~row+column",NULL,nclus.row=2,nclus.column=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary."))
 
     expect_that(rowclustering("Y~row+column","OSM",NULL,long.df=dat), throws_error("For row clustering or biclustering, nclus.row cannot be null."))
     expect_that(columnclustering("Y~row+column","OSM",NULL,long.df=dat), throws_error("For column clustering or biclustering, nclus.column cannot be null."))
@@ -205,27 +205,27 @@ test_that("rowclustering, columnclustering and biclustering fail for an invalid 
 
     dat <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),ROW=rep(1:20,times=5),COL=rep(1:5,each=20))
 
-    expect_that(rowclustering("Y~row+column","test",nclus.row=2,long.df=dat), throws_error("model must be either 'OSM' or POM' for the ordered stereotype and proportional odds models, respectively."))
+    expect_that(rowclustering("Y~row+column","test",nclus.row=2,long.df=dat), throws_error("model must be either 'OSM' or POM' for the ordered stereotype and proportional odds models, or 'Binary' for the binary model."))
 
-    expect_that(rowclustering("Y~row+column",NA,nclus.row=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
-    expect_that(rowclustering("Y~row+column",1.2,nclus.row=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
-    expect_that(rowclustering("Y~row+column",-4,nclus.row=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
-    expect_that(rowclustering("Y~row+column",c(2,4),nclus.row=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
-    expect_that(rowclustering("Y~row+column",as.factor(c(2,4)),nclus.row=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
-    expect_that(rowclustering("Y~row+column",list(a=1,b=2),nclus.row=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
-    expect_that(rowclustering("Y~row+column",array(1:12,dim=c(2,3,2)),nclus.row=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
-    expect_that(rowclustering("Y~row+column",data.frame(a=c(1,2),b=c(1,2)),nclus.row=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
+    expect_that(rowclustering("Y~row+column",NA,nclus.row=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary'."))
+    expect_that(rowclustering("Y~row+column",1.2,nclus.row=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary'."))
+    expect_that(rowclustering("Y~row+column",-4,nclus.row=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary'."))
+    expect_that(rowclustering("Y~row+column",c(2,4),nclus.row=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary'."))
+    expect_that(rowclustering("Y~row+column",as.factor(c(2,4)),nclus.row=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary'."))
+    expect_that(rowclustering("Y~row+column",list(a=1,b=2),nclus.row=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary'."))
+    expect_that(rowclustering("Y~row+column",array(1:12,dim=c(2,3,2)),nclus.row=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary'."))
+    expect_that(rowclustering("Y~row+column",data.frame(a=c(1,2),b=c(1,2)),nclus.row=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary'."))
 
-    expect_that(columnclustering("Y~row+column","test",nclus.column=2,long.df=dat), throws_error("model must be either 'OSM' or POM' for the ordered stereotype and proportional odds models, respectively."))
+    expect_that(columnclustering("Y~row+column","test",nclus.column=2,long.df=dat), throws_error("model must be either 'OSM' or POM' for the ordered stereotype and proportional odds models, or 'Binary' for the binary model."))
 
-    expect_that(columnclustering("Y~row+column",NA,nclus.column=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
-    expect_that(columnclustering("Y~row+column",1.2,nclus.column=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
-    expect_that(columnclustering("Y~row+column",-4,nclus.column=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
-    expect_that(columnclustering("Y~row+column",c(2,4),nclus.column=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
-    expect_that(columnclustering("Y~row+column",as.factor(c(2,4)),nclus.column=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
-    expect_that(columnclustering("Y~row+column",list(a=1,b=2),nclus.column=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
-    expect_that(columnclustering("Y~row+column",array(1:12,dim=c(2,3,2)),nclus.column=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
-    expect_that(columnclustering("Y~row+column",data.frame(a=c(1,2),b=c(1,2)),nclus.column=2,long.df=dat), throws_error("model must be a string, either 'OSM' or 'POM'."))
+    expect_that(columnclustering("Y~row+column",NA,nclus.column=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary'."))
+    expect_that(columnclustering("Y~row+column",1.2,nclus.column=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary'."))
+    expect_that(columnclustering("Y~row+column",-4,nclus.column=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary'."))
+    expect_that(columnclustering("Y~row+column",c(2,4),nclus.column=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary'."))
+    expect_that(columnclustering("Y~row+column",as.factor(c(2,4)),nclus.column=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary'."))
+    expect_that(columnclustering("Y~row+column",list(a=1,b=2),nclus.column=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary'."))
+    expect_that(columnclustering("Y~row+column",array(1:12,dim=c(2,3,2)),nclus.column=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary'."))
+    expect_that(columnclustering("Y~row+column",data.frame(a=c(1,2),b=c(1,2)),nclus.column=2,long.df=dat), throws_error("model must be a string, 'OSM' or 'POM' or 'Binary'."))
 })
 
 ## Invalid number of clusters --------------------------------------------------
