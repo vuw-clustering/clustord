@@ -81,6 +81,31 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
                               gamma.init <- rep(0.1,(RG-1)*(p-1))
                               initvect <- c(mu.init,alpha.init,beta.init,gamma.init)
                           },stop("Invalid model for row/column clustering"))
+               },
+               "Binary"={
+                   mu.init <- mean(as.numeric(as.character(long.df$Y)))
+
+                   columnmeans <- sapply(1:p,function(col) {
+                       mean(as.numeric(as.character(long.df$Y[long.df$COL==col])))
+                   })
+                   beta <- columnmeans[1:(p-1)] - mu.init
+                   ## If not using constraint that beta sum to zero,
+                   ## beta1 will be 0 so need to correct other elements
+                   ## of beta accordingly
+                   if (constraint.sum.zero) beta.init <- beta[1:(p-1)]
+                   else beta.init <- beta[2:p] - beta[1]
+
+                   switch(submodel,
+                          "rs"={
+                              initvect <- c(mu.init,alpha.init)
+                          },
+                          "rp"={
+                              initvect <- c(mu.init,alpha.init,beta.init)
+                          },
+                          "rpi"={
+                              gamma.init <- rep(0.1,(RG-1)*(p-1))
+                              initvect <- c(mu.init,alpha.init,beta.init,gamma.init)
+                          },stop("Invalid model for row/column clustering"))
                })
     }
 
@@ -102,7 +127,8 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
             cat("Fitting RS model to obtain starting values for pi.v\n")
             invect <- switch(model,
                              "OSM"=initvect[1:(q-1+q-2+RG-1)],
-                             "POM"=initvect[1:(q-1+RG-1)])
+                             "POM"=initvect[1:(q-1+RG-1)],
+                             "Binary"=initvect[1:(1+RG-1)])
 
             rs.out <- run.EM.rowcluster(invect=invect,
                                         long.df, model=model,submodel="rs",
@@ -190,6 +216,18 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
                               gamma.init <- rep(0.1,(RG-1)*(CG-1))
                               initvect <- c(mu.init,alpha.init,beta.init,gamma.init)
                           },stop("Invalid model for biclustering"))
+               },
+               "Binary"={
+                   mu.init <- mean(as.numeric(as.character(long.df$Y)))
+
+                   switch(submodel,
+                          "rc"={
+                              initvect <- c(mu.init,alpha.init,beta.init)
+                          },
+                          "rci"={
+                              gamma.init <- rep(0.1,(RG-1)*(CG-1))
+                              initvect <- c(mu.init,alpha.init,beta.init,gamma.init)
+                          },stop("Invalid model for biclustering"))
                })
     }
 
@@ -229,7 +267,8 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
             cat("Fitting RS model to obtain starting values for pi.v\n")
             rs.invect <- switch(model,
                                 "OSM"=initvect[1:(q-1+q-2+RG-1)],
-                                "POM"=initvect[1:(q-1+RG-1)])
+                                "POM"=initvect[1:(q-1+RG-1)],
+                                "Binary"=initvect[1:(1+RG-1)])
             rs.out <- run.EM.rowcluster(invect=rs.invect,
                                         long.df, model=model,submodel="rs",
                                         pi.v=pi.init,
@@ -248,7 +287,8 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
             long.df.transp$COL <- long.df$ROW
             sc.invect <- switch(model,
                                 "OSM"=initvect[c(1:(q-1+q-2),(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+CG-1))],
-                                "POM"=initvect[c(1:(q-1),(q-1+RG-1+1):(q-1+RG-1+CG-1))])
+                                "POM"=initvect[c(1:(q-1),(q-1+RG-1+1):(q-1+RG-1+CG-1))],
+                                "Binary"=initvect[c(1,(1+RG-1+1):(1+RG-1+CG-1))])
             sc.out <- run.EM.rowcluster(invect=sc.invect,
                                         long.df.transp, model=model,submodel="rs",
                                         pi.v=kappa.init,
@@ -263,7 +303,8 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
 
             rc.invect <- switch(model,
                                 "OSM"=initvect[1:(q-1+q-2+RG-1+CG-1)],
-                                "POM"=initvect[1:(q-1+RG-1+CG-1)])
+                                "POM"=initvect[1:(q-1+RG-1+CG-1)],
+                                "Binary"=initvect[1:(1+RG-1+CG-1)])
             rc.out <- run.EM.bicluster(invect=rc.invect,
                                        long.df, model=model, submodel="rc",
                                        pi.v=pi.init, kappa.v=kappa.init,

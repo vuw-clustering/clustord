@@ -183,7 +183,7 @@ Bicluster.IncllC <- function(long.df, theta, pi.v, kappa.v)
     # Full evaluation using the columns.
     # Use if CG^p is small enough.
     # Construct n*p*RG*CG*q array of Multinomial terms:
-    multi.arr = array(0,c(n,p,RG,CG))
+    multi.arr = array(NA,c(n,p,RG,CG))
     for(i in 1:n){
         for(j in 1:p){
             for(r in 1:RG){
@@ -253,7 +253,7 @@ Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
     # Full evaluation using the rows.
     # Use if RG^n is small enough.
     # Construct n*p*RG*CG*q array of Multinomial terms:
-    multi.arr = array(0,c(n,p,RG,CG))
+    multi.arr = array(NA,c(n,p,RG,CG))
     for(i in 1:n){
         for(j in 1:p){
             for(r in 1:RG){

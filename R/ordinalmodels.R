@@ -116,6 +116,61 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constra
 
                           list(n=n,p=p,mu=mu,alpha=alpha,beta=beta,gamma=gamma)
                       })
+           },
+           "Binary"={
+               mu <- invect[1]
+               alpha <- invect[(1+1):(1+RG-1)]
+               if (constraint.sum.zero) alpha <- c(alpha, -sum(alpha))
+               else alpha <- c(0, alpha)
+
+               switch(submodel,
+                      "rs"={
+                          list(n=n,p=p,mu=mu,alpha=alpha)
+                      },
+                      "rp"={
+                          beta <- invect[(1+RG-1+1):(1+RG-1+p-1)]
+                          if (constraint.sum.zero) beta <- c(beta, -sum(beta))
+                          else beta <- c(0, beta)
+
+                          list(n=n,p=p,mu=mu,alpha=alpha,beta=beta)
+                      },
+                      "rpi"={
+                          beta <- invect[(1+RG-1+1):(1+RG-1+p-1)]
+                          if (constraint.sum.zero) beta <- c(beta, -sum(beta))
+                          else beta <- c(0, beta)
+
+                          gamma <- invect[(1+RG-1+p-1+1):(1+RG-1+p-1+(RG-1)*(p-1))]
+                          gamma <- matrix(gamma,nrow=RG-1,ncol=p-1,byrow=T)
+                          gamma <- cbind(gamma,-rowSums(gamma))
+                          # Original POM code had final row of gamma equal to negative
+                          # sum of other rows, but this code follows original OSM code,
+                          # has FIRST row of gamma equal to negative sum of other rows
+                          gamma <- rbind(-colSums(gamma),gamma)
+
+                          list(n=n,p=p,mu=mu,alpha=alpha,beta=beta,gamma=gamma)
+                      },
+                      "rc"={
+                          beta <- invect[(1+RG-1+1):(1+RG-1+CG-1)]
+                          if (constraint.sum.zero) beta <- c(beta, -sum(beta))
+                          else beta <- c(0, beta)
+
+                          list(n=n,p=p,mu=mu,alpha=alpha,beta=beta)
+                      },
+                      "rci"={
+                          beta <- invect[(1+RG-1+1):(1+RG-1+CG-1)]
+                          if (constraint.sum.zero) beta <- c(beta, -sum(beta))
+                          else beta <- c(0, beta)
+
+                          gamma <- invect[(1+RG-1+CG-1+1):(1+RG-1+CG-1+(RG-1)*(CG-1))]
+                          gamma <- matrix(gamma,nrow=RG-1,ncol=CG-1,byrow=T)
+                          gamma <- cbind(gamma,-rowSums(gamma))
+                          # Original POM code had final row of gamma equal to negative
+                          # sum of other rows, but this code follows original OSM code,
+                          # has FIRST row of gamma equal to negative sum of other rows
+                          gamma <- rbind(-colSums(gamma),gamma)
+
+                          list(n=n,p=p,mu=mu,alpha=alpha,beta=beta,gamma=gamma)
+                      })
            })
 }
 
@@ -136,6 +191,14 @@ calc.theta <- function(parlist, model, submodel) {
                       "rpi"=theta.POFM.rpi(parlist),
                       "rc"=theta.POFM.rc(parlist),
                       "rci"=theta.POFM.rci(parlist))
+           },
+           "Binary"={
+               switch(submodel,
+                      "rs"=theta.Binary.rs(parlist),
+                      "rp"=theta.Binary.rp(parlist),
+                      "rpi"=theta.Binary.rpi(parlist),
+                      "rc"=theta.Binary.rc(parlist),
+                      "rci"=theta.Binary.rci(parlist))
            })
 }
 
@@ -434,6 +497,103 @@ theta.POFM.rci <- function(parlist) {
         for(c in 1:CG){
             theta[r,c,q] <- 1-sum(theta[r,c,1:(q-1)])
         }
+    }
+
+    theta
+}
+
+theta.Binary.rs <- function(parlist) {
+    p <- parlist$p
+    RG <- length(parlist$alpha)
+
+    theta <- array(NA,c(RG,p,2))
+    theta[1:RG,1:p,1] <- 1
+    for(r in 1:RG){
+        theta[r,1:p,2] <- exp(parlist$mu + parlist$alpha[r])
+    }
+    for (r in 1:RG){
+        ## Normalize theta values
+        theta[r,1:p,] <- theta[r,1:p,]/rowSums(theta[r,1:p,])
+    }
+
+    theta
+}
+
+theta.Binary.rp <- function(parlist) {
+    p <- parlist$p
+    RG <- length(parlist$alpha)
+
+    theta <- array(NA,c(RG,p,2))
+    theta[1:RG,1:p,1] <- 1
+    for(r in 1:RG){
+        for(j in 1:p){
+            theta[r,j,2] <- exp(parlist$mu + (parlist$alpha[r] + parlist$beta[j]))
+        }
+    }
+    for (r in 1:RG){
+        ## Normalize theta values
+        theta[r,1:p,] <- theta[r,1:p,]/rowSums(theta[r,1:p,])
+    }
+
+    theta
+}
+
+theta.Binary.rpi <- function(parlist) {
+    p <- parlist$p
+    RG <- length(parlist$alpha)
+
+    theta <- array(NA,c(RG,p,2))
+    theta[1:RG,1:p,1] <- 1
+    for(r in 1:RG){
+        for(j in 1:p){
+            theta[r,j,2] <- exp(parlist$mu + (parlist$alpha[r] + parlist$beta[j] + parlist$gamma[r,j]))
+        }
+    }
+    for (r in 1:RG){
+        ## Normalize theta values
+        theta[r,1:p,] <- theta[r,1:p,]/rowSums(theta[r,1:p,])
+    }
+
+    theta
+}
+
+theta.Binary.rc <- function(parlist) {
+    n <- parlist$n
+    p <- parlist$p
+    RG <- length(parlist$alpha)
+    CG <- length(parlist$beta)
+
+    theta <- array(NA,c(RG,CG,2))
+    theta[1:RG,1:CG,1] <- 1
+    for(r in 1:RG){
+        for(c in 1:CG){
+            theta[r,c,2] <- exp(parlist$mu + (parlist$alpha[r] + parlist$beta[c]))
+        }
+    }
+    for (r in 1:RG){
+        ## Normalize theta values
+        theta[r,1:CG,] <- theta[r,1:CG,]/rowSums(theta[r,1:CG,])
+    }
+
+    theta
+}
+
+theta.Binary.rci <- function(parlist) {
+    n <- parlist$n
+    p <- parlist$p
+    RG <- length(parlist$alpha)
+    CG <- length(parlist$beta)
+
+    theta <- array(NA,c(RG,CG,2))
+    theta[1:RG,1:CG,1] <- 1
+    for(r in 1:RG){
+        for(c in 1:CG){
+            theta[r,c,2] <- exp(parlist$mu + (parlist$alpha[r] + parlist$beta[c] + parlist$gamma[r,c]))
+        }
+    }
+    for (r in 1:RG){
+        ## Normalize theta values
+        theta[r,1:CG,] <- theta[r,1:CG,]/rowSums(theta[r,1:CG,])
     }
 
     theta
