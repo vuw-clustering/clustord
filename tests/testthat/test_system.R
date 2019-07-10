@@ -63,6 +63,23 @@ test_that("rowclustering runs without errors.", {
                                           nclus.row=2, long.df=long.df.sim,
                                           EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
+    if (exists("initvect")) rm(initvect)
+    pi.init <- c(0.1,0.9)
+    expect_error(results <- rowclustering("Y~row",
+                                          model="OSM", pi.init=pi.init,
+                                          nclus.row=2, long.df=long.df.sim,
+                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
+    expect_error(results <- rowclustering("Y~row+column",
+                                          model="OSM", pi.init=pi.init,
+                                          nclus.row=2, long.df=long.df.sim,
+                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
+    expect_error(results <- rowclustering("Y~row+column+row:column",
+                                          model="OSM", pi.init=pi.init,
+                                          nclus.row=2, long.df=long.df.sim,
+                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
     ### POM results ------------------------------------------------------------
     expect_error(results <- rowclustering("Y~row",
                                           model="POM",
@@ -124,10 +141,27 @@ test_that("rowclustering runs without errors.", {
                                           nclus.row=2, long.df=long.df.sim,
                                           EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
-    ## Some rows in the dataset are missing
-    long.df.sim <- long.df.sim[-5,]
+    if (exists("initvect")) rm(initvect)
+    pi.init <- c(0.1,0.9)
+    expect_error(results <- rowclustering("Y~row",
+                                          model="POM", pi.init=pi.init,
+                                          nclus.row=2, long.df=long.df.sim,
+                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
+    expect_error(results <- rowclustering("Y~row+column",
+                                          model="POM", pi.init=pi.init,
+                                          nclus.row=2, long.df=long.df.sim,
+                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
     expect_error(results <- rowclustering("Y~row+column+row:column",
-                                          model="OSM", nclus.row=2, long.df=long.df.sim,
+                                          model="POM", pi.init=pi.init,
+                                          nclus.row=2, long.df=long.df.sim,
+                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
+    ## Some rows in the dataset are missing ------------------------------------
+    long.df.sim.missing <- long.df.sim[-5,]
+    expect_error(results <- rowclustering("Y~row+column+row:column",
+                                          model="OSM", nclus.row=2, long.df=long.df.sim.missing,
                                           EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
 })
@@ -197,6 +231,23 @@ test_that("columnclustering runs without errors.", {
                                              nclus.column=2, long.df=long.df.sim,
                                              EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
+    if (exists("initvect")) rm(initvect)
+    kappa.init <- c(0.1,0.9)
+    expect_error(results <- columnclustering("Y~column",
+                                             model="OSM", kappa.init=kappa.init,
+                                             nclus.column=2, long.df=long.df.sim,
+                                             EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
+    expect_error(results <- columnclustering("Y~row+column",
+                                             model="OSM", kappa.init=kappa.init,
+                                             nclus.column=2, long.df=long.df.sim,
+                                             EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
+    expect_error(results <- columnclustering("Y~row+column+row:column",
+                                             model="OSM", kappa.init=kappa.init,
+                                             nclus.column=2, long.df=long.df.sim,
+                                             EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
     ### POM results ------------------------------------------------------------
     expect_error(results <- columnclustering("Y~column",
                                              model="POM",
@@ -258,10 +309,27 @@ test_that("columnclustering runs without errors.", {
                                              nclus.column=2, long.df=long.df.sim,
                                              EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
-    ## Some rows in the long data frame are missing
-    long.df.sim <- long.df.sim[-5,]
+    if (exists("initvect")) rm(initvect)
+    kappa.init <- c(0.1,0.9)
+    expect_error(results <- columnclustering("Y~column",
+                                             model="POM", kappa.init=kappa.init,
+                                             nclus.column=2, long.df=long.df.sim,
+                                             EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
+    expect_error(results <- columnclustering("Y~row+column",
+                                             model="POM", kappa.init=kappa.init,
+                                             nclus.column=2, long.df=long.df.sim,
+                                             EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
     expect_error(results <- columnclustering("Y~row+column+row:column",
-                                             model="OSM", nclus.column=2, long.df=long.df.sim,
+                                             model="POM", kappa.init=kappa.init,
+                                             nclus.column=2, long.df=long.df.sim,
+                                             EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
+    ## Some rows in the long data frame are missing ----------------------------
+    long.df.sim.missing <- long.df.sim[-5,]
+    expect_error(results <- columnclustering("Y~row+column+row:column",
+                                             model="OSM", nclus.column=2, long.df=long.df.sim.missing,
                                              EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 })
 
@@ -318,6 +386,21 @@ test_that("biclustering runs without errors.", {
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
+    if (exists("initvect")) rm(initvect)
+    pi.init <- c(0.4,0.6)
+    kappa.init <- c(0.1,0.9)
+    expect_error(results <- biclustering("Y~row+column",
+                                         model="OSM",
+                                         pi.init=pi.init, kappa.init=kappa.init,
+                                         nclus.row=2, nclus.column=2, long.df=long.df.sim,
+                                         EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
+    expect_error(results <- biclustering("Y~row+column+row:column",
+                                         model="OSM",
+                                         pi.init=pi.init, kappa.init=kappa.init,
+                                         nclus.row=2, nclus.column=2, long.df=long.df.sim,
+                                         EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
     ### POM results ------------------------------------------------------------
     expect_error(results <- biclustering("Y~row+column",
                                          model="POM",
@@ -366,9 +449,26 @@ test_that("biclustering runs without errors.", {
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
-    ## Some rows in the long data frame are missing
-    long.df.sim <- long.df.sim[-5,]
-    expect_error(results <- biclustering("Y~row+column+row:column",
-                                         model="OSM", nclus.row=2, nclus.column=2, long.df=long.df.sim,
+    if (exists("initvect")) rm(initvect)
+    pi.init <- c(0.4,0.6)
+    kappa.init <- c(0.1,0.9)
+    expect_error(results <- biclustering("Y~row+column",
+                                         model="POM",
+                                         pi.init=pi.init, kappa.init=kappa.init,
+                                         nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
+    expect_error(results <- biclustering("Y~row+column+row:column",
+                                         model="POM",
+                                         pi.init=pi.init, kappa.init=kappa.init,
+                                         nclus.row=2, nclus.column=2, long.df=long.df.sim,
+                                         EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
+    ## Some rows in the long data frame are missing ----------------------------
+    long.df.sim.missing <- long.df.sim[-5,]
+    expect_error(results <- biclustering("Y~row+column+row:column",
+                                         model="OSM",
+                                         nclus.row=2, nclus.column=2, long.df=long.df.sim.missing,
+                                         EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+
 })
