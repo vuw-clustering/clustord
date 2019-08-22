@@ -663,7 +663,8 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect, EM.co
     ## stopping criterion
     if (abs(new.llc - new.lli) < 1E-10) new.llc <- new.lli + 1E-10
     likelihood.stopping.criterion <- abs(EM.status$previous.lli - new.lli)/abs(new.llc - new.lli)
-if (is.na(likelihood.stopping.criterion)) browser()
+# if (is.na(likelihood.stopping.criterion)) browser()
+    if (is.infinite(new.lli)) likelihood.stopping.criterion <- Inf
     if (likelihood.stopping.criterion < EM.control$EMstoppingpar &
         (!EM.control$paramstopping || param.stopping.criterion < EM.control$EMstoppingpar)) converged <- TRUE
 
@@ -744,13 +745,12 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
         ## Report the current incomplete-data log-likelihood, which is the
         ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
         ## of the output of optim
-        # if (iter == 1 | iter%%5 == 0) cat(paste(toupper(submodel),'model iter=',iter, ' log.like=', llc ,'\n'))
         cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' partial complete-data log.like=', -optim.fit$value ,'\n'))
         cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' complete-data log.like=', llc ,'\n'))
         cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' incomplete-data log.like=', lli ,'\n'))
-        cat("parlist.out\n")
-        print(parlist.out)
-        cat("pi",pi.v,"\n")
+        # cat("parlist.out\n")
+        # print(parlist.out)
+        # cat("pi",pi.v,"\n")
     }
 
     # Find cluster groupings:
@@ -848,8 +848,8 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
         ## Note that UNLIKE Bicluster.ll, Bicluster.Incll outputs the *actual*
         ## log-likelihood, not the negative of the log-likelihood, so don't need
         ## to make it negative here
-        if(CG^p<RG^n) lli <- Bicluster.IncllC(long.df, theta.arr, pi.v, kappa.v)
-        else lli <- Bicluster.IncllR(long.df, theta.arr, pi.v, kappa.v)
+        if(CG^p<RG^n) lli <- Bicluster.IncllC(long.df, y.mat, theta.arr, pi.v, kappa.v)
+        else lli <- Bicluster.IncllR(long.df, y.mat, theta.arr, pi.v, kappa.v)
 if (is.na(lli)) browser()
         EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
                                      invect=invect,outvect=outvect,EM.control=EM.control)
@@ -857,14 +857,13 @@ if (is.na(lli)) browser()
         ## Report the current incomplete-data log-likelihood, which is the
         ## NEGATIVE of the latest value of Bicluster.ll i.e. the NEGATIVE
         ## of the output of optim
-        # if (iter == 1 | iter%%5 == 0) cat(paste(toupper(submodel),'model iter=',iter, ' log.like=', llc ,'\n'))
         cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' partial complete-data log.like=', -optim.fit$value ,'\n'))
         cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' complete-data log.like=', llc ,'\n'))
         cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' incomplete-data log.like=', lli ,'\n'))
-        cat("parlist.out\n")
-        print(parlist.out)
-        cat("pi",pi.v,"\n")
-        cat("kappa",kappa.v,"\n")
+        # cat("parlist.out\n")
+        # print(parlist.out)
+        # cat("pi",pi.v,"\n")
+        # cat("kappa",kappa.v,"\n")
     }
 
     # Find cluster groupings:
