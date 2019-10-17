@@ -189,13 +189,14 @@ Bicluster.IncllC <- function(long.df, theta, pi.v, kappa.v)
             for(r in 1:RG){
                 for(c in 1:CG){
                     for(k in 1:q){
-                        yval <- long.df$Y[long.df$ROW==i & long.df$COL==j]
+                        yval <- as.numeric(long.df$Y[long.df$ROW==i & long.df$COL==j])
                         if(length(yval) == 1 && yval==k) multi.arr[i,j,r,c]=theta[r,c,k]
                     }
                 }
             }
         }
     }
+
     combos.mat <- as.matrix(expand.grid(rep(list(1:CG),p)))
     # combos.mat has one row per combination of c selections.
     AA <- nrow(combos.mat)
@@ -220,16 +221,19 @@ Bicluster.IncllC <- function(long.df, theta, pi.v, kappa.v)
             # Calculate and store row aa of Aair.a:
             for (ii in 1:n) for (rr in 1:RG)
                 Aair.a[aa,ii,rr] <-  log(pi.v[rr]) + sum(log(m.a[ii,,rr]),na.rm=TRUE)
+
             # May have NA if pi.v[rr]=0, don't use those terms.
+            max.Aair <- apply(Aair.a[aa,,],1,max,na.rm=T)
+
             for (ii in 1:n)
             {
-                Bair.a[aa,ii,] <- rep(max(Aair.a[aa,ii,],na.rm=T),RG)
-                Bai.m[aa,ii]   <- Bair.a[aa,ii,1]
-                Dai.m[aa,ii]   <- sum(exp(Aair.a[aa,ii,]-Bair.a[aa,ii,]))
+                Bai.m[aa,ii]   <- max.Aair[ii]
+                Dai.m[aa,ii]   <- sum(exp(Aair.a[aa,ii,]-max.Aair[ii,]))
             }
 
             Ea.v[aa] <- sum(Bai.m[aa,]) + sum(log(Dai.m[aa,]),na.rm=T)
             Ea.v[aa] <- Ea.v[aa] + log(alpha.v[aa])
+            print(Ea.v[aa])
         }
     }
     M.val <- max(Ea.v, na.rm=TRUE)
@@ -259,7 +263,7 @@ Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
             for(r in 1:RG){
                 for(c in 1:CG){
                     for(k in 1:q){
-                        yval <- long.df$Y[long.df$ROW==i & long.df$COL==j]
+                        yval <- as.numeric(long.df$Y[long.df$ROW==i & long.df$COL==j])
                         if(length(yval)==1 && yval==k) multi.arr[i,j,r,c]=theta[r,c,k]
                     }
                 }
@@ -291,12 +295,14 @@ Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
             for (jj in 1:p) for (cc in 1:CG)
                 Aajc.a[aa,jj,cc] <-  log(kappa.v[cc]) + sum(log(m.a[,jj,cc]),na.rm=TRUE)
             # May have NA if kappa.v[cc]=0, don't use those terms.
+            max.Aajc <- apply(Aajc.a[aa,,],1,max,na.rm=T)
+
             for (jj in 1:p)
             {
-                Bajc.a[aa,jj,] <- rep(max(Aajc.a[aa,jj,],na.rm=T),CG)
-                Baj.m[aa,jj]   <- Bajc.a[aa,jj,1]
-                Daj.m[aa,jj]   <- sum(exp(Aajc.a[aa,jj,]-Bajc.a[aa,jj,]))
+                Baj.m[aa,jj]   <- max.Aajc[jj]
+                Daj.m[aa,jj]   <- sum(exp(Aajc.a[aa,jj,]-max.Aajc[jj,]))
             }
+
             Ea.v[aa] <- sum(Baj.m[aa,]) + sum(log(Daj.m[aa,]),na.rm=T)
             Ea.v[aa] <- Ea.v[aa] + log(alpha.v[aa])
         }
