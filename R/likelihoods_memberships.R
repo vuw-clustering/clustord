@@ -153,7 +153,7 @@ Bicluster.ll <- function(long.df, y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, par
             # llc <- llc + t(ppr.m[,r])%*%log(theta.y)%*%ppc.m[,c]
             log.theta.y <- t(sapply(1:n, function(i) {
                 sapply(1:p, function(j) {
-                    if (is.na(y.mat[i,j] || y.mat[i,j] <= 0)) return(0)
+                    if (is.na(y.mat[i,j]) || y.mat[i,j] <= 0) return(0)
                     else return(log(theta[r,c,y.mat[i,j]]))
                 })
             }))
