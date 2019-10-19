@@ -63,7 +63,7 @@ lower.limit <- 0.00001
 #'     If NULL, starting values will be generated automatically.
 #'     User-specified values of pi.init must be of length (nclus.row-1) because
 #'     the final value will be automatically calculated so that the values of pi sum to 1.
-#' @param EM.control: (default = list(EMcycles=50, EMstoppingpar=1e-4,
+#' @param EM.control: (default = list(EMcycles=50, EMstoppingpar=1e-6,
 #'     paramstopping=TRUE, startEMcycles=10))
 #'     list of parameters controlling the EM algorithm.
 #'     `EMcycles` controls how many EM iterations of the main EM algorithm are
@@ -111,7 +111,7 @@ rowclustering <- function(formula,
                           long.df,
                           initvect=NULL,
                           pi.init=NULL,
-                          EM.control=list(EMcycles=50, EMstoppingpar=1e-4,
+                          EM.control=list(EMcycles=50, EMstoppingpar=1e-6,
                                           paramstopping=TRUE, startEMcycles=10),
                           optim.method="L-BFGS-B", optim.control=default.optim.control(),
                           constraint.sum.zero=TRUE, use.alternative.start=TRUE){
@@ -227,7 +227,7 @@ rowclustering <- function(formula,
 #'     If NULL, starting values will be generated automatically.
 #'     User-specified values of pi.init must be of length (nclus.row-1) because
 #'     the final value will be automatically calculated so that the values of pi sum to 1.
-#' @param EM.control: (default = list(EMcycles=50, EMstoppingpar=1e-4,
+#' @param EM.control: (default = list(EMcycles=50, EMstoppingpar=1e-6,
 #'     paramstopping=TRUE, startEMcycles=10))
 #'     list of parameters controlling the EM algorithm.
 #'     `EMcycles` controls how many EM iterations of the main EM algorithm are
@@ -275,7 +275,7 @@ columnclustering <- function(formula,
     long.df,
     initvect=NULL,
     kappa.init=NULL,
-    EM.control=list(EMcycles=50, EMstoppingpar=1e-4, paramstopping=TRUE, startEMcycles=10),
+    EM.control=list(EMcycles=50, EMstoppingpar=1e-6, paramstopping=TRUE, startEMcycles=10),
     optim.method="L-BFGS-B", optim.control=default.optim.control(),
     constraint.sum.zero=TRUE, use.alternative.start=TRUE){
 
@@ -416,7 +416,7 @@ columnclustering <- function(formula,
 #'     If NULL, starting values will be generated automatically.
 #'     User-specified values of kappa.init must be of length (nclus.column-1) because
 #'     the final value will be automatically calculated so that the values of kappa sum to 1.
-#' @param EM.control: (default = list(EMcycles=50, EMstoppingpar=1e-4,
+#' @param EM.control: (default = list(EMcycles=50, EMstoppingpar=1e-6,
 #'     paramstopping=TRUE, startEMcycles=10))
 #'     list of parameters controlling the EM algorithm.
 #'     `EMcycles` controls how many EM iterations of the main EM algorithm are
@@ -472,7 +472,7 @@ biclustering <- function(formula,
     initvect=NULL,
     pi.init=NULL,
     kappa.init=NULL,
-    EM.control=list(EMcycles=50, EMstoppingpar=1e-4, paramstopping=TRUE, startEMcycles=10),
+    EM.control=list(EMcycles=50, EMstoppingpar=1e-6, paramstopping=TRUE, startEMcycles=10),
     optim.method="L-BFGS-B", optim.control=default.optim.control(),
     constraint.sum.zero=TRUE,
     use.alternative.start=TRUE){
@@ -538,7 +538,7 @@ validate.inputs <- function(type,
                             long.df,
                             initvect=NULL,
                             pi.init=NULL, kappa.init=NULL,
-                            EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
+                            EM.control=list(EMcycles=50, EMstoppingpar=1e-6, startEMcycles=10),
                             optim.method="L-BFGS-B",
                             constraint.sum.zero=TRUE, use.alternative.start=TRUE) {
 
@@ -677,7 +677,7 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect, EM.co
 
 run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
                               constraint.sum.zero=TRUE,
-                              EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
+                              EM.control=list(EMcycles=50, EMstoppingpar=1e-6, startEMcycles=10),
                               optim.method="L-BFGS-B", optim.control=default.optim.control()) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
@@ -775,7 +775,7 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
 
 run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
                              constraint.sum.zero=TRUE,
-                             EM.control=list(EMcycles=50, EMstoppingpar=1e-4, startEMcycles=10),
+                             EM.control=list(EMcycles=50, EMstoppingpar=1e-6, startEMcycles=10),
                              optim.method="L-BFGS-B", optim.control=default.optim.control()) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
