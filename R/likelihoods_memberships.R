@@ -127,11 +127,14 @@ Rcluster.Incll <- function(long.df, theta, pi.v, RG)
     logl = 0
     for(i in 1:n){
         sumoverR=0
+        log.components <- rep(0,RG)
         for(r in 1:RG){
             yvals <- long.df$Y[long.df$ROW==i]
+            log.components[r] <- log(pi.v[r]) + sum(log(diag(theta[r,,yvals])),na.rm=TRUE)
             sumoverR <- sumoverR+pi.v[r]*prod(diag(theta[r,,yvals]),na.rm=TRUE)
         }
-        logl=logl+log(sumoverR)
+        log.sumoverR <- log(sum(exp(log.components - max(log.components)))) + max(log.components)
+        logl <- logl + log.sumoverR
     }
     logl
 }
