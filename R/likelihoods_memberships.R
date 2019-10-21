@@ -7,13 +7,17 @@ onemode.membership.pp <- function(long.df, theta, proportions, nelements, row){
     for(idx in 1:nelements){
         for(clus.idx in 1:nclus){
             yvals <- long.df$Y[long.df$ROW==idx]
-            if (row) pp.raw[idx,clus.idx] <- pp.raw[idx,clus.idx] + sum(log(diag(theta[clus.idx,,yvals])))
-            else pp.raw[idx,clus.idx] <- pp.raw[idx,clus.idx] + sum(log(diag(theta[,clus.idx,yvals])))
+            if (length(yvals) > 0) {
+                if (row) pp.raw[idx,clus.idx] <- pp.raw[idx,clus.idx] + sum(log(diag(theta[clus.idx,,yvals])))
+                else pp.raw[idx,clus.idx] <- pp.raw[idx,clus.idx] + sum(log(diag(theta[,clus.idx,yvals])))
+            }
         }
     }
     for(idx in 1:nelements) pp.m[idx,] <- pp.raw[idx,] - log(sum(exp(pp.raw[idx,] + min(abs(pp.raw[idx,]))))) + min(abs(pp.raw[idx,]))
 
     pp.m <- exp(pp.m)
+    pp.m <- pp.m/rowSums(pp.m)
+    pp.m
 }
 
 twomode.membership.pp <- function(long.df, theta, pi.v, kappa.v, nclus, row) {
@@ -27,8 +31,10 @@ twomode.membership.pp <- function(long.df, theta, pi.v, kappa.v, nclus, row) {
             for(r in 1:nclus){
                 for(j in 1:p){
                     yval <- long.df$Y[long.df$ROW==i & long.df$COL==j]
-                    term <- sum(kappa.v*theta[r,,yval])
-                    pp.raw[i,r] <- pp.raw[i,r] + log(term)
+                    if (length(yval) == 1) {
+                        term <- sum(kappa.v*theta[r,,yval])
+                        pp.raw[i,r] <- pp.raw[i,r] + log(term)
+                    }
                 }
             }
         }
@@ -39,8 +45,10 @@ twomode.membership.pp <- function(long.df, theta, pi.v, kappa.v, nclus, row) {
             for(c in 1:nclus){
                 for(i in 1:n){
                     yval <- long.df$Y[long.df$ROW==i & long.df$COL==j]
-                    term <- sum(pi.v*theta[,c,yval])
-                    pp.raw[j,c] <- pp.raw[j,c] + log(term)
+                    if (length(yval) == 1) {
+                        term <- sum(pi.v*theta[,c,yval])
+                        pp.raw[j,c] <- pp.raw[j,c] + log(term)
+                    }
                 }
             }
         }
@@ -49,6 +57,8 @@ twomode.membership.pp <- function(long.df, theta, pi.v, kappa.v, nclus, row) {
     for(idx in 1:nrow(pp.m)) pp.m[idx,] <- pp.raw[idx,]-log(sum(exp(pp.raw[idx,] + min(abs(pp.raw[idx,]))))) + min(abs(pp.raw[idx,]))
 
     pp.m <- exp(pp.m)
+    pp.m <- pp.m/rowSums(pp.m)
+    pp.m
 }
 
 assignments <- function(pp.m) {
