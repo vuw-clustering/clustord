@@ -1,3 +1,24 @@
+generate.mixing.proportions <- function(nclus) {
+    ## Note that simply generating the first nclus-1 values from Unif(0,1/nclus)
+    ## then means that only one of the nclus proportions can ever be bigger than
+    ## 1/nclus, which would prevent the generation of proportions like
+    ## e.g. (0.2,0.4,0.4) which is are plausible real-world proportions, but
+    ## have 2 proportions bigger than 1/3
+
+    prop <- rep(0,nclus)
+    prop[1] <- runif(1,0,1/nclus)
+    if (nclus > 2) {
+        for (g in 2:(nclus-1)) {
+            nclus.remaining <- (nclus-g+1)
+            prop.cum <- sum(prop[1:(g-1)])
+            prop[g] <- runif(1,0,(1-prop.cum)/nclus.remaining)
+        }
+    }
+    prop[nclus] <- 1-sum(prop[1:(nclus-1)])
+    prop <- prop/sum(prop)
+}
+
+
 generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NULL, pi.init=NULL,
                                       EM.control=list(EMcycles=50, EMstoppingpar=1e-4,
                                                       paramstopping=TRUE, startEMcycles=10),
@@ -115,8 +136,7 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
         {
             pi.init <- pi.kmeans
         } else {
-            pi.init <- runif(RG-1,0,1/RG)
-            pi.init <- c(pi.init,1-sum(pi.init))
+            pi.init <- generate.mixing.proportions(RG)
         }
 
         startEM.control <- list(EMcycles=EM.control$startEMcycles,
@@ -244,8 +264,7 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
         {
             pi.init <- pi.kmeans
         } else {
-            pi.init <- runif(RG-1,0,1/RG)
-            pi.init <- c(pi.init,1-sum(pi.init))
+            pi.init <- generate.mixing.proportions(RG)
         }
     }
     ## If generating kappa, first generate basic kappa, then run simple models to get
@@ -255,8 +274,7 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
         {
             kappa.init <- kappa.kmeans
         } else {
-            kappa.init <- runif(CG-1,0,1/CG)
-            kappa.init <- c(kappa.init,1-sum(kappa.init))
+            kappa.init <- generate.mixing.proportions(CG)
         }
     }
     if (generate.pi | generate.kappa) {
@@ -276,12 +294,12 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
                                         optim.method=optim.method,
                                         optim.control=optim.control)
             cat("=== End of RS model fitting ===\n")
-            pi.init <- rs.out$pi
+            if (all(rs.out$pi > 0)) pi.init <- rs.out$pi
         }
         if (generate.kappa) {
             cat("Fitting SC model as RS model applied to y with ROW
-                           and COL switched, so fitted values of pi gives
-                           starting values for kappa.v\n")
+                and COL switched, so fitted values of pi gives
+                starting values for kappa.v\n")
             long.df.transp <- long.df
             long.df.transp$ROW <- long.df$COL
             long.df.transp$COL <- long.df$ROW
@@ -296,7 +314,7 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
                                         optim.method=optim.method,
                                         optim.control=optim.control)
             cat("=== End of SC model fitting ===\n")
-            kappa.init <- sc.out$pi
+            if (all(sc.out$pi > 0)) kappa.init <- sc.out$pi
         }
 
         if (submodel == "rci") {
