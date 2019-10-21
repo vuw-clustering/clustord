@@ -270,14 +270,14 @@ rowclustering <- function(formula,
 #' columnclustering("Y~row+column+row:column",model="POM",2,long.df),indicates model Logit=mu_k-alpha_i-beta_c-gamma_ic with 2 column clustering groups
 #' @export
 columnclustering <- function(formula,
-    model,
-    nclus.column,
-    long.df,
-    initvect=NULL,
-    kappa.init=NULL,
-    EM.control=list(EMcycles=50, EMstoppingpar=1e-6, paramstopping=TRUE, startEMcycles=10),
-    optim.method="L-BFGS-B", optim.control=default.optim.control(),
-    constraint.sum.zero=TRUE, use.alternative.start=TRUE){
+                             model,
+                             nclus.column,
+                             long.df,
+                             initvect=NULL,
+                             kappa.init=NULL,
+                             EM.control=list(EMcycles=50, EMstoppingpar=1e-6, paramstopping=TRUE, startEMcycles=10),
+                             optim.method="L-BFGS-B", optim.control=default.optim.control(),
+                             constraint.sum.zero=TRUE, use.alternative.start=TRUE){
 
     validate.inputs(type="column",
                     formula=formula, model=model, nclus.column=nclus.column,
@@ -297,11 +297,11 @@ columnclustering <- function(formula,
 
     ## Now switch to calling everything in terms of row clustering
     submodel <- switch(formula,
-        "Y~column"="rs",
-        "Y~row+column"="rp",
-        "Y~row+column+row:column"="rpi",
-        "Y~row*column"="rpi",
-        stop('Error in formula'))
+                       "Y~column"="rs",
+                       "Y~row+column"="rp",
+                       "Y~row+column+row:column"="rpi",
+                       "Y~row*column"="rpi",
+                       stop('Error in formula'))
 
     print(paste("EM algorithm for",model))
 
@@ -340,7 +340,7 @@ columnclustering <- function(formula,
                            criteria=results$criteria,
                            initvect=initvect, parlist.out=column.parlist,
                            kappa=results$pi, ppc=results$ppr,
-                            ColumnClusters=results$RowClusters)
+                           ColumnClusters=results$RowClusters)
     column.results$info['C'] <- column.results$info['R']
     column.results$info <- column.results$info[-which(names(column.results$info) == "R")]
 
@@ -465,17 +465,17 @@ columnclustering <- function(formula,
 #'     with 2 row clustering groups and 4 column clustering groups.
 #' @export
 biclustering <- function(formula,
-    model,
-    nclus.row,
-    nclus.column,
-    long.df,
-    initvect=NULL,
-    pi.init=NULL,
-    kappa.init=NULL,
-    EM.control=list(EMcycles=50, EMstoppingpar=1e-6, paramstopping=TRUE, startEMcycles=10),
-    optim.method="L-BFGS-B", optim.control=default.optim.control(),
-    constraint.sum.zero=TRUE,
-    use.alternative.start=TRUE){
+                         model,
+                         nclus.row,
+                         nclus.column,
+                         long.df,
+                         initvect=NULL,
+                         pi.init=NULL,
+                         kappa.init=NULL,
+                         EM.control=list(EMcycles=50, EMstoppingpar=1e-6, paramstopping=TRUE, startEMcycles=10),
+                         optim.method="L-BFGS-B", optim.control=default.optim.control(),
+                         constraint.sum.zero=TRUE,
+                         use.alternative.start=TRUE){
 
     validate.inputs(type="bi",
                     formula=formula, model=model,
@@ -496,10 +496,10 @@ biclustering <- function(formula,
     EM.control <- replacedefaults(default.EM.control, EM.control)
 
     submodel <- switch(formula,
-        "Y~row+column"="rc",
-        "Y~row+column+row:column"="rci",
-        "Y~row*column"="rci",
-        stop('Error in formula'))
+                       "Y~row+column"="rc",
+                       "Y~row+column+row:column"="rci",
+                       "Y~row*column"="rci",
+                       stop('Error in formula'))
 
     print(paste("EM algorithm for",model))
 
@@ -523,8 +523,8 @@ biclustering <- function(formula,
     }
 
     run.EM.bicluster(invect=initvect, long.df=long.df, model=model, submodel=submodel,
-        pi.v=pi.init, kappa.v=kappa.init, EM.control=EM.control,
-        optim.method=optim.method, optim.control=optim.control)
+                     pi.v=pi.init, kappa.v=kappa.init, EM.control=EM.control,
+                     optim.method=optim.method, optim.control=optim.control)
 }
 
 default.optim.control <- function() {
@@ -548,7 +548,7 @@ validate.inputs <- function(type,
     if (!is.character(formula) || !is.vector(formula) || length(formula) != 1) stop("formula must be a string.")
 
     ## Check that model is valid
-        if (!is.character(model) || !is.vector(model) || length(model) != 1) stop("model must be a string, 'OSM' or 'POM' or 'Binary'.")
+    if (!is.character(model) || !is.vector(model) || length(model) != 1) stop("model must be a string, 'OSM' or 'POM' or 'Binary'.")
     if (!(model %in% c("OSM","POM","Binary"))) stop("model must be either 'OSM' or POM' for the ordered stereotype and proportional odds models, or 'Binary' for the binary model.")
 
     ## Check that clustering settings are valid
@@ -580,8 +580,8 @@ validate.inputs <- function(type,
         any(sapply(long.df$Y,is.infinite))) stop("long.df$Y must be a factor with q levels.")
     if (!is.factor(long.df$ROW) &&
         (is.list(long.df$ROW) || any(sapply(long.df$ROW,is.list)) || any(is.na(long.df$ROW)) ||
-        any(sapply(long.df$ROW,is.infinite)) || any(long.df$ROW %% 1 != 0) ||
-        any(long.df$ROW < 1) || all(long.df$ROW > 1))) stop("long.df$ROW must be a factor or integers from 1 to the number of observations, i.e. the number of rows in the original data matrix.")
+         any(sapply(long.df$ROW,is.infinite)) || any(long.df$ROW %% 1 != 0) ||
+         any(long.df$ROW < 1) || all(long.df$ROW > 1))) stop("long.df$ROW must be a factor or integers from 1 to the number of observations, i.e. the number of rows in the original data matrix.")
     if (!is.factor(long.df$COL) &&
         is.list(long.df$COL) || any(sapply(long.df$COL,is.list)) || any(is.na(long.df$COL)) ||
         any(sapply(long.df$COL,is.infinite)) || any(long.df$COL %% 1 != 0) ||
@@ -663,7 +663,7 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect, EM.co
     ## stopping criterion
     if (abs(new.llc - new.lli) < 1E-10) new.llc <- new.lli + 1E-10
     likelihood.stopping.criterion <- abs(EM.status$previous.lli - new.lli)/abs(new.llc - new.lli)
-# if (is.na(likelihood.stopping.criterion)) browser()
+    # if (is.na(likelihood.stopping.criterion)) browser()
     if (is.infinite(new.lli)) likelihood.stopping.criterion <- Inf
     if (likelihood.stopping.criterion < EM.control$EMstoppingpar &
         (!EM.control$paramstopping || param.stopping.criterion < EM.control$EMstoppingpar)) converged <- TRUE
@@ -740,7 +740,7 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
         lli <- Rcluster.Incll(long.df, theta.arr, pi.v, RG)
 
         EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
-                                     invect=invect,outvect=outvect,EM.control=EM.control)
+                                      invect=invect,outvect=outvect,EM.control=EM.control)
 
         ## Report the current incomplete-data log-likelihood, which is the
         ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
@@ -819,30 +819,30 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
         # M-step:
         #use numerical maximisation
         optim.fit <- optim(par=invect,
-            fn=calc.ll,
-            long.df=long.df,
-            y.mat=y.mat,
-            model=model,
-            submodel=submodel,
-            ppr.m=ppr.m,
-            pi.v=pi.v,
-            RG=RG,
-            ppc.m=ppc.m,
-            kappa.v=kappa.v,
-            CG=CG,
-            constraint.sum.zero=constraint.sum.zero,
-            partial=TRUE,
-            method=optim.method,
-            hessian=F,control=optim.control)
+                           fn=calc.ll,
+                           long.df=long.df,
+                           y.mat=y.mat,
+                           model=model,
+                           submodel=submodel,
+                           ppr.m=ppr.m,
+                           pi.v=pi.v,
+                           RG=RG,
+                           ppc.m=ppc.m,
+                           kappa.v=kappa.v,
+                           CG=CG,
+                           constraint.sum.zero=constraint.sum.zero,
+                           partial=TRUE,
+                           method=optim.method,
+                           hessian=F,control=optim.control)
 
         outvect <- optim.fit$par
 
         llc <- -calc.ll(outvect,long.df=long.df,y.mat=y.mat,model=model,submodel=submodel,
-            ppr.m=ppr.m,pi.v=pi.v,RG=RG, ppc.m=ppc.m,kappa.v=kappa.v,CG=CG,
-            partial=FALSE)
+                        ppr.m=ppr.m,pi.v=pi.v,RG=RG, ppc.m=ppc.m,kappa.v=kappa.v,CG=CG,
+                        partial=FALSE)
 
         parlist.out <- unpack.parvec(outvect,model=model,submodel=submodel,
-            n=n,p=p,q=q,RG=RG,CG=CG,constraint.sum.zero=constraint.sum.zero)
+                                     n=n,p=p,q=q,RG=RG,CG=CG,constraint.sum.zero=constraint.sum.zero)
         theta.arr <- calc.theta(parlist.out,model=model,submodel=submodel)
 
         ## Note that UNLIKE Bicluster.ll, Bicluster.Incll outputs the *actual*
@@ -850,9 +850,9 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
         ## to make it negative here
         if(CG^p<RG^n) lli <- Bicluster.IncllC(long.df, y.mat, theta.arr, pi.v, kappa.v)
         else lli <- Bicluster.IncllR(long.df, y.mat, theta.arr, pi.v, kappa.v)
-if (is.na(lli)) browser()
+        if (is.na(lli)) browser()
         EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
-                                     invect=invect,outvect=outvect,EM.control=EM.control)
+                                      invect=invect,outvect=outvect,EM.control=EM.control)
 
         ## Report the current incomplete-data log-likelihood, which is the
         ## NEGATIVE of the latest value of Bicluster.ll i.e. the NEGATIVE
@@ -877,15 +877,15 @@ if (is.na(lli)) browser()
     names(info) <- c("n","p","npar","R","C")
     list("info"=info,
          "EM.status"=EM.status,
-        "criteria"=criteria,
-        "constraint.sum.zero"=constraint.sum.zero,
-        "initvect"=initvect,
-        "parlist.init"=parlist.init,
-        "parlist.out"=parlist.out,
-        "pi"=pi.v,
-        "ppr"=ppr.m,
-        "kappa"=kappa.v,
-        "ppc"=ppc.m,
-        "RowClusters"=Rclus,
-        "ColClusters"=Cclus)
+         "criteria"=criteria,
+         "constraint.sum.zero"=constraint.sum.zero,
+         "initvect"=initvect,
+         "parlist.init"=parlist.init,
+         "parlist.out"=parlist.out,
+         "pi"=pi.v,
+         "ppr"=ppr.m,
+         "kappa"=kappa.v,
+         "ppc"=ppc.m,
+         "RowClusters"=Rclus,
+         "ColClusters"=Cclus)
 }
