@@ -848,8 +848,8 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
         ## Note that UNLIKE Bicluster.ll, Bicluster.Incll outputs the *actual*
         ## log-likelihood, not the negative of the log-likelihood, so don't need
         ## to make it negative here
-        if(CG^p<RG^n) lli <- Bicluster.IncllC(long.df, y.mat, theta.arr, pi.v, kappa.v)
-        else lli <- Bicluster.IncllR(long.df, y.mat, theta.arr, pi.v, kappa.v)
+        if(CG^p<RG^n) lli <- Bicluster.IncllC(long.df, theta.arr, pi.v, kappa.v)
+        else lli <- Bicluster.IncllR(long.df, theta.arr, pi.v, kappa.v)
         if (is.na(lli)) browser()
         EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
                                       invect=invect,outvect=outvect,EM.control=EM.control)
