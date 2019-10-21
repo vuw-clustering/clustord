@@ -21,7 +21,8 @@ generate.mixing.proportions <- function(nclus) {
 
 generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NULL, pi.init=NULL,
                                       EM.control=list(EMcycles=50, EMstoppingpar=1e-4,
-                                                      paramstopping=TRUE, startEMcycles=10),
+                                                      paramstopping=TRUE, startEMcycles=10,
+                                                      keepallparams=FALSE),
                                       optim.method="L-BFGS-B", optim.control=default.optim.control(),
                                       constraint.sum.zero=TRUE, use.alternative.start=TRUE) {
 
@@ -141,7 +142,8 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
 
         startEM.control <- list(EMcycles=EM.control$startEMcycles,
                                 EMstoppingpar=EM.control$EMstoppingpar,
-                                paramstopping=EM.control$paramstopping)
+                                paramstopping=EM.control$paramstopping,
+                                keepallparams=EM.control$keepallparams)
 
         if (submodel %in% c("rp","rpi")) {
             cat("Fitting RS model to obtain starting values for pi.v\n")
@@ -167,7 +169,8 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
 generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
                                      initvect=NULL, pi.init=NULL, kappa.init=NULL,
                                      EM.control=list(EMcycles=50, EMstoppingpar=1e-4,
-                                                     paramstopping=TRUE, startEMcycles=10),
+                                                     paramstopping=TRUE, startEMcycles=10,
+                                                     keepallparams=FALSE),
                                      optim.method="L-BFGS-B", optim.control=default.optim.control(),
                                      constraint.sum.zero=TRUE, use.alternative.start=TRUE) {
     n <- max(long.df$ROW)
@@ -280,7 +283,8 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
     if (generate.pi | generate.kappa) {
         startEM.control <- list(EMcycles=EM.control$startEMcycles,
                                 EMstoppingpar=EM.control$EMstoppingpar,
-                                paramstopping=EM.control$paramstopping)
+                                paramstopping=EM.control$paramstopping,
+                                keepallparams=EM.control$keepallparams)
         if (generate.pi) {
             cat("Fitting RS model to obtain starting values for pi.v\n")
             rs.invect <- switch(model,
