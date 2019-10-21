@@ -64,6 +64,8 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constra
            },
            "POM"={
                mu <- invect[1:(q-1)]
+               mu <- sort(mu, decreasing=FALSE)
+
                alpha <- invect[(q-1+1):(q-1+RG-1)]
                if (constraint.sum.zero) alpha <- c(alpha, -sum(alpha))
                else alpha <- c(0, alpha)
