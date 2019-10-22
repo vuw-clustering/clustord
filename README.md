@@ -1,4 +1,4 @@
-# clustPOM
+# clustord
 
 The package is not frequently built as a full package yet, so it would be better to take a clone of the code, and source the various files, which are found in the "R" folder.
 
