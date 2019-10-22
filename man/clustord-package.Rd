@@ -1,24 +1,24 @@
-\name{clustPOM-package}
-\alias{clustPOM-package}
-\alias{clustPOM}
+\name{clustord-package}
+\alias{clustord-package}
+\alias{clustord}
 \docType{package}
 \title{
-\packageTitle{clustPOM}
+\packageTitle{clustord}
 }
 \description{
-\packageDescription{clustPOM}
+\packageDescription{clustord}
 }
 \details{
 
 The DESCRIPTION file:
-\packageDESCRIPTION{clustPOM}
-\packageIndices{clustPOM}
+\packageDESCRIPTION{clustord}
+\packageIndices{clustord}
 ~~ An overview of how to use the package, including the most important functions ~~
 }
 \author{
-\packageAuthor{clustPOM}
+\packageAuthor{clustord}
 
-Maintainer: \packageMaintainer{clustPOM}
+Maintainer: \packageMaintainer{clustord}
 }
 \references{
 ~~ Literature or other references for background information ~~

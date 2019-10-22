@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 // rcpparma_hello_world
 arma::mat rcpparma_hello_world();
-RcppExport SEXP _clustPOM_rcpparma_hello_world() {
+RcppExport SEXP _clustord_rcpparma_hello_world() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -18,7 +18,7 @@ END_RCPP
 }
 // rcpparma_outerproduct
 arma::mat rcpparma_outerproduct(const arma::colvec& x);
-RcppExport SEXP _clustPOM_rcpparma_outerproduct(SEXP xSEXP) {
+RcppExport SEXP _clustord_rcpparma_outerproduct(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -29,7 +29,7 @@ END_RCPP
 }
 // rcpparma_innerproduct
 double rcpparma_innerproduct(const arma::colvec& x);
-RcppExport SEXP _clustPOM_rcpparma_innerproduct(SEXP xSEXP) {
+RcppExport SEXP _clustord_rcpparma_innerproduct(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -40,7 +40,7 @@ END_RCPP
 }
 // rcpparma_bothproducts
 Rcpp::List rcpparma_bothproducts(const arma::colvec& x);
-RcppExport SEXP _clustPOM_rcpparma_bothproducts(SEXP xSEXP) {
+RcppExport SEXP _clustord_rcpparma_bothproducts(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -50,15 +50,28 @@ BEGIN_RCPP
 END_RCPP
 }
 
+RcppExport void loglike_Stereo_columneffect_inC(void *, void *, void *, void *, void *, void *, void *);
+RcppExport void logLikelihood_Incomplete_Stereo_RowClustering_rRcC1_inC(void *, void *, void *, void *, void *, void *, void *, void *);
+RcppExport void logLikelihood_Incomplete_Stereo_RowClustering_rRcm_inC(void *, void *, void *, void *, void *, void *, void *, void *);
+RcppExport void Q_Stereo_RowCluster_inC(void *, void *, void *, void *, void *, void *, void *, void *, void *);
+RcppExport void Q_Stereo_RowCluster_rRcC1_inC(void *, void *, void *, void *, void *, void *, void *, void *, void *);
+RcppExport void Q_Stereo_RowCluster_without_iterations_inC(void *, void *, void *, void *, void *, void *, void *, void *, void *);
+
 static const R_CallMethodDef CallEntries[] = {
-    {"_clustPOM_rcpparma_hello_world", (DL_FUNC) &_clustPOM_rcpparma_hello_world, 0},
-    {"_clustPOM_rcpparma_outerproduct", (DL_FUNC) &_clustPOM_rcpparma_outerproduct, 1},
-    {"_clustPOM_rcpparma_innerproduct", (DL_FUNC) &_clustPOM_rcpparma_innerproduct, 1},
-    {"_clustPOM_rcpparma_bothproducts", (DL_FUNC) &_clustPOM_rcpparma_bothproducts, 1},
+    {"_clustord_rcpparma_hello_world", (DL_FUNC) &_clustord_rcpparma_hello_world, 0},
+    {"_clustord_rcpparma_outerproduct", (DL_FUNC) &_clustord_rcpparma_outerproduct, 1},
+    {"_clustord_rcpparma_innerproduct", (DL_FUNC) &_clustord_rcpparma_innerproduct, 1},
+    {"_clustord_rcpparma_bothproducts", (DL_FUNC) &_clustord_rcpparma_bothproducts, 1},
+    {"loglike_Stereo_columneffect_inC",                         (DL_FUNC) &loglike_Stereo_columneffect_inC,                         7},
+    {"logLikelihood_Incomplete_Stereo_RowClustering_rRcC1_inC", (DL_FUNC) &logLikelihood_Incomplete_Stereo_RowClustering_rRcC1_inC, 8},
+    {"logLikelihood_Incomplete_Stereo_RowClustering_rRcm_inC",  (DL_FUNC) &logLikelihood_Incomplete_Stereo_RowClustering_rRcm_inC,  8},
+    {"Q_Stereo_RowCluster_inC",                                 (DL_FUNC) &Q_Stereo_RowCluster_inC,                                 9},
+    {"Q_Stereo_RowCluster_rRcC1_inC",                           (DL_FUNC) &Q_Stereo_RowCluster_rRcC1_inC,                           9},
+    {"Q_Stereo_RowCluster_without_iterations_inC",              (DL_FUNC) &Q_Stereo_RowCluster_without_iterations_inC,              9},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_clustPOM(DllInfo *dll) {
+RcppExport void R_init_clustord(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

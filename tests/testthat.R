@@ -1,4 +1,4 @@
 library(testthat)
-library(clustPOM)
+library(clustord)
 
-test_check("clustPOM")
+test_check("clustord")
