@@ -1,12 +1,12 @@
-Package: clustPOM
+Package: clustord
 Type: Package
-Title: Clustering Using Proportional Odds Model
+Title: Clustering Using Proportional Odds Model, Ordered Stereotype Model or Binary Model
 Version: 0.1
 Date: 2019-05-21
 Author: Ying, Louise McMillan
 Maintainer: Louise McMillan <louise.mcmillan@vuw.ac.nz>
-Description: Biclustering, row clustering and column clustering using the proportional odds model (POM) for ordinal categorical data.
-License: What license is it under?
+Description: Biclustering, row clustering and column clustering using the proportional odds model (POM), ordered stereotype model (OSM) or binary model for ordinal categorical data.
+License: GPLv3
 Imports: Rcpp (>= 1.0.1), 
          MASS
 LinkingTo: Rcpp, RcppArmadillo
