@@ -324,3 +324,57 @@ Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
     logl <- M.val + log(sum(exp(Ea.v-M.val),na.rm=TRUE))
     logl
 }
+
+## Biclustering incomplete-data log-likelihood calculated based on the approximation
+## relating the incomplete-data and complete-data log-likelihoods
+Bicluster.IncllApprox <- function(llc, long.df, y.mat, theta, pi.v, kappa.v, ppr.m, ppc.m) {
+    n <- max(long.df$ROW)
+    p <- max(long.df$COL)
+    q <- length(levels(long.df$Y))
+    RG <- length(pi.v)
+    CG <- length(kappa.v)
+
+    theta[theta<1E-40]=lower.limit
+    pi.v[pi.v<1E-40]=lower.limit
+    kappa.v[kappa.v<1E-40]=lower.limit
+
+    llc.correction.term <- 0
+
+    for (i in 1:n) {
+        for (j in 1:p) {
+            if (!is.na(y.mat[i,j]) && y.mat[i,j] > 0) {
+                theta.ij <- theta[,,y.mat[i,j]]
+                ## Multiply every row by the corresponding value of pi.v, i.e.
+                ## multiply pi.v down each column, and multiply kappa.v across
+                ## each row
+                denom <- t(apply(apply(theta.ij,2,"*",pi.v),1,"*",kappa.v))
+                tau.ij <- denom/rowSums(denom)
+                tau.ij <- denom/colSums(denom)
+                log.tau.ij <- log(tau.ij)
+
+                ## Now do the following calculation in stages, and to avoid Inf*0 = NaN
+                ## forcibly convert any related infinite terms to 0
+                part1 <- ppr.m[i,]%*%log.tau.ij
+                if (any(is.na(part1))) {
+                    na.idxs <- which(is.na(part1))
+                    for (idx in na.idxs) {
+                        log.tau.ij[is.infinite(log.tau.ij[,idx]),idx] <- 0
+                    }
+                    part1 <- ppr.m[i,]%*%log.tau.ij
+                }
+                part2 <- part1%*%ppc.m[j,]
+                if (is.na(part2)) {
+                    part1[is.infinite(part1)] <- 0
+                    part2 <- part1%*%ppc.m[j,]
+                }
+                if (is.na(part2))
+                llc.correction.term <- llc.correction.term + part2
+                # if (is.na(ppr.m[i,]%*%log(tau.ij)%*%ppc.m[j,])) browser()
+                # llc.correction.term <- llc.correction.term + ppr.m[i,]%*%log(tau.ij)%*%ppc.m[j,]
+            }
+        }
+    }
+
+    if (is.finite(llc.correction.term)) lli <- llc - llc.correction.term
+    else lli <- -Inf
+}
