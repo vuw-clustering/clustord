@@ -241,12 +241,11 @@ Bicluster.IncllC <- function(long.df, theta, pi.v, kappa.v)
             for (ii in 1:n)
             {
                 Bai.m[aa,ii]   <- max.Aair[ii]
-                Dai.m[aa,ii]   <- sum(exp(Aair.a[aa,ii,]-max.Aair[ii,]))
+                Dai.m[aa,ii]   <- sum(exp(Aair.a[aa,ii,]-max.Aair[ii]))
             }
 
             Ea.v[aa] <- sum(Bai.m[aa,]) + sum(log(Dai.m[aa,]),na.rm=T)
             Ea.v[aa] <- Ea.v[aa] + log(alpha.v[aa])
-            print(Ea.v[aa])
         }
     }
     M.val <- max(Ea.v, na.rm=TRUE)
@@ -313,7 +312,7 @@ Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
             for (jj in 1:p)
             {
                 Baj.m[aa,jj]   <- max.Aajc[jj]
-                Daj.m[aa,jj]   <- sum(exp(Aajc.a[aa,jj,]-max.Aajc[jj,]))
+                Daj.m[aa,jj]   <- sum(exp(Aajc.a[aa,jj,]-max.Aajc[jj]))
             }
 
             Ea.v[aa] <- sum(Baj.m[aa,]) + sum(log(Daj.m[aa,]),na.rm=T)
