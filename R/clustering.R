@@ -657,7 +657,7 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
         params.for.best.lli$n <- NULL
         params.for.best.lli$p <- NULL
         params.for.best.lli$pi <- pi.v
-        params.for.best.lli$kappa <- kappa.v
+        if (!is.null(kappa.v)) params.for.best.lli$kappa <- kappa.v
     } else {
         best.lli <- EM.status$best.lli
         llc.for.best.lli <- EM.status$llc.for.best.lli
@@ -683,13 +683,19 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
                           llc.for.best.lli=llc.for.best.lli, params.for.best.lli=params.for.best.lli,
                           best.lli=best.lli, paramstopping=EM.control$paramstopping)
     if (EM.control$keepallparams) {
-        names(pi.v) <- paste0("pi",1:length(pi.v))
-        if (!is.null(kappa.v)) names(kappa.v) <- paste0("kappa",1:length(kappa.v))
         names(new.lli) <- "lli"
         names(new.llc) <- "llc"
+        names(pi.v) <- paste0("pi",1:length(pi.v))
+        if (!is.null(kappa.v)) {
+            names(kappa.v) <- paste0("kappa",1:length(kappa.v))
+            newparams <- c(unlist(parlist.out),
+                            pi.v,kappa.v,new.lli,new.llc)
+        } else {
+            newparams <- c(unlist(parlist.out), pi.v,new.lli,new.llc)
+        }
+
         EM.status.out$params.every.iteration <- rbind(EM.status$params.every.iteration,
-                                                      c(unlist(parlist.out),
-                                                        pi.v,kappa.v,new.lli,new.llc))
+                                                      newparams)
     }
 
     EM.status.out
@@ -913,5 +919,5 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
          "kappa"=kappa.v,
          "ppc"=ppc.m,
          "RowClusters"=Rclus,
-         "ColClusters"=Cclus)
+         "ColumnClusters"=Cclus)
 }
