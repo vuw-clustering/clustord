@@ -1,8 +1,6 @@
 unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constraint.sum.zero=TRUE) {
     switch(model,
            "OSM"={
-               ### TODO: Noting that mu for original OSM code is defined differently
-               ### than mu for POM code, decide which version to use and make consistent
                mu <- c(0,invect[1:(q-1)])
 
                ## Convert to phi from u, where u can vary between -Inf and +Inf
