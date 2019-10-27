@@ -8,7 +8,8 @@ Maintainer: Louise McMillan <louise.mcmillan@vuw.ac.nz>
 Description: Biclustering, row clustering and column clustering using the proportional odds model (POM), ordered stereotype model (OSM) or binary model for ordinal categorical data.
 License: GPLv3
 Imports: Rcpp (>= 1.0.1), 
-         MASS
+         MASS,
+         nnet
 LinkingTo: Rcpp, RcppArmadillo
 Suggests: 
     testthat (>= 2.1.0)

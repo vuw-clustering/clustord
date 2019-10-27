@@ -56,18 +56,18 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
 
         switch(model,
                "OSM"={
-                   mu.init <- runif(q-1,min=-2,max=2)
                    # phi.init <- sort(runif(q-2),decreasing=FALSE)
                    u.init <- runif(q-2,min=-1,max=1)
 
-                   PO.sp.out <- MASS::polr(Y~as.factor(COL),data=long.df)
-                   PO.sp.out$mu=PO.sp.out$zeta
+                   BL.sp.out <- nnet::multinom(Y~as.factor(COL), data=long.df)
+                   BL.coef <- coef(BL.sp.out)
+                   mu.init <- BL.coef[,1]
 
                    ## If not using constraint that beta sum to zero,
                    ## beta1 will be 0 so need to correct other elements
                    ## of beta accordingly
-                   if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(p-1)]
-                   else beta.init <- PO.sp.out$coef[2:(p-1)] - PO.sp.out$coef[1]
+                   if (constraint.sum.zero) beta.init <- colMeans(BL.coef)[2:p]
+                   else beta.init <- colMeans(BL.coef)[3:p]-colMeans(BL.coef)[2]
 
                    switch(submodel,
                           "rs"={
@@ -213,9 +213,11 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
 
         switch(model,
                "OSM"={
-                   mu.init <- runif(q-1,min=-2,max=2)
                    # phi.init <- sort(runif(q-2),decreasing=FALSE)
                    u.init <- runif(q-2,min=-1,max=1)
+
+                   BL.ss.out <- nnet::multinom(Y~1, data=long.df)
+                   mu.init <- coef(BL.ss.out)[,1]
 
                    switch(submodel,
                           "rc"={
