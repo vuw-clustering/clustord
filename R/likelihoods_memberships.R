@@ -71,7 +71,8 @@ assignments <- function(pp.m) {
 }
 
 calc.ll <- function(invect, long.df, y.mat, model, submodel, ppr.m, pi.v, RG,
-                    ppc.m=NULL, kappa.v=NULL, CG=NULL, constraint.sum.zero=TRUE, partial=FALSE) {
+                    ppc.m=NULL, kappa.v=NULL, CG=NULL, constraint.sum.zero=TRUE,
+                    partial=FALSE, SE.calc=FALSE) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
     q <- length(levels(long.df$Y))
@@ -81,10 +82,19 @@ calc.ll <- function(invect, long.df, y.mat, model, submodel, ppr.m, pi.v, RG,
 
     this.theta <- calc.theta(parlist,model=model,submodel=submodel)
 
-    if (submodel %in% c("rs","rp","rpi")) {
-        Rcluster.ll(long.df, y.mat, this.theta, ppr.m, pi.v, RG, partial=partial)
-    } else if (submodel %in% c("rc","rci")) {
-        Bicluster.ll(long.df, y.mat, this.theta, ppr.m, ppc.m, pi.v, kappa.v, partial=partial)
+    if (SE.calc) {
+        if (submodel %in% c("rs","rp","rpi")) {
+            Rcluster.Incll(long.df, this.theta, pi.v, RG)
+        } else if (submodel %in% c("rc","rci")) {
+            Bicluster.IncllApprox(long.df=long.df, y.mat=y.mat, theta=this.theta,
+                                  ppr.m=ppr.m, ppc.m=ppc.m, pi.v=pi.v, kappa.v=kappa.v)
+        }
+    } else {
+        if (submodel %in% c("rs","rp","rpi")) {
+            Rcluster.ll(long.df, y.mat, this.theta, ppr.m, pi.v, RG, partial=partial)
+        } else if (submodel %in% c("rc","rci")) {
+            Bicluster.ll(long.df, y.mat, this.theta, ppr.m, ppc.m, pi.v, kappa.v, partial=partial)
+        }
     }
 }
 
@@ -136,6 +146,7 @@ Rcluster.Incll <- function(long.df, theta, pi.v, RG)
         log.sumoverR <- log(sum(exp(log.components - max(log.components)))) + max(log.components)
         logl <- logl + log.sumoverR
     }
+    if (logl == 0) logl <- -1E-40
     logl
 }
 
@@ -326,7 +337,7 @@ Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
 
 ## Biclustering incomplete-data log-likelihood calculated based on the approximation
 ## relating the incomplete-data and complete-data log-likelihoods
-Bicluster.IncllApprox <- function(llc, long.df, y.mat, theta, pi.v, kappa.v, ppr.m, ppc.m) {
+Bicluster.IncllApprox <- function(llc=NULL, long.df, y.mat, theta, pi.v, kappa.v, ppr.m, ppc.m) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
     q <- length(levels(long.df$Y))
@@ -336,6 +347,8 @@ Bicluster.IncllApprox <- function(llc, long.df, y.mat, theta, pi.v, kappa.v, ppr
     theta[theta<1E-40]=lower.limit
     pi.v[pi.v<1E-40]=lower.limit
     kappa.v[kappa.v<1E-40]=lower.limit
+
+    if (is.null(llc)) llc <- Bicluster.ll(long.df, y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, partial=FALSE)
 
     llc.correction.term <- 0
 

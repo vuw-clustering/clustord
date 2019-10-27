@@ -394,8 +394,17 @@ columnclustering <- function(formula,
 #'     function and then the simple model, and then the model without
 #'     interactions, to find starting values for fitting the model with interactions.
 #' @return
+#' A list with components:
+#'
 #'     \code{info}: Basic info n, p, the number of parameters, the number of
 #'     row clusters and the number of column clusters (as applicable).
+#'
+#'     \code{model}: The model used for fitting, "OSM" for Ordered Stereotype
+#'     Model, "POM" for Proportional Odds Model, or "Binary" for Binary model.
+#'
+#'     \code{submodel}: The submodel used. "rs","rp" and "rpi" are the
+#'     rowclustering/columnclustering submodels, and "rc" and "rci" are the
+#'     biclustering submodels. The "i" stands for "with interactions".
 #'
 #'     \code{EM.status}: a list containing the latest iteration \code{iter},
 #'     latest incomplete-data and complete-data log-likelihoods \code{new.lli}
@@ -414,6 +423,9 @@ columnclustering <- function(formula,
 #'     \code{initvect}: the initial \emph{vector} of parameter values, either
 #'     specified by the user or generated automatically. This vector has only
 #'     the \strong{independent} values of the parameters, not the full set.
+#'
+#'     \code{outvect}: the final \emph{vector} of parameter values, containing
+#'     only the independent parameter values from \code{parlist.out}.
 #'
 #'     \code{parlist.init}: the initial list of parameters, constructed from
 #'     the initial parameter vector \code{initvect}. Note that if the initial
@@ -793,10 +805,13 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
     info <- c(n, p, npar, RG)
     names(info) <- c("n","p","npar","R")
     list("info"=info,
+         "model"=model,
+         "submodel"=submodel,
          "EM.status"=EM.status,
          "criteria"=criteria,
          "constraint.sum.zero"=constraint.sum.zero,
          "initvect"=initvect,
+         "outvect"=outvect,
          "parlist.init"=parlist.init,
          "parlist.out"=parlist.out,
          "pi"=pi.v,
@@ -911,10 +926,13 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
     info <- c(n, p, npar, RG, CG)
     names(info) <- c("n","p","npar","R","C")
     list("info"=info,
+         "model"=model,
+         "submodel"=submodel,
          "EM.status"=EM.status,
          "criteria"=criteria,
          "constraint.sum.zero"=constraint.sum.zero,
          "initvect"=initvect,
+         "outvect"=outvect,
          "parlist.init"=parlist.init,
          "parlist.out"=parlist.out,
          "pi"=pi.v,
@@ -923,4 +941,94 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
          "ppc"=ppc.m,
          "RowClusters"=Rclus,
          "ColumnClusters"=Cclus)
+}
+
+#' @describeIn calc.SE.bicluster SE for rowclustering
+#' @export
+calc.SE.rowcluster <- function(long.df, clust.out,
+                               optim.control=default.optim.control()) {
+    optim.control$fnscale=-1
+
+    y.mat <- df2mat(long.df)
+    outvect <- clust.out$outvect
+
+    optim.hess <- optimHess(par=outvect,
+                       fn=calc.ll,
+                       long.df=long.df,
+                       y.mat=y.mat,
+                       model=clust.out$model,
+                       submodel=clust.out$submodel,
+                       ppr.m=clust.out$ppr,
+                       pi.v=clust.out$pi,
+                       RG=clust.out$info["R"],
+                       constraint.sum.zero=clust.out$constraint.sum.zero,
+                       SE.calc=TRUE,
+                       control=optim.control)
+
+    SE <- sqrt(diag(solve(-optim.hess)))
+    SE
+}
+
+#' Calculate standard errors of clustering parameters.
+#'
+#' Calculate SE of parameters fitted using \code{\link{rowclustering}} or
+#' \code{\link{biclustering}}. Cannot currently be applied to
+#' \code{\link{columnclustering}} output.
+#'
+#' Calculates SE by running \code{\link[stats]{optimHess} on the incomplete-data log-likelihood
+#' to find the hessian at the fitted parameter values from \code{\link{rowclustering}}
+#' or \code{\link{biclustering}}.
+#' Then the square roots of the diagonal elements
+#' of the negative inverse of the hessian are the standard errors of the parameters
+#' i.e. \code{SE <- sqrt(diag(solve(-optim.hess))}.
+#'
+#' Note that SE values are \strong{only} calculated for the independent parameters
+#' i.e. if the alpha parameters sum to zero, SE values will only be calculated
+#' for the first RG-1 alpha values, etc.
+#'
+#' The function requires an input which is the output of \code{\link{rowclustering}},
+#' which includes the component \code{outvect}, the final vector of independent
+#' parameter values from the EM algorithm, which will correspond to a subset of
+#' the parameter values in \code{parlist.out}.
+#'
+#' @param long.df The data frame, in long format, as passed to \code{rowclustering}
+#' or \code{biclustering}.
+#'
+#' @param clust.out For \code{calc.SE.rowcluster}, a \code{rowclustering}
+#' object. For \code{calc.SE.bicluster}, a \code{biclustering} object.
+#'
+#' @param optim.control control list for the \code{optim} call within the M step
+#'     of the EM algorithm. See the control list Details in the \code{optim}
+#'     manual for more info.
+#'
+#' @return
+#'     The standard errors corresponding to the elements of \code{clust.out$outvect}.
+#' @describeIn calc.SE.bicluster SE for biclustering
+#' @export
+calc.SE.bicluster <- function(long.df, clust.out,
+                               optim.control=default.optim.control()) {
+
+    optim.control$fnscale=-1
+
+    y.mat <- df2mat(long.df)
+    outvect <- clust.out$outvect
+
+    optim.hess <- optimHess(par=outvect,
+                       fn=calc.ll,
+                       long.df=long.df,
+                       y.mat=y.mat,
+                       model=clust.out$model,
+                       submodel=clust.out$submodel,
+                       ppr.m=clust.out$ppr,
+                       pi.v=clust.out$pi,
+                       RG=clust.out$info["R"],
+                       ppc.m=clust.out$ppc,
+                       kappa.v=clust.out$kappa,
+                       CG=clust.out$info["C"],
+                       constraint.sum.zero=clust.out$constraint.sum.zero,
+                       SE.calc=TRUE,
+                       control=optim.control)
+
+    SE <- sqrt(diag(solve(-optim.hess)))
+    SE
 }
