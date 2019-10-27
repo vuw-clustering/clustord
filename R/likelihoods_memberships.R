@@ -113,7 +113,7 @@ Rcluster.ll <- function(long.df, y.mat, theta, ppr.m, pi.v, RG, partial=FALSE){
 
     if (!is.finite(llc)) browser()
 
-    -llc
+    llc
 }
 
 Rcluster.Incll <- function(long.df, theta, pi.v, RG)
@@ -177,7 +177,7 @@ Bicluster.ll <- function(long.df, y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, par
         llc <- llc + sum(ppr.m%*%log(pi.v))
         llc <- llc + sum(ppc.m%*%log(kappa.v))
     }
-    -llc
+    llc
 }
 
 #The incomplete log-likelihood,used in model selection#

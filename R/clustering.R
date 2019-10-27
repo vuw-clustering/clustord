@@ -720,6 +720,8 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
 
     y.mat <- df2mat(long.df)
 
+    optim.control$fnscale <- -1
+
     parlist.init <- parlist.in
     initvect <- invect
     outvect=invect
@@ -754,7 +756,7 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
                            hessian=F,control=optim.control)
 
         outvect <- optim.fit$par
-        llc <- -calc.ll(outvect,long.df=long.df,y.mat=y.mat,model=model,submodel=submodel,
+        llc <- calc.ll(outvect,long.df=long.df,y.mat=y.mat,model=model,submodel=submodel,
                         ppr.m,pi.v,RG, partial=FALSE)
 
         parlist.out <- unpack.parvec(outvect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,
@@ -822,6 +824,8 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
 
     y.mat <- df2mat(long.df)
 
+    optim.control$fnscale <- -1
+
     parlist.init <- parlist.in
     initvect <- invect
     outvect=invect
@@ -867,7 +871,7 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
 
         outvect <- optim.fit$par
 
-        llc <- -calc.ll(outvect,long.df=long.df,y.mat=y.mat,model=model,submodel=submodel,
+        llc <- calc.ll(outvect,long.df=long.df,y.mat=y.mat,model=model,submodel=submodel,
                         ppr.m=ppr.m,pi.v=pi.v,RG=RG, ppc.m=ppc.m,kappa.v=kappa.v,CG=CG,
                         partial=FALSE)
 
