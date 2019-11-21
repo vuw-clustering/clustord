@@ -533,6 +533,7 @@ biclustering <- function(formula,
 
     run.EM.bicluster(invect=initvect, long.df=long.df, model=model, submodel=submodel,
                      pi.v=pi.init, kappa.v=kappa.init, EM.control=EM.control,
+                     constraint.sum.zero=constraint.sum.zero,
                      optim.method=optim.method, optim.control=optim.control)
 }
 
