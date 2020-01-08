@@ -10,3 +10,4 @@ Par_Optim*
 ParamEstimation*
 PosteriorProb*
 Results_*
+scripts/*.csv

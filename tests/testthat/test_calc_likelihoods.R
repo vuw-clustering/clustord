@@ -25,13 +25,13 @@ test_that("calc.ll produces correct results.", {
     ## OSM
     expect_equivalent(calc.ll(c(mu,phi,alpha_r), long.df, y.mat, "OSM", "rs", ppr.m, pi.v, RG,
                       constraint.sum.zero=TRUE, partial=TRUE),
-                      30.77587457, tolerance=1E-4)
+                      -30.77587457, tolerance=1E-4)
     expect_equivalent(calc.ll(c(mu,phi,alpha_r,beta_j), long.df, y.mat, "OSM", "rp", ppr.m, pi.v, RG,
                               constraint.sum.zero=TRUE, partial=TRUE),
-                      35.08129788, tolerance=1E-4)
+                      -35.08129788, tolerance=1E-4)
     expect_equivalent(calc.ll(c(mu,phi,alpha_r,beta_j,gamma_rj), long.df, y.mat, "OSM", "rpi", ppr.m, pi.v, RG,
                               constraint.sum.zero=TRUE, partial=TRUE),
-                      37.2425604, tolerance=1E-4)
+                      -37.2425604, tolerance=1E-4)
 
     beta_c <- c(0.5)
     gamma_rc <- c(0.5)
@@ -39,31 +39,31 @@ test_that("calc.ll produces correct results.", {
     expect_equivalent(calc.ll(c(mu,phi,alpha_r,beta_c), long.df, y.mat, "OSM", "rc",
                               ppr.m, pi.v, RG, ppc.m, kappa.v, CG,
                               constraint.sum.zero=TRUE, partial=TRUE),
-                      31.72322174, tolerance=1E-4)
+                      -31.72322174, tolerance=1E-4)
     expect_equivalent(calc.ll(c(mu,phi,alpha_r,beta_c,gamma_rc), long.df, y.mat, "OSM", "rci",
                               ppr.m, pi.v, RG, ppc.m, kappa.v, CG,
                               constraint.sum.zero=TRUE, partial=TRUE),
-                      32.7504653, tolerance=1E-4)
+                      -32.7504653, tolerance=1E-4)
 
 
     ## POM
     expect_equivalent(calc.ll(c(mu,alpha_r), long.df, y.mat, "POM", "rs", ppr.m, pi.v, RG,
                               constraint.sum.zero=TRUE, partial=TRUE),
-                      25.93596493, tolerance=1E-4)
+                      -25.93596493, tolerance=1E-4)
     expect_equivalent(calc.ll(c(mu,alpha_r,beta_j), long.df, y.mat, "POM", "rp", ppr.m, pi.v, RG,
                               constraint.sum.zero=TRUE, partial=TRUE),
-                      31.35665815, tolerance=1E-4)
+                      -31.35665815, tolerance=1E-4)
     expect_equivalent(calc.ll(c(mu,alpha_r,beta_j,gamma_rj), long.df, y.mat, "POM", "rpi", ppr.m, pi.v, RG,
                               constraint.sum.zero=TRUE, partial=TRUE),
-                      33.29262377, tolerance=1E-4)
+                      -33.29262377, tolerance=1E-4)
 
     expect_equivalent(calc.ll(c(mu,alpha_r,beta_c), long.df, y.mat, "POM", "rc",
                               ppr.m, pi.v, RG, ppc.m, kappa.v, CG,
                               constraint.sum.zero=TRUE, partial=TRUE),
-                      26.79095153, tolerance=1E-4)
+                      -26.79095153, tolerance=1E-4)
     expect_equivalent(calc.ll(c(mu,alpha_r,beta_c,gamma_rc), long.df, y.mat, "POM", "rci",
                               ppr.m, pi.v, RG, ppc.m, kappa.v, CG,
                               constraint.sum.zero=TRUE, partial=TRUE),
-                      28.61441617, tolerance=1E-4)
+                      -28.61441617, tolerance=1E-4)
 
 })
