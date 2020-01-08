@@ -18,6 +18,49 @@ generate.mixing.proportions <- function(nclus) {
     prop <- prop/sum(prop)
 }
 
+generate.beta.init.OSM <- function(long.df, constraint.sum.zero=TRUE) {
+
+    p <- max(long.df$COL)
+
+    done.generating <- FALSE
+
+    nwts <- length(levels(long.df$Y))*(p+1)
+    if (nwts <= 50000) {
+        MaxNWts <- nwts
+
+        tryCatch({
+            BL.sp.out <- nnet::multinom(Y~as.factor(COL), data=long.df, MaxNWts=MaxNWts)
+            BL.coef <- coef(BL.sp.out)
+            mu.init <- BL.coef[,1]
+
+            ## If not using constraint that beta sum to zero,
+            ## beta1 will be 0 so need to correct other elements
+            ## of beta accordingly
+            if (constraint.sum.zero) beta.init <- colMeans(BL.coef)[2:p]
+            else beta.init <- colMeans(BL.coef)[3:p]-colMeans(BL.coef)[2]
+
+            done.generating <- TRUE
+
+        }, error = function(err) {
+
+            # error handler picks up where error was generated
+            message("Error in using nnet::multinom to generate starting values for beta parameters.")
+            message(paste("My error:  ",err))
+        })
+    } else {
+        warning("Data too large to run nnet::multinom. Generating initial beta parameters randomly.")
+    }
+
+    if (!done.generating) {
+           BL.ss.out <- nnet::multinom(Y~1, data=long.df)
+           BL.coef <- coef(BL.ss.out)
+           mu.init <- BL.coef
+
+           beta.init <- runif(p-1,min=-2,max=2)
+    }
+
+    list(mu.init=mu.init, beta.init=beta.init)
+}
 
 generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NULL, pi.init=NULL,
                                       EM.control=list(EMcycles=50, EMstoppingpar=1e-4,
@@ -59,27 +102,28 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
                    # phi.init <- sort(runif(q-2),decreasing=FALSE)
                    u.init <- runif(q-2,min=-1,max=1)
 
-                   BL.sp.out <- nnet::multinom(Y~as.factor(COL), data=long.df)
-                   BL.coef <- coef(BL.sp.out)
-                   mu.init <- BL.coef[,1]
-
-                   ## If not using constraint that beta sum to zero,
-                   ## beta1 will be 0 so need to correct other elements
-                   ## of beta accordingly
-                   if (constraint.sum.zero) beta.init <- colMeans(BL.coef)[2:p]
-                   else beta.init <- colMeans(BL.coef)[3:p]-colMeans(BL.coef)[2]
-
                    switch(submodel,
                           "rs"={
+                              BL.ss.out <- nnet::multinom(Y~1, data=long.df)
+                              BL.coef <- coef(BL.ss.out)
+                              mu.init <- BL.coef
+
                               initvect <- c(mu.init, u.init, alpha.init)
                           },
                           "rp"={
-                              initvect <- c(mu.init, u.init, alpha.init, beta.init)
+                              part.init <- generate.beta.init.OSM(long.df=long.df,
+                                                                  constraint.sum.zero = constraint.sum.zero)
+
+                              initvect <- c(part.init$mu.init, u.init, alpha.init, part.init$beta.init)
                           },
                           "rpi"={
+                              part.init <- generate.beta.init.OSM(long.df=long.df,
+                                                                  constraint.sum.zero = constraint.sum.zero)
+
                               gamma.init <- rep(0.1,(RG-1)*(p-1))
 
-                              initvect <- c(mu.init,u.init,alpha.init,beta.init,gamma.init)
+                              initvect <- c(part.init$mu.init, u.init, alpha.init,
+                                            part.init$beta.init, gamma.init)
                           },stop("Invalid model for row/column clustering"))
                },
                "POM"={
