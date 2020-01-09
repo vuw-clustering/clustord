@@ -82,7 +82,7 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
             ## convert to data matrix
             y.mat <- df2mat(long.df)
 
-            kmeans.data=kmeans(y.mat,centers=RG,nstart=100)
+            kmeans.data <- kmeans(y.mat,centers=RG,nstart=1000)
             pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
             alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
             ## By default, use alpha sum to zero constraint, so DON'T set alpha1 to zero here.
@@ -229,12 +229,12 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
             ## convert to data matrix
             y.mat <- df2mat(long.df)
 
-            row.kmeans <- kmeans(y.mat,centers=RG,nstart=50)
+            row.kmeans <- kmeans(y.mat,centers=RG,nstart=1000)
             pi.kmeans <- (row.kmeans$size)/sum(row.kmeans$size)
             alpha.kmeans <- rowMeans(row.kmeans$centers, na.rm=TRUE)
             ## By default, use constraint that alpha sum to zero so DON'T set alpha1 to zero here.
 
-            column.kmeans <- kmeans(y.mat,centers=CG,nstart=50)
+            column.kmeans <- kmeans(t(y.mat),centers=CG,nstart=1000)
             kappa.kmeans <- (column.kmeans$size)/sum(column.kmeans$size)
             beta.kmeans <- rowMeans(column.kmeans$centers, na.rm=TRUE)
             ## By default, use constraint that beta sum to zero so DON'T set beta1 to zero here.
