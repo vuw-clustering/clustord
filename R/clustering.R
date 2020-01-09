@@ -446,6 +446,9 @@ columnclustering <- function(formula,
 #'     and \code{ppc}).
 #'
 #' @examples
+#' long.df <- data.frame(Y=factor(sample(1:3,5*50,replace=TRUE)),
+#'                ROW=factor(rep(1:50,times=5)),COL=rep(1:5,each=50))
+#'
 #' # Model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*alpha_r with 3 row clustering groups:
 #' rowclustering("Y~row",model="OSM",3,long.df)
 #'
@@ -466,11 +469,13 @@ columnclustering <- function(formula,
 #'
 #' # Model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*(alpha_r+beta_c)
 #' #    with 3 row clustering groups and 2 column clustering groups:
-#' biclustering("Y~row+column",model="OSM",RG=3,CG=2,long.df)
+#' biclustering("Y~row+column",model="OSM",nclus.row=3,nclus.column=2,long.df,
+#'              EM.control=list(EMcycles=10))
 #'
 #' # Model Logit=mu_k-alpha_r-beta_c-gamma_rc
 #' #    with 2 row clustering groups and 4 column clustering groups:
-#' biclustering("Y~row+column+row:column",model="POM",RG=2,CG=4,long.df)
+#' biclustering("Y~row+column+row:column",model="POM",nclus.row=2,nclus.column=4,
+#'              long.df,EM.control=list(EMcycles=10))
 #' @describeIn biclustering Biclustering
 #' @export
 biclustering <- function(formula,
@@ -977,7 +982,7 @@ calc.SE.rowcluster <- function(long.df, clust.out,
 #' \code{\link{biclustering}}. Cannot currently be applied to
 #' \code{\link{columnclustering}} output.
 #'
-#' Calculates SE by running \code{\link[stats]{optimHess} on the incomplete-data log-likelihood
+#' Calculates SE by running \code{\link[stats]{optimHess}} on the incomplete-data log-likelihood
 #' to find the hessian at the fitted parameter values from \code{\link{rowclustering}}
 #' or \code{\link{biclustering}}.
 #' Then the square roots of the diagonal elements

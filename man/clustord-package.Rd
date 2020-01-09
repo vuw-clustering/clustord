@@ -13,7 +13,17 @@
 The DESCRIPTION file:
 \packageDESCRIPTION{clustord}
 \packageIndices{clustord}
-~~ An overview of how to use the package, including the most important functions ~~
+The clustord package can perform row, column or biclustering on an ordinal or
+binary dataset, using one of three models: the Ordered Stereotype Model (OSM),
+the Proportional Odds Model (POM) or the Binary model (Binary).
+
+The three main functions are \code{rowclustering}, \code{columnclustering} and
+\code{biclustering}.
+
+There are also subsidiary functions \code{calc.SE.rowcluster} and
+\code{calc.SE.bicluster}. The first one calculates the standard error for the
+final parameters of rowclustering or columnclustering, and the second one
+calculates the standard error for the final parameters of biclustering.
 }
 \author{
 \packageAuthor{clustord}
@@ -21,14 +31,12 @@ The DESCRIPTION file:
 Maintainer: \packageMaintainer{clustord}
 }
 \references{
-~~ Literature or other references for background information ~~
+D. Fernández, R. Arnold, S. Pledger, I. Liu, & R. Costilla, “Finite mixture biclustering of discrete type multivariate data,” Advances in Data Analysis and Classification, vol. 13(1), pp. 117–143, 2019.
+
+J. A. Anderson, “Regression and ordered categorical variables,” Journal of the Royal Statistical Society: Series B (Methodological) vol. 46(1), pp. 1–22, 1984.
 }
-~~ Optionally other standard keywords, one per line, from file KEYWORDS in the R documentation directory ~~
 \keyword{ package }
 \seealso{
-~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
 }
 \examples{
-~~ simple examples of the most important functions ~~
 }
