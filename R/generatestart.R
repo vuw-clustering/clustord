@@ -18,48 +18,214 @@ generate.mixing.proportions <- function(nclus) {
     prop <- prop/sum(prop)
 }
 
-generate.beta.init.OSM <- function(long.df, constraint.sum.zero=TRUE) {
+generate.u.init <- function(q) {
+    u.init <- runif(q-2,min=-1,max=1)
+    u.init
+}
+
+generate.mu.init <- function(long.df, model) {
+    switch(model,
+           "OSM"={
+               BL.ss.out <- nnet::multinom(Y~1, data=long.df)
+               BL.coef <- coef(BL.ss.out)
+               mu.init <- BL.coef
+           },
+           "POM"={
+               PO.sp.out <- MASS::polr(Y~1,data=long.df)
+               mu.init <- PO.sp.out$zeta
+           },
+           "Binary"={
+               mu.init <- mean(as.numeric(as.character(long.df$Y)))
+           })
+
+    mu.init
+}
+
+generate.mu.beta.init <- function(long.df, model, constraint.sum.zero=TRUE) {
 
     p <- max(long.df$COL)
 
-    done.generating <- FALSE
+    switch(model,
+           "OSM"={
+               done.generating <- FALSE
 
-    nwts <- length(levels(long.df$Y))*(p+1)
-    if (nwts <= 50000) {
-        MaxNWts <- nwts
+               nwts <- length(levels(long.df$Y))*(p+1)
+               if (nwts <= 50000) {
+                   MaxNWts <- nwts
 
-        tryCatch({
-            BL.sp.out <- nnet::multinom(Y~as.factor(COL), data=long.df, MaxNWts=MaxNWts)
-            BL.coef <- coef(BL.sp.out)
-            mu.init <- BL.coef[,1]
+                   tryCatch({
+                       BL.sp.out <- nnet::multinom(Y~as.factor(COL), data=long.df, MaxNWts=MaxNWts)
+                       BL.coef <- coef(BL.sp.out)
+                       mu.init <- BL.coef[,1]
 
-            ## If not using constraint that beta sum to zero,
-            ## beta1 will be 0 so need to correct other elements
-            ## of beta accordingly
-            if (constraint.sum.zero) beta.init <- colMeans(BL.coef)[2:p]
-            else beta.init <- colMeans(BL.coef)[3:p]-colMeans(BL.coef)[2]
+                       ## If not using constraint that beta sum to zero,
+                       ## beta1 will be 0 so need to correct other elements
+                       ## of beta accordingly
+                       if (constraint.sum.zero) beta.init <- colMeans(BL.coef)[2:p]
+                       else beta.init <- colMeans(BL.coef)[3:p]-colMeans(BL.coef)[2]
 
-            done.generating <- TRUE
+                       done.generating <- TRUE
 
-        }, error = function(err) {
+                   }, error = function(err) {
 
-            # error handler picks up where error was generated
-            message("Error in using nnet::multinom to generate starting values for beta parameters.")
-            message(paste("My error:  ",err))
-        })
-    } else {
-        warning("Data too large to run nnet::multinom. Generating initial beta parameters randomly.")
-    }
+                       # error handler picks up where error was generated
+                       message("Error in using nnet::multinom to generate starting values for beta parameters.")
+                       message(paste("My error:  ",err))
+                   })
+               } else {
+                   warning("Data too large to run nnet::multinom. Generating initial beta parameters randomly.")
+               }
 
-    if (!done.generating) {
-           BL.ss.out <- nnet::multinom(Y~1, data=long.df)
-           BL.coef <- coef(BL.ss.out)
-           mu.init <- BL.coef
+               if (!done.generating) {
+                   BL.ss.out <- nnet::multinom(Y~1, data=long.df)
+                   BL.coef <- coef(BL.ss.out)
+                   mu.init <- BL.coef
 
-           beta.init <- runif(p-1,min=-2,max=2)
-    }
+                   beta.init <- runif(p-1,min=-2,max=2)
+               }
+           },
+           "POM"={
+               PO.sp.out <- MASS::polr(Y~as.factor(COL),data=long.df)
+               mu.init <- PO.sp.out$zeta
+
+               ## If not using constraint that beta sum to zero,
+               ## beta1 will be 0 so need to correct other elements
+               ## of beta accordingly
+               if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(p-1)]
+               else beta.init <- PO.sp.out$coef[2:(p-1)] - PO.sp.out$coef[1]
+           },
+           "Binary"={
+               mu.init <- mean(as.numeric(as.character(long.df$Y)))
+
+               columnmeans <- sapply(1:p,function(col) {
+                   mean(as.numeric(as.character(long.df$Y[long.df$COL==col])))
+               })
+               beta <- columnmeans[1:(p-1)] - mu.init
+               ## If not using constraint that beta sum to zero,
+               ## beta1 will be 0 so need to correct other elements
+               ## of beta accordingly
+               if (constraint.sum.zero) beta.init <- beta[1:(p-1)]
+               else beta.init <- beta[2:p] - beta[1]
+           })
 
     list(mu.init=mu.init, beta.init=beta.init)
+}
+
+generate.alpha.pi.init <- function(long.df, RG, constraint.sum.zero=TRUE) {
+    if (all(table(long.df[,c("ROW","COL")]) == 1)) {
+        ## convert to data matrix
+        y.mat <- df2mat(long.df)
+
+        kmeans.data <- kmeans(y.mat,centers=RG,nstart=1000)
+        pi.init <- (kmeans.data$size)/sum(kmeans.data$size)
+        alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
+        ## By default, use alpha sum to zero constraint, so DON'T set alpha1 to zero here.
+
+        if (constraint.sum.zero) alpha.init <- alpha.kmeans[-RG]
+        else {
+            alpha.kmeans <- alpha.kmeans-alpha.kmeans[1]
+            alpha.init <- alpha.kmeans[-1]
+        }
+    } else {
+        print("Some data is missing, so generating random start instead of using kmeans.")
+
+        alpha.init <- runif(RG-1, min=-5, max=5)
+        pi.init <- generate.mixing.proportions(RG)
+    }
+
+    list(alpha.init=alpha.init, pi.init=pi.init)
+}
+
+generate.gamma.init <- function(RG, p=NULL, CG=NULL) {
+    if (is.null(CG)) {
+        gamma.init <- rep(0.1,(RG-1)*(p-1))
+    } else {
+        gamma.init <- rep(0.1,(RG-1)*(CG-1))
+    }
+
+    gamma.init
+}
+
+generate.initvect.rowcluster <- function(long.df, model, submodel, RG,
+                                         constraint.sum.zero=TRUE) {
+
+    p <- max(long.df$COL)
+    q <- length(levels(long.df$Y))
+
+    if (submodel == "rs") {
+        mu.init <- generate.mu.init(long.df=long.df, model=model)
+    } else {
+        mu.beta.init <- generate.mu.beta.init(long.df=long.df, model=model,
+                                           constraint.sum.zero = constraint.sum.zero)
+        mu.init <- mu.beta.init$mu.init
+        beta.init <- mu.beta.init$beta.init
+    }
+
+    initvect <- mu.init
+
+    if (model == "OSM") {
+        # phi.init <- sort(runif(q-2),decreasing=FALSE)
+        u.init <- generate.u.init(q=q)
+
+        initvect <- c(initvect, u.init)
+    }
+
+    alpha.pi.init <- generate.alpha.pi.init(long.df=long.df, RG=RG, constraint.sum.zero=constraint.sum.zero)
+    alpha.init <- alpha.pi.init$alpha.init
+    pi.init <- alpha.pi.init$pi.init
+
+    switch(submodel,
+           "rs"={
+               initvect <- c(initvect,alpha.init)
+           },
+           "rp"={
+               initvect <- c(initvect,alpha.init,beta.init)
+           },
+           "rpi"={
+               gamma.init <- generate.gamma.init(RG=RG,p=p)
+               initvect <- c(initvect,alpha.init,beta.init,gamma.init)
+           },stop("Invalid model for row/column clustering"))
+
+    list(initvect=initvect, pi.init=pi.init)
+}
+
+generate.initvect.bicluster <- function(long.df, model, submodel, RG, CG,
+                                        constraint.sum.zero=TRUE) {
+
+    q <- length(levels(long.df$Y))
+
+    mu.init <- generate.mu.init(long.df=long.df, model=model)
+    initvect <- mu.init
+
+    if (model == "OSM") {
+        # phi.init <- sort(runif(q-2),decreasing=FALSE)
+        u.init <- generate.u.init(q=q)
+
+        initvect <- c(initvect, u.init)
+    }
+
+    alpha.pi.init <- generate.alpha.pi.init(long.df=long.df, RG=RG, constraint.sum.zero=constraint.sum.zero)
+    alpha.init <- alpha.pi.init$alpha.init
+    pi.init <- alpha.pi.init$pi.init
+
+    long.df.transp <- long.df
+    long.df.transp$ROW <- long.df$COL
+    long.df.transp$COL <- long.df$ROW
+    beta.kappa.init <- generate.alpha.pi.init(long.df=long.df.transp, RG=CG, constraint.sum.zero=constraint.sum.zero)
+
+    beta.init <- beta.kappa.init$alpha.init
+    kappa.init <- beta.kappa.init$pi.init
+
+    switch(submodel,
+           "rc"={
+               initvect <- c(initvect, alpha.init, beta.init)
+           },
+           "rci"={
+               gamma.init <- generate.gamma.init(RG=RG, CG=CG)
+               initvect <- c(initvect, alpha.init, beta.init, gamma.init)
+           },stop("Invalid model for biclustering"))
+
+    list(initvect=initvect, pi.init=pi.init, kappa.init=kappa.init)
 }
 
 generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NULL, pi.init=NULL,
@@ -76,110 +242,15 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
 
     ## Generate initvect -------------------------------------------------------
     if (is.null(initvect)) {
-
-        if (all(table(long.df[,c("ROW","COL")]) == 1)) {
-
-            ## convert to data matrix
-            y.mat <- df2mat(long.df)
-
-            kmeans.data <- kmeans(y.mat,centers=RG,nstart=1000)
-            pi.kmeans=(kmeans.data$size)/sum(kmeans.data$size)
-            alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
-            ## By default, use alpha sum to zero constraint, so DON'T set alpha1 to zero here.
-
-            if (constraint.sum.zero) alpha.init <- alpha.kmeans[-RG]
-            else {
-                alpha.kmeans <- alpha.kmeans-alpha.kmeans[1]
-                alpha.init <- alpha.kmeans[-1]
-            }
-        } else {
-            print("Some data is missing, so generating random start instead of using kmeans.")
-            alpha.init <- runif(RG-1, min=-5, max=5)
-        }
-
-        switch(model,
-               "OSM"={
-                   # phi.init <- sort(runif(q-2),decreasing=FALSE)
-                   u.init <- runif(q-2,min=-1,max=1)
-
-                   switch(submodel,
-                          "rs"={
-                              BL.ss.out <- nnet::multinom(Y~1, data=long.df)
-                              BL.coef <- coef(BL.ss.out)
-                              mu.init <- BL.coef
-
-                              initvect <- c(mu.init, u.init, alpha.init)
-                          },
-                          "rp"={
-                              part.init <- generate.beta.init.OSM(long.df=long.df,
-                                                                  constraint.sum.zero = constraint.sum.zero)
-
-                              initvect <- c(part.init$mu.init, u.init, alpha.init, part.init$beta.init)
-                          },
-                          "rpi"={
-                              part.init <- generate.beta.init.OSM(long.df=long.df,
-                                                                  constraint.sum.zero = constraint.sum.zero)
-
-                              gamma.init <- rep(0.1,(RG-1)*(p-1))
-
-                              initvect <- c(part.init$mu.init, u.init, alpha.init,
-                                            part.init$beta.init, gamma.init)
-                          },stop("Invalid model for row/column clustering"))
-               },
-               "POM"={
-                   PO.sp.out <- MASS::polr(Y~as.factor(COL),data=long.df)
-                   mu.init <- PO.sp.out$zeta
-
-                   ## If not using constraint that beta sum to zero,
-                   ## beta1 will be 0 so need to correct other elements
-                   ## of beta accordingly
-                   if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(p-1)]
-                   else beta.init <- PO.sp.out$coef[2:(p-1)] - PO.sp.out$coef[1]
-
-                   switch(submodel,
-                          "rs"={
-                              initvect <- c(mu.init,alpha.init)
-                          },
-                          "rp"={
-                              initvect <- c(mu.init,alpha.init,beta.init)
-                          },
-                          "rpi"={
-                              gamma.init <- rep(0.1,(RG-1)*(p-1))
-                              initvect <- c(mu.init,alpha.init,beta.init,gamma.init)
-                          },stop("Invalid model for row/column clustering"))
-               },
-               "Binary"={
-                   mu.init <- mean(as.numeric(as.character(long.df$Y)))
-
-                   columnmeans <- sapply(1:p,function(col) {
-                       mean(as.numeric(as.character(long.df$Y[long.df$COL==col])))
-                   })
-                   beta <- columnmeans[1:(p-1)] - mu.init
-                   ## If not using constraint that beta sum to zero,
-                   ## beta1 will be 0 so need to correct other elements
-                   ## of beta accordingly
-                   if (constraint.sum.zero) beta.init <- beta[1:(p-1)]
-                   else beta.init <- beta[2:p] - beta[1]
-
-                   switch(submodel,
-                          "rs"={
-                              initvect <- c(mu.init,alpha.init)
-                          },
-                          "rp"={
-                              initvect <- c(mu.init,alpha.init,beta.init)
-                          },
-                          "rpi"={
-                              gamma.init <- rep(0.1,(RG-1)*(p-1))
-                              initvect <- c(mu.init,alpha.init,beta.init,gamma.init)
-                          },stop("Invalid model for row/column clustering"))
-               })
+        initvect.pi.init <- generate.initvect.rowcluster(long.df, model=model, submodel=submodel, RG=RG,
+                                     constraint.sum.zero = constraint.sum.zero)
+        initvect <- initvect.pi.init$initvect
     }
 
     ## Generate pi.init --------------------------------------------------------
     if (is.null(pi.init)) {
-        if (exists("pi.kmeans") && !is.null(pi.kmeans))
-        {
-            pi.init <- pi.kmeans
+        if (exists("initvect.pi.init") && !is.null(initvect.pi.init)) {
+            pi.init <- initvect.pi.init$pi.init
         } else {
             pi.init <- generate.mixing.proportions(RG)
         }
@@ -225,79 +296,9 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
     ## Generate initvect -------------------------------------------------------
     if (is.null(initvect)) {
 
-        if (all(table(long.df[,c("ROW","COL")]) == 1)) {
-            ## convert to data matrix
-            y.mat <- df2mat(long.df)
-
-            row.kmeans <- kmeans(y.mat,centers=RG,nstart=1000)
-            pi.kmeans <- (row.kmeans$size)/sum(row.kmeans$size)
-            alpha.kmeans <- rowMeans(row.kmeans$centers, na.rm=TRUE)
-            ## By default, use constraint that alpha sum to zero so DON'T set alpha1 to zero here.
-
-            column.kmeans <- kmeans(t(y.mat),centers=CG,nstart=1000)
-            kappa.kmeans <- (column.kmeans$size)/sum(column.kmeans$size)
-            beta.kmeans <- rowMeans(column.kmeans$centers, na.rm=TRUE)
-            ## By default, use constraint that beta sum to zero so DON'T set beta1 to zero here.
-
-            if (constraint.sum.zero) alpha.init <- alpha.kmeans[-RG]
-            else {
-                alpha.kmeans <- alpha.kmeans-alpha.kmeans[1]
-                alpha.init <- alpha.kmeans[-1]
-            }
-            if (constraint.sum.zero) beta.init <- beta.kmeans[-RG]
-            else {
-                beta.kmeans <- beta.kmeans-beta.kmeans[1]
-                beta.init <- beta.kmeans[-1]
-            }
-        } else {
-            print("Some data is missing, so generating random start instead of using kmeans.")
-            alpha.init <- runif(RG-1, min=-5, max=5)
-            beta.init <- runif(CG-1, min=-5, max=5)
-        }
-
-        switch(model,
-               "OSM"={
-                   # phi.init <- sort(runif(q-2),decreasing=FALSE)
-                   u.init <- runif(q-2,min=-1,max=1)
-
-                   BL.ss.out <- nnet::multinom(Y~1, data=long.df)
-                   mu.init <- coef(BL.ss.out)[,1]
-
-                   switch(submodel,
-                          "rc"={
-                              initvect <- c(mu.init, u.init, alpha.init, beta.init)
-                          },
-                          "rci"={
-                              gamma.init <- rep(0.1,(RG-1)*(CG-1))
-
-                              initvect <- c(mu.init,u.init,alpha.init,beta.init,gamma.init)
-                          },stop("Invalid model for biclustering"))
-               },
-               "POM"={
-                   PO.ss.out <- MASS::polr(Y~1,data=long.df)
-                   mu.init <- PO.ss.out$zeta
-
-                   switch(submodel,
-                          "rc"={
-                              initvect <- c(mu.init,alpha.init,beta.init)
-                          },
-                          "rci"={
-                              gamma.init <- rep(0.1,(RG-1)*(CG-1))
-                              initvect <- c(mu.init,alpha.init,beta.init,gamma.init)
-                          },stop("Invalid model for biclustering"))
-               },
-               "Binary"={
-                   mu.init <- mean(as.numeric(as.character(long.df$Y)))
-
-                   switch(submodel,
-                          "rc"={
-                              initvect <- c(mu.init,alpha.init,beta.init)
-                          },
-                          "rci"={
-                              gamma.init <- rep(0.1,(RG-1)*(CG-1))
-                              initvect <- c(mu.init,alpha.init,beta.init,gamma.init)
-                          },stop("Invalid model for biclustering"))
-               })
+        initvect.pi.kappa.init <- generate.initvect.bicluster(long.df=long.df, model=model, submodel=submodel,
+                                                RG=RG, CG=CG, constraint.sum.zero=constraint.sum.zero)
+        initvect <- initvect.pi.kappa.init$initvect
     }
 
     ## Generate pi.init and kappa.init -----------------------------------------
@@ -309,9 +310,9 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
     ## If generating pi, first generate basic pi, then run simple models to get
     ## starting values for pi
     if (generate.pi) {
-        if (exists("pi.kmeans") && !is.null(pi.kmeans))
+        if (exists("initvect.pi.kappa.init") && !is.null(initvect.pi.kappa.init))
         {
-            pi.init <- pi.kmeans
+            pi.init <- initvect.pi.kappa.init$pi.init
         } else {
             pi.init <- generate.mixing.proportions(RG)
         }
@@ -319,9 +320,9 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
     ## If generating kappa, first generate basic kappa, then run simple models to get
     ## starting values for kappa
     if (generate.kappa) {
-        if (exists("kappa.kmeans") && !is.null(kappa.kmeans))
+        if (exists("initvect.pi.kappa.init") && !is.null(initvect.pi.kappa.init))
         {
-            kappa.init <- kappa.kmeans
+            kappa.init <- initvect.pi.kappa.init$kappa.init
         } else {
             kappa.init <- generate.mixing.proportions(CG)
         }
