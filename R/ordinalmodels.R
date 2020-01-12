@@ -15,13 +15,15 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constra
                else alpha <- c(0, alpha)
                switch(submodel,
                       "rs"={
-                          list(n=n,p=p,mu=mu,phi=phi,alpha=alpha)
+                          parlist <- list(n=n,p=p,mu=mu,phi=phi,alpha=alpha)
+                          nelts <- q-1 + q-2 + RG-1
                       },
                       "rp"={
                           beta <- invect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+p-1)]
                           if (constraint.sum.zero) beta <- c(beta, -sum(beta))
                           else beta <- c(0, beta)
-                          list(n=n,p=p,mu=mu,phi=phi,alpha=alpha,beta=beta)
+                          parlist <- list(n=n,p=p,mu=mu,phi=phi,alpha=alpha,beta=beta)
+                          nelts <- q-1 + q-2 + RG-1 + p-1
                       },
                       "rpi"={
                           beta <- invect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+p-1)]
@@ -36,13 +38,15 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constra
                           # has FIRST row of gamma equal to negative sum of other rows
                           gamma <- rbind(-colSums(gamma),gamma)
 
-                          list(n=n,p=p,mu=mu,phi=phi,alpha=alpha,beta=beta,gamma=gamma)
+                          parlist <- list(n=n,p=p,mu=mu,phi=phi,alpha=alpha,beta=beta,gamma=gamma)
+                          nelts <- q-1 + q-2 + RG-1 + p-1 + (RG-1)*(p-1)
                       },
                       "rc"={
                           beta <- invect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+CG-1)]
                           if (constraint.sum.zero) beta <- c(beta, -sum(beta))
                           else beta <- c(0, beta)
-                          list(n=n,p=p,mu=mu,phi=phi,alpha=alpha,beta=beta)
+                          parlist <- list(n=n,p=p,mu=mu,phi=phi,alpha=alpha,beta=beta)
+                          nelts <- q-1 + q-2 + RG-1 + CG-1
                       },
                       "rci"={
                           beta <- invect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+CG-1)]
@@ -57,7 +61,8 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constra
                           # has FIRST row of gamma equal to negative sum of other rows
                           gamma <- rbind(-colSums(gamma),gamma)
 
-                          list(n=n,p=p,mu=mu,phi=phi,alpha=alpha,beta=beta,gamma=gamma)
+                          parlist <- list(n=n,p=p,mu=mu,phi=phi,alpha=alpha,beta=beta,gamma=gamma)
+                          nelts <- q-1 + q-2 + RG-1 + CG-1 + (RG-1)*(CG-1)
                       })
            },
            "POM"={
@@ -70,14 +75,16 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constra
 
                switch(submodel,
                       "rs"={
-                          list(n=n,p=p,mu=mu,alpha=alpha)
+                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha)
+                          nelts <- q-1 + RG-1
                       },
                       "rp"={
                           beta <- invect[(q-1+RG-1+1):(q-1+RG-1+p-1)]
                           if (constraint.sum.zero) beta <- c(beta, -sum(beta))
                           else beta <- c(0, beta)
 
-                          list(n=n,p=p,mu=mu,alpha=alpha,beta=beta)
+                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha,beta=beta)
+                          nelts <- q-1 + RG-1 + p-1
                       },
                       "rpi"={
                           beta <- invect[(q-1+RG-1+1):(q-1+RG-1+p-1)]
@@ -92,14 +99,16 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constra
                           # has FIRST row of gamma equal to negative sum of other rows
                           gamma <- rbind(-colSums(gamma),gamma)
 
-                          list(n=n,p=p,mu=mu,alpha=alpha,beta=beta,gamma=gamma)
+                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha,beta=beta,gamma=gamma)
+                          nelts <- q-1 + RG-1 + p-1 + (RG-1)*(p-1)
                       },
                       "rc"={
                           beta <- invect[(q-1+RG-1+1):(q-1+RG-1+CG-1)]
                           if (constraint.sum.zero) beta <- c(beta, -sum(beta))
                           else beta <- c(0, beta)
 
-                          list(n=n,p=p,mu=mu,alpha=alpha,beta=beta)
+                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha,beta=beta)
+                          nelts <- q-1 + RG-1 + CG-1
                       },
                       "rci"={
                           beta <- invect[(q-1+RG-1+1):(q-1+RG-1+CG-1)]
@@ -114,7 +123,8 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constra
                           # has FIRST row of gamma equal to negative sum of other rows
                           gamma <- rbind(-colSums(gamma),gamma)
 
-                          list(n=n,p=p,mu=mu,alpha=alpha,beta=beta,gamma=gamma)
+                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha,beta=beta,gamma=gamma)
+                          nelts <- q-1 + RG-1 + CG-1 + (RG-1)*(CG-1)
                       })
            },
            "Binary"={
@@ -125,14 +135,16 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constra
 
                switch(submodel,
                       "rs"={
-                          list(n=n,p=p,mu=mu,alpha=alpha)
+                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha)
+                          nelts <- 1 + RG-1
                       },
                       "rp"={
                           beta <- invect[(1+RG-1+1):(1+RG-1+p-1)]
                           if (constraint.sum.zero) beta <- c(beta, -sum(beta))
                           else beta <- c(0, beta)
 
-                          list(n=n,p=p,mu=mu,alpha=alpha,beta=beta)
+                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha,beta=beta)
+                          nelts <- 1 + RG-1 + p-1
                       },
                       "rpi"={
                           beta <- invect[(1+RG-1+1):(1+RG-1+p-1)]
@@ -147,14 +159,16 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constra
                           # has FIRST row of gamma equal to negative sum of other rows
                           gamma <- rbind(-colSums(gamma),gamma)
 
-                          list(n=n,p=p,mu=mu,alpha=alpha,beta=beta,gamma=gamma)
+                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha,beta=beta,gamma=gamma)
+                          nelts <- 1 + RG-1 + p-1 + (RG-1)*(p-1)
                       },
                       "rc"={
                           beta <- invect[(1+RG-1+1):(1+RG-1+CG-1)]
                           if (constraint.sum.zero) beta <- c(beta, -sum(beta))
                           else beta <- c(0, beta)
 
-                          list(n=n,p=p,mu=mu,alpha=alpha,beta=beta)
+                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha,beta=beta)
+                          nelts <- 1 + RG-1 + CG-1
                       },
                       "rci"={
                           beta <- invect[(1+RG-1+1):(1+RG-1+CG-1)]
@@ -169,9 +183,14 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constra
                           # has FIRST row of gamma equal to negative sum of other rows
                           gamma <- rbind(-colSums(gamma),gamma)
 
-                          list(n=n,p=p,mu=mu,alpha=alpha,beta=beta,gamma=gamma)
+                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha,beta=beta,gamma=gamma)
+                          nelts <- 1 + RG-1 + CG-1 + (RG-1)*(CG-1)
                       })
            })
+
+    if (length(invect) != nelts) warning("initvect is TOO LONG, the parameters may have been specified incorrectly. Please double-check initvect.")
+
+    parlist
 }
 
 calc.theta <- function(parlist, model, submodel) {
