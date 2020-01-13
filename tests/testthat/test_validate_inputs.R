@@ -427,36 +427,36 @@ test_that("rowclustering, columnclustering and biclustering fail for an invalid 
 
 })
 
-## Invalid use.alternative.start -----------------------------------------------
-test_that("rowclustering, columnclustering and biclustering fail for an invalid value of use.alternative.start", {
+## Invalid start.from.simple.model -----------------------------------------------
+test_that("rowclustering, columnclustering and biclustering fail for an invalid value of start.from.simple.model", {
 
     dat <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),ROW=rep(1:20,times=5),COL=rep(1:5,each=20))
 
-    expect_that(rowclustering("Y~row+column","OSM",nclus.row=2,long.df=dat,use.alternative.start=NA), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(rowclustering("Y~row+column","OSM",nclus.row=2,long.df=dat,use.alternative.start=c(1:5,NA)), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(rowclustering("Y~row+column","OSM",nclus.row=2,long.df=dat,use.alternative.start=c(1:4,Inf)), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(rowclustering("Y~row+column","POM",nclus.row=2,long.df=dat,use.alternative.start=c(0.5,0.6,"test")), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(rowclustering("Y~row+column","POM",nclus.row=2,long.df=dat,use.alternative.start="test"), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(rowclustering("Y~row+column","POM",nclus.row=2,long.df=dat,use.alternative.start=list(a=1,b=2)), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(rowclustering("Y~row+column","POM",nclus.row=2,long.df=dat,use.alternative.start=array(1:12,dim=c(2,3,2))), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(rowclustering("Y~row+column","POM",nclus.row=2,long.df=dat,use.alternative.start=data.frame(a=c(1,2),b=c(1,2))), throws_error("use.alternative.start must be TRUE or FALSE."))
+    expect_that(rowclustering("Y~row+column","OSM",nclus.row=2,long.df=dat,start.from.simple.model=NA), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(rowclustering("Y~row+column","OSM",nclus.row=2,long.df=dat,start.from.simple.model=c(1:5,NA)), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(rowclustering("Y~row+column","OSM",nclus.row=2,long.df=dat,start.from.simple.model=c(1:4,Inf)), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(rowclustering("Y~row+column","POM",nclus.row=2,long.df=dat,start.from.simple.model=c(0.5,0.6,"test")), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(rowclustering("Y~row+column","POM",nclus.row=2,long.df=dat,start.from.simple.model="test"), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(rowclustering("Y~row+column","POM",nclus.row=2,long.df=dat,start.from.simple.model=list(a=1,b=2)), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(rowclustering("Y~row+column","POM",nclus.row=2,long.df=dat,start.from.simple.model=array(1:12,dim=c(2,3,2))), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(rowclustering("Y~row+column","POM",nclus.row=2,long.df=dat,start.from.simple.model=data.frame(a=c(1,2),b=c(1,2))), throws_error("start.from.simple.model must be TRUE or FALSE."))
 
-    expect_that(columnclustering("Y~row+column","OSM",nclus.column=2,long.df=dat,use.alternative.start=NA), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(columnclustering("Y~row+column","OSM",nclus.column=2,long.df=dat,use.alternative.start=c(1:5,NA)), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(columnclustering("Y~row+column","OSM",nclus.column=2,long.df=dat,use.alternative.start=c(1:4,Inf)), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(columnclustering("Y~row+column","POM",nclus.column=2,long.df=dat,use.alternative.start=c(0.5,0.6,"test")), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(columnclustering("Y~row+column","POM",nclus.column=2,long.df=dat,use.alternative.start="test"), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(columnclustering("Y~row+column","POM",nclus.column=2,long.df=dat,use.alternative.start=list(a=1,b=2)), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(columnclustering("Y~row+column","POM",nclus.column=2,long.df=dat,use.alternative.start=array(1:12,dim=c(2,3,2))), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(columnclustering("Y~row+column","POM",nclus.column=2,long.df=dat,use.alternative.start=data.frame(a=c(1,2),b=c(1,2))), throws_error("use.alternative.start must be TRUE or FALSE."))
+    expect_that(columnclustering("Y~row+column","OSM",nclus.column=2,long.df=dat,start.from.simple.model=NA), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(columnclustering("Y~row+column","OSM",nclus.column=2,long.df=dat,start.from.simple.model=c(1:5,NA)), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(columnclustering("Y~row+column","OSM",nclus.column=2,long.df=dat,start.from.simple.model=c(1:4,Inf)), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(columnclustering("Y~row+column","POM",nclus.column=2,long.df=dat,start.from.simple.model=c(0.5,0.6,"test")), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(columnclustering("Y~row+column","POM",nclus.column=2,long.df=dat,start.from.simple.model="test"), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(columnclustering("Y~row+column","POM",nclus.column=2,long.df=dat,start.from.simple.model=list(a=1,b=2)), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(columnclustering("Y~row+column","POM",nclus.column=2,long.df=dat,start.from.simple.model=array(1:12,dim=c(2,3,2))), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(columnclustering("Y~row+column","POM",nclus.column=2,long.df=dat,start.from.simple.model=data.frame(a=c(1,2),b=c(1,2))), throws_error("start.from.simple.model must be TRUE or FALSE."))
 
-    expect_that(biclustering("Y~row+column","OSM",nclus.row=2,nclus.column=3,long.df=dat,use.alternative.start=NA), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(biclustering("Y~row+column","OSM",nclus.row=2,nclus.column=3,long.df=dat,use.alternative.start=c(1:5,NA)), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(biclustering("Y~row+column","OSM",nclus.row=2,nclus.column=3,long.df=dat,use.alternative.start=c(1:4,Inf)), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(biclustering("Y~row+column","POM",nclus.row=2,nclus.column=3,long.df=dat,use.alternative.start=c(0.5,0.6,"test")), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(biclustering("Y~row+column","POM",nclus.row=2,nclus.column=3,long.df=dat,use.alternative.start="test"), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(biclustering("Y~row+column","POM",nclus.row=2,nclus.column=3,long.df=dat,use.alternative.start=list(a=1,b=2)), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(biclustering("Y~row+column","POM",nclus.row=2,nclus.column=3,long.df=dat,use.alternative.start=array(1:12,dim=c(2,3,2))), throws_error("use.alternative.start must be TRUE or FALSE."))
-    expect_that(biclustering("Y~row+column","POM",nclus.row=2,nclus.column=3,long.df=dat,use.alternative.start=data.frame(a=c(1,2),b=c(1,2))), throws_error("use.alternative.start must be TRUE or FALSE."))
+    expect_that(biclustering("Y~row+column","OSM",nclus.row=2,nclus.column=3,long.df=dat,start.from.simple.model=NA), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(biclustering("Y~row+column","OSM",nclus.row=2,nclus.column=3,long.df=dat,start.from.simple.model=c(1:5,NA)), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(biclustering("Y~row+column","OSM",nclus.row=2,nclus.column=3,long.df=dat,start.from.simple.model=c(1:4,Inf)), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(biclustering("Y~row+column","POM",nclus.row=2,nclus.column=3,long.df=dat,start.from.simple.model=c(0.5,0.6,"test")), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(biclustering("Y~row+column","POM",nclus.row=2,nclus.column=3,long.df=dat,start.from.simple.model="test"), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(biclustering("Y~row+column","POM",nclus.row=2,nclus.column=3,long.df=dat,start.from.simple.model=list(a=1,b=2)), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(biclustering("Y~row+column","POM",nclus.row=2,nclus.column=3,long.df=dat,start.from.simple.model=array(1:12,dim=c(2,3,2))), throws_error("start.from.simple.model must be TRUE or FALSE."))
+    expect_that(biclustering("Y~row+column","POM",nclus.row=2,nclus.column=3,long.df=dat,start.from.simple.model=data.frame(a=c(1,2),b=c(1,2))), throws_error("start.from.simple.model must be TRUE or FALSE."))
 
 })

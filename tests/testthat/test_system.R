@@ -17,12 +17,12 @@ test_that("rowclustering runs without errors.", {
 
     expect_error(results <- rowclustering("Y~row+column+row:column",
                                           model="OSM", nclus.row=2, long.df=long.df.sim,
-                                          use.alternative.start = TRUE,
+                                          start.from.simple.model = TRUE,
                                           EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
     expect_error(results <- rowclustering("Y~row*column",
                                           model="OSM", nclus.row=2, long.df=long.df.sim,
-                                          use.alternative.start = FALSE,
+                                          start.from.simple.model = FALSE,
                                           EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
     if (exists("pi.init")) rm(pi.init)
@@ -94,13 +94,13 @@ test_that("rowclustering runs without errors.", {
     expect_error(results <- rowclustering("Y~row+column+row:column",
                                           model="POM",
                                           nclus.row=2, long.df=long.df.sim,
-                                          use.alternative.start = TRUE,
+                                          start.from.simple.model = TRUE,
                                           EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
     expect_error(results <- rowclustering("Y~row*column",
                                           model="POM",
                                           nclus.row=2, long.df=long.df.sim,
-                                          use.alternative.start = FALSE,
+                                          start.from.simple.model = FALSE,
                                           EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
     if (exists("pi.init")) rm(pi.init)
@@ -185,12 +185,12 @@ test_that("columnclustering runs without errors.", {
 
     expect_error(results <- columnclustering("Y~row+column+row:column",
                                              model="OSM", nclus.column=2, long.df=long.df.sim,
-                                             use.alternative.start = TRUE,
+                                             start.from.simple.model = TRUE,
                                              EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
     expect_error(results <- columnclustering("Y~row*column",
                                              model="OSM", nclus.column=2, long.df=long.df.sim,
-                                             use.alternative.start = FALSE,
+                                             start.from.simple.model = FALSE,
                                              EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
     if (exists("kappa.init")) rm(kappa.init)
@@ -262,13 +262,13 @@ test_that("columnclustering runs without errors.", {
     expect_error(results <- columnclustering("Y~row+column+row:column",
                                              model="POM",
                                              nclus.column=2, long.df=long.df.sim,
-                                             use.alternative.start = TRUE,
+                                             start.from.simple.model = TRUE,
                                              EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
     expect_error(results <- columnclustering("Y~row*column",
                                              model="POM",
                                              nclus.column=2, long.df=long.df.sim,
-                                             use.alternative.start = FALSE,
+                                             start.from.simple.model = FALSE,
                                              EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
     if (exists("kappa.init")) rm(kappa.init)
@@ -348,12 +348,12 @@ test_that("biclustering runs without errors.", {
 
     expect_error(results <- biclustering("Y~row+column+row:column",
                                          model="OSM", nclus.row=2, nclus.column=2, long.df=long.df.sim,
-                                         use.alternative.start = TRUE,
+                                         start.from.simple.model = TRUE,
                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
     expect_error(results <- biclustering("Y~row*column",
                                          model="OSM", nclus.row=2, nclus.column=2, long.df=long.df.sim,
-                                         use.alternative.start = FALSE,
+                                         start.from.simple.model = FALSE,
                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
     if (exists("pi.init")) rm(pi.init)
@@ -410,13 +410,13 @@ test_that("biclustering runs without errors.", {
     expect_error(results <- biclustering("Y~row+column+row:column",
                                          model="POM",
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
-                                         use.alternative.start = TRUE,
+                                         start.from.simple.model = TRUE,
                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
     expect_error(results <- biclustering("Y~row*column",
                                          model="POM",
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
-                                         use.alternative.start = FALSE,
+                                         start.from.simple.model = FALSE,
                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
     if (exists("pi.init")) rm(pi.init)

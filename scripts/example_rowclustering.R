@@ -21,12 +21,12 @@ results <- rowclustering("Y~row+column",
 results <- rowclustering("Y~row+column+row:column",
                          model="OSM",
                 nclus.row=2, long.df=long.df.sim,
-                use.alternative.start = TRUE)
+                start.from.simple.model = TRUE)
 
 results <- rowclustering("Y~row*column",
                          model="OSM",
                          nclus.row=2, long.df=long.df.sim,
-                         use.alternative.start = FALSE)
+                         start.from.simple.model = FALSE)
 
 rm(pi.init)
 initvect <- c(-0.8,0.7,0.2,2)
@@ -73,12 +73,12 @@ results <- rowclustering("Y~row+column",
 results <- rowclustering("Y~row+column+row:column",
                          model="POM",
                          nclus.row=2, long.df=long.df.sim,
-                         use.alternative.start = TRUE)
+                         start.from.simple.model = TRUE)
 
 results <- rowclustering("Y~row*column",
                          model="POM",
                          nclus.row=2, long.df=long.df.sim,
-                         use.alternative.start = FALSE)
+                         start.from.simple.model = FALSE)
 
 rm(pi.init)
 initvect <- c(-0.8,0.7,2,rep(0.25,times=4),rep(0.4,times=4))

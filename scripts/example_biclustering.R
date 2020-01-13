@@ -18,13 +18,13 @@ results <- biclustering("Y~row+column",
 results <- biclustering("Y~row+column+row:column",
                          model="OSM",
                 nclus.row=2, nclus.column=2, long.df=long.df.sim,
-                use.alternative.start = TRUE,
+                start.from.simple.model = TRUE,
                 EM.control=list(EMcycles=3))
 
 results <- biclustering("Y~row*column",
                          model="OSM",
                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
-                         use.alternative.start = FALSE,
+                         start.from.simple.model = FALSE,
                         EM.control=list(EMcycles=3))
 
 rm(pi.init,kappa.init)
@@ -58,13 +58,13 @@ results <- biclustering("Y~row+column",
 results <- biclustering("Y~row+column+row:column",
                          model="POM",
                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
-                         use.alternative.start = TRUE,
+                         start.from.simple.model = TRUE,
                         EM.control=list(EMcycles=3))
 
 results <- biclustering("Y~row*column",
                          model="POM",
                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
-                         use.alternative.start = FALSE,
+                         start.from.simple.model = FALSE,
                         EM.control=list(EMcycles=3))
 
 pi.init <- c(0.1,0.9)

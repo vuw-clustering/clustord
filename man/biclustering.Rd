@@ -11,20 +11,20 @@ rowclustering(formula, model, nclus.row, long.df, initvect = NULL,
   pi.init = NULL, EM.control = list(EMcycles = 50, EMstoppingpar =
   1e-06, paramstopping = TRUE, startEMcycles = 10, keepallparams = FALSE),
   optim.method = "L-BFGS-B", optim.control = default.optim.control(),
-  constraint.sum.zero = TRUE, use.alternative.start = TRUE)
+  constraint.sum.zero = TRUE, start.from.simple.model = TRUE)
 
 columnclustering(formula, model, nclus.column, long.df, initvect = NULL,
   kappa.init = NULL, EM.control = list(EMcycles = 50, EMstoppingpar =
   1e-06, paramstopping = TRUE, startEMcycles = 10, keepallparams = FALSE),
   optim.method = "L-BFGS-B", optim.control = default.optim.control(),
-  constraint.sum.zero = TRUE, use.alternative.start = TRUE)
+  constraint.sum.zero = TRUE, start.from.simple.model = TRUE)
 
 biclustering(formula, model, nclus.row, nclus.column, long.df,
   initvect = NULL, pi.init = NULL, kappa.init = NULL,
   EM.control = list(EMcycles = 50, EMstoppingpar = 1e-06, paramstopping =
   TRUE, startEMcycles = 10, keepallparams = FALSE),
   optim.method = "L-BFGS-B", optim.control = default.optim.control(),
-  constraint.sum.zero = TRUE, use.alternative.start = TRUE)
+  constraint.sum.zero = TRUE, start.from.simple.model = TRUE)
 }
 \arguments{
 \item{optim.control}{control list for the \code{optim} call within the M step
@@ -176,12 +176,11 @@ the column index of an original data matrix whose values are given by \code{Y}.}
 step of the EM algorithm. Must be one of 'L-BFGS-B', 'BFGS', 'CG' or
 'Nelder-Mead' (i.e. not the SANN method).}
 
-\item{use.alternative.start:}{(default \code{TRUE}) if \code{TRUE}, fit the model
-without interactions first and use that to provide starting values of
-\code{ppr.m} and \code{pi.v} (and \code{ppc.m} and \code{kappa.v}) for
-fitting the model with interactions; if \code{FALSE}, use the \code{polr}
-function and then the simple model, and then the model without
-interactions, to find starting values for fitting the model with interactions.}
+\item{start.from.simple.model:}{(default \code{TRUE}) if \code{TRUE}, fit the
+simpler model, or the one without interactions, first and use that to
+provide starting values for all parameters for the model with interactions;
+if \code{FALSE}, use the more basic models to provide starting values only
+for \code{pi.init} and \code{kappa.init}.}
 }
 \value{
 A list with components:

@@ -12,14 +12,14 @@ rowclustering <- function(formula,
                                           paramstopping=TRUE, startEMcycles=10,
                                           keepallparams=FALSE),
                           optim.method="L-BFGS-B", optim.control=default.optim.control(),
-                          constraint.sum.zero=TRUE, use.alternative.start=TRUE){
+                          constraint.sum.zero=TRUE, start.from.simple.model=TRUE){
 
     validate.inputs(type="row",
                     formula=formula, model=model, nclus.row=nclus.row,
                     long.df=long.df, initvect=initvect, pi.init=pi.init,
                     EM.control=EM.control, optim.method=optim.method,
                     constraint.sum.zero=constraint.sum.zero,
-                    use.alternative.start=use.alternative.start)
+                    start.from.simple.model=start.from.simple.model)
 
     ## If ROW and COL are factors, convert them to their numeric values before
     ## running clustering
@@ -49,7 +49,7 @@ rowclustering <- function(formula,
                                                optim.method=optim.method,
                                                optim.control=optim.control,
                                                constraint.sum.zero=constraint.sum.zero,
-                                               use.alternative.start=use.alternative.start)
+                                               start.from.simple.model=start.from.simple.model)
         initvect <- start.par$initvect
         pi.init <- start.par$pi.init
     }
@@ -72,14 +72,14 @@ columnclustering <- function(formula,
                                              paramstopping=TRUE, startEMcycles=10,
                                              keepallparams=FALSE),
                              optim.method="L-BFGS-B", optim.control=default.optim.control(),
-                             constraint.sum.zero=TRUE, use.alternative.start=TRUE){
+                             constraint.sum.zero=TRUE, start.from.simple.model=TRUE){
 
     validate.inputs(type="column",
                     formula=formula, model=model, nclus.column=nclus.column,
                     long.df=long.df, initvect=initvect, kappa.init=kappa.init,
                     EM.control=EM.control, optim.method=optim.method,
                     constraint.sum.zero=constraint.sum.zero,
-                    use.alternative.start=use.alternative.start)
+                    start.from.simple.model=start.from.simple.model)
 
     ## If ROW and COL are factors, convert them to their numeric values before
     ## running clustering
@@ -114,7 +114,7 @@ columnclustering <- function(formula,
                                                optim.method=optim.method,
                                                optim.control=optim.control,
                                                constraint.sum.zero=constraint.sum.zero,
-                                               use.alternative.start=use.alternative.start)
+                                               start.from.simple.model=start.from.simple.model)
         initvect <- start.par$initvect
         pi.init <- start.par$pi.init
     }
@@ -387,12 +387,12 @@ columnclustering <- function(formula,
 #'     negative sum of the other columns (so \code{gamma} columns sum to zero)
 #'     and first row of gamma equal to the negative sum of the other rows (so
 #'     \code{gamma} rows sum to zero).
-#' @param use.alternative.start: (default \code{TRUE}) if \code{TRUE}, fit the model
-#'     without interactions first and use that to provide starting values of
-#'     \code{ppr.m} and \code{pi.v} (and \code{ppc.m} and \code{kappa.v}) for
-#'     fitting the model with interactions; if \code{FALSE}, use the \code{polr}
-#'     function and then the simple model, and then the model without
-#'     interactions, to find starting values for fitting the model with interactions.
+#' @param start.from.simple.model: (default \code{TRUE}) if \code{TRUE}, fit the
+#'     simpler model, or the one without interactions, first and use that to
+#'     provide starting values for all parameters for the model with interactions;
+#'     if \code{FALSE}, use the more basic models to provide starting values only
+#'     for \code{pi.init} and \code{kappa.init}.
+#'
 #' @return
 #' A list with components:
 #'
@@ -489,7 +489,7 @@ biclustering <- function(formula,
                          EM.control=list(EMcycles=50, EMstoppingpar=1e-6, paramstopping=TRUE,
                                          startEMcycles=10, keepallparams=FALSE),
                          optim.method="L-BFGS-B", optim.control=default.optim.control(),
-                         constraint.sum.zero=TRUE, use.alternative.start=TRUE){
+                         constraint.sum.zero=TRUE, start.from.simple.model=TRUE){
 
     validate.inputs(type="bi",
                     formula=formula, model=model,
@@ -498,7 +498,7 @@ biclustering <- function(formula,
                     pi.init=pi.init, kappa.init=kappa.init,
                     EM.control=EM.control, optim.method=optim.method,
                     constraint.sum.zero=constraint.sum.zero,
-                    use.alternative.start=use.alternative.start)
+                    start.from.simple.model=start.from.simple.model)
 
     ## If ROW and COL are factors, convert them to their numeric values before
     ## running clustering
@@ -530,7 +530,7 @@ biclustering <- function(formula,
                                               optim.method=optim.method,
                                               optim.control=optim.control,
                                               constraint.sum.zero=constraint.sum.zero,
-                                              use.alternative.start=use.alternative.start)
+                                              start.from.simple.model=start.from.simple.model)
         initvect <- start.par$initvect
         pi.init <- start.par$pi.init
         kappa.init <- start.par$kappa.init
@@ -557,7 +557,7 @@ validate.inputs <- function(type,
                                             paramstopping=TRUE, startEMcycles=10,
                                             keepallparams=FALSE),
                             optim.method="L-BFGS-B",
-                            constraint.sum.zero=TRUE, use.alternative.start=TRUE) {
+                            constraint.sum.zero=TRUE, start.from.simple.model=TRUE) {
 
     ## Note the double-& and double-| which stops the later parts being checked
     ## if the earlier parts are false
@@ -628,8 +628,8 @@ validate.inputs <- function(type,
 
     if (!is.logical(constraint.sum.zero) || !is.vector(constraint.sum.zero) ||
         length(constraint.sum.zero) != 1 || is.na(constraint.sum.zero)) stop("constraint.sum.zero must be TRUE or FALSE.")
-    if (!is.logical(use.alternative.start) || !is.vector(use.alternative.start) ||
-        length(use.alternative.start) != 1 || is.na(use.alternative.start)) stop("use.alternative.start must be TRUE or FALSE.")
+    if (!is.logical(start.from.simple.model) || !is.vector(start.from.simple.model) ||
+        length(start.from.simple.model) != 1 || is.na(start.from.simple.model)) stop("start.from.simple.model must be TRUE or FALSE.")
 
     if (!is.list(EM.control) || length(EM.control) == 0 || length(EM.control) > 5 ||
         !all(names(EM.control) %in% c("EMcycles","EMstoppingpar","paramstopping",
@@ -742,8 +742,9 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
     optim.control$fnscale <- -1
 
     parlist.init <- parlist.in
+    pi.init <- pi.v
     initvect <- invect
-    outvect=invect
+    outvect <- invect
     # Run the EM cycle:
     EM.status <- new.EM.status()
 
@@ -821,7 +822,8 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
          "outvect"=outvect,
          "parlist.init"=parlist.init,
          "parlist.out"=parlist.out,
-         "pi"=pi.v,
+         "pi.init"=pi.init,
+         "pi.out"=pi.v,
          "ppr"=ppr.m,
          "RowClusters"=Rclus)
 }
@@ -849,8 +851,10 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
     optim.control$fnscale <- -1
 
     parlist.init <- parlist.in
+    pi.init <- pi.v
+    kappa.init <- kappa.v
     initvect <- invect
-    outvect=invect
+    outvect <- invect
     # Run the EM cycle:
     EM.status <- new.EM.status()
 
@@ -942,9 +946,11 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
          "outvect"=outvect,
          "parlist.init"=parlist.init,
          "parlist.out"=parlist.out,
-         "pi"=pi.v,
+         "pi.init"=pi.init,
+         "kappa.init"=kappa.init,
+         "pi.out"=pi.v,
          "ppr"=ppr.m,
-         "kappa"=kappa.v,
+         "kappa.out"=kappa.v,
          "ppc"=ppc.m,
          "RowClusters"=Rclus,
          "ColumnClusters"=Cclus)
