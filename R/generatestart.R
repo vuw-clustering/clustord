@@ -1,3 +1,11 @@
+startEM.control <- function(EM.control) {
+    startEM <- EM.control
+    startEM$EMcycles <- EM.control$startEMcycles
+    startEM$keepallparams <- FALSE
+
+    startEM
+}
+
 generate.mixing.proportions <- function(nclus) {
     ## Note that simply generating the first nclus-1 values from Unif(0,1/nclus)
     ## then means that only one of the nclus proportions can ever be bigger than
@@ -147,9 +155,7 @@ generate.gamma.init <- function(RG, p=NULL, CG=NULL) {
 }
 
 generate.initvect.rowcluster <- function(long.df, model, submodel, RG,
-                                         EM.control=list(EMcycles=50, EMstoppingpar=1e-4,
-                                                         paramstopping=TRUE, startEMcycles=10,
-                                                         keepallparams=FALSE),
+                                         EM.control=default.EM.control(),
                                          optim.method="L-BFGS-B", optim.control=default.optim.control(),
                                          constraint.sum.zero=TRUE,
                                          start.from.simple.model=TRUE) {
@@ -194,10 +200,6 @@ generate.initvect.rowcluster <- function(long.df, model, submodel, RG,
     if (submodel %in% c("rp","rpi") & start.from.simple.model) {
         cat("Using the output of RS model as initial values for RP/RPI model\n")
 
-        startEM.control <- list(EMcycles=EM.control$startEMcycles,
-                                EMstoppingpar=EM.control$EMstoppingpar,
-                                paramstopping=EM.control$paramstopping,
-                                keepallparams=EM.control$keepallparams)
         invect <- switch(model,
                          "OSM"=initvect[1:(q-1+q-2+RG-1)],
                          "POM"=initvect[1:(q-1+RG-1)],
@@ -206,7 +208,7 @@ generate.initvect.rowcluster <- function(long.df, model, submodel, RG,
         rs.out <- run.EM.rowcluster(invect=invect,
                                     long.df, model=model,submodel="rs",
                                     pi.v=pi.init,
-                                    EM.control=startEM.control,
+                                    EM.control=startEM.control(EM.control),
                                     optim.method=optim.method,
                                     optim.control=optim.control)
         cat("=== End of RS model fitting ===\n")
@@ -219,17 +221,10 @@ generate.initvect.rowcluster <- function(long.df, model, submodel, RG,
 }
 
 generate.initvect.bicluster <- function(long.df, model, submodel, RG, CG,
-                                        EM.control=list(EMcycles=50, EMstoppingpar=1e-4,
-                                                        paramstopping=TRUE, startEMcycles=10,
-                                                        keepallparams=FALSE),
+                                        EM.control=default.EM.control(),
                                         optim.method="L-BFGS-B", optim.control=default.optim.control(),
                                         constraint.sum.zero=TRUE,
                                         start.from.simple.model=TRUE) {
-
-    startEM.control <- list(EMcycles=EM.control$startEMcycles,
-                            EMstoppingpar=EM.control$EMstoppingpar,
-                            paramstopping=EM.control$paramstopping,
-                            keepallparams=FALSE)
 
     q <- length(levels(long.df$Y))
 
@@ -261,7 +256,7 @@ generate.initvect.bicluster <- function(long.df, model, submodel, RG, CG,
         rs.out <- run.EM.rowcluster(invect=rs.invect,
                                     long.df, model=model,submodel="rs",
                                     pi.v=pi.init,
-                                    EM.control=startEM.control,
+                                    EM.control=startEM.control(EM.control),
                                     optim.method=optim.method,
                                     optim.control=optim.control)
         cat("=== End of RS model fitting ===\n")
@@ -278,7 +273,7 @@ generate.initvect.bicluster <- function(long.df, model, submodel, RG, CG,
         sc.out <- run.EM.rowcluster(invect=sc.invect,
                                     long.df.transp, model=model,submodel="rs",
                                     pi.v=kappa.init,
-                                    EM.control=startEM.control,
+                                    EM.control=startEM.control(EM.control),
                                     optim.method=optim.method,
                                     optim.control=optim.control)
         cat("=== End of SC model fitting ===\n")
@@ -300,7 +295,7 @@ generate.initvect.bicluster <- function(long.df, model, submodel, RG, CG,
             rc.out <- run.EM.bicluster(invect=rc.invect,
                                        long.df, model=model, submodel="rc",
                                        pi.v=pi.init, kappa.v=kappa.init,
-                                       EM.control=startEM.control,
+                                       EM.control=startEM.control(EM.control),
                                        optim.method=optim.method,
                                        optim.control=optim.control)
             cat("=== End of RC model fitting ===\n")
@@ -318,11 +313,10 @@ generate.initvect.bicluster <- function(long.df, model, submodel, RG, CG,
 }
 
 generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NULL, pi.init=NULL,
-                                      EM.control=list(EMcycles=50, EMstoppingpar=1e-4,
-                                                      paramstopping=TRUE, startEMcycles=10,
-                                                      keepallparams=FALSE),
+                                      EM.control=default.EM.control(),
                                       optim.method="L-BFGS-B", optim.control=default.optim.control(),
-                                      constraint.sum.zero=TRUE, start.from.simple.model=TRUE) {
+                                      constraint.sum.zero=TRUE, start.from.simple.model=TRUE,
+                                      nstarts=5) {
 
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
@@ -351,9 +345,7 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
 
 generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
                                      initvect=NULL, pi.init=NULL, kappa.init=NULL,
-                                     EM.control=list(EMcycles=50, EMstoppingpar=1e-4,
-                                                     paramstopping=TRUE, startEMcycles=10,
-                                                     keepallparams=FALSE),
+                                     EM.control=default.EM.control(),
                                      optim.method="L-BFGS-B", optim.control=default.optim.control(),
                                      constraint.sum.zero=TRUE, start.from.simple.model=TRUE) {
     n <- max(long.df$ROW)

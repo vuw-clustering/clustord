@@ -8,9 +8,7 @@ rowclustering <- function(formula,
                           long.df,
                           initvect=NULL,
                           pi.init=NULL,
-                          EM.control=list(EMcycles=50, EMstoppingpar=1e-6,
-                                          paramstopping=TRUE, startEMcycles=10,
-                                          keepallparams=FALSE),
+                          EM.control=default.EM.control(),
                           optim.method="L-BFGS-B", optim.control=default.optim.control(),
                           constraint.sum.zero=TRUE, start.from.simple.model=TRUE){
 
@@ -27,7 +25,7 @@ rowclustering <- function(formula,
 
     ## Replace defaults with user-provided values, so that any control parameters
     ## the user did not specify are not left blank:
-    default.EM.control <- as.list(args(rowclustering))$EM.control
+    default.EM.control <- default.EM.control()
     EM.control <- replacedefaults(default.EM.control, EM.control)
 
     submodel <- switch(formula,
@@ -68,9 +66,7 @@ columnclustering <- function(formula,
                              long.df,
                              initvect=NULL,
                              kappa.init=NULL,
-                             EM.control=list(EMcycles=50, EMstoppingpar=1e-6,
-                                             paramstopping=TRUE, startEMcycles=10,
-                                             keepallparams=FALSE),
+                             EM.control=default.EM.control(),
                              optim.method="L-BFGS-B", optim.control=default.optim.control(),
                              constraint.sum.zero=TRUE, start.from.simple.model=TRUE){
 
@@ -87,7 +83,7 @@ columnclustering <- function(formula,
 
     ## Replace defaults with user-provided values, so that any control parameters
     ## the user did not specify are not left blank:
-    default.EM.control <- as.list(args(rowclustering))$EM.control
+    default.EM.control <- default.EM.control()
     EM.control <- replacedefaults(default.EM.control, EM.control)
 
     ## Now switch to calling everything in terms of row clustering
@@ -486,8 +482,7 @@ biclustering <- function(formula,
                          initvect=NULL,
                          pi.init=NULL,
                          kappa.init=NULL,
-                         EM.control=list(EMcycles=50, EMstoppingpar=1e-6, paramstopping=TRUE,
-                                         startEMcycles=10, keepallparams=FALSE),
+                         EM.control=default.EM.control(),
                          optim.method="L-BFGS-B", optim.control=default.optim.control(),
                          constraint.sum.zero=TRUE, start.from.simple.model=TRUE){
 
@@ -506,7 +501,7 @@ biclustering <- function(formula,
 
     ## Replace defaults with user-provided values, so that any control parameters
     ## the user did not specify are not left blank:
-    default.EM.control <- as.list(args(rowclustering))$EM.control
+    default.EM.control <- default.EM.control()
     EM.control <- replacedefaults(default.EM.control, EM.control)
 
     submodel <- switch(formula,
@@ -542,6 +537,11 @@ biclustering <- function(formula,
                      optim.method=optim.method, optim.control=optim.control)
 }
 
+default.EM.control <- function() {
+    list(EMcycles=50, EMstoppingpar=1e-6, paramstopping=TRUE, startEMcycles=10,
+    keepallparams=FALSE)
+}
+
 default.optim.control <- function() {
     list(maxit=100,trace=0)
 }
@@ -553,9 +553,7 @@ validate.inputs <- function(type,
                             long.df,
                             initvect=NULL,
                             pi.init=NULL, kappa.init=NULL,
-                            EM.control=list(EMcycles=50, EMstoppingpar=1e-6,
-                                            paramstopping=TRUE, startEMcycles=10,
-                                            keepallparams=FALSE),
+                            EM.control=default.EM.control(),
                             optim.method="L-BFGS-B",
                             constraint.sum.zero=TRUE, start.from.simple.model=TRUE) {
 
@@ -722,8 +720,7 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
 
 run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
                               constraint.sum.zero=TRUE,
-                              EM.control=list(EMcycles=50, EMstoppingpar=1e-6,
-                                              paramstopping=TRUE, keepallparams=FALSE),
+                              EM.control=default.EM.control(),
                               optim.method="L-BFGS-B", optim.control=default.optim.control()) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
@@ -796,8 +793,8 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
         ## Report the current incomplete-data log-likelihood, which is the
         ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
         ## of the output of optim
-        cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' partial complete-data log.like=', -optim.fit$value ,'\n'))
-        cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' complete-data log.like=', llc ,'\n'))
+        # cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' partial complete-data log.like=', -optim.fit$value ,'\n'))
+        # cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' complete-data log.like=', llc ,'\n'))
         cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' incomplete-data log.like=', lli ,'\n'))
         # cat("parlist.out\n")
         # print(parlist.out)
@@ -830,8 +827,7 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
 
 run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
                              constraint.sum.zero=TRUE,
-                             EM.control=list(EMcycles=50, EMstoppingpar=1e-6,
-                                             paramstopping=TRUE, keepallparams=FALSE),
+                             EM.control=default.EM.control(),
                              optim.method="L-BFGS-B", optim.control=default.optim.control()) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
