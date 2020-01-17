@@ -31,9 +31,9 @@ Calculate SE of parameters fitted using \code{\link{rowclustering}} or
 \code{\link{columnclustering}} output.
 }
 \details{
-Calculates SE by running \code{\link[stats]{optimHess}} on the incomplete-data log-likelihood
-to find the hessian at the fitted parameter values from \code{\link{rowclustering}}
-or \code{\link{biclustering}}.
+Calculates SE by running \code{optimHess} (see \code{\link[stats]{optim}}) on
+the incomplete-data log-likelihood to find the hessian at the fitted parameter
+values from \code{\link{rowclustering}} or \code{\link{biclustering}}.
 Then the square roots of the diagonal elements
 of the negative inverse of the hessian are the standard errors of the parameters
 i.e. \code{SE <- sqrt(diag(solve(-optim.hess))}.
