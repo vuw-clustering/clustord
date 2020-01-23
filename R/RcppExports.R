@@ -17,3 +17,15 @@ rcpparma_bothproducts <- function(x) {
     .Call(`_clustord_rcpparma_bothproducts`, x)
 }
 
+rcpparma_updateliC <- function(li, columnclusters, RG, n, p, ymat, theta, pivec, kappavec) {
+    .Call(`_clustord_rcpparma_updateliC`, li, columnclusters, RG, n, p, ymat, theta, pivec, kappavec)
+}
+
+rcpparma_updateliR <- function(li, rowclusters, CG, n, p, ymat, theta, pivec, kappavec) {
+    .Call(`_clustord_rcpparma_updateliR`, li, rowclusters, CG, n, p, ymat, theta, pivec, kappavec)
+}
+
+rcpparma_Rclusterll <- function(ymat, theta, pprm, piv, RG, p, n, partial) {
+    .Call(`_clustord_rcpparma_Rclusterll`, ymat, theta, pprm, piv, RG, p, n, partial)
+}
+

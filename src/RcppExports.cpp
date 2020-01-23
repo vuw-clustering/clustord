@@ -49,25 +49,71 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-
-RcppExport void loglike_Stereo_columneffect_inC(void *, void *, void *, void *, void *, void *, void *);
-RcppExport void logLikelihood_Incomplete_Stereo_RowClustering_rRcC1_inC(void *, void *, void *, void *, void *, void *, void *, void *);
-RcppExport void logLikelihood_Incomplete_Stereo_RowClustering_rRcm_inC(void *, void *, void *, void *, void *, void *, void *, void *);
-RcppExport void Q_Stereo_RowCluster_inC(void *, void *, void *, void *, void *, void *, void *, void *, void *);
-RcppExport void Q_Stereo_RowCluster_rRcC1_inC(void *, void *, void *, void *, void *, void *, void *, void *, void *);
-RcppExport void Q_Stereo_RowCluster_without_iterations_inC(void *, void *, void *, void *, void *, void *, void *, void *, void *);
+// rcpparma_updateliC
+double rcpparma_updateliC(double li, const arma::colvec& columnclusters, const int RG, const int n, const int p, const arma::mat& ymat, const arma::cube& theta, const arma::colvec& pivec, const arma::rowvec& kappavec);
+RcppExport SEXP _clustord_rcpparma_updateliC(SEXP liSEXP, SEXP columnclustersSEXP, SEXP RGSEXP, SEXP nSEXP, SEXP pSEXP, SEXP ymatSEXP, SEXP thetaSEXP, SEXP pivecSEXP, SEXP kappavecSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type li(liSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type columnclusters(columnclustersSEXP);
+    Rcpp::traits::input_parameter< const int >::type RG(RGSEXP);
+    Rcpp::traits::input_parameter< const int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< const int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type ymat(ymatSEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type pivec(pivecSEXP);
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type kappavec(kappavecSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpparma_updateliC(li, columnclusters, RG, n, p, ymat, theta, pivec, kappavec));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpparma_updateliR
+double rcpparma_updateliR(double li, const arma::rowvec& rowclusters, const int CG, const int n, const int p, const arma::mat& ymat, const arma::cube& theta, const arma::colvec& pivec, const arma::rowvec& kappavec);
+RcppExport SEXP _clustord_rcpparma_updateliR(SEXP liSEXP, SEXP rowclustersSEXP, SEXP CGSEXP, SEXP nSEXP, SEXP pSEXP, SEXP ymatSEXP, SEXP thetaSEXP, SEXP pivecSEXP, SEXP kappavecSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type li(liSEXP);
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type rowclusters(rowclustersSEXP);
+    Rcpp::traits::input_parameter< const int >::type CG(CGSEXP);
+    Rcpp::traits::input_parameter< const int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< const int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type ymat(ymatSEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type pivec(pivecSEXP);
+    Rcpp::traits::input_parameter< const arma::rowvec& >::type kappavec(kappavecSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpparma_updateliR(li, rowclusters, CG, n, p, ymat, theta, pivec, kappavec));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpparma_Rclusterll
+double rcpparma_Rclusterll(arma::mat& ymat, arma::cube& theta, arma::mat& pprm, arma::colvec piv, int RG, int p, int n, bool partial);
+RcppExport SEXP _clustord_rcpparma_Rclusterll(SEXP ymatSEXP, SEXP thetaSEXP, SEXP pprmSEXP, SEXP pivSEXP, SEXP RGSEXP, SEXP pSEXP, SEXP nSEXP, SEXP partialSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type ymat(ymatSEXP);
+    Rcpp::traits::input_parameter< arma::cube& >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type pprm(pprmSEXP);
+    Rcpp::traits::input_parameter< arma::colvec >::type piv(pivSEXP);
+    Rcpp::traits::input_parameter< int >::type RG(RGSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< bool >::type partial(partialSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpparma_Rclusterll(ymat, theta, pprm, piv, RG, p, n, partial));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_clustord_rcpparma_hello_world", (DL_FUNC) &_clustord_rcpparma_hello_world, 0},
     {"_clustord_rcpparma_outerproduct", (DL_FUNC) &_clustord_rcpparma_outerproduct, 1},
     {"_clustord_rcpparma_innerproduct", (DL_FUNC) &_clustord_rcpparma_innerproduct, 1},
     {"_clustord_rcpparma_bothproducts", (DL_FUNC) &_clustord_rcpparma_bothproducts, 1},
-    {"loglike_Stereo_columneffect_inC",                         (DL_FUNC) &loglike_Stereo_columneffect_inC,                         7},
-    {"logLikelihood_Incomplete_Stereo_RowClustering_rRcC1_inC", (DL_FUNC) &logLikelihood_Incomplete_Stereo_RowClustering_rRcC1_inC, 8},
-    {"logLikelihood_Incomplete_Stereo_RowClustering_rRcm_inC",  (DL_FUNC) &logLikelihood_Incomplete_Stereo_RowClustering_rRcm_inC,  8},
-    {"Q_Stereo_RowCluster_inC",                                 (DL_FUNC) &Q_Stereo_RowCluster_inC,                                 9},
-    {"Q_Stereo_RowCluster_rRcC1_inC",                           (DL_FUNC) &Q_Stereo_RowCluster_rRcC1_inC,                           9},
-    {"Q_Stereo_RowCluster_without_iterations_inC",              (DL_FUNC) &Q_Stereo_RowCluster_without_iterations_inC,              9},
+    {"_clustord_rcpparma_updateliC", (DL_FUNC) &_clustord_rcpparma_updateliC, 9},
+    {"_clustord_rcpparma_updateliR", (DL_FUNC) &_clustord_rcpparma_updateliR, 9},
+    {"_clustord_rcpparma_Rclusterll", (DL_FUNC) &_clustord_rcpparma_Rclusterll, 8},
     {NULL, NULL, 0}
 };
 
