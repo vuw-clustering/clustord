@@ -823,9 +823,10 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
 
     # Save results:
     npar <- length(invect) + length(pi.v)-1
+    ninitvect <- length(invect)
     criteria <- calc.criteria(EM.status$best.lli, EM.status$llc.for.best.lli, npar, n, p)
-    info <- c(n, p, npar, RG)
-    names(info) <- c("n","p","npar","R")
+    info <- c(n, p, npar, ninitvect, RG)
+    names(info) <- c("n","p","npar","ninitvect","R")
     list("info"=info,
          "model"=model,
          "submodel"=submodel,
@@ -946,9 +947,10 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
 
     # Save results:
     npar <- length(invect) + length(pi.v)-1 + length(kappa.v)-1
+    ninitvect <- length(initvect)
     criteria <- calc.criteria(EM.status$best.lli, EM.status$llc.for.best.lli, npar, n, p)
-    info <- c(n, p, npar, RG, CG)
-    names(info) <- c("n","p","npar","R","C")
+    info <- c(n, p, npar, ninitvect, RG, CG)
+    names(info) <- c("n","p","npar","ninitvect","R","C")
     list("info"=info,
          "model"=model,
          "submodel"=submodel,
