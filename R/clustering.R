@@ -10,14 +10,16 @@ rowclustering <- function(formula,
                           pi.init=NULL,
                           EM.control=default.EM.control(),
                           optim.method="L-BFGS-B", optim.control=default.optim.control(),
-                          constraint.sum.zero=TRUE, start.from.simple.model=TRUE){
+                          constraint.sum.zero=TRUE, start.from.simple.model=TRUE,
+                          nstarts=5){
 
     validate.inputs(type="row",
                     formula=formula, model=model, nclus.row=nclus.row,
                     long.df=long.df, initvect=initvect, pi.init=pi.init,
                     EM.control=EM.control, optim.method=optim.method,
                     constraint.sum.zero=constraint.sum.zero,
-                    start.from.simple.model=start.from.simple.model)
+                    start.from.simple.model=start.from.simple.model,
+                    nstarts=nstarts)
 
     ## If ROW and COL are factors, convert them to their numeric values before
     ## running clustering
@@ -47,7 +49,8 @@ rowclustering <- function(formula,
                                                optim.method=optim.method,
                                                optim.control=optim.control,
                                                constraint.sum.zero=constraint.sum.zero,
-                                               start.from.simple.model=start.from.simple.model)
+                                               start.from.simple.model=start.from.simple.model,
+                                               nstarts=nstarts)
         initvect <- start.par$initvect
         pi.init <- start.par$pi.init
     }
@@ -68,14 +71,16 @@ columnclustering <- function(formula,
                              kappa.init=NULL,
                              EM.control=default.EM.control(),
                              optim.method="L-BFGS-B", optim.control=default.optim.control(),
-                             constraint.sum.zero=TRUE, start.from.simple.model=TRUE){
+                             constraint.sum.zero=TRUE, start.from.simple.model=TRUE,
+                             nstarts=5){
 
     validate.inputs(type="column",
                     formula=formula, model=model, nclus.column=nclus.column,
                     long.df=long.df, initvect=initvect, kappa.init=kappa.init,
                     EM.control=EM.control, optim.method=optim.method,
                     constraint.sum.zero=constraint.sum.zero,
-                    start.from.simple.model=start.from.simple.model)
+                    start.from.simple.model=start.from.simple.model,
+                    nstarts=nstarts)
 
     ## If ROW and COL are factors, convert them to their numeric values before
     ## running clustering
@@ -110,7 +115,8 @@ columnclustering <- function(formula,
                                                optim.method=optim.method,
                                                optim.control=optim.control,
                                                constraint.sum.zero=constraint.sum.zero,
-                                               start.from.simple.model=start.from.simple.model)
+                                               start.from.simple.model=start.from.simple.model,
+                                               nstarts=nstarts)
         initvect <- start.par$initvect
         pi.init <- start.par$pi.init
     }
@@ -466,12 +472,13 @@ columnclustering <- function(formula,
 #' # Model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*(alpha_r+beta_c)
 #' #    with 3 row clustering groups and 2 column clustering groups:
 #' biclustering("Y~row+column",model="OSM",nclus.row=3,nclus.column=2,long.df,
-#'              EM.control=list(EMcycles=10))
+#'              EM.control=list(EMcycles=5), nstarts=1)
 #'
 #' # Model Logit=mu_k-alpha_r-beta_c-gamma_rc
 #' #    with 2 row clustering groups and 4 column clustering groups:
 #' biclustering("Y~row+column+row:column",model="POM",nclus.row=2,nclus.column=4,
-#'              long.df,EM.control=list(EMcycles=10))
+#'              long.df,EM.control=list(EMcycles=5), nstarts=1,
+#'              start.from.simple.models=FALSE)
 #' @describeIn biclustering Biclustering
 #' @export
 biclustering <- function(formula,
@@ -484,7 +491,8 @@ biclustering <- function(formula,
                          kappa.init=NULL,
                          EM.control=default.EM.control(),
                          optim.method="L-BFGS-B", optim.control=default.optim.control(),
-                         constraint.sum.zero=TRUE, start.from.simple.model=TRUE){
+                         constraint.sum.zero=TRUE, start.from.simple.model=TRUE,
+                         nstarts=5){
 
     validate.inputs(type="bi",
                     formula=formula, model=model,
@@ -493,7 +501,8 @@ biclustering <- function(formula,
                     pi.init=pi.init, kappa.init=kappa.init,
                     EM.control=EM.control, optim.method=optim.method,
                     constraint.sum.zero=constraint.sum.zero,
-                    start.from.simple.model=start.from.simple.model)
+                    start.from.simple.model=start.from.simple.model,
+                    nstarts=nstarts)
 
     ## If ROW and COL are factors, convert them to their numeric values before
     ## running clustering
@@ -525,7 +534,8 @@ biclustering <- function(formula,
                                               optim.method=optim.method,
                                               optim.control=optim.control,
                                               constraint.sum.zero=constraint.sum.zero,
-                                              start.from.simple.model=start.from.simple.model)
+                                              start.from.simple.model=start.from.simple.model,
+                                              nstarts=nstarts)
         initvect <- start.par$initvect
         pi.init <- start.par$pi.init
         kappa.init <- start.par$kappa.init
@@ -538,7 +548,7 @@ biclustering <- function(formula,
 }
 
 default.EM.control <- function() {
-    list(EMcycles=50, EMstoppingpar=1e-6, paramstopping=TRUE, startEMcycles=10,
+    list(EMcycles=50, EMstoppingpar=1e-6, paramstopping=TRUE, startEMcycles=5,
     keepallparams=FALSE)
 }
 
@@ -555,7 +565,9 @@ validate.inputs <- function(type,
                             pi.init=NULL, kappa.init=NULL,
                             EM.control=default.EM.control(),
                             optim.method="L-BFGS-B",
-                            constraint.sum.zero=TRUE, start.from.simple.model=TRUE) {
+                            constraint.sum.zero=TRUE,
+                            start.from.simple.model=TRUE,
+                            nstarts=5) {
 
     ## Note the double-& and double-| which stops the later parts being checked
     ## if the earlier parts are false
@@ -628,6 +640,11 @@ validate.inputs <- function(type,
         length(constraint.sum.zero) != 1 || is.na(constraint.sum.zero)) stop("constraint.sum.zero must be TRUE or FALSE.")
     if (!is.logical(start.from.simple.model) || !is.vector(start.from.simple.model) ||
         length(start.from.simple.model) != 1 || is.na(start.from.simple.model)) stop("start.from.simple.model must be TRUE or FALSE.")
+
+    if (!is.null(nstarts)) {
+        if (!is.vector(nstarts) || !is.numeric(nstarts) || length(nstarts) != 1 ||
+            nstarts < 0 || nstarts %% 1 != 0) stop("If supplied, nstarts must be a positive integer.")
+    }
 
     if (!is.list(EM.control) || length(EM.control) == 0 || length(EM.control) > 5 ||
         !all(names(EM.control) %in% c("EMcycles","EMstoppingpar","paramstopping",

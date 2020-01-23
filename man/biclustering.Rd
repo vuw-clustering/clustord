@@ -8,23 +8,22 @@
 Odds Models (POM) or Binary Models}
 \usage{
 rowclustering(formula, model, nclus.row, long.df, initvect = NULL,
-  pi.init = NULL, EM.control = list(EMcycles = 50, EMstoppingpar =
-  1e-06, paramstopping = TRUE, startEMcycles = 10, keepallparams = FALSE),
+  pi.init = NULL, EM.control = default.EM.control(),
   optim.method = "L-BFGS-B", optim.control = default.optim.control(),
-  constraint.sum.zero = TRUE, start.from.simple.model = TRUE)
+  constraint.sum.zero = TRUE, start.from.simple.model = TRUE,
+  nstarts = 5)
 
 columnclustering(formula, model, nclus.column, long.df, initvect = NULL,
-  kappa.init = NULL, EM.control = list(EMcycles = 50, EMstoppingpar =
-  1e-06, paramstopping = TRUE, startEMcycles = 10, keepallparams = FALSE),
+  kappa.init = NULL, EM.control = default.EM.control(),
   optim.method = "L-BFGS-B", optim.control = default.optim.control(),
-  constraint.sum.zero = TRUE, start.from.simple.model = TRUE)
+  constraint.sum.zero = TRUE, start.from.simple.model = TRUE,
+  nstarts = 5)
 
 biclustering(formula, model, nclus.row, nclus.column, long.df,
   initvect = NULL, pi.init = NULL, kappa.init = NULL,
-  EM.control = list(EMcycles = 50, EMstoppingpar = 1e-06, paramstopping =
-  TRUE, startEMcycles = 10, keepallparams = FALSE),
-  optim.method = "L-BFGS-B", optim.control = default.optim.control(),
-  constraint.sum.zero = TRUE, start.from.simple.model = TRUE)
+  EM.control = default.EM.control(), optim.method = "L-BFGS-B",
+  optim.control = default.optim.control(), constraint.sum.zero = TRUE,
+  start.from.simple.model = TRUE, nstarts = 5)
 }
 \arguments{
 \item{optim.control}{control list for the \code{optim} call within the M step
@@ -362,10 +361,11 @@ columnclustering("Y~row+column+row:column",model="POM",2,long.df)
 # Model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*(alpha_r+beta_c)
 #    with 3 row clustering groups and 2 column clustering groups:
 biclustering("Y~row+column",model="OSM",nclus.row=3,nclus.column=2,long.df,
-             EM.control=list(EMcycles=10))
+             EM.control=list(EMcycles=5), nstarts=1)
 
 # Model Logit=mu_k-alpha_r-beta_c-gamma_rc
 #    with 2 row clustering groups and 4 column clustering groups:
 biclustering("Y~row+column+row:column",model="POM",nclus.row=2,nclus.column=4,
-             long.df,EM.control=list(EMcycles=10))
+             long.df,EM.control=list(EMcycles=5), nstarts=1,
+             start.from.simple.models=FALSE)
 }

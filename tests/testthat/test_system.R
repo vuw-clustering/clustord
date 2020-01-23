@@ -9,160 +9,187 @@ test_that("rowclustering runs without errors.", {
     ## OSM results -------------------------------------------------------------
     expect_error(results <- rowclustering("Y~row", model="OSM",
                                           nclus.row=3, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     expect_error(results <- rowclustering("Y~row+column", model="OSM",
                                           nclus.row=3, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     expect_error(results <- rowclustering("Y~row+column+row:column",
                                           model="OSM", nclus.row=2, long.df=long.df.sim,
                                           start.from.simple.model = TRUE,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     expect_error(results <- rowclustering("Y~row*column",
                                           model="OSM", nclus.row=2, long.df=long.df.sim,
                                           start.from.simple.model = FALSE,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     if (exists("pi.init")) rm(pi.init)
     initvect <- c(-0.8,0.7,0.2,2)
     expect_error(results <- rowclustering("Y~row",
                                           model="OSM", initvect=initvect,
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,0.2,2,rep(0.25,times=4))
     expect_error(results <- rowclustering("Y~row+column",
                                           model="OSM", initvect=initvect,
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,0.2,2,rep(0.25,times=4),rep(0.4,times=4))
     expect_error(results <- rowclustering("Y~row+column+row:column",
                                           model="OSM", initvect=initvect,
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     pi.init <- c(0.1,0.9)
     initvect <- c(-0.8,0.7,0.2,2)
     expect_error(results <- rowclustering("Y~row",
                                           model="OSM", initvect=initvect, pi.init=pi.init,
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,0.2,2,rep(0.25,times=4))
     expect_error(results <- rowclustering("Y~row+column",
                                           model="OSM", initvect=initvect, pi.init=pi.init,
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,0.2,2,rep(0.25,times=4),rep(0.4,times=4))
     expect_error(results <- rowclustering("Y~row+column+row:column",
                                           model="OSM", initvect=initvect, pi.init=pi.init,
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     if (exists("initvect")) rm(initvect)
     pi.init <- c(0.1,0.9)
     expect_error(results <- rowclustering("Y~row",
                                           model="OSM", pi.init=pi.init,
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     expect_error(results <- rowclustering("Y~row+column",
                                           model="OSM", pi.init=pi.init,
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     expect_error(results <- rowclustering("Y~row+column+row:column",
                                           model="OSM", pi.init=pi.init,
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     ### POM results ------------------------------------------------------------
     expect_error(results <- rowclustering("Y~row",
                                           model="POM",
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     expect_error(results <- rowclustering("Y~row+column",
                                           model="POM",
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     expect_error(results <- rowclustering("Y~row+column+row:column",
                                           model="POM",
                                           nclus.row=2, long.df=long.df.sim,
                                           start.from.simple.model = TRUE,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     expect_error(results <- rowclustering("Y~row*column",
                                           model="POM",
                                           nclus.row=2, long.df=long.df.sim,
                                           start.from.simple.model = FALSE,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     if (exists("pi.init")) rm(pi.init)
     initvect <- c(-0.8,0.7,2)
     expect_error(results <- rowclustering("Y~row",
                                           model="POM", initvect=initvect,
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,2,rep(0.25,times=4))
     expect_error(results <- rowclustering("Y~row+column",
                                           model="POM", initvect=initvect,
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,2,rep(0.25,times=4),rep(0.4,times=4))
     expect_error(results <- rowclustering("Y~row+column+row:column",
                                           model="POM", initvect=initvect,
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     pi.init <- c(0.1,0.9)
     initvect <- c(-0.8,0.7,2)
     expect_error(results <- rowclustering("Y~row",
                                           model="POM", initvect=initvect, pi.init=pi.init,
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,2,rep(0.25,times=4))
     expect_error(results <- rowclustering("Y~row+column",
                                           model="POM", initvect=initvect, pi.init=pi.init,
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,2,rep(0.25,times=4),rep(0.4,times=4))
     expect_error(results <- rowclustering("Y~row+column+row:column",
                                           model="POM", initvect=initvect, pi.init=pi.init,
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     if (exists("initvect")) rm(initvect)
     pi.init <- c(0.1,0.9)
     expect_error(results <- rowclustering("Y~row",
                                           model="POM", pi.init=pi.init,
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     expect_error(results <- rowclustering("Y~row+column",
                                           model="POM", pi.init=pi.init,
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     expect_error(results <- rowclustering("Y~row+column+row:column",
                                           model="POM", pi.init=pi.init,
                                           nclus.row=2, long.df=long.df.sim,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
     ## Some rows in the dataset are missing ------------------------------------
     long.df.sim.missing <- long.df.sim[-5,]
     expect_error(results <- rowclustering("Y~row+column+row:column",
                                           model="OSM", nclus.row=2, long.df=long.df.sim.missing,
-                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
+                                          EM.control=list(EMcycles=3,startEMcycles=2),
+                                          nstarts=1),NA)
 
 })
 

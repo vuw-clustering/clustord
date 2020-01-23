@@ -31,96 +31,108 @@ generate.u.init <- function(q) {
     u.init
 }
 
-generate.mu.init <- function(long.df, model) {
-    switch(model,
-           "OSM"={
-               BL.ss.out <- nnet::multinom(Y~1, data=long.df)
-               BL.coef <- coef(BL.ss.out)
-               mu.init <- BL.coef
-           },
-           "POM"={
-               PO.sp.out <- MASS::polr(Y~1,data=long.df)
-               mu.init <- PO.sp.out$zeta
-           },
-           "Binary"={
-               mu.init <- mean(as.numeric(as.character(long.df$Y)))
-           })
-
-    mu.init
-}
-
-generate.mu.beta.init <- function(long.df, model, constraint.sum.zero=TRUE) {
-
-    p <- max(long.df$COL)
-
-    switch(model,
-           "OSM"={
-               done.generating <- FALSE
-
-               nwts <- length(levels(long.df$Y))*(p+1)
-               if (nwts <= 50000) {
-                   MaxNWts <- nwts
-
-                   tryCatch({
-                       BL.sp.out <- nnet::multinom(Y~as.factor(COL), data=long.df, MaxNWts=MaxNWts)
-                       BL.coef <- coef(BL.sp.out)
-                       mu.init <- BL.coef[,1]
-
-                       ## If not using constraint that beta sum to zero,
-                       ## beta1 will be 0 so need to correct other elements
-                       ## of beta accordingly
-                       if (constraint.sum.zero) beta.init <- colMeans(BL.coef)[2:p]
-                       else beta.init <- colMeans(BL.coef)[3:p]-colMeans(BL.coef)[2]
-
-                       done.generating <- TRUE
-
-                   }, error = function(err) {
-
-                       # error handler picks up where error was generated
-                       message("Error in using nnet::multinom to generate starting values for beta parameters.")
-                       message(paste("My error:  ",err))
-                   })
-               } else {
-                   warning("Data too large to run nnet::multinom. Generating initial beta parameters randomly.")
-               }
-
-               if (!done.generating) {
+generate.mu.init <- function(long.df, model, use.random=FALSE) {
+    if (!use.random) {
+        switch(model,
+               "OSM"={
                    BL.ss.out <- nnet::multinom(Y~1, data=long.df)
                    BL.coef <- coef(BL.ss.out)
                    mu.init <- BL.coef
-
-                   beta.init <- runif(p-1,min=-2,max=2)
-               }
-           },
-           "POM"={
-               PO.sp.out <- MASS::polr(Y~as.factor(COL),data=long.df)
-               mu.init <- PO.sp.out$zeta
-
-               ## If not using constraint that beta sum to zero,
-               ## beta1 will be 0 so need to correct other elements
-               ## of beta accordingly
-               if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(p-1)]
-               else beta.init <- PO.sp.out$coef[2:(p-1)] - PO.sp.out$coef[1]
-           },
-           "Binary"={
-               mu.init <- mean(as.numeric(as.character(long.df$Y)))
-
-               columnmeans <- sapply(1:p,function(col) {
-                   mean(as.numeric(as.character(long.df$Y[long.df$COL==col])))
+               },
+               "POM"={
+                   PO.sp.out <- MASS::polr(Y~1,data=long.df)
+                   mu.init <- PO.sp.out$zeta
+               },
+               "Binary"={
+                   mu.init <- mean(as.numeric(as.character(long.df$Y)))
                })
-               beta <- columnmeans[1:(p-1)] - mu.init
-               ## If not using constraint that beta sum to zero,
-               ## beta1 will be 0 so need to correct other elements
-               ## of beta accordingly
-               if (constraint.sum.zero) beta.init <- beta[1:(p-1)]
-               else beta.init <- beta[2:p] - beta[1]
-           })
+
+    } else {
+        q <- length(levels(long.df$Y))
+        mu.init <- runif(q-1, min=-5, max=5)
+    }
+    mu.init
+}
+
+generate.mu.beta.init <- function(long.df, model, constraint.sum.zero=TRUE,
+                                  use.random=FALSE) {
+
+    p <- max(long.df$COL)
+    if (!use.random) {
+        switch(model,
+               "OSM"={
+                   done.generating <- FALSE
+
+                   nwts <- length(levels(long.df$Y))*(p+1)
+                   if (nwts <= 50000) {
+                       MaxNWts <- nwts
+
+                       tryCatch({
+                           BL.sp.out <- nnet::multinom(Y~as.factor(COL), data=long.df, MaxNWts=MaxNWts)
+                           BL.coef <- coef(BL.sp.out)
+                           mu.init <- BL.coef[,1]
+
+                           ## If not using constraint that beta sum to zero,
+                           ## beta1 will be 0 so need to correct other elements
+                           ## of beta accordingly
+                           if (constraint.sum.zero) beta.init <- colMeans(BL.coef)[2:p]
+                           else beta.init <- colMeans(BL.coef)[3:p]-colMeans(BL.coef)[2]
+
+                           done.generating <- TRUE
+
+                       }, error = function(err) {
+
+                           # error handler picks up where error was generated
+                           message("Error in using nnet::multinom to generate starting values for beta parameters.")
+                           message(paste("My error:  ",err))
+                       })
+                   } else {
+                       warning("Data too large to run nnet::multinom. Generating initial beta parameters randomly.")
+                   }
+
+                   if (!done.generating) {
+                       BL.ss.out <- nnet::multinom(Y~1, data=long.df)
+                       BL.coef <- coef(BL.ss.out)
+                       mu.init <- BL.coef
+
+                       beta.init <- runif(p-1,min=-2,max=2)
+                   }
+               },
+               "POM"={
+                   PO.sp.out <- MASS::polr(Y~as.factor(COL),data=long.df)
+                   mu.init <- PO.sp.out$zeta
+
+                   ## If not using constraint that beta sum to zero,
+                   ## beta1 will be 0 so need to correct other elements
+                   ## of beta accordingly
+                   if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(p-1)]
+                   else beta.init <- PO.sp.out$coef[2:(p-1)] - PO.sp.out$coef[1]
+               },
+               "Binary"={
+                   mu.init <- mean(as.numeric(as.character(long.df$Y)))
+
+                   columnmeans <- sapply(1:p,function(col) {
+                       mean(as.numeric(as.character(long.df$Y[long.df$COL==col])))
+                   })
+                   beta <- columnmeans[1:(p-1)] - mu.init
+                   ## If not using constraint that beta sum to zero,
+                   ## beta1 will be 0 so need to correct other elements
+                   ## of beta accordingly
+                   if (constraint.sum.zero) beta.init <- beta[1:(p-1)]
+                   else beta.init <- beta[2:p] - beta[1]
+               })
+    } else {
+        q <- length(levels(long.df$Y))
+        mu.init <- runif(q-1, min=-5, max=5)
+        beta.init <- runif(p-1,min=-2,max=2)
+    }
 
     list(mu.init=mu.init, beta.init=beta.init)
 }
 
-generate.alpha.pi.init <- function(long.df, RG, constraint.sum.zero=TRUE) {
-    if (all(table(long.df[,c("ROW","COL")]) == 1)) {
+generate.alpha.pi.init <- function(long.df, RG, constraint.sum.zero=TRUE,
+                                   use.random=FALSE) {
+    if (!use.random & all(table(long.df[,c("ROW","COL")]) == 1)) {
         ## convert to data matrix
         y.mat <- df2mat(long.df)
 
@@ -135,7 +147,7 @@ generate.alpha.pi.init <- function(long.df, RG, constraint.sum.zero=TRUE) {
             alpha.init <- alpha.kmeans[-1]
         }
     } else {
-        print("Some data is missing, so generating random start instead of using kmeans.")
+        if (all(table(long.df[,c("ROW","COL")]) != 1)) print("Some data is missing, so generating random start instead of using kmeans.")
 
         alpha.init <- runif(RG-1, min=-5, max=5)
         pi.init <- generate.mixing.proportions(RG)
@@ -158,16 +170,19 @@ generate.initvect.rowcluster <- function(long.df, model, submodel, RG,
                                          EM.control=default.EM.control(),
                                          optim.method="L-BFGS-B", optim.control=default.optim.control(),
                                          constraint.sum.zero=TRUE,
-                                         start.from.simple.model=TRUE) {
+                                         start.from.simple.model=TRUE,
+                                         use.random=FALSE) {
 
     p <- max(long.df$COL)
     q <- length(levels(long.df$Y))
 
     if (submodel == "rs") {
-        mu.init <- generate.mu.init(long.df=long.df, model=model)
+        mu.init <- generate.mu.init(long.df=long.df, model=model,
+                                    use.random=use.random)
     } else {
         mu.beta.init <- generate.mu.beta.init(long.df=long.df, model=model,
-                                           constraint.sum.zero = constraint.sum.zero)
+                                              constraint.sum.zero = constraint.sum.zero,
+                                              use.random=use.random)
         mu.init <- mu.beta.init$mu.init
         beta.init <- mu.beta.init$beta.init
     }
@@ -181,7 +196,9 @@ generate.initvect.rowcluster <- function(long.df, model, submodel, RG,
         initvect <- c(initvect, u.init)
     }
 
-    alpha.pi.init <- generate.alpha.pi.init(long.df=long.df, RG=RG, constraint.sum.zero=constraint.sum.zero)
+    alpha.pi.init <- generate.alpha.pi.init(long.df=long.df, RG=RG,
+                                            constraint.sum.zero=constraint.sum.zero,
+                                            use.random=use.random)
     alpha.init <- alpha.pi.init$alpha.init
     pi.init <- alpha.pi.init$pi.init
 
@@ -213,7 +230,7 @@ generate.initvect.rowcluster <- function(long.df, model, submodel, RG,
                                     optim.control=optim.control)
         cat("=== End of RS model fitting ===\n")
         if (all(rs.out$pi.out > 1E-20))
-        pi.init <- rs.out$pi.out
+            pi.init <- rs.out$pi.out
         initvect[1:length(rs.out$outvect)] <- rs.out$outvect
     }
 
@@ -224,11 +241,13 @@ generate.initvect.bicluster <- function(long.df, model, submodel, RG, CG,
                                         EM.control=default.EM.control(),
                                         optim.method="L-BFGS-B", optim.control=default.optim.control(),
                                         constraint.sum.zero=TRUE,
-                                        start.from.simple.model=TRUE) {
+                                        start.from.simple.model=TRUE,
+                                        use.random=FALSE) {
 
     q <- length(levels(long.df$Y))
 
-    mu.init <- generate.mu.init(long.df=long.df, model=model)
+    mu.init <- generate.mu.init(long.df=long.df, model=model,
+                                use.random=use.random)
     initvect <- mu.init
 
     if (model == "OSM") {
@@ -238,14 +257,18 @@ generate.initvect.bicluster <- function(long.df, model, submodel, RG, CG,
         initvect <- c(initvect, u.init)
     }
 
-    alpha.pi.init <- generate.alpha.pi.init(long.df=long.df, RG=RG, constraint.sum.zero=constraint.sum.zero)
+    alpha.pi.init <- generate.alpha.pi.init(long.df=long.df, RG=RG,
+                                            constraint.sum.zero=constraint.sum.zero,
+                                            use.random=use.random)
     alpha.init <- alpha.pi.init$alpha.init
     pi.init <- alpha.pi.init$pi.init
 
     long.df.transp <- long.df
     long.df.transp$ROW <- long.df$COL
     long.df.transp$COL <- long.df$ROW
-    beta.kappa.init <- generate.alpha.pi.init(long.df=long.df.transp, RG=CG, constraint.sum.zero=constraint.sum.zero)
+    beta.kappa.init <- generate.alpha.pi.init(long.df=long.df.transp, RG=CG,
+                                              constraint.sum.zero=constraint.sum.zero,
+                                              use.random=use.random)
 
     beta.init <- beta.kappa.init$alpha.init
     kappa.init <- beta.kappa.init$pi.init
@@ -325,10 +348,32 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
 
     ## Generate initvect -------------------------------------------------------
     if (is.null(initvect)) {
-        initvect.pi.init <- generate.initvect.rowcluster(long.df, model=model, submodel=submodel, RG=RG,
-                                     constraint.sum.zero = constraint.sum.zero,
-                                     start.from.simple.model = start.from.simple.model)
-        initvect <- initvect.pi.init$initvect
+
+        best.lli <- -Inf
+        for (s in 1:nstarts) {
+            cat(paste0("Randomly generated start #",s,"\n"))
+            initvect.pi.init <- generate.initvect.rowcluster(long.df, model=model, submodel=submodel, RG=RG,
+                                                             constraint.sum.zero = constraint.sum.zero,
+                                                             start.from.simple.model = start.from.simple.model,
+                                                             use.random=(s>1))
+
+            print(initvect.pi.init$initvect)
+
+            init.out <- run.EM.rowcluster(invect=initvect.pi.init$initvect,
+                                          long.df=long.df, model=model,submodel=submodel,
+                                          pi.v=initvect.pi.init$pi.init,
+                                          EM.control=startEM.control(EM.control),
+                                          optim.method=optim.method,
+                                          optim.control=optim.control)
+
+            new.lli <- init.out$EM.status$best.lli
+            if (new.lli > best.lli) {
+                cat(paste("Found better incomplete LL:",new.lli,"\n"))
+                best.lli <- new.lli
+                initvect.pi.init <- list(initvect=init.out$outvect,pi.init=init.out$pi.out)
+                initvect <- init.out$outvect
+            }
+        }
     }
 
     ## Generate pi.init --------------------------------------------------------
@@ -347,7 +392,8 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
                                      initvect=NULL, pi.init=NULL, kappa.init=NULL,
                                      EM.control=default.EM.control(),
                                      optim.method="L-BFGS-B", optim.control=default.optim.control(),
-                                     constraint.sum.zero=TRUE, start.from.simple.model=TRUE) {
+                                     constraint.sum.zero=TRUE, start.from.simple.model=TRUE,
+                                     nstarts=5) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
 
@@ -356,10 +402,34 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
     ## Generate initvect -------------------------------------------------------
     if (is.null(initvect)) {
 
-        initvect.pi.kappa.init <- generate.initvect.bicluster(long.df=long.df, model=model, submodel=submodel,
-                                                RG=RG, CG=CG, constraint.sum.zero=constraint.sum.zero,
-                                                start.from.simple.model=start.from.simple.model)
-        initvect <- initvect.pi.kappa.init$initvect
+        best.lli <- -Inf
+        for (s in 1:nstarts) {
+            cat(paste0("Randomly generated start #",s,"\n"))
+            initvect.pi.kappa.init <- generate.initvect.bicluster(long.df=long.df, model=model, submodel=submodel,
+                                                                  RG=RG, CG=CG, constraint.sum.zero=constraint.sum.zero,
+                                                                  start.from.simple.model=start.from.simple.model,
+                                                                  use.random=(s>1))
+
+            print(initvect.pi.kappa.init$initvect)
+
+            init.out <- run.EM.bicluster(invect=initvect.pi.kappa.init$initvect,
+                                         long.df=long.df, model=model,submodel=submodel,
+                                         pi.v=initvect.pi.kappa.init$pi.init,
+                                         kappa.v=initvect.pi.kappa.init$kappa.init,
+                                         EM.control=startEM.control(EM.control),
+                                         optim.method=optim.method,
+                                         optim.control=optim.control)
+
+            new.lli <- init.out$EM.status$best.lli
+            if (new.lli > best.lli) {
+                cat(paste("Found better incomplete LL:",new.lli,"\n"))
+                best.lli <- new.lli
+                initvect.pi.kappa.init <- list(initvect=init.out$outvect,
+                                               pi.init=init.out$pi.out,
+                                               kappa.init=init.out$kappa.out)
+                initvect <- init.out$outvect
+            }
+        }
     }
 
     ## Generate pi.init and kappa.init -----------------------------------------
