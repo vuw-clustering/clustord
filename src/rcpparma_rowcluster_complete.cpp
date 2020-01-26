@@ -12,6 +12,7 @@ double rcpparma_Rclusterll(arma::mat & ymat, arma::cube & theta,
 
     for (int rr=0; rr<RG; ++rr) {
         arma::mat log_thetaymat(n,p);
+        log_thetaymat.fill(0);
 
         for (int jj=0; jj<p; ++jj) {
             for (int ii=0; ii<n; ++ii) {
