@@ -90,7 +90,7 @@ calc.criteria <- function(ll, llc,  npar, n, p) {
     AIC <- -2*ll + 2*npar
     AICc <- AIC + (2*(npar+1)*(npar+2))/(n*p - npar - 2)
     BIC <- -2*ll + npar*log(n*p)
-    ICL <- 2*llc + npar*log(n*p)
+    ICL <- -2*llc + npar*log(n*p)
 
     list(Res.Dev=Res.Dev, AIC=AIC, AICc=AICc, BIC=BIC, ICL=ICL)
 }
