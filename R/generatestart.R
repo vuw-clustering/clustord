@@ -370,16 +370,15 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
             if (new.lli > best.lli) {
                 cat(paste("Found better incomplete LL:",new.lli,"\n"))
                 best.lli <- new.lli
-                initvect.pi.init <- list(initvect=init.out$outvect,pi.init=init.out$pi.out)
+                best.initvect.pi.init <- list(initvect=init.out$outvect,pi.init=init.out$pi.out)
                 initvect <- init.out$outvect
             }
         }
     }
-
     ## Generate pi.init --------------------------------------------------------
     if (is.null(pi.init)) {
-        if (exists("initvect.pi.init") && !is.null(initvect.pi.init)) {
-            pi.init <- initvect.pi.init$pi.init
+        if (exists("initvect.pi.init") && !is.null(best.initvect.pi.init)) {
+            pi.init <- best.initvect.pi.init$pi.init
         } else {
             pi.init <- generate.mixing.proportions(RG)
         }
@@ -424,7 +423,7 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
             if (new.lli > best.lli) {
                 cat(paste("Found better incomplete LL:",new.lli,"\n"))
                 best.lli <- new.lli
-                initvect.pi.kappa.init <- list(initvect=init.out$outvect,
+                best.initvect.pi.kappa.init <- list(initvect=init.out$outvect,
                                                pi.init=init.out$pi.out,
                                                kappa.init=init.out$kappa.out)
                 initvect <- init.out$outvect
@@ -434,17 +433,17 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
 
     ## Generate pi.init and kappa.init -----------------------------------------
     if (is.null(pi.init)) {
-        if (exists("initvect.pi.kappa.init") && !is.null(initvect.pi.kappa.init))
+        if (exists("initvect.pi.kappa.init") && !is.null(best.initvect.pi.kappa.init))
         {
-            pi.init <- initvect.pi.kappa.init$pi.init
+            pi.init <- best.initvect.pi.kappa.init$pi.init
         } else {
             pi.init <- generate.mixing.proportions(RG)
         }
     }
     if (is.null(kappa.init)) {
-        if (exists("initvect.pi.kappa.init") && !is.null(initvect.pi.kappa.init))
+        if (exists("initvect.pi.kappa.init") && !is.null(best.initvect.pi.kappa.init))
         {
-            kappa.init <- initvect.pi.kappa.init$kappa.init
+            kappa.init <- best.initvect.pi.kappa.init$kappa.init
         } else {
             kappa.init <- generate.mixing.proportions(CG)
         }
