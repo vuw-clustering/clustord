@@ -8,7 +8,7 @@ M <- 10 # number of columns
 R <- 2
 
 # probability of 1 for each cluster
-theta_r <- c(0., 1.)
+theta_r <- c(0.25, 0.75)
 
 # row mixing ratio
 pi_r <- c(0.2, 0.8)
@@ -24,6 +24,7 @@ cum.sum.ns <- cumsum(ns)
 data <- rep(NA, N*M)
 rows <- rep(NA, N*M)
 cols <- rep(NA, N*M)
+thetas <- rep(NA, N*M)
 x <- rnorm(N, mean = 4, sd =1) #covariate
 
 for(i in 1:N) {
@@ -38,13 +39,14 @@ for(i in 1:N) {
 
     for(j in 1:M){
         k <- M*(i - 1) + j
-        data[k] <- rbinom(1, 1, expit(logit(theta_r[r]) + delta*x[i]) )  #adding covariate effect
+        thetas[k] <- expit(logit(theta_r[r]) + delta*x[i]) 
+        data[k] <- rbinom(1, 1, thetas[k] )  #adding covariate effect
         rows[k] <- i
         cols[k] <- j
     }
 }
 
-long.df <- data.frame(Y = factor(data), ROW = rows, COL = cols, COV = x)
+long.df <- data.frame(Y = factor(data), ROW = rows, COL = cols, COV = x, THETA = thetas)
 print(long.df)
 
 #cluster
@@ -60,3 +62,32 @@ results <- rowclustering("Y~row", model = "Binary",
 print(results)
 
 # #check
+# #calculate MSE of estimated theta_r
+
+theta_r_hat <- expit(results$parlist.out$mu + results$parlist.out$alpha)
+
+#we can't compare theta_r_hat[r] with theta_r[r] b/c order in theta_r_hat[r] might have changed
+
+theta.mse.error <- 0
+for(r in 1:R){
+	for(i in results$RowClusters[[r]]){
+		for(j in 1:M){
+			k <- M*(i - 1) + j
+			theta.exact <- long.df$THETA[k]
+			theta.model <- expit(results$parlist.out$mu + results$parlist.out$alpha[r])
+			theta.mse.error <- theta.mse.error + (theta.exact - theta.model)^2
+		}
+	}
+}
+theta.mse.error <- theta.mse.error / (N*M)
+print(sprintf("MSE(theta) = %.5g",theta.mse.error))
+
+
+
+
+
+
+
+
+
+
