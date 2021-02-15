@@ -14,31 +14,33 @@ theta_r <- c(0., 1.)
 pi_r <- c(0.2, 0.8)
 
 # covariate effect
-delta <- 2
+delta <- 0.0
 
 #generate data
 ns <- round(pi_r*N)
-ns[R] <- N - sum(ns[1:(R-1)])
+ns[R] <- N - sum(ns[1:(R-1)]) #ensures sum of ns values is N because rounding can throw things off
 cum.sum.ns <- cumsum(ns)
 
 data <- rep(NA, N*M)
 rows <- rep(NA, N*M)
 cols <- rep(NA, N*M)
-x <- rnorm(N*M, mean = 4, sd =1) #covariate
+x <- rnorm(N, mean = 4, sd =1) #covariate
 
 for(i in 1:N) {
-    # row group
+
+    #assign group "r" to the row
     for(r in 1:R) {
         if(i <= cum.sum.ns[r]) {
+        	#found my group "r"
             break
         }
     }
+
     for(j in 1:M){
         k <- M*(i - 1) + j
-        data[k] <- rbinom(1, 1, expit(logit(theta_r[r]) + delta*x[k]) )  #adding covariate effect
+        data[k] <- rbinom(1, 1, expit(logit(theta_r[r]) + delta*x[i]) )  #adding covariate effect
         rows[k] <- i
         cols[k] <- j
-      
     }
 }
 
