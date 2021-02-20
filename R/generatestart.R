@@ -176,7 +176,7 @@ generate.initvect.rowcluster <- function(long.df, model, submodel, RG,
     p <- max(long.df$COL)
     q <- length(levels(long.df$Y))
 
-    if (submodel == "rs") {
+    if ((submodel == "rs") || (submodel == "rsd")) {
         mu.init <- generate.mu.init(long.df=long.df, model=model,
                                     use.random=use.random)
     } else {
@@ -206,6 +206,10 @@ generate.initvect.rowcluster <- function(long.df, model, submodel, RG,
            "rs"={
                initvect <- c(initvect,alpha.init)
            },
+           "rsd"={
+               # add delta for covariate effects, initially zero
+               initvect <- c(initvect,alpha.init,0.0)
+           },
            "rp"={
                initvect <- c(initvect,alpha.init,beta.init)
            },
@@ -214,8 +218,8 @@ generate.initvect.rowcluster <- function(long.df, model, submodel, RG,
                initvect <- c(initvect,alpha.init,beta.init,gamma.init)
            },stop("Invalid model for row/column clustering"))
 
-    if (submodel %in% c("rp","rpi") & start.from.simple.model) {
-        cat("Using the output of RS model as initial values for RP/RPI model\n")
+    if (submodel %in% c("rp","rpi","rsd") & start.from.simple.model) {
+        cat("Using the output of RS model as initial values for RP/RPI/RSD model\n")
 
         invect <- switch(model,
                          "OSM"=initvect[1:(q-1+q-2+RG-1)],
@@ -223,7 +227,7 @@ generate.initvect.rowcluster <- function(long.df, model, submodel, RG,
                          "Binary"=initvect[1:(1+RG-1)])
 
         rs.out <- run.EM.rowcluster(invect=invect,
-                                    long.df, model=model,submodel="rs",
+                                    long.df, row.covariate=NULL, model=model,submodel="rs",
                                     pi.v=pi.init,
                                     EM.control=startEM.control(EM.control),
                                     optim.method=optim.method,

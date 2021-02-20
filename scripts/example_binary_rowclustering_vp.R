@@ -1,9 +1,8 @@
 library(clustord)
 
-create_data <- function(M, N, R, pi_r, theta_r, delta){
+create_data <- function(M, N, R, pi_r, theta_r, delta = 0.0){
 
-    # covariate effect
-    delta <- 0.0
+    # covariate effect delta
 
     #generate data
     ns <- round(pi_r*N)
@@ -14,7 +13,9 @@ create_data <- function(M, N, R, pi_r, theta_r, delta){
     rows <- rep(NA, N*M)
     cols <- rep(NA, N*M)
     thetas <- rep(NA, N*M)
-    x <- rnorm(N, mean = 4, sd =1) #covariate
+
+    #covariate 
+    row.covariate <- rnorm(N, mean = 4, sd =1) #covariate
 
     for(i in 1:N) {
 
@@ -28,23 +29,26 @@ create_data <- function(M, N, R, pi_r, theta_r, delta){
 
         for(j in 1:M){
             k <- M*(i - 1) + j
-            thetas[k] <- expit(logit(theta_r[r]) + delta*x[i]) 
+            thetas[k] <- expit(logit(theta_r[r]) + delta*row.covariate[i]) 
             data[k] <- rbinom(1, 1, thetas[k] )  #adding covariate effect
             rows[k] <- i
             cols[k] <- j
         }
     }
 
-    long.df <- data.frame(Y = factor(data), ROW = rows, COL = cols, COV = x, THETA = thetas)
-    return(long.df)
+    long.df <- data.frame(Y = factor(data), ROW = rows, COL = cols, THETA = thetas)
+
+    return(list(long.df = long.df, row.covariate = row.covariate))
 }
 
-ex_rowclustering <- function(long.df){
+ex_rowclustering <- function(long.df, row.covariate){
     #cluster
     #initvect <- c(mu, phi, alpha, beta)
-    results <- rowclustering("Y~row", model = "Binary", 
+    formula <- "Y~row" #+row.covariate"
+    results <- rowclustering(formula, model = "Binary", 
                              nclus.row = R,
-                             long.df, initvect = NULL,
+                             long.df, row.covariate = row.covariate,
+                             initvect = NULL,
                              pi.init = pi_r,
                              EM.control = default.EM.control(),
                              optim.method = "L-BFGS-B", optim.control = default.optim.control(),
@@ -87,8 +91,8 @@ theta_r <- c(0.25, 0.75)
 # row mixing ratio
 pi_r <- c(0.2, 0.8)
 
-long.df <- create_data(M, N, R, pi_r, theta_r, delta)
-theta.mse.error <- ex_rowclustering(long.df)
+data.list <- create_data(M, N, R, pi_r, theta_r, delta = 0.0)
+theta.mse.error <- ex_rowclustering(long.df = data.list$long.df, row.covariate = data.list$row.covariate)
 
 print(sprintf("MSE(theta) = %.5g",theta.mse.error))
 

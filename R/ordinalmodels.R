@@ -1,4 +1,4 @@
-unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constraint.sum.zero=TRUE) {
+unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constraint.sum.zero=TRUE, row.covariate=NULL) {
     switch(model,
            "OSM"={
                mu <- c(0,invect[1:(q-1)])
@@ -138,6 +138,11 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constra
                           parlist <- list(n=n,p=p,mu=mu,alpha=alpha)
                           nelts <- 1 + RG-1
                       },
+                      "rsd"={
+                      	  delta <- invect[1+RG-1+1]
+                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha,delta=delta)
+                          nelts <- 1 + RG-1 + 1
+                      },
                       "rp"={
                           beta <- invect[(1+RG-1+1):(1+RG-1+p-1)]
                           if (constraint.sum.zero) beta <- c(beta, -sum(beta))
@@ -193,7 +198,7 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constra
     parlist
 }
 
-calc.theta <- function(parlist, model, submodel) {
+calc.theta <- function(parlist, model, submodel, row.covariate) {
     switch(model,
            "OSM"={
                switch(submodel,
@@ -214,6 +219,7 @@ calc.theta <- function(parlist, model, submodel) {
            "Binary"={
                switch(submodel,
                       "rs"=theta.Binary.rs(parlist),
+                      "rsd"=theta.Binary.rsd(parlist,row.covariate),
                       "rp"=theta.Binary.rp(parlist),
                       "rpi"=theta.Binary.rpi(parlist),
                       "rc"=theta.Binary.rc(parlist),
@@ -533,6 +539,27 @@ theta.Binary.rs <- function(parlist) {
     for (r in 1:RG){
         ## Normalize theta values
         theta[r,1:p,] <- theta[r,1:p,]/rowSums(theta[r,1:p,])
+    }
+
+    theta
+}
+
+theta.Binary.rsd <- function(parlist,row.covariate) {
+    n <- parlist$n
+    p <- parlist$p
+    RG <- length(parlist$alpha)
+
+    theta <- array(NA, c(RG,n,2))
+    theta[1:RG,1:n,1] <- 1
+    for(r in 1:RG){
+    	for(i in 1:n){
+    		theta[r,i,2] <- exp(parlist$mu + parlist$alpha[r] + parlist$delta*row.covariate[i])
+    	}
+        
+    }
+    for (r in 1:RG){
+        ## Normalize theta values
+        theta[r,1:n,] <- theta[r,1:n,]/rowSums(theta[r,1:n,])
     }
 
     theta
