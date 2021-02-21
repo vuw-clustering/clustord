@@ -1,6 +1,6 @@
 library(clustord)
 
-create_data <- function(M, N, R, pi_r, theta_r, delta = 0.0){
+create_data <- function(M, N, R, pi_r, theta_r, delta){
 
     # covariate effect delta
 
@@ -13,6 +13,7 @@ create_data <- function(M, N, R, pi_r, theta_r, delta = 0.0){
     rows <- rep(NA, N*M)
     cols <- rep(NA, N*M)
     thetas <- rep(NA, N*M)
+    true.membership <- rep(NA, N)
 
     #covariate 
     row.covariate <- rnorm(N, mean = 4, sd =1) #covariate
@@ -27,6 +28,8 @@ create_data <- function(M, N, R, pi_r, theta_r, delta = 0.0){
             }
         }
 
+        true.membership[i] <- r
+
         for(j in 1:M){
             k <- M*(i - 1) + j
             thetas[k] <- expit(logit(theta_r[r]) + delta*row.covariate[i]) 
@@ -38,13 +41,12 @@ create_data <- function(M, N, R, pi_r, theta_r, delta = 0.0){
 
     long.df <- data.frame(Y = factor(data), ROW = rows, COL = cols, THETA = thetas)
 
-    return(list(long.df = long.df, row.covariate = row.covariate))
+    return(list(long.df = long.df, row.covariate = row.covariate, true.membership = true.membership))
 }
 
-ex_rowclustering <- function(long.df, row.covariate){
+ex_rowclustering <- function(formula, long.df, row.covariate){
     #cluster
     #initvect <- c(mu, phi, alpha, beta)
-    formula <- "Y~row" #+row.covariate"
     results <- rowclustering(formula, model = "Binary", 
                              nclus.row = R,
                              long.df, row.covariate = row.covariate,
@@ -91,10 +93,34 @@ theta_r <- c(0.25, 0.75)
 # row mixing ratio
 pi_r <- c(0.2, 0.8)
 
-data.list <- create_data(M, N, R, pi_r, theta_r, delta = 0.0)
-theta.mse.error <- ex_rowclustering(long.df = data.list$long.df, row.covariate = data.list$row.covariate)
+data.list <- create_data(M, N, R, pi_r, theta_r, delta = 1)
 
-print(sprintf("MSE(theta) = %.5g",theta.mse.error))
+formula <- "Y~row+row.covariate"
 
+results <- rowclustering(formula, model = "Binary", 
+                             nclus.row = R,
+                             long.df = data.list$long.df, row.covariate = data.list$row.covariate,
+                             initvect = NULL,
+                             pi.init = pi_r,
+                             EM.control = default.EM.control(),
+                             optim.method = "L-BFGS-B", optim.control = default.optim.control(),
+                             constraint.sum.zero = TRUE, start.from.simple.model = TRUE,
+                             nstarts = 5)
+#theta.mse.error <- ex_rowclustering(formula, long.df = data.list$long.df, row.covariate = data.list$row.covariate)
 
+#print(sprintf("MSE(theta) = %.5g",theta.mse.error))
+
+check_results <- function(output, true_membership, type="row") {
+    total <- switch(type,"row"=N,"col"=M)
+    result_clust <- result <- switch(type,"row"=output$ppr,"col"=output$ppc)
+    assignments <- apply(result_clust,1,which.max)
+    percent_correct <- sum(assignments==true_membership)/total*100
+    percent_confident_correct <- sum(assignments==true_membership &
+                                             (result_clust[,1] > 0.8 | result_clust[,1] < 0.2))/total*100
+
+    list(percent_correct = percent_correct,
+         percent_confident_correct = percent_confident_correct)
+}
+
+check_results(results, data.list$true_membership, type = "row")
 

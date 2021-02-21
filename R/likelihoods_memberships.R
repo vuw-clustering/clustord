@@ -85,8 +85,8 @@ calc.ll <- function(invect, long.df, row.covariate, y.mat, model, submodel, ppr.
     if (SE.calc) {
         if (submodel %in% c("rs","rp","rpi")) {
             Rcluster.Incll(long.df, this.theta, pi.v, RG)
-        # } else if (submodel %in% c("rsd")) {
-        #     Rcluster.Incll.rsd(long.df, this.theta, pi.v, RG)
+        } else if (submodel %in% c("rsd")) {
+            Rcluster.Incll.rsd(long.df, this.theta, pi.v, RG)
         } else if (submodel %in% c("rc","rci")) {
             Bicluster.IncllApprox(long.df=long.df, y.mat=y.mat, theta=this.theta,
                                   ppr.m=ppr.m, ppc.m=ppc.m, pi.v=pi.v, kappa.v=kappa.v)
@@ -94,8 +94,8 @@ calc.ll <- function(invect, long.df, row.covariate, y.mat, model, submodel, ppr.
     } else {
         if (submodel %in% c("rs","rp","rpi")) {
             Rcluster.ll(long.df, y.mat, this.theta, ppr.m, pi.v, RG, partial=partial)
-        # } else if(submodel %in% c("rsd")) {
-        #     Rcluster.ll.rsd(long.df, y.mat, this.theta, ppr.m, pi.v, RG, partial=partial))
+        } else if (submodel %in% c("rsd")) {
+            Rcluster.ll.rsd(long.df, y.mat, this.theta, ppr.m, pi.v, RG, partial=partial)
         } else if (submodel %in% c("rc","rci")) {
             Bicluster.ll(long.df, y.mat, this.theta, ppr.m, ppc.m, pi.v, kappa.v, partial=partial)
         }
@@ -185,7 +185,7 @@ Rcluster.ll.rsd <- function(long.df, y.mat, theta, ppr.m, pi.v, RG, partial=FALS
             }
         }
 
-        print(sprintf("*** nrow(log.theta.y.mat)=%d ncol(log.theta.y.mat)=%d", nrow(log.theta.y.mat), ncol(log.theta.y.mat)))
+        #print(sprintf("*** nrow(log.theta.y.mat)=%d ncol(log.theta.y.mat)=%d", nrow(log.theta.y.mat), ncol(log.theta.y.mat)))
         llc <- llc + sum(t(ppr.m[,r])%*%log.theta.y.mat)
     }
     if (!partial) llc <- llc + sum(ppr.m%*%log(pi.v))

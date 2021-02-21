@@ -281,7 +281,8 @@ generate.initvect.bicluster <- function(long.df, model, submodel, RG, CG,
         cat("Fitting RS model to obtain starting values for alpha and pi.\n")
         rs.invect <- c(initvect, alpha.init)
         rs.out <- run.EM.rowcluster(invect=rs.invect,
-                                    long.df, model=model,submodel="rs",
+                                    long.df, row.covariate=NULL,
+                                    model=model,submodel="rs",
                                     pi.v=pi.init,
                                     EM.control=startEM.control(EM.control),
                                     optim.method=optim.method,
@@ -298,7 +299,8 @@ generate.initvect.bicluster <- function(long.df, model, submodel, RG, CG,
                 and COL switched, to find starting values for beta and kappa.v\n")
         sc.invect <- c(initvect, beta.init)
         sc.out <- run.EM.rowcluster(invect=sc.invect,
-                                    long.df.transp, model=model,submodel="rs",
+                                    long.df.transp, row.covariate=NULL,
+                                    model=model,submodel="rs",
                                     pi.v=kappa.init,
                                     EM.control=startEM.control(EM.control),
                                     optim.method=optim.method,
@@ -339,7 +341,7 @@ generate.initvect.bicluster <- function(long.df, model, submodel, RG, CG,
     list(initvect=initvect, pi.init=pi.init, kappa.init=kappa.init)
 }
 
-generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NULL, pi.init=NULL,
+generate.start.rowcluster <- function(long.df, row.covariate, model, submodel, RG, initvect=NULL, pi.init=NULL,
                                       EM.control=default.EM.control(),
                                       optim.method="L-BFGS-B", optim.control=default.optim.control(),
                                       constraint.sum.zero=TRUE, start.from.simple.model=TRUE,
@@ -364,7 +366,8 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
             print(initvect.pi.init$initvect)
 
             init.out <- run.EM.rowcluster(invect=initvect.pi.init$initvect,
-                                          long.df=long.df, model=model,submodel=submodel,
+                                          long.df=long.df, row.covariate=row.covariate,
+                                          model=model,submodel=submodel,
                                           pi.v=initvect.pi.init$pi.init,
                                           EM.control=startEM.control(EM.control),
                                           optim.method=optim.method,

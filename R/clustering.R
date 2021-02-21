@@ -45,7 +45,8 @@ rowclustering <- function(formula,
 
     if (is.null(initvect) | is.null(pi.init)) {
         ## generate.start will keep using whichever of initvect and pi.init is not null
-        start.par <- generate.start.rowcluster(long.df, model=model, submodel=submodel, RG=RG,
+        start.par <- generate.start.rowcluster(long.df, row.covariate=row.covariate, 
+                                               model=model, submodel=submodel, RG=RG,
                                                initvect=initvect, pi.init=pi.init,
                                                EM.control=EM.control,
                                                optim.method=optim.method,
@@ -111,7 +112,8 @@ columnclustering <- function(formula,
 
     if (is.null(initvect) | is.null(pi.init)) {
         ## generate.start will keep using whichever of initvect and kappa.init is not null
-        start.par <- generate.start.rowcluster(long.df.transp, model=model, submodel=submodel, RG=RG,
+        start.par <- generate.start.rowcluster(long.df.transp, row.covariate=NULL,
+                                               model=model, submodel=submodel, RG=RG,
                                                initvect=initvect, pi.init=kappa.init,
                                                EM.control=EM.control,
                                                optim.method=optim.method,
