@@ -145,7 +145,49 @@ print(sprintf("sqrt MSE(theta) = %.5g",sqrt(out$theta.mse.error)))
 # check_results(results, data.list$true.membership, type = "row")
 
 
-count_num_group_errors <- function(group.membership, Z) {
+# count_num_group_errors <- function(group.membership, Z) {
+#     #param: group.membership, array of size num rows, each element tells us to which group the row belongs to
+#     #param: Z, matrix of size n times G of zeros and one one
+#     #returns the number of misclassified rows
+#     n <- length(group.membership)
+
+#     # convert Z to membership array
+#     group.membership2 <- max.col(Z)
+
+#     groups <- unique(group.membership)
+#     G <- length(groups)
+
+#     all.permutations = combinat::permn(groups)
+#     num_perm <- length(all.permutations)
+
+#     # start with the worst case scenario
+#     min_num_diffs <- n
+    
+#     # iterate over all group assignment perturbations
+#     for (iperm in 1:num_perm) {
+
+#         # copy, add negative sign so we remember the old values
+#         gm2 <- -group.membership2
+
+#         for (g in 1:G) {
+#             # replace group groups[g] with all.permutations[[iperm]][g]
+#             old.val <- groups[g]
+#             new.val <- all.permutations[[iperm]][g]
+#             gm2[gm2 == -old.val] <- new.val
+#         }
+
+#         # number of differences
+#         num_diff <- sum(group.membership != gm2)
+#         if (num_diff < min_num_diffs) {
+#             # store the lowest value
+#             min_num_diffs <- num_diff
+#         }
+#     }
+
+#     return(min_num_diffs)
+# }
+
+cluster_acc <- function(group.membership, Z) {
     #param: group.membership, array of size num rows, each element tells us to which group the row belongs to
     #param: Z, matrix of size n times G of zeros and one one
     #returns the number of misclassified rows
@@ -183,7 +225,8 @@ count_num_group_errors <- function(group.membership, Z) {
             min_num_diffs <- num_diff
         }
     }
-
-    return(min_num_diffs)
+    acc <- (n - min_num_diffs)/n * 100
+    return(paste("Clustering Accuracy:", acc, "%"))
 }
-#count_num_group_errors(true.membership, Z)
+
+cluster_acc(data.list$true.membership, out$results$ppr)
