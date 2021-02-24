@@ -478,3 +478,5 @@ Bicluster.IncllApprox <- function(llc=NULL, long.df, y.mat, theta, pi.v, kappa.v
     if (is.finite(llc.correction.term)) lli <- llc - llc.correction.term
     else lli <- -Inf
 }
+
+
