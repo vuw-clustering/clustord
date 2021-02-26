@@ -4,13 +4,53 @@ get_k_index <- function(M, N, i, j){
     return(M*(i - 1) + j)
 }
 
-create_data <- function(M, N, R, pi_r, mu, alpha_r, delta){
+cluster_acc <- function(group.membership, Z) {
+    #param: group.membership, array of size num rows, each element tells us to which group the row belongs to
+    #param: Z, matrix of size n times G of zeros and one one
+    #returns the number of misclassified rows
+    n <- length(group.membership)
+    print(group.membership)
+    print(Z)
+    # convert Z to membership array
+    group.membership2 <- max.col(Z)
 
-    # covariate effect delta
+    groups <- unique(group.membership)
+    G <- length(groups)
 
-    #generate data
-    ns <- round(pi_r*N)
-    ns[R] <- N - sum(ns[1:(R-1)]) #ensures sum of ns values is N because rounding can throw things off
+    all.permutations = combinat::permn(groups)
+    num_perm <- length(all.permutations)
+
+    # start with the worst case scenario
+    min_num_diffs <- n
+    
+    # iterate over all group assignment permutations
+    for (iperm in 1:num_perm) {
+
+        # copy, add negative sign so we remember the old values
+        gm2 <- -group.membership2
+
+        for (g in 1:G) {
+            # replace group groups[g] with all.permutations[[iperm]][g]
+            old.val <- groups[g]
+            new.val <- all.permutations[[iperm]][g]
+            gm2[gm2 == -old.val] <- new.val
+        }
+
+        # number of differences
+        num_diff <- sum(group.membership != gm2)
+        #print(sprintf("groups = %s num_perm= %d n=%d G=%d iperm= %d gm2 = %s group membership = %s num differences= %d min_num_diffs=%d", groups, num_perm, n, G, iperm, gm2, group.membership, num_diff, min_num_diffs))
+        if (num_diff < min_num_diffs) {
+            # store the lowest value
+            min_num_diffs <- num_diff
+        }
+    }
+    acc <- (n - min_num_diffs)/n * 100
+    return(paste("Clustering Accuracy:", acc, "%"))
+}
+
+create_data <- function(M, N, R, pi_r, mu, alpha_r, delta, row.covariate, ns){
+
+ 
     cum.sum.ns <- cumsum(ns)
 
     data <- rep(NA, N*M)
@@ -19,10 +59,6 @@ create_data <- function(M, N, R, pi_r, mu, alpha_r, delta){
     thetas <- rep(NA, N*M)
     true.membership <- rep(NA, N)
 
-    #covariate 
-    #set 1s for first group, second group all zeros
-    row.covariate <- rep(0, N)
-    row.covariate[1:ns[1]] <- 1
 
     for(i in 1:N) {
 
@@ -47,7 +83,7 @@ create_data <- function(M, N, R, pi_r, mu, alpha_r, delta){
 
     long.df <- data.frame(Y = factor(data), ROW = rows, COL = cols, THETA = thetas)
 
-    return(list(long.df = long.df, row.covariate = row.covariate, true.membership = true.membership))
+    return(list(long.df = long.df, true.membership = true.membership))
 }
 
 ex_rowclustering <- function(formula, long.df, row.covariate, pi_r){
@@ -97,24 +133,31 @@ set.seed(123)
 
 #input
 N <- 40 # number of rows
-M <- 20 # number of columns
+M <- 40 # number of columns
 
 # number of row clusters
 R <- 2
 
 mu.in <- 0.
-alpha_r.in <- c(-2, 2)
+alpha_r.in <- c(1, -1)
 delta.in <- 1.0
 
 # row mixing ratio
-pi_r.in <- c(0.3, 0.7)
+pi_r.in <- c(0.5, 0.5)
+ns <- round(pi_r.in*N)
+ns[R] <- N - sum(ns[1:(R-1)]) #ensures sum of ns values is N because rounding can throw things off
+#covariate 
+#set 1s for first group, second group all zeros
+row.covariate <- rep(1, N)
+row.covariate[1:ns[1]] <- -0
 
-data.list <- create_data(M, N, R, pi_r = pi_r.in, mu = mu.in, alpha_r = alpha_r.in, delta = delta.in)
+data.list <- create_data(M, N, R, pi_r=pi_r.in, mu=mu.in, alpha_r=alpha_r.in, 
+    delta=delta.in, row.covariate=row.covariate, ns=ns)
 
 formula <- "Y~row+row.covariate"
 #formula <- "Y~row"
 
-out <- ex_rowclustering(formula, long.df = data.list$long.df, row.covariate = data.list$row.covariate, pi_r = pi_r.in)
+out <- ex_rowclustering(formula, long.df = data.list$long.df, row.covariate = row.covariate, pi_r = pi_r.in)
 
 d <- 0.0
 if ("delta" %in% names(out$results$parlist.init)){
@@ -128,105 +171,5 @@ print(sprintf("r=%2d mu=%8.4f alpha_r=%8.4f delta=%8.4f",
 
 print(sprintf("sqrt MSE(theta) = %.5g",sqrt(out$theta.mse.error)))
 
-# check_results <- function(output, true_membership, type="row") {
-#     total <- switch(type,"row"=N,"col"=M)
-#     result_clust <- result <- switch(type,"row"=output$ppr,"col"=output$ppc)
-#     print(result_clust)
-#     assignments <- apply(result_clust,1,which.max)
-#     print(assignments)
-#     percent_correct <- sum(assignments==true_membership)/total*100
-#     percent_confident_correct <- sum(assignments==true_membership &
-#                                              (result_clust[,1] > 0.8 | result_clust[,1] < 0.2))/total*100
-
-#     list(percent_correct = percent_correct,
-#          percent_confident_correct = percent_confident_correct)
-# }
-# data.list$true.membership
-# check_results(results, data.list$true.membership, type = "row")
-
-
-# count_num_group_errors <- function(group.membership, Z) {
-#     #param: group.membership, array of size num rows, each element tells us to which group the row belongs to
-#     #param: Z, matrix of size n times G of zeros and one one
-#     #returns the number of misclassified rows
-#     n <- length(group.membership)
-
-#     # convert Z to membership array
-#     group.membership2 <- max.col(Z)
-
-#     groups <- unique(group.membership)
-#     G <- length(groups)
-
-#     all.permutations = combinat::permn(groups)
-#     num_perm <- length(all.permutations)
-
-#     # start with the worst case scenario
-#     min_num_diffs <- n
-    
-#     # iterate over all group assignment perturbations
-#     for (iperm in 1:num_perm) {
-
-#         # copy, add negative sign so we remember the old values
-#         gm2 <- -group.membership2
-
-#         for (g in 1:G) {
-#             # replace group groups[g] with all.permutations[[iperm]][g]
-#             old.val <- groups[g]
-#             new.val <- all.permutations[[iperm]][g]
-#             gm2[gm2 == -old.val] <- new.val
-#         }
-
-#         # number of differences
-#         num_diff <- sum(group.membership != gm2)
-#         if (num_diff < min_num_diffs) {
-#             # store the lowest value
-#             min_num_diffs <- num_diff
-#         }
-#     }
-
-#     return(min_num_diffs)
-# }
-
-cluster_acc <- function(group.membership, Z) {
-    #param: group.membership, array of size num rows, each element tells us to which group the row belongs to
-    #param: Z, matrix of size n times G of zeros and one one
-    #returns the number of misclassified rows
-    n <- length(group.membership)
-
-    # convert Z to membership array
-    group.membership2 <- max.col(Z)
-
-    groups <- unique(group.membership)
-    G <- length(groups)
-
-    all.permutations = combinat::permn(groups)
-    num_perm <- length(all.permutations)
-
-    # start with the worst case scenario
-    min_num_diffs <- n
-    
-    # iterate over all group assignment perturbations
-    for (iperm in 1:num_perm) {
-
-        # copy, add negative sign so we remember the old values
-        gm2 <- -group.membership2
-
-        for (g in 1:G) {
-            # replace group groups[g] with all.permutations[[iperm]][g]
-            old.val <- groups[g]
-            new.val <- all.permutations[[iperm]][g]
-            gm2[gm2 == -old.val] <- new.val
-        }
-
-        # number of differences
-        num_diff <- sum(group.membership != gm2)
-        if (num_diff < min_num_diffs) {
-            # store the lowest value
-            min_num_diffs <- num_diff
-        }
-    }
-    acc <- (n - min_num_diffs)/n * 100
-    return(paste("Clustering Accuracy:", acc, "%"))
-}
-
-cluster_acc(data.list$true.membership, out$results$ppr)
+print(out$results)
+#cluster_acc(data.list$true.membership, out$results$ppr)
