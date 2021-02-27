@@ -1,4 +1,5 @@
 library(clustord)
+library(plot.matrix)
 
 get_k_index <- function(M, N, i, j){
     return(M*(i - 1) + j)
@@ -45,7 +46,8 @@ cluster_acc <- function(group.membership, Z) {
         }
     }
     acc <- (n - min_num_diffs)/n * 100
-    return(paste("Clustering Accuracy:", acc, "%"))
+    #return(paste("Clustering Accuracy:", acc, "%"))
+    return(acc)
 }
 
 create_data <- function(M, N, R, pi_r, mu, alpha_r, delta, row.covariate, ns){
@@ -83,7 +85,19 @@ create_data <- function(M, N, R, pi_r, mu, alpha_r, delta, row.covariate, ns){
 
     long.df <- data.frame(Y = factor(data), ROW = rows, COL = cols, THETA = thetas)
 
-    return(list(long.df = long.df, true.membership = true.membership))
+    z.true <- matrix(0, nrow= N, ncol = R)
+        for (i in 1:length(true.membership)){
+          if(true.membership[i] ==1){
+              z.true[i, 1] <- 1
+              z.true[i, 2] <- 0
+          }
+          else{
+              z.true[i, 1] <- 0
+              z.true[i, 2] <- 1
+          }
+        }
+
+    return(list(long.df = long.df, true.membership = true.membership, z.true = z.true))
 }
 
 ex_rowclustering <- function(formula, long.df, row.covariate, pi_r){
@@ -359,7 +373,7 @@ case3 <- function(Nvals){
 
     ncases <- length(Nvals)
 
-    results <- data.frame(N=rep(NA, ncases*2), M=rep(NA, ncases*2), formula=rep(NA, ncases*2), MSE=rep(NA, ncases*2), clust.acc=rep(NA, ncases*2))
+    results <- data.frame(N=rep(NA, ncases*2), M=rep(NA, ncases*2), formula=rep(NA, ncases*2), MSE=rep(NA, ncases*2), clust.acc.prcnt=rep(NA, ncases*2))
 
     i <- 1
     for (N in Nvals){
@@ -375,6 +389,11 @@ case3 <- function(Nvals){
         data.list <- create_data(M, N, R, pi_r=pi_r.in, mu=mu.in, alpha_r=alpha_r.in, 
             delta=delta.in, row.covariate=row.covariate, ns=ns)
 
+        filename <- sprintf("case3_N%d.png", N)
+        png(filename, bg="transparent", width=500, height=500, units = "mm", res= 360, pointsize = 50)
+        plot(data.list$z.true, xlab="Row Cluster", main = sprintf("N=M=%d: True Membership", N))
+        dev.off()
+
         for (formula in c("Y~row", "Y~row+row.covariate")){
 
             out <- ex_rowclustering(formula, long.df = data.list$long.df, row.covariate = row.covariate, pi_r = pi_r.in)
@@ -384,7 +403,32 @@ case3 <- function(Nvals){
             results$M[i] <- M
             results$formula[i] <- formula
             results$MSE[i] <- out$theta.mse.error
-            results$clust.acc[i] <- cluster_acc(data.list$true.membership, out$results$ppr)
+            results$clust.acc.prcnt[i] <- cluster_acc(data.list$true.membership, out$results$ppr)
+
+            filename <- sprintf("case3_N%d_%s.png", N, formula)
+            png(filename, bg="transparent", width=700, height=500, units = "mm", res = 360, pointsize = 50)
+            title <- sprintf("N=M=%d %s: Est. Membership", N, formula)
+            plot(out$results$ppr, xlab="Row Cluster", main = title)
+            dev.off()
+
+
+
+
+            # #coerce z.hat to 0 or 1
+            # z.est <- out$results$ppr
+            # #print(z)
+            # #Z <- mapply(Z, function(x) ifelse(x>=0.5, 1, 0))
+            # for (i in 1:nrow(z.est)){
+            #   for (j in 1:ncol(z.est)){
+            #       z.est[i,j] <- ifelse(z.est[i,j] >= 0.5, 1, 0)
+            #   }
+            # }
+            # #print(z)
+            # jpeg('plot_case1_clustered.jpg',bg="transparent", width=500, height=500, units = "mm", res= 360,pointsize = 50)
+            # plot(z.est, xlab="Row Cluster", main = "Case 1: Heatmap of Row Clustered Data")
+            # dev.off()
+            # #heatmap(z.est)
+
 
             i <- i + 1
 
