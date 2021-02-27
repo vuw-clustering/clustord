@@ -335,91 +335,104 @@ ex_rowclustering <- function(formula, long.df, row.covariate, pi_r){
 ############
 
 
-set.seed(123)
+case_3 <- function(Nvals){
+    #case 3 has row covariate effect ingrained in synthetic data
+    #param: Nvals, values for different number of rows
+    
+    set.seed(123)
 
-#input
-N <- 20 # number of rows
-M <- 20 # number of columns
+    # number of row clusters
+    R <- 2
 
-# number of row clusters
-R <- 2
+    mu.in <- 0.0
+    alpha_r.in <- c(-0.5, 0.5)
+    delta.in <- 1.0
 
-mu.in <- 0.0
-alpha_r.in <- c(-0.5, 0.5)
-delta.in <- 1.0
+    # row mixing ratio
+    pi_r.in <- c(0.5, 0.5)
+    ns <- round(pi_r.in*N)
+    ns[R] <- N - sum(ns[1:(R-1)]) #ensures sum of ns values is N because rounding can throw things off
 
-# row mixing ratio
-pi_r.in <- c(0.5, 0.5)
-ns <- round(pi_r.in*N)
-ns[R] <- N - sum(ns[1:(R-1)]) #ensures sum of ns values is N because rounding can throw things off
+    results <- data.frame(N=c(), M=c(), formula=c(), MSE=c(), clust.acc=c())
 
-#covariate 
-row.covariate <- cos(seq(from = 0, to = 2*pi, by = 2*pi/(N-1))) #we want things to vary and cosine varies, could represent seasonal effect on the data
+    for (N in Nvals){
 
-data.list <- create_data(M, N, R, pi_r=pi_r.in, mu=mu.in, alpha_r=alpha_r.in, 
-    delta=delta.in, row.covariate=row.covariate, ns=ns)
+        M <- N
 
-formula <- "Y~row+row.covariate"
-#formula <- "Y~row"
+        #covariate 
+        row.covariate <- cos(seq(from = 0, to = 2*pi, by = 2*pi/(N-1))) #we want things to vary and cosine varies, could represent seasonal effect on the data
 
-out <- ex_rowclustering(formula, long.df = data.list$long.df, row.covariate = row.covariate, pi_r = pi_r.in)
+        data.list <- create_data(M, N, R, pi_r=pi_r.in, mu=mu.in, alpha_r=alpha_r.in, 
+            delta=delta.in, row.covariate=row.covariate, ns=ns)
 
-d <- 0.0
-if ("delta" %in% names(out$results$parlist.init)){
-    d <- out$results$parlist.init$delta
+        for (formula in c("Y~row", "Y~row+row.covariate")){
+
+            out <- ex_rowclustering(formula, long.df = data.list$long.df, row.covariate = row.covariate, pi_r = pi_r.in)
+            ca <- cluster_acc(data.list$true.membership, out$results$ppr)
+
+            #append results
+            results$N <- c(results$N, N)
+            results$M <- c(results$M, M)
+            results$formula <- c(results$formula, formula)
+            results$MSE <- c(results$MSE, out$theta.mse.error)
+            results$clust.acc <- c(results$clust.acc, ca)
+
+        }
+
+    }
+
+    return(results)
+
 }
 
-for (r in 1:R) {
-print(sprintf("r=%2d mu=%8.4f alpha_r=%8.4f delta=%8.4f",
-      r, out$results$parlist.out$mu, out$results$parlist.out$alpha[r], d))
-}
 
-print(sprintf("sqrt MSE(theta) = %.5g",sqrt(out$theta.mse.error)))
+results <- case3(Nvals=c(10,20))
+print(results)
 
-print(out$results)
-cluster_acc(data.list$true.membership, out$results$ppr)
+# ####HEAT MAP
 
 
-####HEAT MAP
+# #print(data.list$true.membership)
+# ##TRUE Z
+
+# z.true <- matrix(0, nrow= N, ncol = R)
+# for (i in 1:length(data.list$true.membership)){
+#     if(data.list$true.membership[i] ==1){
+#         z.true[i, 1] <- 1
+#         z.true[i, 2] <- 0
+#     }
+#     else{
+#         z.true[i, 1] <- 0
+#         z.true[i, 2] <- 1
+
+#     }
+    
+# }
+# library('plot.matrix')
+
+# jpeg('plot_case3_true.jpg')
+# plot(z.true)
+# dev.off()
 
 
-#print(data.list$true.membership)
-##TRUE Z
+# #plot(z.true[sample.int(nrow(z.true)),])
 
-z.true <- matrix(0, nrow= N, ncol = R)
-for (i in 1:length(data.list$true.membership)){
-	if(data.list$true.membership[i] ==1){
-		z.true[i, 1] <- 1
-		z.true[i, 2] <- 0
-	}
-	else{
-		z.true[i, 1] <- 0
-		z.true[i, 2] <- 1
-
-	}
-	
-}
-library('plot.matrix')
-
-jpeg('plot_case3_true.jpg')
-plot(z.true)
-dev.off()
+# #coerce z.hat to 0 or 1
+# z.est <- out$results$ppr
+# #print(z)
+# #Z <- mapply(Z, function(x) ifelse(x>=0.5, 1, 0))
+# for (i in 1:nrow(z.est)){
+#     for (j in 1:ncol(z.est)){
+#         z.est[i,j] <- ifelse(z.est[i,j] >= 0.5, 1, 0)
+#     }
+# }
+# #print(z)
+# jpeg('plot_case3_clustered.jpg')
+# plot(z.est)
+# dev.off()
 
 
-#plot(z.true[sample.int(nrow(z.true)),])
 
-#coerce z.hat to 0 or 1
-z.est <- out$results$ppr
-#print(z)
-#Z <- mapply(Z, function(x) ifelse(x>=0.5, 1, 0))
-for (i in 1:nrow(z.est)){
-	for (j in 1:ncol(z.est)){
-		z.est[i,j] <- ifelse(z.est[i,j] >= 0.5, 1, 0)
-	}
-}
-#print(z)
-jpeg('plot_case3_clustered.jpg')
-plot(z.est)
-dev.off()
+
 
 
