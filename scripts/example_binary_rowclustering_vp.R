@@ -87,6 +87,12 @@ create_data <- function(M, N, R, pi_r, mu, alpha_r, delta, row.covariate, ns){
 }
 
 ex_rowclustering <- function(formula, long.df, row.covariate, pi_r){
+
+
+    N <- max(long.df$ROW)
+    M <- max(long.df$COL)
+    R <- length(pi_r)
+
     #cluster
     #initvect <- c(mu, phi, alpha, beta)
     results <- rowclustering(formula, model = "Binary", 
@@ -335,7 +341,7 @@ ex_rowclustering <- function(formula, long.df, row.covariate, pi_r){
 ############
 
 
-case_3 <- function(Nvals){
+case3 <- function(Nvals){
     #case 3 has row covariate effect ingrained in synthetic data
     #param: Nvals, values for different number of rows
     
@@ -350,14 +356,18 @@ case_3 <- function(Nvals){
 
     # row mixing ratio
     pi_r.in <- c(0.5, 0.5)
-    ns <- round(pi_r.in*N)
-    ns[R] <- N - sum(ns[1:(R-1)]) #ensures sum of ns values is N because rounding can throw things off
 
-    results <- data.frame(N=c(), M=c(), formula=c(), MSE=c(), clust.acc=c())
+    ncases <- length(Nvals)
 
+    results <- data.frame(N=rep(NA, ncases*2), M=rep(NA, ncases*2), formula=rep(NA, ncases*2), MSE=rep(NA, ncases*2), clust.acc=rep(NA, ncases*2))
+
+    i <- 1
     for (N in Nvals){
 
         M <- N
+
+        ns <- round(pi_r.in*N)
+        ns[R] <- N - sum(ns[1:(R-1)]) #ensures sum of ns values is N because rounding can throw things off
 
         #covariate 
         row.covariate <- cos(seq(from = 0, to = 2*pi, by = 2*pi/(N-1))) #we want things to vary and cosine varies, could represent seasonal effect on the data
@@ -368,14 +378,15 @@ case_3 <- function(Nvals){
         for (formula in c("Y~row", "Y~row+row.covariate")){
 
             out <- ex_rowclustering(formula, long.df = data.list$long.df, row.covariate = row.covariate, pi_r = pi_r.in)
-            ca <- cluster_acc(data.list$true.membership, out$results$ppr)
 
             #append results
-            results$N <- c(results$N, N)
-            results$M <- c(results$M, M)
-            results$formula <- c(results$formula, formula)
-            results$MSE <- c(results$MSE, out$theta.mse.error)
-            results$clust.acc <- c(results$clust.acc, ca)
+            results$N[i] <- N
+            results$M[i] <- M
+            results$formula[i] <- formula
+            results$MSE[i] <- out$theta.mse.error
+            results$clust.acc[i] <- cluster_acc(data.list$true.membership, out$results$ppr)
+
+            i <- i + 1
 
         }
 
@@ -386,7 +397,7 @@ case_3 <- function(Nvals){
 }
 
 
-results <- case3(Nvals=c(10,20))
+results <- case3(Nvals=c(10, 20, 50))
 print(results)
 
 # ####HEAT MAP
