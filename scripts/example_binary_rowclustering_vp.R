@@ -129,27 +129,232 @@ ex_rowclustering <- function(formula, long.df, row.covariate, pi_r){
 
 
 #########################
+
+# ###############
+
+
+# #FIRST CASE NO INGRAINED COVARIATE EFFECT
+
+# ############
+
+
+# set.seed(123)
+
+# #input
+# N <- 100 # number of rows
+# M <- 40 # number of columns
+
+# # number of row clusters
+# R <- 2
+
+# mu.in <- 1.0
+# alpha_r.in <- c(1, -1)
+# delta.in <- 0.0
+
+# # row mixing ratio
+# pi_r.in <- c(0.5, 0.5)
+# ns <- round(pi_r.in*N)
+# ns[R] <- N - sum(ns[1:(R-1)]) #ensures sum of ns values is N because rounding can throw things off
+# #covariate 
+# #set 1s for first group, second group all zeros
+# row.covariate <- rep(1, N)
+# row.covariate[1:ns[1]] <- -0
+
+# data.list <- create_data(M, N, R, pi_r=pi_r.in, mu=mu.in, alpha_r=alpha_r.in, 
+#     delta=delta.in, row.covariate=row.covariate, ns=ns)
+
+# #formula <- "Y~row+row.covariate"
+# formula <- "Y~row"
+
+# out <- ex_rowclustering(formula, long.df = data.list$long.df, row.covariate = NULL, pi_r = pi_r.in)
+
+# d <- 0.0
+# if ("delta" %in% names(out$results$parlist.init)){
+#     d <- out$results$parlist.init$delta
+# }
+
+# for (r in 1:R) {
+# print(sprintf("r=%2d mu=%8.4f alpha_r=%8.4f delta=%8.4f",
+#       r, out$results$parlist.out$mu, out$results$parlist.out$alpha[r], d))
+# }
+
+# print(sprintf("sqrt MSE(theta) = %.5g",sqrt(out$theta.mse.error)))
+
+# print(out$results)
+# cluster_acc(data.list$true.membership, out$results$ppr)
+
+
+# ####HEAT MAP
+
+
+# #print(data.list$true.membership)
+# ##TRUE Z
+
+# z.true <- matrix(0, nrow= N, ncol = R)
+# for (i in 1:length(data.list$true.membership)){
+# 	if(data.list$true.membership[i] ==1){
+# 		z.true[i, 1] <- 1
+# 		z.true[i, 2] <- 0
+# 	}
+# 	else{
+# 		z.true[i, 1] <- 0
+# 		z.true[i, 2] <- 1
+
+# 	}
+	
+# }
+# library('plot.matrix')
+
+# jpeg('plot_case1_true.jpg', bg="transparent", width=700, height=500, units = "mm", res = 360,pointsize = 50)
+# plot(z.true, xlab="Row Cluster", main = "Case 1: Heatmap of Synthetic Data")
+# dev.off()
+
+
+# #plot(z.true[sample.int(nrow(z.true)),])
+
+# #coerce z.hat to 0 or 1
+# z.est <- out$results$ppr
+# #print(z)
+# #Z <- mapply(Z, function(x) ifelse(x>=0.5, 1, 0))
+# for (i in 1:nrow(z.est)){
+# 	for (j in 1:ncol(z.est)){
+# 		z.est[i,j] <- ifelse(z.est[i,j] >= 0.5, 1, 0)
+# 	}
+# }
+# #print(z)
+# jpeg('plot_case1_clustered.jpg',bg="transparent", width=500, height=500, units = "mm", res= 360,pointsize = 50)
+# plot(z.est, xlab="Row Cluster", main = "Case 1: Heatmap of Row Clustered Data")
+# dev.off()
+# #heatmap(z.est)
+
+
+# ###############################
+
+
+# ###############
+
+
+# #2nd CASE INGRAINED COVARIATE EFFECT no cov in formula
+
+# ############
+
+
+# set.seed(123)
+
+# #input
+# N <- 100 # number of rows
+# M <- 40 # number of columns
+
+# # number of row clusters
+# R <- 2
+
+# mu.in <- 1.0
+# alpha_r.in <- c(1, -1)
+# delta.in <- 5.0
+
+# # row mixing ratio
+# pi_r.in <- c(0.5, 0.5)
+# ns <- round(pi_r.in*N)
+# ns[R] <- N - sum(ns[1:(R-1)]) #ensures sum of ns values is N because rounding can throw things off
+# #covariate 
+# #set 1s for first group, second group all zeros
+# row.covariate <- rep(1, N)
+# row.covariate[1:ns[1]] <- -0
+
+# data.list <- create_data(M, N, R, pi_r=pi_r.in, mu=mu.in, alpha_r=alpha_r.in, 
+#     delta=delta.in, row.covariate=row.covariate, ns=ns)
+
+# #formula <- "Y~row+row.covariate"
+# formula <- "Y~row"
+
+# out <- ex_rowclustering(formula, long.df = data.list$long.df, row.covariate = NULL, pi_r = pi_r.in)
+
+# d <- 0.0
+# if ("delta" %in% names(out$results$parlist.init)){
+#     d <- out$results$parlist.init$delta
+# }
+
+# for (r in 1:R) {
+# print(sprintf("r=%2d mu=%8.4f alpha_r=%8.4f delta=%8.4f",
+#       r, out$results$parlist.out$mu, out$results$parlist.out$alpha[r], d))
+# }
+
+# print(sprintf("sqrt MSE(theta) = %.5g",sqrt(out$theta.mse.error)))
+
+# print(out$results)
+# cluster_acc(data.list$true.membership, out$results$ppr)
+
+
+# ####HEAT MAP
+
+
+# #print(data.list$true.membership)
+# ##TRUE Z
+
+# z.true <- matrix(0, nrow= N, ncol = R)
+# for (i in 1:length(data.list$true.membership)){
+# 	if(data.list$true.membership[i] ==1){
+# 		z.true[i, 1] <- 1
+# 		z.true[i, 2] <- 0
+# 	}
+# 	else{
+# 		z.true[i, 1] <- 0
+# 		z.true[i, 2] <- 1
+
+# 	}
+	
+# }
+# library('plot.matrix')
+
+# jpeg('plot_case2_true.jpg', bg="transparent", width=700, height=500, units = "mm", res = 360,pointsize = 50)
+# plot(z.true, xlab="Row Cluster", main = "Case 2: Heatmap of Synthetic Data")
+# dev.off()
+
+# #plot(z.true[sample.int(nrow(z.true)),])
+
+# #coerce z.hat to 0 or 1
+# z.est <- out$results$ppr
+# #print(z)
+# #Z <- mapply(Z, function(x) ifelse(x>=0.5, 1, 0))
+# for (i in 1:nrow(z.est)){
+# 	for (j in 1:ncol(z.est)){
+# 		z.est[i,j] <- ifelse(z.est[i,j] >= 0.5, 1, 0)
+# 	}
+# }
+# #print(z)
+
+# jpeg('plot_case2_clustered.jpg', bg="transparent", width=700, height=500, units = "mm", res = 360,pointsize = 50)
+# plot(z.est, xlab="Row Cluster", main = "Case 2: Heatmap of Row Clustered Data")
+# dev.off()
+
+# ###############
+
+
+#3rd CASE INGRAINED COVARIATE EFFECT with cov in formula
+
+############
+
+
 set.seed(123)
 
 #input
-N <- 40 # number of rows
-M <- 40 # number of columns
+N <- 20 # number of rows
+M <- 20 # number of columns
 
 # number of row clusters
 R <- 2
 
-mu.in <- 0.
-alpha_r.in <- c(1, -1)
+mu.in <- 0.0
+alpha_r.in <- c(-0.5, 0.5)
 delta.in <- 1.0
 
 # row mixing ratio
 pi_r.in <- c(0.5, 0.5)
 ns <- round(pi_r.in*N)
 ns[R] <- N - sum(ns[1:(R-1)]) #ensures sum of ns values is N because rounding can throw things off
+
 #covariate 
-#set 1s for first group, second group all zeros
-row.covariate <- rep(1, N)
-row.covariate[1:ns[1]] <- -0
+row.covariate <- cos(seq(from = 0, to = 2*pi, by = 2*pi/(N-1))) #we want things to vary and cosine varies, could represent seasonal effect on the data
 
 data.list <- create_data(M, N, R, pi_r=pi_r.in, mu=mu.in, alpha_r=alpha_r.in, 
     delta=delta.in, row.covariate=row.covariate, ns=ns)
@@ -172,4 +377,49 @@ print(sprintf("r=%2d mu=%8.4f alpha_r=%8.4f delta=%8.4f",
 print(sprintf("sqrt MSE(theta) = %.5g",sqrt(out$theta.mse.error)))
 
 print(out$results)
-#cluster_acc(data.list$true.membership, out$results$ppr)
+cluster_acc(data.list$true.membership, out$results$ppr)
+
+
+####HEAT MAP
+
+
+#print(data.list$true.membership)
+##TRUE Z
+
+z.true <- matrix(0, nrow= N, ncol = R)
+for (i in 1:length(data.list$true.membership)){
+	if(data.list$true.membership[i] ==1){
+		z.true[i, 1] <- 1
+		z.true[i, 2] <- 0
+	}
+	else{
+		z.true[i, 1] <- 0
+		z.true[i, 2] <- 1
+
+	}
+	
+}
+library('plot.matrix')
+
+jpeg('plot_case3_true.jpg')
+plot(z.true)
+dev.off()
+
+
+#plot(z.true[sample.int(nrow(z.true)),])
+
+#coerce z.hat to 0 or 1
+z.est <- out$results$ppr
+#print(z)
+#Z <- mapply(Z, function(x) ifelse(x>=0.5, 1, 0))
+for (i in 1:nrow(z.est)){
+	for (j in 1:ncol(z.est)){
+		z.est[i,j] <- ifelse(z.est[i,j] >= 0.5, 1, 0)
+	}
+}
+#print(z)
+jpeg('plot_case3_clustered.jpg')
+plot(z.est)
+dev.off()
+
+
