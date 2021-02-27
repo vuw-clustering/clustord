@@ -20,6 +20,32 @@ onemode.membership.pp <- function(long.df, theta, proportions, nelements, row){
     pp.m
 }
 
+onemode.membership.pp.rsd <- function(long.df, proportions, parlist, row.covariate){
+	#NOTE: ONLY WORKS FOR BINARY RSD MODEL
+    
+	nelements <- max(long.df$ROW)
+	ncols <- max(long.df$COL)
+    nclus <- length(proportions)
+    pp.m <- matrix(NA,nelements,nclus)
+
+    for(idx in 1:nelements){
+        for(clus.idx in 1:nclus){
+
+        	#parameterization, theta_ri = expit(Gamma_ri)
+        	Gamma_ri <- parlist$mu + parlist$alpha[clus.idx] + parlist$delta*row.covariate[idx]
+            yvals <- long.df$Y[long.df$ROW == idx]
+            num.ones <- sum(yvals == 1)
+            pp.m[idx,clus.idx] <- proportions[clus.idx]*( exp(Gamma_ri*num.ones/ncols) / (1 + exp(Gamma_ri)) )^ncols
+
+        }
+        #For each row we normalize
+        pp.m[idx,] <- pp.m[idx,]/sum(pp.m[idx,])
+    }
+
+    pp.m
+}
+
+
 twomode.membership.pp <- function(long.df, theta, pi.v, kappa.v, nclus, row) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)

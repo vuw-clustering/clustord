@@ -772,7 +772,13 @@ run.EM.rowcluster <- function(invect, long.df, row.covariate, model, submodel, p
     while(!EM.status$finished)
     {
         # E-step - Update posterior probabilities
-        ppr.m <- onemode.membership.pp(long.df, theta.arr, pi.v, n, row=TRUE)
+        if(model == "Binary" & submodel == "rsd" ){
+        	ppr.m <- onemode.membership.pp.rsd(long.df, pi.v, parlist.in, row.covariate)
+        }
+        else{
+        	ppr.m <- onemode.membership.pp(long.df, theta.arr, pi.v, n, row=TRUE)
+        }
+        
 
         ## Now set any NA values in the posterior probabilities matrix to 0
         ppr.m[is.na(ppr.m)] <- 0
@@ -803,6 +809,9 @@ run.EM.rowcluster <- function(invect, long.df, row.covariate, model, submodel, p
 
         parlist.out <- unpack.parvec(outvect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,
                                      constraint.sum.zero=constraint.sum.zero)
+
+        parlist.in <- parlist.out
+
         theta.arr <- calc.theta(parlist.out,model=model,submodel=submodel,row.covariate=row.covariate)
 
         ## Note that UNLIKE Rcluster.ll, Rcluster.Incll outputs the *actual*
