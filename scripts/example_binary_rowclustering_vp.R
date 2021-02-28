@@ -1,6 +1,5 @@
 library(clustord)
 library(plot.matrix)
-library(ggplot2)
 
 get_k_index <- function(M, N, i, j){
     return(M*(i - 1) + j)
@@ -191,7 +190,7 @@ case3 <- function(Nvals){
 
         filename <- sprintf("case3_true_N%d.png", N)
         png(filename, bg="transparent", width=300, height=500, units = "mm", res= 360, pointsize = 50)
-        plot(data.list$z.true, xlab="Row Cluster", main = sprintf("N=M=%d: True Membership", N))
+        plot(data.list$z.true, xlab="Row Cluster", main = sprintf("True", N))
         dev.off()
 
         for (formula in c("Y~row", "Y~row+row.covariate")) {
@@ -207,8 +206,8 @@ case3 <- function(Nvals){
 
             filename <- sprintf("case3_est_N%d_%s.png", N, formula)
             png(filename, bg="transparent", width=300, height=500, units = "mm", res = 360, pointsize = 50)
-            title <- sprintf("N=M=%d %s: Est. Membership", N, formula)
-            plot(out$results$ppr, xlab="Row Cluster", main = title)
+            title <- sprintf("%s",formula)
+            plot(out$results$ppr, xlab="Row Cluster", main = title, fmt.key='%.2f', breaks=c(0, 1))
             dev.off()
 
             filename <- sprintf("case3_theta_N%d_%s.png", N, formula)
@@ -216,7 +215,7 @@ case3 <- function(Nvals){
             title <- sprintf("N=M=%d %s", N, formula)
             plot(x = 1:N, y = out$thetas$est, pch = 4, main = title, xlab = "Row", ylab= "Theta")
             points(x = 1:N, y = out$thetas$true, pch = 1)
-            legend("topleft", legend = c("est.", "true"), pch = c(4,1))
+            legend("bottomright", legend = c("est.", "true"), pch = c(4,1))
             dev.off()
 
 
@@ -231,7 +230,7 @@ case3 <- function(Nvals){
 }
 
 
-results <- case3(Nvals=c(10,20))
+results <- case3(Nvals=c(10,20)) #,50,100,200))
 print(results)
 
 
@@ -239,9 +238,9 @@ filename <- "case3_MSE.png"
 png(filename, bg="transparent", width=500, height=500, units = "mm", res = 360, pointsize = 50)
 covres <- subset(results, formula == 'Y~row+row.covariate')
 rowres <- subset(results, formula == 'Y~row')
-plot(x = covres$N, y = covres$MSE, pch = 8, main = "Mean Square Error", xlab = "N=M", ylab= "error")
+plot(x = covres$N, y = covres$MSE, pch = 8, main = "Mean Square Error", xlab = "N=M", ylab= "Error")
 points(x = rowres$N, y = rowres$MSE, pch = 0)
-legend("topleft", legend = c('Y~row+row.covariate', 'Y~row'), pch = c(8, 0))
+legend("topright", legend = c('Y~row+row.covariate', 'Y~row'), pch = c(8, 0))
 dev.off()
 
 
@@ -249,7 +248,7 @@ filename <- "case3_clustacc.png"
 png(filename, bg="transparent", width=500, height=500, units = "mm", res = 360, pointsize = 50)
 covres <- subset(results, formula == 'Y~row+row.covariate')
 rowres <- subset(results, formula == 'Y~row')
-plot(x = covres$N, y = covres$clust.acc.prcnt, pch = 8, main = "Clustering Accuracy (%)", xlab = "N=M", ylab= "error")
+plot(x = covres$N, y = covres$clust.acc.prcnt, pch = 8, main = "Clustering Accuracy (%)", xlab = "N=M", ylab= "Accuracy")
 points(x = rowres$N, y = rowres$clust.acc.prcnt, pch = 0)
 legend("bottomright", legend = c('Y~row+row.covariate', 'Y~row'), pch = c(8, 0))
 dev.off()
