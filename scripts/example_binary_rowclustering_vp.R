@@ -239,10 +239,18 @@ filename <- "case3_MSE.png"
 png(filename, bg="transparent", width=500, height=500, units = "mm", res = 360, pointsize = 50)
 covres <- subset(results, formula == 'Y~row+row.covariate')
 rowres <- subset(results, formula == 'Y~row')
-
 plot(x = covres$N, y = covres$MSE, pch = 8, main = "Mean Square Error", xlab = "N=M", ylab= "error")
-
 points(x = rowres$N, y = rowres$MSE, pch = 0)
-legend("bottomleft", legend = c('Y~row+row.covariate', 'Y~row'), pch = c(8, 0))
+legend("topleft", legend = c('Y~row+row.covariate', 'Y~row'), pch = c(8, 0))
+dev.off()
+
+
+filename <- "case3_clustacc.png"
+png(filename, bg="transparent", width=500, height=500, units = "mm", res = 360, pointsize = 50)
+covres <- subset(results, formula == 'Y~row+row.covariate')
+rowres <- subset(results, formula == 'Y~row')
+plot(x = covres$N, y = covres$clust.acc.prcnt, pch = 8, main = "Clustering Accuracy (%)", xlab = "N=M", ylab= "error")
+points(x = rowres$N, y = rowres$clust.acc.prcnt, pch = 0)
+legend("bottomright", legend = c('Y~row+row.covariate', 'Y~row'), pch = c(8, 0))
 dev.off()
 
