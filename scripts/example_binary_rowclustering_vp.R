@@ -220,22 +220,6 @@ case3 <- function(Nvals){
             dev.off()
 
 
-            # #coerce z.hat to 0 or 1
-            # z.est <- out$results$ppr
-            # #print(z)
-            # #Z <- mapply(Z, function(x) ifelse(x>=0.5, 1, 0))
-            # for (i in 1:nrow(z.est)){
-            #   for (j in 1:ncol(z.est)){
-            #       z.est[i,j] <- ifelse(z.est[i,j] >= 0.5, 1, 0)
-            #   }
-            # }
-            # #print(z)
-            # jpeg('plot_case1_clustered.jpg',bg="transparent", width=500, height=500, units = "mm", res= 360,pointsize = 50)
-            # plot(z.est, xlab="Row Cluster", main = "Case 1: Heatmap of Row Clustered Data")
-            # dev.off()
-            # #heatmap(z.est)
-
-
             i <- i + 1
 
         }
@@ -251,24 +235,14 @@ results <- case3(Nvals=c(10,20))
 print(results)
 
 
+filename <- "case3_MSE.png"
+png(filename, bg="transparent", width=500, height=500, units = "mm", res = 360, pointsize = 50)
+covres <- subset(results, formula == 'Y~row+row.covariate')
+rowres <- subset(results, formula == 'Y~row')
 
-# ## PLOTTING THETAS
-# formula <- "Y~row"
-# #formula <- "Y~row+row.covariate"
+plot(x = covres$N, y = covres$MSE, pch = 8, main = "Mean Square Error", xlab = "N=M", ylab= "error")
 
-# #data
+points(x = rowres$N, y = rowres$MSE, pch = 0)
+legend("bottomleft", legend = c('Y~row+row.covariate', 'Y~row'), pch = c(8, 0))
+dev.off()
 
-# R <- 2
-# mu.in <- 0.0
-# alpha_r.in <- c(-0.5, 0.5)
-# delta.in <- 1.0
-# # row mixing ratio
-# pi_r.in <- c(0.5, 0.5)
-# create_data(M=N, N=N, R=R, pi_r=pi_r.in, mu=mu.in, alpha_r, delta, row.covariate, ns)
-
-
-# res <- ex_rowclustering(formula, long.df, row.covariate, pi_r)
-
-# #thetas 
-
-# res$thetas
