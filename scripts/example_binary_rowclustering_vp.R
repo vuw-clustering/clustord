@@ -188,9 +188,9 @@ case3 <- function(Nvals){
         data.list <- create_data(M, N, R, pi_r=pi_r.in, mu=mu.in, alpha_r=alpha_r.in, 
             delta=delta.in, row.covariate=row.covariate, ns=ns)
 
-        filename <- sprintf("case3_true_N%d.png", N)
-        png(filename, bg="transparent", width=300, height=500, units = "mm", res= 360, pointsize = 50)
-        plot(data.list$z.true, xlab="Row Cluster", main = sprintf("True", N))
+        filename <- sprintf("case3_true_N%d.pdf", N)
+        pdf(filename, bg="transparent", width=300, height=500, units = "mm", res= 360, pointsize = 50)
+        plot(data.list$z.true, xlab="Row Cluster", main = sprintf("True", N), fmt.key='%.2f', breaks=c(0, 1))
         dev.off()
 
         for (formula in c("Y~row", "Y~row+row.covariate")) {
@@ -204,14 +204,14 @@ case3 <- function(Nvals){
             results$MSE[i] <- out$theta.mse.error
             results$clust.acc.prcnt[i] <- cluster_acc(data.list$true.membership, out$results$ppr)
 
-            filename <- sprintf("case3_est_N%d_%s.png", N, formula)
-            png(filename, bg="transparent", width=300, height=500, units = "mm", res = 360, pointsize = 50)
+            filename <- sprintf("case3_est_N%d_%s.pdf", N, formula)
+            pdf(filename, bg="transparent", width=300, height=500, units = "mm", res = 360, pointsize = 50)
             title <- sprintf("%s",formula)
             plot(out$results$ppr, xlab="Row Cluster", main = title, fmt.key='%.2f', breaks=c(0, 1))
             dev.off()
 
-            filename <- sprintf("case3_theta_N%d_%s.png", N, formula)
-            png(filename, bg="transparent", width=500, height=500, units = "mm", res = 360, pointsize = 50)
+            filename <- sprintf("case3_theta_N%d_%s.pdf", N, formula)
+            pdf(filename, bg="transparent", width=500, height=500, units = "mm", res = 360, pointsize = 50)
             title <- sprintf("N=M=%d %s", N, formula)
             plot(x = 1:N, y = out$thetas$est, pch = 4, main = title, xlab = "Row", ylab= "Theta")
             points(x = 1:N, y = out$thetas$true, pch = 1)
@@ -230,12 +230,12 @@ case3 <- function(Nvals){
 }
 
 
-results <- case3(Nvals=c(10,20)) #,50,100,200))
+results <- case3(Nvals=c(10,20,50,100,200))
 print(results)
 
 
-filename <- "case3_MSE.png"
-png(filename, bg="transparent", width=500, height=500, units = "mm", res = 360, pointsize = 50)
+filename <- "case3_MSE.pdf"
+pdf(filename, bg="transparent", width=500, height=500, units = "mm", res = 360, pointsize = 50)
 covres <- subset(results, formula == 'Y~row+row.covariate')
 rowres <- subset(results, formula == 'Y~row')
 plot(x = covres$N, y = covres$MSE, pch = 8, main = "Mean Square Error", xlab = "N=M", ylab= "Error")
@@ -244,8 +244,8 @@ legend("topright", legend = c('Y~row+row.covariate', 'Y~row'), pch = c(8, 0))
 dev.off()
 
 
-filename <- "case3_clustacc.png"
-png(filename, bg="transparent", width=500, height=500, units = "mm", res = 360, pointsize = 50)
+filename <- "case3_clustacc.pdf"
+pdf(filename, bg="transparent", width=500, height=500, units = "mm", res = 360, pointsize = 50)
 covres <- subset(results, formula == 'Y~row+row.covariate')
 rowres <- subset(results, formula == 'Y~row')
 plot(x = covres$N, y = covres$clust.acc.prcnt, pch = 8, main = "Clustering Accuracy (%)", xlab = "N=M", ylab= "Accuracy")
