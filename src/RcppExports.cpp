@@ -6,16 +6,11 @@
 
 using namespace Rcpp;
 
-// rcpparma_hello_world
-arma::mat rcpparma_hello_world();
-RcppExport SEXP _clustord_rcpparma_hello_world() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(rcpparma_hello_world());
-    return rcpp_result_gen;
-END_RCPP
-}
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // rcpparma_outerproduct
 arma::mat rcpparma_outerproduct(const arma::colvec& x);
 RcppExport SEXP _clustord_rcpparma_outerproduct(SEXP xSEXP) {
@@ -107,7 +102,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_clustord_rcpparma_hello_world", (DL_FUNC) &_clustord_rcpparma_hello_world, 0},
     {"_clustord_rcpparma_outerproduct", (DL_FUNC) &_clustord_rcpparma_outerproduct, 1},
     {"_clustord_rcpparma_innerproduct", (DL_FUNC) &_clustord_rcpparma_innerproduct, 1},
     {"_clustord_rcpparma_bothproducts", (DL_FUNC) &_clustord_rcpparma_bothproducts, 1},

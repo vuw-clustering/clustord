@@ -8,22 +8,7 @@
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 
-// simple example of creating two matrices and
-// returning the result of an operatioon on them
-//
-// via the exports attribute we tell Rcpp to make this function
-// available from R
-//
-// [[Rcpp::export]]
-arma::mat rcpparma_hello_world() {
-    arma::mat m1 = arma::eye<arma::mat>(3, 3);
-    arma::mat m2 = arma::eye<arma::mat>(3, 3);
-	                     
-    return m1 + 3 * (m1 + m2);
-}
-
-
-// another simple example: outer product of a vector, 
+// A simple example: outer product of a vector,
 // returning a matrix
 //
 // [[Rcpp::export]]
