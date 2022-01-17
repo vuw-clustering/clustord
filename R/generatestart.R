@@ -54,6 +54,7 @@ generate.mu.init <- function(long.df, model, use.random=FALSE) {
     mu.init
 }
 
+# TODO: Not sure whether needing to edit this? ====
 generate.mu.beta.init <- function(long.df, model, constraint.sum.zero=TRUE,
                                   use.random=FALSE) {
 
@@ -166,6 +167,10 @@ generate.gamma.init <- function(RG, p=NULL, CG=NULL) {
     gamma.init
 }
 
+## TODO: ADD FUNCTIONS HERE to initialise individual row and column effect params, ====
+# and any covariate params
+
+# TODO: EDIT THIS to use new format clustering call ====
 generate.initvect.rowcluster <- function(long.df, model, submodel, RG,
                                          EM.control=default.EM.control(),
                                          optim.method="L-BFGS-B", optim.control=default.optim.control(),
@@ -335,6 +340,7 @@ generate.initvect.bicluster <- function(long.df, model, submodel, RG, CG,
     list(initvect=initvect, pi.init=pi.init, kappa.init=kappa.init)
 }
 
+# TODO: EDIT THIS to use new format clustering call ====
 generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NULL, pi.init=NULL,
                                       EM.control=default.EM.control(),
                                       optim.method="L-BFGS-B", optim.control=default.optim.control(),
@@ -352,6 +358,7 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
         best.lli <- -Inf
         for (s in 1:nstarts) {
             cat(paste0("Randomly generated start #",s,"\n"))
+            # TODO: EDIT THIS to use new format clustering call ====
             initvect.pi.init <- generate.initvect.rowcluster(long.df, model=model, submodel=submodel, RG=RG,
                                                              constraint.sum.zero = constraint.sum.zero,
                                                              start.from.simple.model = start.from.simple.model,
@@ -359,6 +366,7 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
 
             print(initvect.pi.init$initvect)
 
+            # TODO: EDIT THIS to use new format clustering call ====
             init.out <- run.EM.rowcluster(invect=initvect.pi.init$initvect,
                                           long.df=long.df, model=model,submodel=submodel,
                                           pi.v=initvect.pi.init$pi.init,
@@ -387,6 +395,7 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
     list(initvect=initvect, pi.init=pi.init)
 }
 
+# TODO: EDIT THIS to use new format clustering call ====
 generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
                                      initvect=NULL, pi.init=NULL, kappa.init=NULL,
                                      EM.control=default.EM.control(),
@@ -404,6 +413,7 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
         best.lli <- -Inf
         for (s in 1:nstarts) {
             cat(paste0("Randomly generated start #",s,"\n"))
+            # TODO: EDIT THIS to use new format clustering call ====
             initvect.pi.kappa.init <- generate.initvect.bicluster(long.df=long.df, model=model, submodel=submodel,
                                                                   RG=RG, CG=CG, constraint.sum.zero=constraint.sum.zero,
                                                                   start.from.simple.model=start.from.simple.model,
@@ -411,6 +421,7 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
 
             print(initvect.pi.kappa.init$initvect)
 
+            # TODO: EDIT THIS to use new format clustering call ====
             init.out <- run.EM.bicluster(invect=initvect.pi.kappa.init$initvect,
                                          long.df=long.df, model=model,submodel=submodel,
                                          pi.v=initvect.pi.kappa.init$pi.init,
@@ -424,8 +435,8 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
                 cat(paste("Found better incomplete LL:",new.lli,"\n"))
                 best.lli <- new.lli
                 best.initvect.pi.kappa.init <- list(initvect=init.out$outvect,
-                                               pi.init=init.out$pi.out,
-                                               kappa.init=init.out$kappa.out)
+                                                    pi.init=init.out$pi.out,
+                                                    kappa.init=init.out$kappa.out)
                 initvect <- init.out$outvect
             }
         }

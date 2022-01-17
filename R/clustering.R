@@ -549,125 +549,11 @@ biclustering <- function(formula,
 
 default.EM.control <- function() {
     list(EMcycles=50, EMstoppingpar=1e-6, paramstopping=TRUE, startEMcycles=5,
-    keepallparams=FALSE)
+         keepallparams=FALSE)
 }
 
 default.optim.control <- function() {
     list(maxit=100,trace=0)
-}
-
-validate.inputs <- function(type,
-                            formula,
-                            model,
-                            nclus.row=NULL,nclus.column=NULL,
-                            long.df,
-                            initvect=NULL,
-                            pi.init=NULL, kappa.init=NULL,
-                            EM.control=default.EM.control(),
-                            optim.method="L-BFGS-B",
-                            constraint.sum.zero=TRUE,
-                            start.from.simple.model=TRUE,
-                            nstarts=5) {
-
-    ## Note the double-& and double-| which stops the later parts being checked
-    ## if the earlier parts are false
-
-    if (!is.character(formula) || !is.vector(formula) || length(formula) != 1) stop("formula must be a string.")
-
-    ## Check that model is valid
-    if (!is.character(model) || !is.vector(model) || length(model) != 1) stop("model must be a string, 'OSM' or 'POM' or 'Binary'.")
-    if (!(model %in% c("OSM","POM","Binary"))) stop("model must be either 'OSM' or POM' for the ordered stereotype and proportional odds models, or 'Binary' for the binary model.")
-
-    ## Check that clustering settings are valid
-    if (type %in% c("row","bi") && is.null(nclus.row)) stop("For row clustering or biclustering, nclus.row cannot be null.")
-    else if (!is.null(nclus.row)) {
-        if (!is.vector(nclus.row) || length(nclus.row) != 1 || nclus.row <= 1 ||
-            nclus.row %% 1 != 0 || is.na(nclus.row)) {
-            stop("nclus.row must be an integer, from 2 to the number of rows/observations in the data.")
-        }
-    }
-    if (type %in% c("column","bi") && is.null(nclus.column)) stop("For column clustering or biclustering, nclus.column cannot be null.")
-    else if (!is.null(nclus.column)) {
-        if (!is.vector(nclus.column) || length(nclus.column) != 1 ||
-            nclus.column <= 1 || nclus.column %% 1 != 0 || is.na(nclus.column)) {
-            stop("nclus.column must be an integer, from 2 to the number of columns/questions in the data.")
-        }
-    }
-
-    if (is.null(long.df)) stop("long.df cannot be null.")
-    if (!is.data.frame(long.df)) stop("long.df must be a data frame.")
-    if (length(long.df) < 3) stop("long.df must have at least 3 columns, Y and ROW and COL.")
-    if (!("Y" %in% names(long.df))) stop("long.df must have a column named 'Y' which contains the response values.")
-    if (!("ROW" %in% names(long.df))) stop("long.df must have a column named 'ROW' which indicates what observation (row in the data matrix) each value of Y corresponds to.")
-    if (!("COL" %in% names(long.df))) stop("long.df must have a column named 'COL' which indicates what variable (column in the data matrix) each value of Y corresponds to.")
-
-    if (!is.factor(long.df$Y)) stop("long.df$Y must be a factor.")
-
-    if (any(is.na(long.df$Y))) stop("long.df$Y has missing values (NA). Please delete these rows and try again.")
-    if (is.list(long.df$Y) || any(sapply(long.df$Y,is.list)) ||
-        any(sapply(long.df$Y,is.infinite))) stop("long.df$Y is a list, or has list elements or infinite elements. long.df$Y should be a factor with q levels.")
-    if (!is.factor(long.df$ROW) &&
-        (is.list(long.df$ROW) || any(sapply(long.df$ROW,is.list)) || any(is.na(long.df$ROW)) ||
-         any(sapply(long.df$ROW,is.infinite)) || any(long.df$ROW %% 1 != 0) ||
-         any(long.df$ROW < 1) || all(long.df$ROW > 1))) stop("long.df$ROW must be a factor or integers from 1 to the number of observations, i.e. the number of rows in the original data matrix.")
-    if (!is.factor(long.df$COL) &&
-        (is.list(long.df$COL) || any(sapply(long.df$COL,is.list)) || any(is.na(long.df$COL)) ||
-        any(sapply(long.df$COL,is.infinite)) || any(long.df$COL %% 1 != 0) ||
-        any(long.df$COL < 1) || all(long.df$COL > 1))) stop("long.df$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix.")
-
-    if (any(table(long.df[,c("ROW","COL")]) > 1)) stop("Each element from the original data matrix must correspond to no more than 1 row in long.df.")
-
-    if (!is.null(nclus.row) && nclus.row >= max(as.numeric(long.df$ROW))) stop("nclus.row must be smaller than the maximum value of long.df$ROW.")
-    if (!is.null(nclus.column) && nclus.column >= max(as.numeric(long.df$COL))) stop("nclus.column must be smaller than the maximum value of long.df$COL.")
-
-    if (!is.null(initvect)) {
-        if (!is.vector(initvect) || !is.numeric(initvect) || any(is.na(initvect)) ||
-            any(is.infinite(initvect))) stop("If supplied, initvect must be a numeric vector with finite values.")
-    }
-
-    if (!is.null(pi.init)) {
-        if (!is.vector(pi.init) || !is.numeric(pi.init) || any(is.na(pi.init)) ||
-            any(pi.init < 0) || any(pi.init > 1)) stop("If supplied, pi.init must be a vector of numbers between 0 and 1.")
-        if (length(pi.init) != nclus.row || sum(pi.init) != 1) stop("pi.init must be the same length as the number of row clusters, and must add up to 1")
-    }
-    if (!is.null(kappa.init)) {
-        if (!is.vector(kappa.init) || !is.numeric(kappa.init) || any(is.na(kappa.init)) ||
-            any(kappa.init < 0) | any(kappa.init > 1)) stop("If supplied, kappa.init must be a vector of numbers between 0 and 1.")
-        if (length(kappa.init) != nclus.column || sum(kappa.init) != 1) stop("kappa.init must be the same length as the number of column clusters, and must add up to 1")
-    }
-
-    if (!is.logical(constraint.sum.zero) || !is.vector(constraint.sum.zero) ||
-        length(constraint.sum.zero) != 1 || is.na(constraint.sum.zero)) stop("constraint.sum.zero must be TRUE or FALSE.")
-    if (!is.logical(start.from.simple.model) || !is.vector(start.from.simple.model) ||
-        length(start.from.simple.model) != 1 || is.na(start.from.simple.model)) stop("start.from.simple.model must be TRUE or FALSE.")
-
-    if (!is.null(nstarts)) {
-        if (!is.vector(nstarts) || !is.numeric(nstarts) || length(nstarts) != 1 ||
-            nstarts < 0 || nstarts %% 1 != 0) stop("If supplied, nstarts must be a positive integer.")
-    }
-
-    if (!is.list(EM.control) || length(EM.control) == 0 || length(EM.control) > 5 ||
-        !all(names(EM.control) %in% c("EMcycles","EMstoppingpar","paramstopping",
-                                      "startEMcycles","keepallparams"))) {
-        stop("If supplied, EM.control must be a list of control parameters for the EM algorithm. Please see the manual for more info.")
-    }
-
-    if (is.null(optim.method) || !is.character(optim.method) || !is.vector(optim.method) ||
-        length(optim.method) != 1 || !(optim.method %in% c("Nelder-Mead","BFGS","CG","L-BFGS-B"))) stop("If supplied, optim.method must be one of the valid methods for optim, 'Nelder-Mead', 'CG', 'BFGS' or 'L-BFGS-B'.")
-}
-
-check.factors <- function(long.df) {
-    if (is.factor(long.df$ROW)) {
-        print("Converting factor ROW to numeric.")
-        attributes(long.df)$ROWlevels <- levels(long.df$ROW)
-        long.df$ROW <- as.numeric(long.df$ROW)
-    }
-    if (is.factor(long.df$COL)) {
-        print("Converting factor COL to numeric")
-        attributes(long.df)$COLlevels <- levels(long.df$COL)
-        long.df$COL <- as.numeric(long.df$COL)
-    }
-    long.df
 }
 
 new.EM.status <- function() {
@@ -723,7 +609,7 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
         if (!is.null(kappa.v)) {
             names(kappa.v) <- paste0("kappa",1:length(kappa.v))
             newparams <- c(unlist(parlist.out),
-                            pi.v,kappa.v,new.lli,new.llc)
+                           pi.v,kappa.v,new.lli,new.llc)
         } else {
             newparams <- c(unlist(parlist.out), pi.v,new.lli,new.llc)
         }
@@ -744,13 +630,18 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
     q <- length(levels(long.df$Y))
     RG <- length(pi.v)
 
+    # TODO: Want to move this bit to Rcpp -- or maybe just initially run it in R? ----
+    # Probably keep this one in R because easier to then do error checking
+    # for initial param values
     parlist.in <- unpack.parvec(invect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,
                                 constraint.sum.zero=constraint.sum.zero)
     if (any(sapply(parlist.in,function(elt) any(is.na(elt))))) stop("Error unpacking parameters for model.")
     if (any(sapply(parlist.in,function(elt) is.null(elt)))) stop("Error unpacking parameters for model.")
 
+    # TODO: DELETE THIS -- will do this on the fly for each value of theta, in Rcpp ----
     theta.arr <- calc.theta(parlist.in,model=model,submodel=submodel)
 
+    # TODO: DELETE THIS -- will instead pass long.df and model matrices to Rcpp ----
     y.mat <- df2mat(long.df)
 
     optim.control$fnscale <- -1
@@ -764,6 +655,8 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
 
     while(!EM.status$finished)
     {
+        # TODO: EDIT THIS TO USE Rcpp theta function on the fly instead of taking ----
+        # theta input
         # E-step - Update posterior probabilities
         ppr.m <- onemode.membership.pp(long.df, theta.arr, pi.v, n, row=TRUE)
 
@@ -775,6 +668,7 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
         invect=outvect
         # M-step:
         #use numerical maximisation
+        # TODO: EDIT THIS to use different arguments ----
         optim.fit <- optim(par=invect,
                            fn=calc.ll,
                            long.df=long.df,
@@ -791,15 +685,20 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
 
         outvect <- optim.fit$par
         llc <- calc.ll(outvect,long.df=long.df,y.mat=y.mat,model=model,submodel=submodel,
-                        ppr.m,pi.v,RG, partial=FALSE)
+                       ppr.m,pi.v,RG, partial=FALSE)
 
+        # TODO: Again, need to decide whether to still keep this, given most parvec ----
+        # unpacking done in Rcpp
         parlist.out <- unpack.parvec(outvect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,
                                      constraint.sum.zero=constraint.sum.zero)
+
+        # TODO: DELETE THIS -- instead calc theta on the fly, in Rcpp ----
         theta.arr <- calc.theta(parlist.out,model=model,submodel=submodel)
 
         ## Note that UNLIKE Rcluster.ll, Rcluster.Incll outputs the *actual*
         ## log-likelihood, not the negative of the log-likelihood, so don't need
         ## to make it negative here
+        # TODO: EDIT THIS -- use Rcpp ----
         lli <- Rcluster.Incll(long.df, theta.arr, pi.v, RG)
 
         EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
@@ -853,13 +752,18 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
     RG <- length(pi.v)
     CG <- length(kappa.v)
 
+    # TODO: Want to move this bit to Rcpp -- or maybe just initially run it in R? ----
+    # Probably keep this one in R because easier to then do error checking
+    # for initial param values
     parlist.in <- unpack.parvec(invect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,CG=CG,
                                 constraint.sum.zero=constraint.sum.zero)
     if (any(sapply(parlist.in,function(elt) any(is.na(elt))))) stop("Error unpacking parameters for model.")
     if (any(sapply(parlist.in,function(elt) is.null(elt)))) stop("Error unpacking parameters for model.")
 
+    # TODO: DELETE THIS -- will do this on the fly for each value of theta, in Rcpp ----
     theta.arr <- calc.theta(parlist.in,model=model,submodel=submodel)
 
+    # TODO: DELETE THIS -- will instead pass long.df and model matrices to Rcpp ----
     y.mat <- df2mat(long.df)
 
     optim.control$fnscale <- -1
@@ -874,6 +778,8 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
 
     while(!EM.status$finished)
     {
+        # TODO: EDIT THIS TO USE Rcpp theta function on the fly instead of taking ----
+        # theta input
         # E-step - Update posterior probabilities
         ppr.m <- twomode.membership.pp(long.df, theta.arr, pi.v, kappa.v, RG, row=TRUE)
 
@@ -882,6 +788,8 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
 
         pi.v <- colMeans(ppr.m)
 
+        # TODO: EDIT THIS TO USE Rcpp theta function on the fly instead of taking ----
+        # theta input
         ppc.m <- twomode.membership.pp(long.df, theta.arr, pi.v, kappa.v, CG, row=FALSE)
 
         ## Now set any NA values in the posterior probabilities matrix to 0
@@ -892,6 +800,7 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
         invect=outvect
         # M-step:
         #use numerical maximisation
+        # TODO: EDIT THIS to use different arguments ----
         optim.fit <- optim(par=invect,
                            fn=calc.ll,
                            long.df=long.df,
@@ -912,18 +821,24 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
         outvect <- optim.fit$par
 
         llc <- calc.ll(outvect,long.df=long.df,y.mat=y.mat,model=model,submodel=submodel,
-                        ppr.m=ppr.m,pi.v=pi.v,RG=RG, ppc.m=ppc.m,kappa.v=kappa.v,CG=CG,
-                        partial=FALSE)
+                       ppr.m=ppr.m,pi.v=pi.v,RG=RG, ppc.m=ppc.m,kappa.v=kappa.v,CG=CG,
+                       partial=FALSE)
 
+        # TODO: Again, need to decide whether to still keep this, given most parvec ----
+        # unpacking done in Rcpp
         parlist.out <- unpack.parvec(outvect,model=model,submodel=submodel,
                                      n=n,p=p,q=q,RG=RG,CG=CG,constraint.sum.zero=constraint.sum.zero)
+
+        # TODO: DELETE THIS -- instead calc theta on the fly, in Rcpp ====
         theta.arr <- calc.theta(parlist.out,model=model,submodel=submodel)
 
         ## Note that UNLIKE Bicluster.ll, Bicluster.Incll outputs the *actual*
         ## log-likelihood, not the negative of the log-likelihood, so don't need
         ## to make it negative here
+        # TODO: EDIT THIS -- use Rcpp ====
         lli <- Bicluster.IncllApprox(llc, long.df, y.mat, theta.arr, pi.v, kappa.v, ppr.m, ppc.m)
         if (is.na(lli)) browser()
+
         EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
                                       parlist.out=parlist.out,
                                       invect=invect,outvect=outvect,
@@ -977,21 +892,24 @@ calc.SE.rowcluster <- function(long.df, clust.out,
                                optim.control=default.optim.control()) {
     optim.control$fnscale=-1
 
+    # TODO: DELETE THIS ====
     y.mat <- df2mat(long.df)
+
     outvect <- clust.out$outvect
 
+    # TODO: EDIT THIS to use different arguments ====
     optim.hess <- optimHess(par=outvect,
-                       fn=calc.ll,
-                       long.df=long.df,
-                       y.mat=y.mat,
-                       model=clust.out$model,
-                       submodel=clust.out$submodel,
-                       ppr.m=clust.out$ppr,
-                       pi.v=clust.out$pi.out,
-                       RG=clust.out$info["R"],
-                       constraint.sum.zero=clust.out$constraint.sum.zero,
-                       SE.calc=TRUE,
-                       control=optim.control)
+                            fn=calc.ll,
+                            long.df=long.df,
+                            y.mat=y.mat,
+                            model=clust.out$model,
+                            submodel=clust.out$submodel,
+                            ppr.m=clust.out$ppr,
+                            pi.v=clust.out$pi.out,
+                            RG=clust.out$info["R"],
+                            constraint.sum.zero=clust.out$constraint.sum.zero,
+                            SE.calc=TRUE,
+                            control=optim.control)
 
     SE <- sqrt(diag(solve(-optim.hess)))
     SE
@@ -1034,28 +952,31 @@ calc.SE.rowcluster <- function(long.df, clust.out,
 #' @describeIn calc.SE.bicluster SE for biclustering
 #' @export
 calc.SE.bicluster <- function(long.df, clust.out,
-                               optim.control=default.optim.control()) {
+                              optim.control=default.optim.control()) {
 
     optim.control$fnscale=-1
 
+    # TODO: DELETE THIS ====
     y.mat <- df2mat(long.df)
+
     outvect <- clust.out$outvect
 
+    # TODO: EDIT THIS to use different arguments ====
     optim.hess <- optimHess(par=outvect,
-                       fn=calc.ll,
-                       long.df=long.df,
-                       y.mat=y.mat,
-                       model=clust.out$model,
-                       submodel=clust.out$submodel,
-                       ppr.m=clust.out$ppr,
-                       pi.v=clust.out$pi.out,
-                       RG=clust.out$info["R"],
-                       ppc.m=clust.out$ppc,
-                       kappa.v=clust.out$kappa.out,
-                       CG=clust.out$info["C"],
-                       constraint.sum.zero=clust.out$constraint.sum.zero,
-                       SE.calc=TRUE,
-                       control=optim.control)
+                            fn=calc.ll,
+                            long.df=long.df,
+                            y.mat=y.mat,
+                            model=clust.out$model,
+                            submodel=clust.out$submodel,
+                            ppr.m=clust.out$ppr,
+                            pi.v=clust.out$pi.out,
+                            RG=clust.out$info["R"],
+                            ppc.m=clust.out$ppc,
+                            kappa.v=clust.out$kappa.out,
+                            CG=clust.out$info["C"],
+                            constraint.sum.zero=clust.out$constraint.sum.zero,
+                            SE.calc=TRUE,
+                            control=optim.control)
 
     SE <- sqrt(diag(solve(-optim.hess)))
     SE

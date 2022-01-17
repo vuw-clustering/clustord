@@ -193,6 +193,8 @@ unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constra
     parlist
 }
 
+# TODO: TOTALLY REWRITE THIS AND FOLLOWING FUNCTIONS -- don't use separate ====
+# functions for each model or formula any more
 calc.theta <- function(parlist, model, submodel) {
     switch(model,
            "OSM"={

@@ -1,3 +1,4 @@
+# TODO: EDIT THIS to fetch theta on the fly from Rcpp ----
 onemode.membership.pp <- function(long.df, theta, proportions, nelements, row){
     nclus <- length(proportions)
     pp.m <- matrix(NA, nelements, nclus)
@@ -20,6 +21,7 @@ onemode.membership.pp <- function(long.df, theta, proportions, nelements, row){
     pp.m
 }
 
+# TODO: EDIT THIS to fetch theta on the fly from Rcpp ====
 twomode.membership.pp <- function(long.df, theta, pi.v, kappa.v, nclus, row) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
@@ -70,6 +72,13 @@ assignments <- function(pp.m) {
     assignments
 }
 
+# TODO: EDIT THIS to take parvec and model matrices as inputs instead of submodel ====
+# rcpparma_Bicluster.IncllApprox, or rcpparma_Bicluster.ll
+########## ACTUALLY:
+# Either split up this function into separate versions for Rcluster and Bicluster,
+# or just get rid of this entirely and just call Rcluster.ll, Bicluster.ll,
+# Rcluster.Incll and Bicluster.IncllApprox from clustering.R
+# (and call their Rcpp versions instead of R versions)
 calc.ll <- function(invect, long.df, y.mat, model, submodel, ppr.m, pi.v, RG,
                     ppc.m=NULL, kappa.v=NULL, CG=NULL, constraint.sum.zero=TRUE,
                     partial=FALSE, SE.calc=FALSE) {
@@ -77,27 +86,38 @@ calc.ll <- function(invect, long.df, y.mat, model, submodel, ppr.m, pi.v, RG,
     p <- max(long.df$COL)
     q <- length(levels(long.df$Y))
 
+    # TODO: DELETE THIS -- only unpack parvec inside Rcpp ====
     parlist <- unpack.parvec(invect,model=model,submodel=submodel,
                              n=n,p=p,q=q,RG=RG,CG=CG,constraint.sum.zero=constraint.sum.zero)
 
+    # TODO: DELETE THIS -- only calculate theta on the fly inside Rcpp ====
     this.theta <- calc.theta(parlist,model=model,submodel=submodel)
 
     if (SE.calc) {
         if (submodel %in% c("rs","rp","rpi")) {
+            # TODO: EDIT THIS to instead call rcpparma_RCluster.Incll, and pass in ====
+            # parvec and model matrices instead of theta
             Rcluster.Incll(long.df, this.theta, pi.v, RG)
         } else if (submodel %in% c("rc","rci")) {
+            # TODO: EDIT THIS to instead call rcpparma_BiCluster.IncllApprox, and ====
+            # pass in parvec and model matrices instead of theta
             Bicluster.IncllApprox(long.df=long.df, y.mat=y.mat, theta=this.theta,
                                   ppr.m=ppr.m, ppc.m=ppc.m, pi.v=pi.v, kappa.v=kappa.v)
         }
     } else {
         if (submodel %in% c("rs","rp","rpi")) {
+            # TODO: EDIT THIS to instead call rcpparma_RCluster.ll, and pass in ====
+            # parvec and model matrices instead of theta
             Rcluster.ll(long.df, y.mat, this.theta, ppr.m, pi.v, RG, partial=partial)
         } else if (submodel %in% c("rc","rci")) {
+            # TODO: EDIT THIS to instead call rcpparma_BiCluster.ll, and pass in ====
+            # parvec and model matrices instead of theta
             Bicluster.ll(long.df, y.mat, this.theta, ppr.m, ppc.m, pi.v, kappa.v, partial=partial)
         }
     }
 }
 
+# TODO: PROBABLY DELETE THIS -- unnecessary, just call Rcpp directly from higher level ====
 Rcluster.ll <- function(long.df, y.mat, theta, ppr.m, pi.v, RG, partial=FALSE){
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
@@ -128,6 +148,8 @@ Rcluster.ll <- function(long.df, y.mat, theta, ppr.m, pi.v, RG, partial=FALSE){
     llc
 }
 
+# TODO: PROBABLY DELETE THIS -- and instead use rcpparma_updateliR or updateliC ====
+# (and update them to construct theta on the fly)
 Rcluster.Incll <- function(long.df, theta, pi.v, RG)
 {
     n <- max(long.df$ROW)
@@ -154,7 +176,7 @@ Rcluster.Incll <- function(long.df, theta, pi.v, RG)
     logl
 }
 
-#The Log-likelihood #
+# TODO: PROBABLY DELETE THIS ====
 Bicluster.ll <- function(long.df, y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, partial=FALSE){
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
@@ -196,6 +218,7 @@ Bicluster.ll <- function(long.df, y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, par
 }
 
 #The incomplete log-likelihood,used in model selection#
+# TODO: PROBABLY DELETE THIS ====
 Bicluster.IncllC <- function(long.df, theta, pi.v, kappa.v)
 {
     n <- max(long.df$ROW)
@@ -269,6 +292,7 @@ Bicluster.IncllC <- function(long.df, theta, pi.v, kappa.v)
 }
 
 # Rows expansion (use if RG^n small enough):
+# TODO: PROBABLY DELETE THIS ====
 Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
 {
     n <- max(long.df$ROW)
@@ -339,6 +363,7 @@ Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
     logl
 }
 
+# TODO: PROBABLY DELETE THIS - INSTEAD JUST USE RCPP FUNCTION ====
 ## Biclustering incomplete-data log-likelihood calculated based on the approximation
 ## relating the incomplete-data and complete-data log-likelihoods
 Bicluster.IncllApprox <- function(llc=NULL, long.df, y.mat, theta, pi.v, kappa.v, ppr.m, ppc.m) {

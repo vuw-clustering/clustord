@@ -73,6 +73,7 @@ calc.joint.entropy <- function(cont.table) {
 }
 
 #transform data set to matrix form #
+# TODO: REWRITE THIS TO INCLUDE XR.DF AND XC.DF ====
 df2mat <- function(long.df){
     n <- max(long.df$ROW)
     p <- max(long.df$COL)

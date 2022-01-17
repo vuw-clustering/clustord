@@ -4,6 +4,8 @@
 #' odds model (POM), ordered stereotype model (OSM) or binary model for ordinal
 #' categorical data.
 #'
+# TODO: REWRITE THIS!!! ====
+#'
 #' The clustord package provides three important functions:
 #' rowclustering, columnclustering and biclustering.
 #'
