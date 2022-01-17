@@ -1,6 +1,4 @@
-validate.inputs <- function(type,
-                            formula,
-                            model,
+validate.inputs <- function(formula, model,
                             nclus.row=NULL,nclus.column=NULL,
                             long.df,
                             initvect=NULL,
@@ -20,16 +18,16 @@ validate.inputs <- function(type,
     if (!is.character(model) || !is.vector(model) || length(model) != 1) stop("model must be a string, 'OSM' or 'POM' or 'Binary'.")
     if (!(model %in% c("OSM","POM","Binary"))) stop("model must be either 'OSM' or POM' for the ordered stereotype and proportional odds models, or 'Binary' for the binary model.")
 
-    ## Check that clustering settings are valid
-    if (type %in% c("row","bi") && is.null(nclus.row)) stop("For row clustering or biclustering, nclus.row cannot be null.")
-    else if (!is.null(nclus.row)) {
+    ## Check that clustering settings are valid (later, in check.formula, will
+    ## make sure user has provide nclus.row or nclus.column or both, depending
+    ## on formula supplied)
+    if (!is.null(nclus.row)) {
         if (!is.vector(nclus.row) || length(nclus.row) != 1 || nclus.row <= 1 ||
             nclus.row %% 1 != 0 || is.na(nclus.row)) {
             stop("nclus.row must be an integer, from 2 to the number of rows/observations in the data.")
         }
     }
-    if (type %in% c("column","bi") && is.null(nclus.column)) stop("For column clustering or biclustering, nclus.column cannot be null.")
-    else if (!is.null(nclus.column)) {
+    if (!is.null(nclus.column)) {
         if (!is.vector(nclus.column) || length(nclus.column) != 1 ||
             nclus.column <= 1 || nclus.column %% 1 != 0 || is.na(nclus.column)) {
             stop("nclus.column must be an integer, from 2 to the number of columns/questions in the data.")
