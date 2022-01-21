@@ -1,229 +1,176 @@
-unpack.parvec <- function(invect, model, submodel, n, p, q, RG, CG=NULL, constraint.sum.zero=TRUE) {
+unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
+                          constraint.sum.zero = TRUE) {
+
+    sub.invect <- invect
+    nelts <- 0
+    parlist <- as.list(param.lengths)
     switch(model,
            "OSM"={
-               mu <- c(0,invect[1:(q-1)])
+               mu <- c(0,sub.invect[1:(q-1)])
+               parlist[['mu']] <- mu
+               nelts <- nelts + q-1
 
                ## Convert to phi from u, where u can vary between -Inf and +Inf
                ## but phi must be between 0 and 1, and phi_k >= phi_k-1
-               u <- c(0,invect[(q-1+1):(q-1+q-2)])
+               u <- c(0,sub.invect[(q-1+1):(q-1+q-2)])
                if (q == 3) phi <- c(0, expit(u[2]) ,1)
                else if (q > 3) phi <- c(0, expit(u[2]), sapply(3:(q-1), function(k) expit(u[2] + sum(exp(u[3:k])))), 1)
                else stop("q must be at least 3!")
+               parlist[['phi']] <- phi
+               nelts <- nelts + q-2
 
-               alpha <- invect[(q-1+q-2+1):(q-1+q-2+RG-1)]
-               if (constraint.sum.zero) alpha <- c(alpha, -sum(alpha))
-               else alpha <- c(0, alpha)
-               switch(submodel,
-                      "rs"={
-                          parlist <- list(n=n,p=p,mu=mu,phi=phi,alpha=alpha)
-                          nelts <- q-1 + q-2 + RG-1
-                      },
-                      "rp"={
-                          beta <- invect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+p-1)]
-                          if (constraint.sum.zero) beta <- c(beta, -sum(beta))
-                          else beta <- c(0, beta)
-                          parlist <- list(n=n,p=p,mu=mu,phi=phi,alpha=alpha,beta=beta)
-                          nelts <- q-1 + q-2 + RG-1 + p-1
-                      },
-                      "rpi"={
-                          beta <- invect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+p-1)]
-                          if (constraint.sum.zero) beta <- c(beta, -sum(beta))
-                          else beta <- c(0, beta)
-
-                          gamma <- c(invect[(q-1+q-2+RG-1+p-1+1):(q-1+q-2+RG-1+p-1+(RG-1)*(p-1))])
-                          gamma <- matrix(gamma,nrow=RG-1,ncol=p-1,byrow=T)
-                          gamma <- cbind(gamma,-rowSums(gamma))
-                          # Original POM code had final row of gamma equal to negative
-                          # sum of other rows, but this code follows original OSM code,
-                          # has FIRST row of gamma equal to negative sum of other rows
-                          gamma <- rbind(-colSums(gamma),gamma)
-
-                          parlist <- list(n=n,p=p,mu=mu,phi=phi,alpha=alpha,beta=beta,gamma=gamma)
-                          nelts <- q-1 + q-2 + RG-1 + p-1 + (RG-1)*(p-1)
-                      },
-                      "rc"={
-                          beta <- invect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+CG-1)]
-                          if (constraint.sum.zero) beta <- c(beta, -sum(beta))
-                          else beta <- c(0, beta)
-                          parlist <- list(n=n,p=p,mu=mu,phi=phi,alpha=alpha,beta=beta)
-                          nelts <- q-1 + q-2 + RG-1 + CG-1
-                      },
-                      "rci"={
-                          beta <- invect[(q-1+q-2+RG-1+1):(q-1+q-2+RG-1+CG-1)]
-                          if (constraint.sum.zero) beta <- c(beta, -sum(beta))
-                          else beta <- c(0, beta)
-
-                          gamma <- invect[(q-1+q-2+RG-1+CG-1+1):(q-1+q-2+RG-1+CG-1+(RG-1)*(CG-1))]
-                          gamma <- matrix(gamma,nrow=RG-1,ncol=CG-1,byrow=T)
-                          gamma <- cbind(gamma,-rowSums(gamma))
-                          # Original POM code had final row of gamma equal to negative
-                          # sum of other rows, but this code follows original OSM code,
-                          # has FIRST row of gamma equal to negative sum of other rows
-                          gamma <- rbind(-colSums(gamma),gamma)
-
-                          parlist <- list(n=n,p=p,mu=mu,phi=phi,alpha=alpha,beta=beta,gamma=gamma)
-                          nelts <- q-1 + q-2 + RG-1 + CG-1 + (RG-1)*(CG-1)
-                      })
+               sub.invect <- sub.invect[(q-1+q-1):length(sub.invect)]
            },
            "POM"={
-               mu <- invect[1:(q-1)]
+               mu <- sub.invect[1:(q-1)]
                mu <- sort(mu, decreasing=FALSE)
+               parlist[['mu']] <- mu
+               nelts <- nelts + q-1
 
-               alpha <- invect[(q-1+1):(q-1+RG-1)]
-               if (constraint.sum.zero) alpha <- c(alpha, -sum(alpha))
-               else alpha <- c(0, alpha)
-
-               switch(submodel,
-                      "rs"={
-                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha)
-                          nelts <- q-1 + RG-1
-                      },
-                      "rp"={
-                          beta <- invect[(q-1+RG-1+1):(q-1+RG-1+p-1)]
-                          if (constraint.sum.zero) beta <- c(beta, -sum(beta))
-                          else beta <- c(0, beta)
-
-                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha,beta=beta)
-                          nelts <- q-1 + RG-1 + p-1
-                      },
-                      "rpi"={
-                          beta <- invect[(q-1+RG-1+1):(q-1+RG-1+p-1)]
-                          if (constraint.sum.zero) beta <- c(beta, -sum(beta))
-                          else beta <- c(0, beta)
-
-                          gamma <- invect[(q-1+RG-1+p-1+1):(q-1+RG-1+p-1+(RG-1)*(p-1))]
-                          gamma <- matrix(gamma,nrow=RG-1,ncol=p-1,byrow=T)
-                          gamma <- cbind(gamma,-rowSums(gamma))
-                          # Original POM code had final row of gamma equal to negative
-                          # sum of other rows, but this code follows original OSM code,
-                          # has FIRST row of gamma equal to negative sum of other rows
-                          gamma <- rbind(-colSums(gamma),gamma)
-
-                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha,beta=beta,gamma=gamma)
-                          nelts <- q-1 + RG-1 + p-1 + (RG-1)*(p-1)
-                      },
-                      "rc"={
-                          beta <- invect[(q-1+RG-1+1):(q-1+RG-1+CG-1)]
-                          if (constraint.sum.zero) beta <- c(beta, -sum(beta))
-                          else beta <- c(0, beta)
-
-                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha,beta=beta)
-                          nelts <- q-1 + RG-1 + CG-1
-                      },
-                      "rci"={
-                          beta <- invect[(q-1+RG-1+1):(q-1+RG-1+CG-1)]
-                          if (constraint.sum.zero) beta <- c(beta, -sum(beta))
-                          else beta <- c(0, beta)
-
-                          gamma <- invect[(q-1+RG-1+CG-1+1):(q-1+RG-1+CG-1+(RG-1)*(CG-1))]
-                          gamma <- matrix(gamma,nrow=RG-1,ncol=CG-1,byrow=T)
-                          gamma <- cbind(gamma,-rowSums(gamma))
-                          # Original POM code had final row of gamma equal to negative
-                          # sum of other rows, but this code follows original OSM code,
-                          # has FIRST row of gamma equal to negative sum of other rows
-                          gamma <- rbind(-colSums(gamma),gamma)
-
-                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha,beta=beta,gamma=gamma)
-                          nelts <- q-1 + RG-1 + CG-1 + (RG-1)*(CG-1)
-                      })
+               sub.invect <- sub.invect[q:length(sub.invect)]
            },
            "Binary"={
-               mu <- invect[1]
-               alpha <- invect[(1+1):(1+RG-1)]
-               if (constraint.sum.zero) alpha <- c(alpha, -sum(alpha))
-               else alpha <- c(0, alpha)
+               mu <- sub.invect[1]
+               parlist[['mu']] <- mu
+               nelts <- nelts + 1
 
-               switch(submodel,
-                      "rs"={
-                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha)
-                          nelts <- 1 + RG-1
-                      },
-                      "rp"={
-                          beta <- invect[(1+RG-1+1):(1+RG-1+p-1)]
-                          if (constraint.sum.zero) beta <- c(beta, -sum(beta))
-                          else beta <- c(0, beta)
-
-                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha,beta=beta)
-                          nelts <- 1 + RG-1 + p-1
-                      },
-                      "rpi"={
-                          beta <- invect[(1+RG-1+1):(1+RG-1+p-1)]
-                          if (constraint.sum.zero) beta <- c(beta, -sum(beta))
-                          else beta <- c(0, beta)
-
-                          gamma <- invect[(1+RG-1+p-1+1):(1+RG-1+p-1+(RG-1)*(p-1))]
-                          gamma <- matrix(gamma,nrow=RG-1,ncol=p-1,byrow=T)
-                          gamma <- cbind(gamma,-rowSums(gamma))
-                          # Original POM code had final row of gamma equal to negative
-                          # sum of other rows, but this code follows original OSM code,
-                          # has FIRST row of gamma equal to negative sum of other rows
-                          gamma <- rbind(-colSums(gamma),gamma)
-
-                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha,beta=beta,gamma=gamma)
-                          nelts <- 1 + RG-1 + p-1 + (RG-1)*(p-1)
-                      },
-                      "rc"={
-                          beta <- invect[(1+RG-1+1):(1+RG-1+CG-1)]
-                          if (constraint.sum.zero) beta <- c(beta, -sum(beta))
-                          else beta <- c(0, beta)
-
-                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha,beta=beta)
-                          nelts <- 1 + RG-1 + CG-1
-                      },
-                      "rci"={
-                          beta <- invect[(1+RG-1+1):(1+RG-1+CG-1)]
-                          if (constraint.sum.zero) beta <- c(beta, -sum(beta))
-                          else beta <- c(0, beta)
-
-                          gamma <- invect[(1+RG-1+CG-1+1):(1+RG-1+CG-1+(RG-1)*(CG-1))]
-                          gamma <- matrix(gamma,nrow=RG-1,ncol=CG-1,byrow=T)
-                          gamma <- cbind(gamma,-rowSums(gamma))
-                          # Original POM code had final row of gamma equal to negative
-                          # sum of other rows, but this code follows original OSM code,
-                          # has FIRST row of gamma equal to negative sum of other rows
-                          gamma <- rbind(-colSums(gamma),gamma)
-
-                          parlist <- list(n=n,p=p,mu=mu,alpha=alpha,beta=beta,gamma=gamma)
-                          nelts <- 1 + RG-1 + CG-1 + (RG-1)*(CG-1)
-                      })
+               sub.invect <- sub.invect[2:length(sub.invect)]
            })
+
+    nrowc <- param.lengths['rowc']
+    if (nrowc > 0) {
+        if (length(sub.invect) < (nrowc-1)) stop("invect not long enough for given formula.")
+        rowc.coef <- sub.invect[1:(nrowc-1)]
+        if (constraint.sum.zero) rowc.coef <- c(rowc.coef, -sum(rowc.coef))
+        else rowc.coef <- c(0, rowc.coef)
+        parlist[['rowc']] <- rowc.coef
+        nelts <- nelts + nrowc - 1
+
+        if (length(sub.invect) > (nrowc-1)) sub.invect <- sub.invect[nrowc:length(sub.invect)]
+    }
+
+    ncolc <- param.lengths['colc']
+    if (ncolc > 0) {
+        if (length(sub.invect) < (ncolc-1)) stop("invect not long enough for given formula.")
+        colc.coef <- sub.invect[1:(ncolc-1)]
+        if (constraint.sum.zero) colc.coef <- c(colc.coef, -sum(colc.coef))
+        else colc.coef <- c(0, colc.coef)
+        parlist[['colc']] <- colc.coef
+        nelts <- nelts + ncolc - 1
+
+        if (length(sub.invect) > (ncolc-1)) sub.invect <- sub.invect[ncolc:length(sub.invect)]
+    }
+
+    nrowc.colc <- param.lengths['rowc.colc']
+    if (nrowc.colc > 0) {
+        if (length(sub.invect) < (RG-1)*(CG-1)) stop("invect not long enough for given formula.")
+        rowc.colc.coef <- sub.invect[1:((RG-1)*(CG-1))]
+        rowc.colc.coef <- matrix(rowc.colc.coef,nrow=RG-1,ncol=CG-1,byrow=T)
+        rowc.colc.coef <- cbind(rowc.colc.coef,-rowSums(rowc.colc.coef))
+        # Original POM code had final row of rowc.colc.coef equal to
+        # negative sum of other rows, but this code follows original OSM
+        # code, has FIRST row of rowc.colc.coef equal to negative sum of
+        # other rows
+        rowc.colc.coef <- rbind(-colSums(rowc.colc.coef),rowc.colc.coef)
+
+        parlist[['rowc']] <- rowc.colc.coef
+        nelts <- nelts + (RG-1)*(CG-1)
+
+        if (length(sub.invect) > (RG-1)*(CG-1)) sub.invect <- sub.invect[((RG-1)*(CG-1)+1):length(sub.invect)]
+    }
+
+    nrow <- param.lengths['row']
+    if (nrow > 0) {
+        if (length(sub.invect) < n) stop("invect not long enough for given formula.")
+        row.coef <- sub.invect[1:n]
+
+        parlist[['row']] <- row.coef
+        nelts <- nelts + n
+
+        if (length(sub.invect) > n) sub.invect <- sub.invect[(n+1):length(sub.invect)]
+    }
+    ncol <- param.lengths['col']
+    if (ncol > 0) {
+        if (length(sub.invect) < p) stop("invect not long enough for given formula.")
+        col.coef <- sub.invect[1:p]
+
+        parlist[['col']] <- col.coef
+        nelts <- nelts + p
+
+        if (length(sub.invect) > p) sub.invect <- sub.invect[(p+1):length(sub.invect)]
+    }
+
+    nrowc.col <- param.lengths['rowc.col']
+    if (nrowc.col > 0) {
+        if (length(sub.invect) < RG*p) stop("invect not long enough for given formula.")
+        rowc.col.coef <- sub.invect[1:RG*p]
+
+        rowc.col.coef <- matrix(rowc.col.coef,nrow=RG-1,ncol=p-1,byrow=T)
+        rowc.col.coef <- cbind(rowc.col.coef,-rowSums(rowc.col.coef))
+        # Original POM code had final row of rowc.col.coef equal to negative
+        # sum of other rows, but this code follows original OSM code,
+        # has FIRST row of rowc.col.coef equal to negative sum of other rows
+        rowc.col.coef <- rbind(-colSums(rowc.col.coef),rowc.col.coef)
+
+        parlist[['rowc.col']] <- rowc.col.coef
+        nelts <- nelts + RG*p
+
+        if (length(sub.invect) > RG*p) sub.invect <- sub.invect[(RG*p+1):length(sub.invect)]
+    }
+
+    ncolc.row <- param.lengths['colc.row']
+    if (ncolc.row > 0) {
+        if (length(sub.invect) < CG*n) stop("invect not long enough for given formula.")
+        colc.row.coef <- sub.invect[1:CG*n]
+
+        colc.row.coef <- matrix(colc.row.coef,nrow=RG-1,ncol=p-1,byrow=T)
+        colc.row.coef <- cbind(colc.row.coef,-rowSums(colc.row.coef))
+        # Original POM code had final row of colc.row.coef equal to negative
+        # sum of other rows, but this code follows original OSM code,
+        # has FIRST row of colc.row.coef equal to negative sum of other rows
+        colc.row.coef <- rbind(-colSums(colc.row.coef),colc.row.coef)
+
+        parlist[['colc.row']] <- colc.row.coef
+        nelts <- nelts + CG*n
+
+        if (length(sub.invect) > CG*n) sub.invect <- sub.invect[(CG*n+1):length(sub.invect)]
+    }
+
+    nrowc.cov <- param.lengths['rowc.cov']
+    if (nrowc.cov > 0) {
+        if (length(sub.invect) < nrowc.cov) stop("invect not long enough for given formula.")
+        rowc.cov.coef <- sub.invect[1:nrowc.cov]
+
+        parlist[['rowc.cov']] <- rowc.cov.coef
+        nelts <- nelts + nrowc.cov
+
+        if (length(sub.invect) > nrowc.cov) sub.invect <- sub.invect[(nrowc.cov+1):length(sub.invect)]
+    }
+    ncolc.cov <- param.lengths['colc.cov']
+    if (ncolc.cov > 0) {
+        if (length(sub.invect) < ncolc.cov) stop("invect not long enough for given formula.")
+        colc.cov.coef <- sub.invect[1:ncolc.cov]
+
+        parlist[['colc.cov']] <- colc.cov.coef
+        nelts <- nelts + ncolc.cov
+
+        if (length(sub.invect) > ncolc.cov) sub.invect <- sub.invect[(ncolc.cov+1):length(sub.invect)]
+    }
+    ncov <- param.lengths['cov']
+    if (nrowc.cov > 0) {
+        if (length(sub.invect) < ncov) stop("invect not long enough for given formula.")
+        cov.coef <- sub.invect[1:ncov]
+
+        parlist[['cov']] <- cov.coef
+        nelts <- nelts + ncov
+
+        if (length(sub.invect > ncov) sub.invect <- sub.invect[(ncov+1):length(sub.invect)]
+    }
 
     if (length(invect) != nelts) warning("initvect is TOO LONG, the parameters may have been specified incorrectly. Please double-check initvect.")
 
     parlist
 }
-
-# TODO: TOTALLY REWRITE THIS AND FOLLOWING FUNCTIONS -- don't use separate ====
-# functions for each model or formula any more
-calc.theta <- function(parlist, model, submodel) {
-    switch(model,
-           "OSM"={
-               switch(submodel,
-                      "rs"=theta.OSM.rs(parlist),
-                      "rp"=theta.OSM.rp(parlist),
-                      "rpi"=theta.OSM.rpi(parlist),
-                      "rc"=theta.OSM.rc(parlist),
-                      "rci"=theta.OSM.rci(parlist))
-           },
-           "POM"={
-               switch(submodel,
-                      "rs"=theta.POFM.rs(parlist),
-                      "rp"=theta.POFM.rp(parlist),
-                      "rpi"=theta.POFM.rpi(parlist),
-                      "rc"=theta.POFM.rc(parlist),
-                      "rci"=theta.POFM.rci(parlist))
-           },
-           "Binary"={
-               switch(submodel,
-                      "rs"=theta.Binary.rs(parlist),
-                      "rp"=theta.Binary.rp(parlist),
-                      "rpi"=theta.Binary.rpi(parlist),
-                      "rc"=theta.Binary.rc(parlist),
-                      "rci"=theta.Binary.rci(parlist))
-           })
-}
-
-
 
 theta.OSM.rs <- function(parlist) {
     p <- parlist$p
