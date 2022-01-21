@@ -116,6 +116,13 @@ check.factors <- function(long.df) {
         attributes(long.df)$COLlevels <- levels(long.df$COL)
         long.df$COL <- as.numeric(long.df$COL)
     }
+
+    # Check that all covariates are factors
+    cov.idxs <- which(!(names(long.df) %in% c("Y","ROW","COL")))
+    for (j in cov.idxs) {
+        if (is.character(long.df[,j])) long.df[,j] <- factor(long.df[,j])
+    }
+
     long.df
 }
 
