@@ -605,9 +605,9 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
     if (EM.control$keepallparams) {
         names(new.lli) <- "lli"
         names(new.llc) <- "llc"
-        names(pi.v) <- paste0("pi",1:length(pi.v))
+        names(pi.v) <- paste0("pi",seq_along(pi.v))
         if (!is.null(kappa.v)) {
-            names(kappa.v) <- paste0("kappa",1:length(kappa.v))
+            names(kappa.v) <- paste0("kappa",seq_along(kappa.v))
             newparams <- c(unlist(parlist.out),
                            pi.v,kappa.v,new.lli,new.llc)
         } else {

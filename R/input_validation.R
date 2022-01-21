@@ -289,7 +289,7 @@ extract.covs <- function(clust.name, clust.idxs, non.row.col.part, long.df) {
     if (length(clust.cov.part) > 0) {
         # First, remove the COLCLUST term from those parts, because we want to
         # obtain the model matrix of the remaining parts of the terms
-        for (i in 1:length(clust.cov.part)) {
+        for (i in seq_along(clust.cov.part)) {
             term <- clust.cov.part[i]
             if (substr(term, 1, 9) == paste0(clust.name, ":")) {
                 clust.cov.part[i] <- substr(term,10,nchar(term))

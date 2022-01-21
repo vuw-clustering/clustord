@@ -236,7 +236,7 @@ generate.initvect.rowcluster <- function(long.df, model, submodel, RG,
         cat("=== End of RS model fitting ===\n")
         if (all(rs.out$pi.out > 1E-20))
             pi.init <- rs.out$pi.out
-        initvect[1:length(rs.out$outvect)] <- rs.out$outvect
+        initvect[seq_along(rs.out$outvect)] <- rs.out$outvect
     }
 
     list(initvect=initvect, pi.init=pi.init)
