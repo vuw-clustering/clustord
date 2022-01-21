@@ -155,7 +155,8 @@ check.formula <- function(formula, long.df, RG, CG) {
     if (colc.grep > 0 && colc.grep != sum(fo.vars == "COLCLUST")) stop("You cannot use functions of COLCLUST, only COLCLUST as-is.")
 
     # A.4  Check that if ROW or COL is in the formula, there are no functions of
-    #      them, or any interaction terms involving them
+    #      them, or any interaction terms involving them EXCEPT interactions
+    #      between ROW and COLCLUST or between COL and ROWCLUST
     #      OUTPUT: errors
     # We looked for ROWCLUST in attr(terms, "variables"), because ROWCLUST is
     # allowed to have interaction terms, just not allowed to be included via a
@@ -164,10 +165,27 @@ check.formula <- function(formula, long.df, RG, CG) {
     # any interactions
     temp.labels <- gsub("ROWCLUST","ZZ",fo.labels)
     row.grep <- length(grep("ROW",temp.labels))
-    if (row.grep > 0 && row.grep != sum(temp.labels == "ROW")) stop("You cannot use functions of ROW, or interactions with ROW.")
+    if (row.grep > 0 && row.grep != sum(temp.labels %in% c("ROW","ROW:COLCLUST","COLCLUST:ROW"))) {
+        stop("You cannot use functions of ROW, and the only permitted interaction is with COLCLUST.")
+    }
+    if (any(temp.labels == "ROW")) {
+        row.part <- "ROW"
+    }
+    if (any(temp.labels %in% c("ROW:COLCLUST","COLCLUST:ROW"))) {
+        colc.row.part <- "COLCLUST:ROW"
+    }
+
     temp.labels <- gsub("COLCLUST","ZZ",fo.labels)
     col.grep <- length(grep("COL",temp.labels))
-    if (col.grep > 0 && col.grep != sum(temp.labels == "COL")) stop("You cannot use functions of COL, or interactions with COL.")
+    if (col.grep > 0 && col.grep != sum(temp.labels %in% c("COL","COL:ROWCLUST","ROWCLUST:COL"))) {
+        stop("You cannot use functions of COL, and the only permitted interaction is with ROWCLUST.")
+    }
+    if (any(temp.labels == "COL")) {
+        col.part <- "COL"
+    }
+    if (any(temp.labels %in% c("COL:ROWCLUST","ROWCLUST:COL"))) {
+        rowc.col.part <- "ROWCLUST:COL"
+    }
 
     # A.5  Check that there are no three-way or higher-order interactions
     # involving ROWCLUST and COLCLUST
@@ -230,14 +248,16 @@ check.formula <- function(formula, long.df, RG, CG) {
     #      terms (i.e. all the remaining params apart from model-specific params
     #      like mu or mu_k, and phi_k)
     #      OUTPUT: params
-    param.lengths <- rep(0, 11)
+    param.lengths <- rep(0, 12)
     names(param.lengths) <- c("mu","phi","rowc","colc","rowc.colc","row","col",
-                              "rowc.cov","colc.cov","cov")
+                              "rowc.col","colc.row", "rowc.cov","colc.cov","cov")
     if (exists('rowc.part')) param.lengths['rowc'] <- RG
     if (exists('colc.part')) param.lengths['colc'] <- CG
     if (exists('rowc.colc.part')) param.lengths['rowc.colc'] <- RG*CG
-    if (row.grep > 0) param.lengths['row'] <- row.grep*n
-    if (col.grep > 0) param.lengths['col'] <- col.grep*p
+    if (exists('row.part')) param.lengths['row'] <- n
+    if (exists('colc.row.part')) param.lengths['colc.row'] <- CG*n
+    if (exists('col.part')) param.lengths['col'] <- p
+    if (exists('rowc.col.part')) param.lengths['rowc.col'] <- RG*p
     if (exists('rowc.cov.part') && length(rowc.cov.part) > 0) param.lengths['rowc.cov'] <- length(rowc.cov.part)*RG
     if (exists('colc.cov.part') && length(colc.cov.part) > 0) param.lengths['colc.cov'] <- length(colc.cov.part)*CG
     if (exists('pure.cov.part') && length(pure.cov.part) > 0) param.lengths['cov'] <- length(pure.cov.part)
@@ -249,7 +269,6 @@ check.formula <- function(formula, long.df, RG, CG) {
     #      Also KEEP a copy of the set of initial values provided for the params,
     #      to be reported at the end so the user can check they supplied correct
     #      initial values for the different params
-
 
     # Return model matrices
     # Return list of params
