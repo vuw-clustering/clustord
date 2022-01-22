@@ -1,9 +1,14 @@
 unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
                           constraint.sum.zero = TRUE) {
 
+    ## NOTE: I have to set up empty entries for the unused parts of parlist and
+    ## ensure that non-empty entries that should be matrices are matrices, so
+    ## that I can pass the full list with all entries into Rcpp
+
     sub.invect <- invect
     nelts <- 0
     parlist <- as.list(param.lengths)
+
     switch(model,
            "OSM"={
                mu <- c(0,sub.invect[1:(q-1)])
@@ -28,6 +33,8 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
                nelts <- nelts + q-1
 
                sub.invect <- sub.invect[q:length(sub.invect)]
+
+               parlist[['phi']] <- NULL
            },
            "Binary"={
                mu <- sub.invect[1]
@@ -35,6 +42,8 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
                nelts <- nelts + 1
 
                sub.invect <- sub.invect[2:length(sub.invect)]
+
+               parlist[['phi']] <- NULL
            })
 
     nrowc <- param.lengths['rowc']
@@ -47,7 +56,7 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         nelts <- nelts + nrowc - 1
 
         if (length(sub.invect) > (nrowc-1)) sub.invect <- sub.invect[nrowc:length(sub.invect)]
-    }
+    } else parlist[['rowc']] <- NULL
 
     ncolc <- param.lengths['colc']
     if (ncolc > 0) {
@@ -59,7 +68,7 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         nelts <- nelts + ncolc - 1
 
         if (length(sub.invect) > (ncolc-1)) sub.invect <- sub.invect[ncolc:length(sub.invect)]
-    }
+    } else parlist[['colc']] <- NULL
 
     nrowc.colc <- param.lengths['rowc.colc']
     if (nrowc.colc > 0) {
@@ -73,11 +82,11 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         # other rows
         rowc.colc.coef <- rbind(-colSums(rowc.colc.coef),rowc.colc.coef)
 
-        parlist[['rowc.colc']] <- rowc.colc.coef
+        parlist[['rowc.colc']] <- as.matrix(rowc.colc.coef)
         nelts <- nelts + (RG-1)*(CG-1)
 
         if (length(sub.invect) > (RG-1)*(CG-1)) sub.invect <- sub.invect[((RG-1)*(CG-1)+1):length(sub.invect)]
-    }
+    } else parlist[['rowc.colc']] <- NULL
 
     nrow <- param.lengths['row']
     if (nrow > 0) {
@@ -88,7 +97,7 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         nelts <- nelts + n
 
         if (length(sub.invect) > n) sub.invect <- sub.invect[(n+1):length(sub.invect)]
-    }
+    } else parlist[['row']] <- NULL
     ncol <- param.lengths['col']
     if (ncol > 0) {
         if (length(sub.invect) < p) stop("invect not long enough for given formula.")
@@ -98,7 +107,7 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         nelts <- nelts + p
 
         if (length(sub.invect) > p) sub.invect <- sub.invect[(p+1):length(sub.invect)]
-    }
+    } else parlist[['col']] <- NULL
 
     nrowc.col <- param.lengths['rowc.col']
     if (nrowc.col > 0) {
@@ -112,11 +121,11 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         # has FIRST row of rowc.col.coef equal to negative sum of other rows
         rowc.col.coef <- rbind(-colSums(rowc.col.coef),rowc.col.coef)
 
-        parlist[['rowc.col']] <- rowc.col.coef
+        parlist[['rowc.col']] <- as.matrix(rowc.col.coef)
         nelts <- nelts + RG*p
 
         if (length(sub.invect) > RG*p) sub.invect <- sub.invect[(RG*p+1):length(sub.invect)]
-    }
+    } else parlist[['rowc.col']] <- NULL
 
     ncolc.row <- param.lengths['colc.row']
     if (ncolc.row > 0) {
@@ -130,32 +139,33 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         # has FIRST row of colc.row.coef equal to negative sum of other rows
         colc.row.coef <- rbind(-colSums(colc.row.coef),colc.row.coef)
 
-        parlist[['colc.row']] <- colc.row.coef
+        parlist[['colc.row']] <- as.matrix(colc.row.coef)
         nelts <- nelts + CG*n
 
         if (length(sub.invect) > CG*n) sub.invect <- sub.invect[(CG*n+1):length(sub.invect)]
-    }
+    } else parlist[['colc.row']] <- NULL
 
     nrowc.cov <- param.lengths['rowc.cov']
     if (nrowc.cov > 0) {
         if (length(sub.invect) < nrowc.cov) stop("invect not long enough for given formula.")
         rowc.cov.coef <- sub.invect[1:nrowc.cov]
 
-        parlist[['rowc.cov']] <- rowc.cov.coef
+        parlist[['rowc.cov']] <- as.matrix(rowc.cov.coef)
         nelts <- nelts + nrowc.cov
 
         if (length(sub.invect) > nrowc.cov) sub.invect <- sub.invect[(nrowc.cov+1):length(sub.invect)]
-    }
+    } else parlist[['rowc.cov']] <- NULL
     ncolc.cov <- param.lengths['colc.cov']
     if (ncolc.cov > 0) {
         if (length(sub.invect) < ncolc.cov) stop("invect not long enough for given formula.")
         colc.cov.coef <- sub.invect[1:ncolc.cov]
 
-        parlist[['colc.cov']] <- colc.cov.coef
+        parlist[['colc.cov']] <- as.matrix(colc.cov.coef)
         nelts <- nelts + ncolc.cov
 
         if (length(sub.invect) > ncolc.cov) sub.invect <- sub.invect[(ncolc.cov+1):length(sub.invect)]
-    }
+    } else parlist[['colc.cov']] <- NULL
+
     ncov <- param.lengths['cov']
     if (ncov > 0) {
         if (length(sub.invect) < ncov) stop("invect not long enough for given formula.")
@@ -165,7 +175,7 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         nelts <- nelts + ncov
 
         if (length(sub.invect) > ncov) sub.invect <- sub.invect[(ncov+1):length(sub.invect)]
-    }
+    } else parlist[['cov']] <- NULL
 
     if (length(invect) != nelts) warning("initvect is TOO LONG, the parameters may have been specified incorrectly. Please double-check initvect.")
 
