@@ -73,7 +73,7 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         # other rows
         rowc.colc.coef <- rbind(-colSums(rowc.colc.coef),rowc.colc.coef)
 
-        parlist[['rowc']] <- rowc.colc.coef
+        parlist[['rowc.colc']] <- rowc.colc.coef
         nelts <- nelts + (RG-1)*(CG-1)
 
         if (length(sub.invect) > (RG-1)*(CG-1)) sub.invect <- sub.invect[((RG-1)*(CG-1)+1):length(sub.invect)]
@@ -157,14 +157,14 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         if (length(sub.invect) > ncolc.cov) sub.invect <- sub.invect[(ncolc.cov+1):length(sub.invect)]
     }
     ncov <- param.lengths['cov']
-    if (nrowc.cov > 0) {
+    if (ncov > 0) {
         if (length(sub.invect) < ncov) stop("invect not long enough for given formula.")
         cov.coef <- sub.invect[1:ncov]
 
         parlist[['cov']] <- cov.coef
         nelts <- nelts + ncov
 
-        if (length(sub.invect > ncov) sub.invect <- sub.invect[(ncov+1):length(sub.invect)]
+        if (length(sub.invect) > ncov) sub.invect <- sub.invect[(ncov+1):length(sub.invect)]
     }
 
     if (length(invect) != nelts) warning("initvect is TOO LONG, the parameters may have been specified incorrectly. Please double-check initvect.")
