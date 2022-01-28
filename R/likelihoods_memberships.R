@@ -139,8 +139,8 @@ Rcluster.Incll <- function(long.df, theta, pi.v, RG)
     logl = 0
     for(i in 1:n){
         log.components <- rep(0,RG)
+        yvals <- long.df$Y[long.df$ROW==i]
         for(r in 1:RG){
-            yvals <- long.df$Y[long.df$ROW==i]
             if (length(yvals) >= 1) {
                 if (length(yvals) == 1) th <- theta[r,,yvals]
                 else if (length(yvals) > 1) th <- diag(theta[r,,yvals])
@@ -364,8 +364,7 @@ Bicluster.IncllApprox <- function(llc=NULL, long.df, y.mat, theta, pi.v, kappa.v
                 ## multiply pi.v down each column, and multiply kappa.v across
                 ## each row
                 denom <- t(apply(apply(theta.ij,2,"*",pi.v),1,"*",kappa.v))
-                tau.ij <- denom/rowSums(denom)
-                tau.ij <- denom/colSums(denom)
+                tau.ij <- denom/sum(denom)
                 log.tau.ij <- log(tau.ij)
 
                 ## Now do the following calculation in stages, and to avoid Inf*0 = NaN
@@ -383,7 +382,7 @@ Bicluster.IncllApprox <- function(llc=NULL, long.df, y.mat, theta, pi.v, kappa.v
                     part1[is.infinite(part1)] <- 0
                     part2 <- part1%*%ppc.m[j,]
                 }
-                if (is.na(part2))
+                if (is.na(part2)) browser()
                 llc.correction.term <- llc.correction.term + part2
                 # if (is.na(ppr.m[i,]%*%log(tau.ij)%*%ppc.m[j,])) browser()
                 # llc.correction.term <- llc.correction.term + ppr.m[i,]%*%log(tau.ij)%*%ppc.m[j,]
