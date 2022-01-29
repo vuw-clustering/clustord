@@ -248,7 +248,9 @@ check.formula <- function(formula, long.df, RG, CG) {
     pure.cov.part <- non.row.col.part[-c(rowc.idxs, colc.idxs)]
     if (length(pure.cov.part) > 0) {
         cov.fo <- formula(paste("Y ~",paste(pure.cov.part, collapse="+")))
-        cov.mm <- model.matrix(cov.fo, data=long.df)
+        cov.tf <- terms(cov.fo)
+        attr(cov.tf, "intercept") <- 0
+        cov.mm <- model.matrix(cov.tf, data=long.df)
     }
 
     # B.3  Construct list of params for ROW, COL, and pure RowClust and ColClust
@@ -256,8 +258,8 @@ check.formula <- function(formula, long.df, RG, CG) {
     #      like mu or mu_k, and phi_k)
     #      OUTPUT: params
     param.lengths <- rep(0, 12)
-    names(param.lengths) <- c("mu","phi","rowc","colc","rowc.colc","row","col",
-                              "rowc.col","colc.row", "rowc.cov","colc.cov","cov")
+    names(param.lengths) <- c("mu","phi","rowc","col","rowc.col","rowc.cov","cov",
+                              "colc","rowc.colc","row","colc.row","colc.cov")
     if (exists('rowc.part')) param.lengths['rowc'] <- RG
     if (exists('colc.part')) param.lengths['colc'] <- CG
     if (exists('rowc.colc.part')) param.lengths['rowc.colc'] <- RG*CG
@@ -305,16 +307,18 @@ extract.covs <- function(clust.name, clust.idxs, non.row.col.part, long.df) {
             }
         }
 
-        # Now obtain model matrix
+        # Now obtain model matrix, making sure to remove the intercept term
         clust.fo <- formula(paste("Y ~",paste(clust.cov.part,collapse="+")))
-        clust.mm <- model.matrix(clust.fo, data=long.df)
+        clust.tf <- terms(clust.fo)
+        attr(clust.tf, "intercept") <- 0
+        clust.mm <- model.matrix(clust.tf, data=long.df)
     }
 
     list(pure.clust.part=pure.clust.part, clust.cov.part=clust.cov.part,
          clust.mm=clust.mm)
 }
 
-fo <- Y ~ ROW + COL + ROWCLUST + COLCLUST + ROWCLUST:x1 + ROWCLUST:I(x2^2) + x3:ROWCLUST + x4:ROWCLUST:x5 + COLCLUST*z
-long.df <- data.frame(Y=1:10,ROW=rep(1:5,times=2), COL=rep(1:2,each=5),
-                      x1=1:10,x2=1:10,x3=1:10,x4=1:10,x5=1:10,z=1:10)
-check.formula(fo, long.df, RG=2,CG=2)
+# fo <- Y ~ ROW + COL + ROWCLUST + COLCLUST + ROWCLUST:x1 + ROWCLUST:I(x2^2) + x3:ROWCLUST + x4:ROWCLUST:x5 + COLCLUST*z
+# long.df <- data.frame(Y=1:10,ROW=rep(1:5,times=2), COL=rep(1:2,each=5),
+#                       x1=1:10,x2=1:10,x3=1:10,x4=1:10,x5=1:10,z=1:10)
+# check.formula(fo, long.df, RG=2,CG=2)
