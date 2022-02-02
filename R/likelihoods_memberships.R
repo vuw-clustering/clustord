@@ -72,162 +72,13 @@ assignments <- function(pp.m) {
     assignments
 }
 
-# TODO: EDIT THIS to take parvec and model matrices as inputs instead of submodel ====
-# rcpparma_Bicluster.IncllApprox, or rcpparma_Bicluster.ll
-########## ACTUALLY:
-# Either split up this function into separate versions for Rcluster and Bicluster,
-# or just get rid of this entirely and just call Rcluster.ll, Bicluster.ll,
-# Rcluster.Incll and Bicluster.IncllApprox from clustering.R
-# (and call their Rcpp versions instead of R versions)
-calc.ll <- function(invect, long.df, y.mat, model, submodel, ppr.m, pi.v, RG,
-                    ppc.m=NULL, kappa.v=NULL, CG=NULL, constraint.sum.zero=TRUE,
-                    partial=FALSE, SE.calc=FALSE) {
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
-    q <- length(levels(long.df$Y))
-
-    # TODO: DELETE THIS -- only unpack parvec inside Rcpp ====
-    parlist <- unpack.parvec(invect,model=model,submodel=submodel,
-                             n=n,p=p,q=q,RG=RG,CG=CG,constraint.sum.zero=constraint.sum.zero)
-
-    # TODO: DELETE THIS -- only calculate theta on the fly inside Rcpp ====
-    this.theta <- calc.theta(parlist,model=model,submodel=submodel)
-
-    if (SE.calc) {
-        if (submodel %in% c("rs","rp","rpi")) {
-            # TODO: EDIT THIS to instead call rcpparma_RCluster.Incll, and pass in ====
-            # parvec and model matrices instead of theta
-            Rcluster.Incll(long.df, this.theta, pi.v, RG)
-        } else if (submodel %in% c("rc","rci")) {
-            # TODO: EDIT THIS to instead call rcpparma_BiCluster.IncllApprox, and ====
-            # pass in parvec and model matrices instead of theta
-            Bicluster.IncllApprox(long.df=long.df, y.mat=y.mat, theta=this.theta,
-                                  ppr.m=ppr.m, ppc.m=ppc.m, pi.v=pi.v, kappa.v=kappa.v)
-        }
-    } else {
-        if (submodel %in% c("rs","rp","rpi")) {
-            # TODO: EDIT THIS to instead call rcpparma_RCluster.ll, and pass in ====
-            # parvec and model matrices instead of theta
-            Rcluster.ll(long.df, y.mat, this.theta, ppr.m, pi.v, RG, partial=partial)
-        } else if (submodel %in% c("rc","rci")) {
-            # TODO: EDIT THIS to instead call rcpparma_BiCluster.ll, and pass in ====
-            # parvec and model matrices instead of theta
-            Bicluster.ll(long.df, y.mat, this.theta, ppr.m, ppc.m, pi.v, kappa.v, partial=partial)
-        }
-    }
-}
-
-# TODO: PROBABLY DELETE THIS -- unnecessary, just call Rcpp directly from higher level ====
-Rcluster.ll <- function(long.df, y.mat, theta, ppr.m, pi.v, RG, partial=FALSE){
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
-    q <- length(levels(long.df$Y))
-
-    theta[theta<=0]=lower.limit
-    pi.v[pi.v==0]=lower.limit
-    # llc=0
-    # for (r in 1:RG) {
-    #     # theta.y.mat <- sapply(1:p,function(j) {
-    #     #     yvals <- as.numeric(long.df$Y[long.df$COL==j])
-    #     #     theta[r,j,yvals]
-    #     # }) ## <-- THIS IS VERY VERY SLOW
-    #     # llc <- llc + sum(t(ppr.m[,r])%*%log(theta.y.mat))
-    #     log.theta.y.mat <- sapply(1:p,function(j) {
-    #         raw.log.theta <- log(theta[r,j,y.mat[,j]])
-    #         raw.log.theta[is.na(raw.log.theta) | is.infinite(raw.log.theta)] <- 0
-    #         raw.log.theta
-    #     })
-    #     llc <- llc + sum(t(ppr.m[,r])%*%log.theta.y.mat)
-    # }
-    # if (!partial) llc <- llc + sum(ppr.m%*%log(pi.v))
-    #
-    # if (!is.finite(llc)) browser()
-
-    llc <- rcpparma_Rclusterll(y.mat, theta, ppr.m, pi.v, RG, p, n, as.numeric(partial))
-
-    llc
-}
-
-# TODO: PROBABLY DELETE THIS -- and instead use rcpparma_updateliR or updateliC ====
-# (and update them to construct theta on the fly)
-Rcluster.Incll <- function(long.df, theta, pi.v, RG)
+Bicluster.IncllC <- function(invect, model, ydf, rowc.mm, colc.mm, cov.mm, pi.v, kappa.v,
+                             param.lengths, RG, CG, p, n, q,
+                             constraint.sum.zero=TRUE)
 {
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
-    q <- length(levels(long.df$Y))
+    parlist <- unpack.parvec(invect, model, param.lengths, n, p, q, RG, CG,
+                             constraint.sum.zero)
 
-    theta[theta<=0]=lower.limit
-    pi.v[pi.v==0]=lower.limit
-    logl = 0
-    for(i in 1:n){
-        log.components <- rep(0,RG)
-        yvals <- long.df$Y[long.df$ROW==i]
-        for(r in 1:RG){
-            if (length(yvals) >= 1) {
-                if (length(yvals) == 1) th <- theta[r,,yvals]
-                else if (length(yvals) > 1) th <- diag(theta[r,,yvals])
-                log.components[r] <- log(pi.v[r]) + sum(log(th),na.rm=TRUE)
-            }
-        }
-        log.sumoverR <- log(sum(exp(log.components - max(log.components)))) + max(log.components)
-        logl <- logl + log.sumoverR
-    }
-    if (logl == 0) logl <- -1E-40
-    logl
-}
-
-# TODO: PROBABLY DELETE THIS ====
-Bicluster.ll <- function(long.df, y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, partial=FALSE){
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
-    q <- length(levels(long.df$Y))
-
-    RG <- length(pi.v)
-    CG <- length(kappa.v)
-
-    theta[theta<=0]=lower.limit
-    pi.v[pi.v==0]=lower.limit
-    kappa.v[kappa.v==0]=lower.limit
-
-    llc=0
-
-    for (r in 1:RG) {
-        for (c in 1:CG) {
-            # theta.y <- t(sapply(1:n, function(i) {
-            #     sapply(1:p, function(j) {
-            #         # theta[r,c,long.df$Y[long.df$ROW==i & long.df$COL==j]] ## <-- THIS IS VERY VERY SLOW
-            #         if (is.na(y.mat[i,j])) return(0)
-            #         else return(theta[r,c,y.mat[i,j]])
-            #     })
-            # }))
-            # llc <- llc + t(ppr.m[,r])%*%log(theta.y)%*%ppc.m[,c]
-            log.theta.y <- t(sapply(1:n, function(i) {
-                sapply(1:p, function(j) {
-                    if (is.na(y.mat[i,j]) || y.mat[i,j] <= 0) return(0)
-                    else return(log(theta[r,c,y.mat[i,j]]))
-                })
-            }))
-            llc <- llc + t(ppr.m[,r])%*%log.theta.y%*%ppc.m[,c]
-        }
-    }
-    if (!partial) {
-        llc <- llc + sum(ppr.m%*%log(pi.v))
-        llc <- llc + sum(ppc.m%*%log(kappa.v))
-    }
-    llc
-}
-
-#The incomplete log-likelihood,used in model selection#
-# TODO: PROBABLY DELETE THIS ====
-Bicluster.IncllC <- function(long.df, theta, pi.v, kappa.v)
-{
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
-    q <- length(levels(long.df$Y))
-    RG <- length(pi.v)
-    CG <- length(kappa.v)
-
-    theta[theta<=0]=lower.limit
     pi.v[pi.v==0]=lower.limit
     kappa.v[kappa.v==0]=lower.limit
 
@@ -235,13 +86,72 @@ Bicluster.IncllC <- function(long.df, theta, pi.v, kappa.v)
     # Use if CG^p is small enough.
     # Construct n*p*RG*CG*q array of Multinomial terms:
     multi.arr = array(NA,c(n,p,RG,CG))
-    for(i in 1:n){
-        for(j in 1:p){
-            for(r in 1:RG){
-                for(c in 1:CG){
-                    for(k in 1:q){
-                        yval <- as.numeric(long.df$Y[long.df$ROW==i & long.df$COL==j])
-                        if(length(yval) == 1 && yval==k) multi.arr[i,j,r,c]=theta[r,c,k]
+    for(ii in 1:n){
+        for(jj in 1:p){
+            for(rr in 1:RG){
+                for(cc in 1:CG){
+                    ij <- which(ydf$ROW==ii & ydf$COL==jj)
+                    if(length(ij) == 1) {
+                        yval <- as.numeric(ydf$Y[ij])
+
+                        linear_part = 0;
+                        if (param.lengths["rowc"] > 0) {
+                            linear_part <- linear_part + parlist$rowc[rr];
+                        }
+                        if (param.lengths["colc"] > 0) {
+                            linear_part <- linear_part + parlist$colc[cc];
+                        }
+                        if (param.lengths["rowc.colc"] > 0) {
+                            linear_part <- linear_part + parlist$rowc.colc[rr,cc];
+                        }
+
+                        if (param.lengths["row"] > 0) {
+                            linear_part <- linear_part + parlist$row[ii];
+                        }
+                        if (param.lengths["col"] > 0) {
+                            linear_part <- linear_part + parlist$col[jj];
+                        }
+                        if (param.lengths["rowc.col"] > 0) {
+                            linear_part <- linear_part + parlist$rowc.col[rr,jj];
+                        }
+                        if (param.lengths["colc.row"] > 0) {
+                            linear_part <- linear_part + parlist$colc.row[cc,ii];
+                        }
+
+                        if (param.lengths["rowc.cov"] > 0) {
+                            linear_part <- linear_part + sum(rowc.mm[ij,]*parlist$rowc.cov[rr,])
+                        }
+                        if (param.lengths["colc.cov"] > 0) {
+                            linear_part <- linear_part + sum(colc.mm[ij,]*parlist$colc.cov[cc,])
+                        }
+                        if (param.lengths["cov"] > 0) {
+                            linear_part <- linear_part + sum(cov.mm[ij,]*parlist$cov)
+                        }
+
+                        theta_sum = 0;
+                        if (model == "OSM") {
+                            theta_all <- c(1,exp(mu[2:q] + phi[2:q]*linear_part))
+                            theta = theta_all[yval]/theta_sum;
+                        } else if (model == "POM") {
+                            theta_all[1] <- expit(mu[0] - linear_part)
+                            theta_sum = theta_all[1]
+                            for (kk in 2:q-1) {
+                                theta_all[kk] = rcpp_expit(mu[kk] - linear_part) -
+                                    rcpp_expit(mu[kk-1] - linear_part);
+                                theta_sum <- theta_sum + theta_all[kk];
+                            }
+                            theta_all[q] = 1-theta_sum;
+                            theta = theta_all[yval];
+                        } else if (model == "Binary") {
+                            theta_all <- c(1, exp(mu[1] + linear_part))
+                            theta = theta_all[yval]/sum(theta_all)
+                        }
+
+                        if (theta <= 0) {
+                            theta = 0.0000000001;
+                        }
+
+                        multi.arr[ii,jj,rr,cc] <- theta
                     }
                 }
             }
@@ -292,7 +202,6 @@ Bicluster.IncllC <- function(long.df, theta, pi.v, kappa.v)
 }
 
 # Rows expansion (use if RG^n small enough):
-# TODO: PROBABLY DELETE THIS ====
 Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
 {
     n <- max(long.df$ROW)
@@ -361,60 +270,4 @@ Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
     M.val <- max(Ea.v, na.rm=TRUE)
     logl <- M.val + log(sum(exp(Ea.v-M.val),na.rm=TRUE))
     logl
-}
-
-# TODO: PROBABLY DELETE THIS - INSTEAD JUST USE RCPP FUNCTION ====
-## Biclustering incomplete-data log-likelihood calculated based on the approximation
-## relating the incomplete-data and complete-data log-likelihoods
-Bicluster.IncllApprox <- function(llc=NULL, long.df, y.mat, theta, pi.v, kappa.v, ppr.m, ppc.m) {
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
-    q <- length(levels(long.df$Y))
-    RG <- length(pi.v)
-    CG <- length(kappa.v)
-
-    theta[theta<1E-40]=lower.limit
-    pi.v[pi.v<1E-40]=lower.limit
-    kappa.v[kappa.v<1E-40]=lower.limit
-
-    if (is.null(llc)) llc <- Bicluster.ll(long.df, y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, partial=FALSE)
-
-    llc.correction.term <- 0
-
-    for (i in 1:n) {
-        for (j in 1:p) {
-            if (!is.na(y.mat[i,j]) && y.mat[i,j] > 0) {
-                theta.ij <- theta[,,y.mat[i,j]]
-                ## Multiply every row by the corresponding value of pi.v, i.e.
-                ## multiply pi.v down each column, and multiply kappa.v across
-                ## each row
-                denom <- t(apply(apply(theta.ij,2,"*",pi.v),1,"*",kappa.v))
-                tau.ij <- denom/sum(denom)
-                log.tau.ij <- log(tau.ij)
-
-                ## Now do the following calculation in stages, and to avoid Inf*0 = NaN
-                ## forcibly convert any related infinite terms to 0
-                part1 <- ppr.m[i,]%*%log.tau.ij
-                if (any(is.na(part1))) {
-                    na.idxs <- which(is.na(part1))
-                    for (idx in na.idxs) {
-                        log.tau.ij[is.infinite(log.tau.ij[,idx]),idx] <- 0
-                    }
-                    part1 <- ppr.m[i,]%*%log.tau.ij
-                }
-                part2 <- part1%*%ppc.m[j,]
-                if (is.na(part2)) {
-                    part1[is.infinite(part1)] <- 0
-                    part2 <- part1%*%ppc.m[j,]
-                }
-                if (is.na(part2)) browser()
-                llc.correction.term <- llc.correction.term + part2
-                # if (is.na(ppr.m[i,]%*%log(tau.ij)%*%ppc.m[j,])) browser()
-                # llc.correction.term <- llc.correction.term + ppr.m[i,]%*%log(tau.ij)%*%ppc.m[j,]
-            }
-        }
-    }
-
-    if (is.finite(llc.correction.term)) lli <- llc - llc.correction.term
-    else lli <- -Inf
 }
