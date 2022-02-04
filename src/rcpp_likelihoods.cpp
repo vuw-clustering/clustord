@@ -843,7 +843,7 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
     double ppm_rowminabs;
     double ppm_log_sum_exp_adjusted;
 
-    IntegerVector ppm_row_started(n);
+    IntegerMatrix ppm_started(n,RG);
 
     NumericVector yval;
     int ymatij_idx;
@@ -857,9 +857,9 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
         jj = ydf(ij,2)-1;
 
         for (rr=0; rr < RG; rr++) {
-            if (ppm_row_started[ii] == 0) {
+            if (ppm_started(ii,rr) == 0) {
                 ppm_raw(ii,rr) = log(piv[rr]);
-                ppm_row_started[ii] = 1;
+                ppm_started(ii,rr) = 1;
             }
 
             yval = ydf(ij,0);
