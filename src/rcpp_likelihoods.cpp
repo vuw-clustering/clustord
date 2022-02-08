@@ -843,7 +843,7 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
     double ppm_rowminabs;
     double ppm_log_sum_exp_adjusted;
 
-    IntegerVector ppm_row_started(n);
+    IntegerMatrix ppm_started(n,RG);
 
     NumericVector yval;
     int ymatij_idx;
@@ -857,9 +857,9 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
         jj = ydf(ij,2)-1;
 
         for (rr=0; rr < RG; rr++) {
-            if (ppm_row_started[ii] == 0) {
+            if (ppm_started(ii,rr) == 0) {
                 ppm_raw(ii,rr) = log(piv[rr]);
-                ppm_row_started[ii] = 1;
+                ppm_started(ii,rr) = 1;
             }
 
             yval = ydf(ij,0);
@@ -982,8 +982,8 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
         nelements = p;
         nclust = CG;
     }
-    Rcout << "The value of nelements : " << nelements << "\n";
-    Rcout << "The value of nclust : " << nclust << "\n";
+    // Rcout << "The value of nelements : " << nelements << "\n";
+    // Rcout << "The value of nclust : " << nclust << "\n";
 
     NumericMatrix ppm(nelements, nclust);
     NumericMatrix ppm_raw(nelements, nclust);
@@ -992,7 +992,7 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
     double ppm_rowminabs;
     double ppm_log_sum_exp_adjusted;
 
-    NumericVector ppm_row_started(nelements);
+    NumericMatrix ppm_started(nelements, nclust);
 
     for (ij=0; ij < ydf.nrow(); ij++) {
 
@@ -1004,9 +1004,12 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
         if (row_clusters) {
 
             for (rr=0; rr < RG; rr++) {
-                if (ppm_row_started[ii] == 0) {
+                // Need this step because we are looping over ij, but for each
+                // ii and rr we only want to include one log(piv[rr]), instead of
+                // adding one for each jj
+                if (ppm_started(ii,rr) == 0) {
                     ppm_raw(ii,rr) = log(piv[rr]);
-                    ppm_row_started[ii] = 1;
+                    ppm_started(ii,rr) = 1;
                 }
 
                 yval = ydf(ij,0);
@@ -1032,15 +1035,18 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
                         sum_pikappa_theta += kappav[cc]*theta;
                     }
 
-                    Rcout << "The value of the additional log term : " << log(sum_pikappa_theta) << "\n";
+                    // Rcout << "The value of the additional log term : " << log(sum_pikappa_theta) << "\n";
                     ppm_raw(ii,rr) += log(sum_pikappa_theta);
                 }
             }
         } else {
             for (cc=0; cc < CG; cc++) {
-                if (ppm_row_started[jj] == 0) {
+                // Need this step because we are looping over ij, but for each
+                // jj and cc we only want to include one log(kappav[cc]),
+                // instead of adding one for each ii
+                if (ppm_started(jj,cc) == 0) {
                     ppm_raw(jj,cc) = log(kappav[cc]);
-                    ppm_row_started[jj] = 1;
+                    ppm_started(jj,cc) = 1;
                 }
 
                 yval = ydf(ij,0);
@@ -1070,7 +1076,7 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
             }
         }
     }
-    Rcout << "The value of ppm_raw : " << ppm_raw << "\n";
+    // Rcout << "The value of ppm_raw : " << ppm_raw << "\n";
 
     for (ll=0; ll < nelements; ll++) {
         ppm_row = ppm_raw.row(ll);
