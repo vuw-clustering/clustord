@@ -132,7 +132,7 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         if (length(sub.invect) < CG*n) stop("invect not long enough for given formula.")
         colc.row.coef <- sub.invect[1:CG*n]
 
-        colc.row.coef <- matrix(colc.row.coef,nrow=RG-1,ncol=p-1,byrow=T)
+        colc.row.coef <- matrix(colc.row.coef,nrow=CG-1,ncol=n-1,byrow=T)
         colc.row.coef <- cbind(colc.row.coef,-rowSums(colc.row.coef))
         # Original POM code had final row of colc.row.coef equal to negative
         # sum of other rows, but this code follows original OSM code,
