@@ -112,7 +112,7 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
     nrowc.col <- param.lengths['rowc.col']
     if (nrowc.col > 0) {
         if (length(sub.invect) < RG*p) stop("invect not long enough for given formula.")
-        rowc.col.coef <- sub.invect[1:RG*p]
+        rowc.col.coef <- sub.invect[1:(RG*p)]
 
         rowc.col.coef <- matrix(rowc.col.coef,nrow=RG-1,ncol=p-1,byrow=T)
         rowc.col.coef <- cbind(rowc.col.coef,-rowSums(rowc.col.coef))
@@ -130,7 +130,7 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
     ncolc.row <- param.lengths['colc.row']
     if (ncolc.row > 0) {
         if (length(sub.invect) < CG*n) stop("invect not long enough for given formula.")
-        colc.row.coef <- sub.invect[1:CG*n]
+        colc.row.coef <- sub.invect[1:(CG*n)]
 
         colc.row.coef <- matrix(colc.row.coef,nrow=CG-1,ncol=n-1,byrow=T)
         colc.row.coef <- cbind(colc.row.coef,-rowSums(colc.row.coef))
