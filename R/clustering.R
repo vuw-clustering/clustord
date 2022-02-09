@@ -621,7 +621,8 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
     EM.status.out
 }
 
-run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
+run.EM.rowcluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
+                              pi.v, paramlengths,
                               constraint.sum.zero=TRUE,
                               EM.control=default.EM.control(),
                               optim.method="L-BFGS-B", optim.control=default.optim.control()) {
@@ -630,19 +631,16 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
     q <- length(levels(long.df$Y))
     RG <- length(pi.v)
 
-    # TODO: Want to move this bit to Rcpp -- or maybe just initially run it in R? ----
-    # Probably keep this one in R because easier to then do error checking
-    # for initial param values
-    parlist.in <- unpack.parvec(invect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,
-                                constraint.sum.zero=constraint.sum.zero)
+    ## Extract parameters in R in order to check that invect is the correct length
+    parlist.in <- unpack.parvec(invect, model=model, param.lengths=param.lengths,
+                                n, p, q, RG, CG = NULL,
+                                constraint.sum.zero = constraint.sum.zero)
     if (any(sapply(parlist.in,function(elt) any(is.na(elt))))) stop("Error unpacking parameters for model.")
     if (any(sapply(parlist.in,function(elt) is.null(elt)))) stop("Error unpacking parameters for model.")
 
-    # TODO: DELETE THIS -- will do this on the fly for each value of theta, in Rcpp ----
-    theta.arr <- calc.theta(parlist.in,model=model,submodel=submodel)
-
-    # TODO: DELETE THIS -- will instead pass long.df and model matrices to Rcpp ----
-    y.mat <- df2mat(long.df)
+    ## Important: do NOT change the order of the three columns in this call,
+    ## because the C++ code relies on having this order for Y, ROW and COL
+    ydf <- as.matrix(long.df[,c("Y","ROW","COL")])
 
     optim.control$fnscale <- -1
 
@@ -655,51 +653,69 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
 
     while(!EM.status$finished)
     {
-        # TODO: EDIT THIS TO USE Rcpp theta function on the fly instead of taking ----
-        # theta input
-        # E-step - Update posterior probabilities
-        ppr.m <- onemode.membership.pp(long.df, theta.arr, pi.v, n, row=TRUE)
+        ppr.m <- rcpp_Rcluster_Estep(invect, model,
+                                     ydf, rowcmm, colcmm, covmm,
+                                     pi.v, paramlengths,
+                                     RG, p, n, q, constraint.sum.zero)
 
         ## Now set any NA values in the posterior probabilities matrix to 0
         ppr.m[is.na(ppr.m)] <- 0
 
         pi.v <- colMeans(ppr.m)
 
-        invect=outvect
+        invect <- outvect
         # M-step:
         #use numerical maximisation
-        # TODO: EDIT THIS to use different arguments ----
         optim.fit <- optim(par=invect,
-                           fn=calc.ll,
-                           long.df=long.df,
-                           y.mat=y.mat,
+                           fn=rcpp_Rclusterll,
                            model=model,
-                           submodel=submodel,
-                           ppr.m=ppr.m,
-                           pi.v=pi.v,
-                           RG=RG,
-                           constraint.sum.zero=constraint.sum.zero,
+                           ydf=ydf,
+                           rowcmm=rowc.mm,
+                           colcmm=colc.mm,
+                           covmm=cov.mm,
+                           pprm=ppr.m,
+                           piv=pi.v,
+                           paramlengths=param.lengths,
+                           RG=RG, p=p, n=n, q=q,
+                           constraint_sum_zero=constraint.sum.zero,
                            partial=TRUE,
+                           incomplete=FALSE,
                            method=optim.method,
                            hessian=F,control=optim.control)
 
         outvect <- optim.fit$par
-        llc <- calc.ll(outvect,long.df=long.df,y.mat=y.mat,model=model,submodel=submodel,
-                       ppr.m,pi.v,RG, partial=FALSE)
 
-        # TODO: Again, need to decide whether to still keep this, given most parvec ----
-        # unpacking done in Rcpp
-        parlist.out <- unpack.parvec(outvect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,
-                                     constraint.sum.zero=constraint.sum.zero)
+        parlist.out <- unpack.parvec(outvect,model=model, param.lengths=param.lengths,
+                                     n, p, q, RG, CG = NULL,
+                                     constraint.sum.zero = constraint.sum.zero)
 
-        # TODO: DELETE THIS -- instead calc theta on the fly, in Rcpp ----
-        theta.arr <- calc.theta(parlist.out,model=model,submodel=submodel)
+        llc <- rcpp_Rclusterll(outvect,
+                               model=model,
+                               ydf=ydf,
+                               rowcmm=rowc.mm,
+                               colcmm=colc.mm,
+                               covmm=cov.mm,
+                               pprm=ppr.m,
+                               piv=pi.v,
+                               paramlengths=param.lengths,
+                               RG=RG, p=p, n=n, q=q,
+                               constraint_sum_zero=constraint.sum.zero,
+                               partial=FALSE,
+                               incomplete=FALSE)
 
-        ## Note that UNLIKE Rcluster.ll, Rcluster.Incll outputs the *actual*
-        ## log-likelihood, not the negative of the log-likelihood, so don't need
-        ## to make it negative here
-        # TODO: EDIT THIS -- use Rcpp ----
-        lli <- Rcluster.Incll(long.df, theta.arr, pi.v, RG)
+        lli <- rcpp_Rclusterll(outvect,
+                               model=model,
+                               ydf=ydf,
+                               rowcmm=rowc.mm,
+                               colcmm=colc.mm,
+                               covmm=cov.mm,
+                               pprm=ppr.m,
+                               piv=pi.v,
+                               paramlengths=param.lengths,
+                               RG=RG, p=p, n=n, q=q,
+                               constraint_sum_zero=constraint.sum.zero,
+                               partial=FALSE,
+                               incomplete=TRUE)
 
         EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
                                       parlist.out=parlist.out,
@@ -724,14 +740,15 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
     npar <- length(invect) + length(pi.v)-1
     ninitvect <- length(invect)
     criteria <- calc.criteria(EM.status$best.lli, EM.status$llc.for.best.lli, npar, n, p)
-    info <- c(n, p, npar, ninitvect, RG)
-    names(info) <- c("n","p","npar","ninitvect","R")
+    info <- c(n, p, q, npar, ninitvect, RG)
+    names(info) <- c("n","p","q","npar","ninitvect","R")
     list("info"=info,
          "model"=model,
          "submodel"=submodel,
          "EM.status"=EM.status,
          "criteria"=criteria,
          "constraint.sum.zero"=constraint.sum.zero,
+         "param.lengths"=param.lengths,
          "initvect"=initvect,
          "outvect"=outvect,
          "parlist.init"=parlist.init,
@@ -739,10 +756,13 @@ run.EM.rowcluster <- function(invect, long.df, model, submodel, pi.v,
          "pi.init"=pi.init,
          "pi.out"=pi.v,
          "ppr"=ppr.m,
+         "rowcmm"=rowcmm,
+         "covmm"=covmm,
          "RowClusters"=Rclus)
 }
 
-run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
+run.EM.bicluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
+                             pi.v, kappa.v, paramlengths,
                              constraint.sum.zero=TRUE,
                              EM.control=default.EM.control(),
                              optim.method="L-BFGS-B", optim.control=default.optim.control()) {
@@ -752,19 +772,16 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
     RG <- length(pi.v)
     CG <- length(kappa.v)
 
-    # TODO: Want to move this bit to Rcpp -- or maybe just initially run it in R? ----
-    # Probably keep this one in R because easier to then do error checking
-    # for initial param values
-    parlist.in <- unpack.parvec(invect,model=model,submodel=submodel,n=n,p=p,q=q,RG=RG,CG=CG,
-                                constraint.sum.zero=constraint.sum.zero)
+    ## Extract parameters in R in order to check that invect is the correct length
+    parlist.in <- unpack.parvec(invect, model=model, param.lengths=param.lengths,
+                                n, p, q, RG, CG,
+                                constraint.sum.zero = constraint.sum.zero)
     if (any(sapply(parlist.in,function(elt) any(is.na(elt))))) stop("Error unpacking parameters for model.")
     if (any(sapply(parlist.in,function(elt) is.null(elt)))) stop("Error unpacking parameters for model.")
 
-    # TODO: DELETE THIS -- will do this on the fly for each value of theta, in Rcpp ----
-    theta.arr <- calc.theta(parlist.in,model=model,submodel=submodel)
-
-    # TODO: DELETE THIS -- will instead pass long.df and model matrices to Rcpp ----
-    y.mat <- df2mat(long.df)
+    ## Important: do NOT change the order of the three columns in this call,
+    ## because the C++ code relies on having this order for Y, ROW and COL
+    ydf <- as.matrix(long.df[,c("Y","ROW","COL")])
 
     optim.control$fnscale <- -1
 
@@ -778,65 +795,91 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
 
     while(!EM.status$finished)
     {
-        # TODO: EDIT THIS TO USE Rcpp theta function on the fly instead of taking ----
-        # theta input
-        # E-step - Update posterior probabilities
-        ppr.m <- twomode.membership.pp(long.df, theta.arr, pi.v, kappa.v, RG, row=TRUE)
+        ppr.m <- rcpp_Rcluster_Estep(invect, model,
+                                     ydf, rowcmm, colcmm, covmm,
+                                     pi.v, kappa.v, paramlengths,
+                                     RG, CG, p, n, q, constraint.sum.zero,
+                                     row_clusters=TRUE)
 
         ## Now set any NA values in the posterior probabilities matrix to 0
         ppr.m[is.na(ppr.m)] <- 0
 
         pi.v <- colMeans(ppr.m)
 
-        # TODO: EDIT THIS TO USE Rcpp theta function on the fly instead of taking ----
-        # theta input
-        ppc.m <- twomode.membership.pp(long.df, theta.arr, pi.v, kappa.v, CG, row=FALSE)
+        ppc.m <- rcpp_Rcluster_Estep(invect, model,
+                                     ydf, rowcmm, colcmm, covmm,
+                                     pi.v, kappa.v, paramlengths,
+                                     RG, CG, p, n, q, constraint.sum.zero,
+                                     row_clusters=FALSE)
 
         ## Now set any NA values in the posterior probabilities matrix to 0
         ppc.m[is.na(ppc.m)] <- 0
 
         kappa.v <- colMeans(ppc.m)
 
-        invect=outvect
+        invect <- outvect
         # M-step:
         #use numerical maximisation
-        # TODO: EDIT THIS to use different arguments ----
         optim.fit <- optim(par=invect,
-                           fn=calc.ll,
-                           long.df=long.df,
-                           y.mat=y.mat,
+                           fn=rcpp_Biclusterll,
                            model=model,
-                           submodel=submodel,
-                           ppr.m=ppr.m,
-                           pi.v=pi.v,
-                           RG=RG,
-                           ppc.m=ppc.m,
-                           kappa.v=kappa.v,
-                           CG=CG,
-                           constraint.sum.zero=constraint.sum.zero,
+                           ydf=ydf,
+                           rowcmm=rowc.mm,
+                           colcmm=colc.mm,
+                           covmm=cov.mm,
+                           pprm=ppr.m,
+                           ppcm=ppc.m,
+                           piv=pi.v,
+                           kappav=kappa.v,
+                           paramlengths=param.lengths,
+                           RG=RG, CG=CG, p=p, n=n, q=q,
+                           constraint_sum_zero=constraint.sum.zero,
                            partial=TRUE,
+                           incomplete=FALSE, llc=NA,
                            method=optim.method,
                            hessian=F,control=optim.control)
 
         outvect <- optim.fit$par
 
-        llc <- calc.ll(outvect,long.df=long.df,y.mat=y.mat,model=model,submodel=submodel,
-                       ppr.m=ppr.m,pi.v=pi.v,RG=RG, ppc.m=ppc.m,kappa.v=kappa.v,CG=CG,
-                       partial=FALSE)
+        parlist.out <- unpack.parvec(outvect,model=model, param.lengths=param.lengths,
+                                     n, p, q, RG, CG,
+                                     constraint.sum.zero = constraint.sum.zero)
 
-        # TODO: Again, need to decide whether to still keep this, given most parvec ----
-        # unpacking done in Rcpp
-        parlist.out <- unpack.parvec(outvect,model=model,submodel=submodel,
-                                     n=n,p=p,q=q,RG=RG,CG=CG,constraint.sum.zero=constraint.sum.zero)
+        llc <- rcpp_Biclusterll(outvect,
+                                model=model,
+                                ydf=ydf,
+                                rowcmm=rowc.mm,
+                                colcmm=colc.mm,
+                                covmm=cov.mm,
+                                pprm=ppr.m,
+                                ppcm=ppc.m,
+                                piv=pi.v,
+                                kappav=kappa.v,
+                                paramlengths=param.lengths,
+                                RG=RG, CG=CG, p=p, n=n, q=q,
+                                constraint_sum_zero=constraint.sum.zero,
+                                partial=FALSE,
+                                incomplete=FALSE, llc=NA,
+                                method=optim.method,
+                                hessian=F,control=optim.control)
 
-        # TODO: DELETE THIS -- instead calc theta on the fly, in Rcpp ====
-        theta.arr <- calc.theta(parlist.out,model=model,submodel=submodel)
-
-        ## Note that UNLIKE Bicluster.ll, Bicluster.Incll outputs the *actual*
-        ## log-likelihood, not the negative of the log-likelihood, so don't need
-        ## to make it negative here
-        # TODO: EDIT THIS -- use Rcpp ====
-        lli <- Bicluster.IncllApprox(llc, long.df, y.mat, theta.arr, pi.v, kappa.v, ppr.m, ppc.m)
+        lli <- rcpp_Biclusterll(outvect,
+                                model=model,
+                                ydf=ydf,
+                                rowcmm=rowc.mm,
+                                colcmm=colc.mm,
+                                covmm=cov.mm,
+                                pprm=ppr.m,
+                                ppcm=ppc.m,
+                                piv=pi.v,
+                                kappav=kappa.v,
+                                paramlengths=param.lengths,
+                                RG=RG, CG=CG, p=p, n=n, q=q,
+                                constraint_sum_zero=constraint.sum.zero,
+                                partial=FALSE,
+                                incomplete=TRUE, llc=llc,
+                                method=optim.method,
+                                hessian=F,control=optim.control)
         if (is.na(lli)) browser()
 
         EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
@@ -864,14 +907,15 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
     npar <- length(invect) + length(pi.v)-1 + length(kappa.v)-1
     ninitvect <- length(initvect)
     criteria <- calc.criteria(EM.status$best.lli, EM.status$llc.for.best.lli, npar, n, p)
-    info <- c(n, p, npar, ninitvect, RG, CG)
-    names(info) <- c("n","p","npar","ninitvect","R","C")
+    info <- c(n, p, q, npar, ninitvect, RG, CG)
+    names(info) <- c("n","p","q","npar","ninitvect","R","C")
     list("info"=info,
          "model"=model,
          "submodel"=submodel,
          "EM.status"=EM.status,
          "criteria"=criteria,
          "constraint.sum.zero"=constraint.sum.zero,
+         "param.lengths"=param.lengths,
          "initvect"=initvect,
          "outvect"=outvect,
          "parlist.init"=parlist.init,
@@ -882,6 +926,9 @@ run.EM.bicluster <- function(invect, long.df, model, submodel, pi.v, kappa.v,
          "ppr"=ppr.m,
          "kappa.out"=kappa.v,
          "ppc"=ppc.m,
+         "rowcmm"=rowcmm,
+         "colcmm"=colcmm,
+         "covmm"=covmm,
          "RowClusters"=Rclus,
          "ColumnClusters"=Cclus)
 }
@@ -892,23 +939,28 @@ calc.SE.rowcluster <- function(long.df, clust.out,
                                optim.control=default.optim.control()) {
     optim.control$fnscale=-1
 
-    # TODO: DELETE THIS ====
-    y.mat <- df2mat(long.df)
+    ## Important: do NOT change the order of the three columns in this call,
+    ## because the C++ code relies on having this order for Y, ROW and COL
+    ydf <- as.matrix(long.df[,c("Y","ROW","COL")])
 
     outvect <- clust.out$outvect
 
-    # TODO: EDIT THIS to use different arguments ====
     optim.hess <- optimHess(par=outvect,
-                            fn=calc.ll,
-                            long.df=long.df,
-                            y.mat=y.mat,
+                            fn=rcpp_Rclusterll,
                             model=clust.out$model,
-                            submodel=clust.out$submodel,
-                            ppr.m=clust.out$ppr,
-                            pi.v=clust.out$pi.out,
-                            RG=clust.out$info["R"],
-                            constraint.sum.zero=clust.out$constraint.sum.zero,
-                            SE.calc=TRUE,
+                            ydf=ydf,
+                            rowcmm=rowc.mm,
+                            colcmm=colc.mm,
+                            covmm=cov.mm,
+                            pprm=clust.out$ppr,
+                            piv=clust.out$pi.out,
+                            paramlengths=clust.out$param.lengths,
+                            RG=clust.out$info["R"], p=clust.out$info["p"],
+                            n=clust.out$info["n"], q=clust.out$info["q"],
+                            constraint_sum_zero=clust.out$constraint.sum.zero,
+                            partial=FALSE,
+                            incomplete=TRUE,
+                            method=optim.method,
                             control=optim.control)
 
     SE <- sqrt(diag(solve(-optim.hess)))
@@ -956,26 +1008,30 @@ calc.SE.bicluster <- function(long.df, clust.out,
 
     optim.control$fnscale=-1
 
-    # TODO: DELETE THIS ====
-    y.mat <- df2mat(long.df)
+    ## Important: do NOT change the order of the three columns in this call,
+    ## because the C++ code relies on having this order for Y, ROW and COL
+    ydf <- as.matrix(long.df[,c("Y","ROW","COL")])
 
     outvect <- clust.out$outvect
 
-    # TODO: EDIT THIS to use different arguments ====
     optim.hess <- optimHess(par=outvect,
-                            fn=calc.ll,
-                            long.df=long.df,
-                            y.mat=y.mat,
                             model=clust.out$model,
-                            submodel=clust.out$submodel,
-                            ppr.m=clust.out$ppr,
-                            pi.v=clust.out$pi.out,
-                            RG=clust.out$info["R"],
-                            ppc.m=clust.out$ppc,
-                            kappa.v=clust.out$kappa.out,
-                            CG=clust.out$info["C"],
-                            constraint.sum.zero=clust.out$constraint.sum.zero,
-                            SE.calc=TRUE,
+                            ydf=ydf,
+                            rowcmm=clust.out$rowc.mm,
+                            colcmm=clust.out$colc.mm,
+                            covmm=clust.out$cov.mm,
+                            pprm=clust.out$ppr,
+                            ppcm=clust.out$ppc,
+                            piv=clust.out$pi.out,
+                            kappav=clust.out$kappa.out,
+                            paramlengths=clust.out$param.lengths,
+                            RG=clust.out$info["R"], CG=clust.out$info["C"],
+                            p=clust.out$info["p"], n=clust.out$info["n"],
+                            q=clust.out$info["q"],
+                            constraint_sum_zero=clust.out$constraint.sum.zero,
+                            partial=FALSE,
+                            incomplete=TRUE, llc=NA,
+                            method=optim.method,
                             control=optim.control)
 
     SE <- sqrt(diag(solve(-optim.hess)))
