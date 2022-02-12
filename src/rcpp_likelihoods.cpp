@@ -81,10 +81,12 @@ void rcpp_unpack(const String & model,
         // Rcout << "The value of phi : " << phi << "\n";
 
     } else if (model == "POM") {
-        for (kk=0; kk < q-1; kk++) {
-            mu[kk] = invect[kk];
+        // Convert to mu from w, where w can vary between -Inf and +Inf
+        // but mu must be increasing i.e. mu[1] <= mu[2] <= mu[3]...
+        mu[0] = invect[0];
+        for (kk=1; kk < q-1; kk++) {
+            mu[kk] = mu[kk-1] + exp(invect[kk]);
         }
-        mu.sort();
         nelts += q-1;
         // Rcout << "The value of nelts : " << nelts << "\n";
         // Rcout << "The value of mu : " << mu << "\n";

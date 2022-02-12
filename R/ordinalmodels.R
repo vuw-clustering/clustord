@@ -27,8 +27,13 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
                sub.invect <- sub.invect[(q-1+q-1):length(sub.invect)]
            },
            "POM"={
-               mu <- sub.invect[1:(q-1)]
-               mu <- sort(mu, decreasing=FALSE)
+               ## Convert to mu from w, where w can vary between -Inf and +Inf
+               ## but mu must be increasing i.e. mu[1] <= mu[2] <= mu[3]...
+               mu <- rep(0,q-1)
+               mu[1] <- sub.invect[1]
+               for (k in 2:(q-1)) {
+                   mu[k] <- mu[k-1] + exp(sub.invect[k])
+               }
                parlist[['mu']] <- mu
                nelts <- nelts + q-1
 
