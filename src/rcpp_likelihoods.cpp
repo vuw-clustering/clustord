@@ -347,7 +347,8 @@ double rcpp_theta_from_linear(const String model,
                               const int ymatij_idx,
                               const NumericVector mu,
                               const NumericVector phi,
-                              const int & q) {
+                              const int & q,
+                              const double & epsilon) {
 
     double theta = 0;
     NumericVector theta_all (q);
@@ -381,8 +382,8 @@ double rcpp_theta_from_linear(const String model,
         theta = theta_all[ymatij_idx]/theta_sum;
     }
 
-    if (theta <= 0) {
-        theta = 0.0000000001;
+    if (theta <= epsilon) {
+        theta = epsilon;
     }
 
     return theta;
@@ -399,8 +400,8 @@ double rcpp_Rclusterll(const NumericVector & invect,
                        const NumericVector & piv,
                        const IntegerVector & paramlengths,
                        const int & RG, const int & p, const int & n, const int & q,
-                       const bool & constraint_sum_zero, const bool & partial,
-                       const bool & incomplete) {
+                       const double & epsilon, const bool & constraint_sum_zero,
+                       const bool & partial, const bool & incomplete) {
 
     // BE CAREFUL! You CANNOT use single quotes to fetch named element of a
     // vector, only double quotes: paramlengths["rowc"], else you will get a
@@ -467,6 +468,11 @@ double rcpp_Rclusterll(const NumericVector & invect,
 
     double logl;
 
+    // Adjust very small values of piv to avoid errors when calculating log(piv)
+    for (rr=0; rr < RG; rr++) {
+        if (piv[rr] < epsilon) piv[rr] = epsilon;
+    }
+
     if (!incomplete) {
         double llc = 0;
 
@@ -494,7 +500,7 @@ double rcpp_Rclusterll(const NumericVector & invect,
 
                     ymatij_idx = ydf(ij,0)-1;
 
-                    theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q);
+                    theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q, epsilon);
 
                     log_thetaymat = log(theta);
                 } else {
@@ -583,6 +589,7 @@ double rcpp_Biclusterll(const NumericVector & invect,
                         const IntegerVector & paramlengths,
                         const int & RG, const int & CG,
                         const int & p, const int & n, const int & q,
+                        const double & epsilon,
                         const bool & constraint_sum_zero, const bool & partial,
                         const bool & incomplete, double & llc) {
 
@@ -658,6 +665,16 @@ double rcpp_Biclusterll(const NumericVector & invect,
     double log_thetaymat;
 
     double logl = 0;
+
+    // Adjust very small values of piv to avoid errors when calculating log(piv)
+    for (rr=0; rr < RG; rr++) {
+        if (piv[rr] < epsilon) piv[rr] = epsilon;
+    }
+    // Similarly for kappav
+    for (cc=0; cc < CG; cc++) {
+        if (kappav[cc] < epsilon) kappav[cc] = epsilon;
+    }
+
     if (!incomplete || NumericVector::is_na(llc)) {
         llc = 0;
 
@@ -742,7 +759,7 @@ double rcpp_Biclusterll(const NumericVector & invect,
                                                        nrowccov, ncolccov,
                                                        rr, cc, ij, ii, jj);
 
-                        theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q);
+                        theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q, epsilon);
 
                         tau_numerator(rr,cc) = piv[rr]*theta*kappav[cc];
                         tau_denominator += tau_numerator(rr,cc);
@@ -791,6 +808,7 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
                                   const NumericVector & piv,
                                   const IntegerVector & paramlengths,
                                   const int & RG, const int & p, const int & n, const int & q,
+                                  const double & epsilon,
                                   const bool & constraint_sum_zero) {
 
     // BE CAREFUL! You CANNOT use single quotes to fetch named element of a
@@ -851,6 +869,11 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
     double theta;
     double log_thetaymat;
 
+    // Adjust very small values of piv to avoid errors when calculating log(piv)
+    for (rr=0; rr < RG; rr++) {
+        if (piv[rr] < epsilon) piv[rr] = epsilon;
+    }
+
     for (ij=0; ij < ydf.nrow(); ij++) {
 
         ii = ydf(ij,1)-1;
@@ -878,7 +901,7 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
 
                 ymatij_idx = ydf(ij,0)-1;
 
-                theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q);
+                theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q, epsilon);
 
                 log_thetaymat = log(theta);
             } else {
@@ -913,6 +936,7 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
                                    const IntegerVector & paramlengths,
                                    const int & RG, const int & CG,
                                    const int & p, const int & n, const int & q,
+                                   const double & epsilon,
                                    const bool & constraint_sum_zero,
                                    const bool & row_clusters) {
 
@@ -994,6 +1018,15 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
 
     NumericMatrix ppm_started(nelements, nclust);
 
+    // Adjust very small values of piv to avoid errors when calculating log(piv)
+    for (rr=0; rr < RG; rr++) {
+        if (piv[rr] < epsilon) piv[rr] = epsilon;
+    }
+    // Similarly for kappav
+    for (cc=0; cc < CG; cc++) {
+        if (kappav[cc] < epsilon) kappav[cc] = epsilon;
+    }
+
     for (ij=0; ij < ydf.nrow(); ij++) {
 
         ii = ydf(ij,1)-1;
@@ -1030,7 +1063,7 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
                                                        nrowccov, ncolccov,
                                                        rr, cc, ij, ii, jj);
 
-                        theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q);
+                        theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q, epsilon);
 
                         sum_pikappa_theta += kappav[cc]*theta;
                     }
@@ -1067,7 +1100,7 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
                                                        nrowccov, ncolccov,
                                                        rr, cc, ij, ii, jj);
 
-                        theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q);
+                        theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q, epsilon);
 
                         sum_pikappa_theta += piv[rr]*theta;
                     }

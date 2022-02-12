@@ -549,7 +549,7 @@ biclustering <- function(formula,
 
 default.EM.control <- function() {
     list(EMcycles=50, EMstoppingpar=1e-6, paramstopping=TRUE, startEMcycles=5,
-         keepallparams=FALSE)
+         keepallparams=FALSE, epsilon=1e-6)
 }
 
 default.optim.control <- function() {
@@ -644,6 +644,8 @@ run.EM.rowcluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
 
     optim.control$fnscale <- -1
 
+    epsilon <- EM.control$epsilon
+
     parlist.init <- parlist.in
     pi.init <- pi.v
     initvect <- invect
@@ -656,7 +658,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
         ppr.m <- rcpp_Rcluster_Estep(invect, model,
                                      ydf, rowcmm, colcmm, covmm,
                                      pi.v, paramlengths,
-                                     RG, p, n, q, constraint.sum.zero)
+                                     RG, p, n, q, epsilon, constraint.sum.zero)
 
         ## Now set any NA values in the posterior probabilities matrix to 0
         ppr.m[is.na(ppr.m)] <- 0
@@ -676,7 +678,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
                            pprm=ppr.m,
                            piv=pi.v,
                            paramlengths=param.lengths,
-                           RG=RG, p=p, n=n, q=q,
+                           RG=RG, p=p, n=n, q=q, epsilon=epsilon,
                            constraint_sum_zero=constraint.sum.zero,
                            partial=TRUE,
                            incomplete=FALSE,
@@ -698,7 +700,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
                                pprm=ppr.m,
                                piv=pi.v,
                                paramlengths=param.lengths,
-                               RG=RG, p=p, n=n, q=q,
+                               RG=RG, p=p, n=n, q=q, epsilon=epsilon,
                                constraint_sum_zero=constraint.sum.zero,
                                partial=FALSE,
                                incomplete=FALSE)
@@ -712,7 +714,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
                                pprm=ppr.m,
                                piv=pi.v,
                                paramlengths=param.lengths,
-                               RG=RG, p=p, n=n, q=q,
+                               RG=RG, p=p, n=n, q=q, epsilon=epsilon,
                                constraint_sum_zero=constraint.sum.zero,
                                partial=FALSE,
                                incomplete=TRUE)
@@ -747,6 +749,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
          "submodel"=submodel,
          "EM.status"=EM.status,
          "criteria"=criteria,
+         "numerical.correction.epsilon"=epsilon,
          "constraint.sum.zero"=constraint.sum.zero,
          "param.lengths"=param.lengths,
          "initvect"=initvect,
@@ -762,7 +765,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
 }
 
 run.EM.bicluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
-                             pi.v, kappa.v, paramlengths,
+                             pi.v, kappa.v, paramlengths, epsilon,
                              constraint.sum.zero=TRUE,
                              EM.control=default.EM.control(),
                              optim.method="L-BFGS-B", optim.control=default.optim.control()) {
@@ -785,6 +788,8 @@ run.EM.bicluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
 
     optim.control$fnscale <- -1
 
+    epsilon <- EM.control$epsilon
+
     parlist.init <- parlist.in
     pi.init <- pi.v
     kappa.init <- kappa.v
@@ -798,7 +803,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
         ppr.m <- rcpp_Rcluster_Estep(invect, model,
                                      ydf, rowcmm, colcmm, covmm,
                                      pi.v, kappa.v, paramlengths,
-                                     RG, CG, p, n, q, constraint.sum.zero,
+                                     RG, CG, p, n, q, epsilon, constraint.sum.zero,
                                      row_clusters=TRUE)
 
         ## Now set any NA values in the posterior probabilities matrix to 0
@@ -809,7 +814,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
         ppc.m <- rcpp_Rcluster_Estep(invect, model,
                                      ydf, rowcmm, colcmm, covmm,
                                      pi.v, kappa.v, paramlengths,
-                                     RG, CG, p, n, q, constraint.sum.zero,
+                                     RG, CG, p, n, q, epsilon, constraint.sum.zero,
                                      row_clusters=FALSE)
 
         ## Now set any NA values in the posterior probabilities matrix to 0
@@ -832,7 +837,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
                            piv=pi.v,
                            kappav=kappa.v,
                            paramlengths=param.lengths,
-                           RG=RG, CG=CG, p=p, n=n, q=q,
+                           RG=RG, CG=CG, p=p, n=n, q=q, epsilon=epsilon,
                            constraint_sum_zero=constraint.sum.zero,
                            partial=TRUE,
                            incomplete=FALSE, llc=NA,
@@ -856,7 +861,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
                                 piv=pi.v,
                                 kappav=kappa.v,
                                 paramlengths=param.lengths,
-                                RG=RG, CG=CG, p=p, n=n, q=q,
+                                RG=RG, CG=CG, p=p, n=n, q=q, epsilon=epsilon,
                                 constraint_sum_zero=constraint.sum.zero,
                                 partial=FALSE,
                                 incomplete=FALSE, llc=NA,
@@ -874,7 +879,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
                                 piv=pi.v,
                                 kappav=kappa.v,
                                 paramlengths=param.lengths,
-                                RG=RG, CG=CG, p=p, n=n, q=q,
+                                RG=RG, CG=CG, p=p, n=n, q=q, epsilon=epsilon,
                                 constraint_sum_zero=constraint.sum.zero,
                                 partial=FALSE,
                                 incomplete=TRUE, llc=llc,
@@ -914,6 +919,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
          "submodel"=submodel,
          "EM.status"=EM.status,
          "criteria"=criteria,
+         "numerical.correction.epsilon"=epsilon,
          "constraint.sum.zero"=constraint.sum.zero,
          "param.lengths"=param.lengths,
          "initvect"=initvect,
@@ -957,6 +963,7 @@ calc.SE.rowcluster <- function(long.df, clust.out,
                             paramlengths=clust.out$param.lengths,
                             RG=clust.out$info["R"], p=clust.out$info["p"],
                             n=clust.out$info["n"], q=clust.out$info["q"],
+                            epsilon=clust.out$epsilon,
                             constraint_sum_zero=clust.out$constraint.sum.zero,
                             partial=FALSE,
                             incomplete=TRUE,
@@ -1028,6 +1035,7 @@ calc.SE.bicluster <- function(long.df, clust.out,
                             RG=clust.out$info["R"], CG=clust.out$info["C"],
                             p=clust.out$info["p"], n=clust.out$info["n"],
                             q=clust.out$info["q"],
+                            epsilon=clust.out$epsilon,
                             constraint_sum_zero=clust.out$constraint.sum.zero,
                             partial=FALSE,
                             incomplete=TRUE, llc=NA,
