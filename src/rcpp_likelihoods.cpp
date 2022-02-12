@@ -399,7 +399,7 @@ double rcpp_Rclusterll(const NumericVector & invect,
                        const NumericMatrix & colcmm,
                        const NumericMatrix & covmm,
                        const NumericMatrix & pprm,
-                       const NumericVector & piv,
+                       NumericVector piv,
                        const IntegerVector & paramlengths,
                        const int & RG, const int & p, const int & n, const int & q,
                        const double & epsilon, const bool & constraint_sum_zero,
@@ -556,7 +556,7 @@ double rcpp_Rclusterll(const NumericVector & invect,
                                                            rr, cc, ij, ii, jj);
                             ymatij_idx = ydf(ij,0)-1;
 
-                            theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q);
+                            theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q, epsilon);
                             log_theta = log(theta);
                             if (!NumericVector::is_na(log_theta) &&
                                 !Rcpp::traits::is_nan<REALSXP>(log_theta) &&
@@ -586,8 +586,8 @@ double rcpp_Biclusterll(const NumericVector & invect,
                         const NumericMatrix & covmm,
                         const NumericMatrix & pprm,
                         const NumericMatrix & ppcm,
-                        const NumericVector & piv,
-                        const NumericVector & kappav,
+                        NumericVector piv,
+                        NumericVector kappav,
                         const IntegerVector & paramlengths,
                         const int & RG, const int & CG,
                         const int & p, const int & n, const int & q,
@@ -707,7 +707,7 @@ double rcpp_Biclusterll(const NumericVector & invect,
                                                        nrowccov, ncolccov,
                                                        rr, cc, ij, ii, jj);
 
-                        theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q);
+                        theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q, epsilon);
                         // Rcout << "The value of theta : " << theta << "\n";
 
                         log_thetaymat = log(theta);
@@ -732,58 +732,24 @@ double rcpp_Biclusterll(const NumericVector & invect,
     if (incomplete) {
         double logl_correction = 0;
 
-        NumericMatrix tau_numerator (RG,CG);
-        double this_num;
-        double tau_denominator;
-        double logl_correction_term;
-
-        for (ij=0; ij < ydf.nrow(); ++ij) {
-            ii = ydf(ij,1)-1;
-            jj = ydf(ij,2)-1;
-
-            yval = ydf(ij,0);
-            if (all(is_finite(yval)) & all(!is_nan(yval))) {
-                ymatij_idx = ydf(ij,0)-1;
-
-                tau_denominator = 0;
-
-                for (rr=0; rr < RG; rr++) {
-                    for (cc=0; cc < CG; cc++) {
-                        linear_part = rcpp_linear_part(ydf, rowcmm, colcmm, covmm,
-                                                       paramlengths,
-                                                       rowc_coef, colc_coef,
-                                                       rowc_colc_coef,
-                                                       row_coef, col_coef,
-                                                       rowc_col_coef, colc_row_coef,
-                                                       rowc_cov_coef, colc_cov_coef,
-                                                       cov_coef,
-                                                       RG, CG, p, n, q,
-                                                       nrowccov, ncolccov,
-                                                       rr, cc, ij, ii, jj);
-
-                        theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q, epsilon);
-
-                        tau_numerator(rr,cc) = piv[rr]*theta*kappav[cc];
-                        tau_denominator += tau_numerator(rr,cc);
-                    }
+        for (ii=0; ii < n; ii++) {
+            for (rr=0; rr < RG; rr++) {
+                if (pprm(ii,rr) > 0) {
+                    // Note that the "n*" part is the sum of xhat_jc over j and c,
+                    // because the original term is sum_i sum_j sum_r sum_c zhat_ir xhat_jc log(zhat_ir),
+                    // but the xhat_jc bit simplifies to p
+                    logl_correction += p*pprm(ii,rr)*log(pprm(ii,rr));
                 }
+            }
+        }
 
-                for (rr=0; rr < RG; rr++) {
-                    for (cc=0; cc < CG; cc++) {
-
-                        this_num = pprm(ii,rr);
-                        Rcout << "This z_ir is:" << this_num << "\n";
-                        this_num = ppcm(jj,cc);
-                        Rcout << "This x_jc is:" << this_num << "\n";
-
-                        logl_correction_term = pprm(ii,rr)*ppcm(jj,cc)*log(tau_numerator(rr,cc)/tau_denominator);
-                        if (!NumericVector::is_na(logl_correction_term) &&
-                            !Rcpp::traits::is_nan<REALSXP>(logl_correction_term) &&
-                            !Rcpp::traits::is_infinite<REALSXP>(logl_correction_term)) {
-                            logl_correction += logl_correction_term;
-                            Rcout << "The logl correction term is:" << logl_correction_term << "\n";
-                        }
-                    }
+        for (jj=0; jj < p; jj++) {
+            for (cc=0; cc < CG; cc++) {
+                if (ppcm(jj,cc) > 0) {
+                    // Note that the "p*" part is the sum of zhat_ir over i and r
+                    // because the original term is sum_i sum_j sum_r sum_c zhat_ir xhat_jc log(xhat_jc)
+                    // but the zhat_ir bit simplifies to n
+                    logl_correction += n*ppcm(jj,cc)*log(ppcm(jj,cc));
                 }
             }
         }
@@ -791,10 +757,12 @@ double rcpp_Biclusterll(const NumericVector & invect,
         if (!NumericVector::is_na(logl_correction) &&
             !Rcpp::traits::is_nan<REALSXP>(logl_correction) &&
             !Rcpp::traits::is_infinite<REALSXP>(logl_correction)) {
-            logl -= logl_correction;
+            logl = llc - logl_correction;
         } else {
             logl = R_NegInf;
         }
+
+        // Rcout << "The value of logl : " << logl << "\n";
     }
 
     return logl;
@@ -807,7 +775,7 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
                                   const NumericMatrix & rowcmm,
                                   const NumericMatrix & colcmm,
                                   const NumericMatrix & covmm,
-                                  const NumericVector & piv,
+                                  NumericVector piv,
                                   const IntegerVector & paramlengths,
                                   const int & RG, const int & p, const int & n, const int & q,
                                   const double & epsilon,
@@ -933,8 +901,8 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
                                    const NumericMatrix & rowcmm,
                                    const NumericMatrix & colcmm,
                                    const NumericMatrix & covmm,
-                                   const NumericVector & piv,
-                                   const NumericVector & kappav,
+                                   NumericVector piv,
+                                   NumericVector kappav,
                                    const IntegerVector & paramlengths,
                                    const int & RG, const int & CG,
                                    const int & p, const int & n, const int & q,
