@@ -24,26 +24,26 @@ test_that("calc.ll produces correct results.", {
     ydf <- as.matrix(data.frame(Y=c(c(1,1,1,2,2,2),c(1,1,2,2,3,3),c(1,2,3,1,2,3)),
                                 ROW=rep(1:6,times=3), COL=rep(1:3,each=6)))
 
-    paramlengths <- c(2,1,2,0,0,0,0,0,0,0,0,0)
+    paramlengths <- c(q,q,RG,0,0,0,0,0,0,0,0,0)
     names(paramlengths) <- c("mu","phi","rowc","col","rowc_col","rowc_cov","cov","colc","row","colc_row","colc_cov","rowc_colc")
     expect_equal(rcpp_Rclusterll(c(mu,phi,alpha_r), "OSM", ydf,
                                  rowcmm, colcmm, covmm,
                                  ppr.m, pi.v, paramlengths = paramlengths,
-                                 RG, p, n, q,
+                                 RG, p, n, q, epsilon=1e-6,
                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
                  -30.77587457, ignore_attr=TRUE, tolerance=1E-4)
     paramlengths["col"] <- 3
     expect_equal(rcpp_Rclusterll(c(mu,phi,alpha_r,beta_j), "OSM", ydf,
                                  rowcmm, colcmm, covmm,
                                  ppr.m, pi.v, paramlengths = paramlengths,
-                                 RG, p, n, q,
+                                 RG, p, n, q, epsilon=1e-6,
                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
                  -35.08129788, ignore_attr=TRUE, tolerance=1E-4)
     paramlengths["rowc_col"] <- 3
     expect_equal(rcpp_Rclusterll(c(mu,phi,alpha_r,beta_j,gamma_rj), "OSM", ydf,
                                  rowcmm, colcmm, covmm,
                                  ppr.m, pi.v, paramlengths = paramlengths,
-                                 RG, p, n, q,
+                                 RG, p, n, q, epsilon=1e-6,
                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
                  -37.2425604, ignore_attr=TRUE, tolerance=1E-4)
 
@@ -61,7 +61,7 @@ test_that("calc.ll produces correct results.", {
     expect_equal(rcpp_Biclusterll(c(mu,phi,alpha_r,beta_c), "OSM", ydf,
                                   rowcmm, colcmm, covmm,
                                   ppr.m, ppc.m, pi.v, kappa.v, paramlengths = paramlengths,
-                                  RG, CG, p, n, q,
+                                  RG, CG, p, n, q, epsilon=1e-6,
                                   constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE, llc=NA),
                  -31.72322174, ignore_attr=TRUE, tolerance=1E-4)
 
@@ -69,32 +69,35 @@ test_that("calc.ll produces correct results.", {
     expect_equal(rcpp_Biclusterll(c(mu,phi,alpha_r,beta_c,gamma_rc), "OSM", ydf,
                                   rowcmm, colcmm, covmm,
                                   ppr.m, ppc.m, pi.v, kappa.v, paramlengths = paramlengths,
-                                  RG, CG, p, n, q,
+                                  RG, CG, p, n, q, epsilon=1e-6,
                                   constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE, llc=NA),
                  -32.7504653, ignore_attr=TRUE, tolerance=1E-4)
 
 
     ## POM ====
-    paramlengths <- c(2,0,2,0,0,0,0,0,0,0,0,0)
+    # For mu in POM, have to supply numbers that will be constructed into mu = (1,2,3)
+    mu_reparam <- c(-0.5,log(1.5))
+
+    paramlengths <- c(q,0,RG,0,0,0,0,0,0,0,0,0)
     names(paramlengths) <- c("mu","phi","rowc","col","rowc_col","rowc_cov","cov","colc","row","colc_row","colc_cov","rowc_colc")
-    expect_equal(rcpp_Rclusterll(c(mu,alpha_r), "POM", ydf,
+    expect_equal(rcpp_Rclusterll(c(mu_reparam,alpha_r), "POM", ydf,
                                  rowcmm, colcmm, covmm,
                                  ppr.m, pi.v, paramlengths = paramlengths,
-                                 RG, p, n, q,
+                                 RG, p, n, q, epsilon=1e-6,
                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
                  -25.93596493, ignore_attr=TRUE, tolerance=1E-4)
     paramlengths["col"] <- 3
-    expect_equal(rcpp_Rclusterll(c(mu,alpha_r,beta_j), "POM", ydf,
+    expect_equal(rcpp_Rclusterll(c(mu_reparam,alpha_r,beta_j), "POM", ydf,
                                  rowcmm, colcmm, covmm,
                                  ppr.m, pi.v, paramlengths = paramlengths,
-                                 RG, p, n, q,
+                                 RG, p, n, q, epsilon=1e-6,
                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
                  -31.35665815, ignore_attr=TRUE, tolerance=1E-4)
     paramlengths["rowc_col"] <- 3
-    expect_equal(rcpp_Rclusterll(c(mu,alpha_r,beta_j,gamma_rj), "POM", ydf,
+    expect_equal(rcpp_Rclusterll(c(mu_reparam,alpha_r,beta_j,gamma_rj), "POM", ydf,
                                  rowcmm, colcmm, covmm,
                                  ppr.m, pi.v, paramlengths = paramlengths,
-                                 RG, p, n, q,
+                                 RG, p, n, q, epsilon=1e-6,
                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
                  -33.29262377, ignore_attr=TRUE, tolerance=1E-4)
 
@@ -129,13 +132,13 @@ test_that("calc.ll produces correct results.", {
     ydf <- as.matrix(data.frame(Y=c(c(2,2,1,1),c(2,1,2,1)),
                                 ROW=rep(1:4,times=2), COL=rep(1:2,each=4)))
 
-    paramlengths <- c(1,0,2,0,0,0,0,0,0,0,0,0)
+    paramlengths <- c(1,0,RG,0,0,0,0,0,0,0,0,0)
     names(paramlengths) <- c("mu","phi","rowc","col","rowc_col","rowc_cov","cov","colc","row","colc_row","colc_cov","rowc_colc")
 
     expect_equal(rcpp_Rclusterll(c(mu,alpha_r), "Binary", ydf,
                                  rowcmm, colcmm, covmm,
                                  ppr.m, pi.v, paramlengths = paramlengths,
-                                 RG, p, n, q,
+                                 RG, p, n, q, epsilon=1e-6,
                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
                  -5.21102653113038, ignore_attr=TRUE, tolerance=1E-4)
 
@@ -143,14 +146,14 @@ test_that("calc.ll produces correct results.", {
     expect_equal(rcpp_Rclusterll(c(mu,alpha_r,beta_j), "Binary", ydf,
                                  rowcmm, colcmm, covmm,
                                  ppr.m, pi.v, paramlengths = paramlengths,
-                                 RG, p, n, q,
+                                 RG, p, n, q, epsilon=1e-6,
                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
                  -8.123555951, ignore_attr=TRUE, tolerance=1E-4)
     paramlengths["rowc_col"] <- 2
     expect_equal(rcpp_Rclusterll(c(mu,alpha_r,beta_j,gamma_rj), "Binary", ydf,
                                  rowcmm, colcmm, covmm,
                                  ppr.m, pi.v, paramlengths = paramlengths,
-                                 RG, p, n, q,
+                                 RG, p, n, q, epsilon=1e-6,
                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
                  -9.06850841785471, ignore_attr=TRUE, tolerance=1E-4)
 
@@ -207,13 +210,13 @@ test_that("calc.ll produces correct results.", {
     rowc_cov_coef <- c(1.5,0.3,-1.5,-0.3)
     cov_coef <- 0.7
 
-    paramlengths <- c(1,0,2,0,0,4,1,0,0,0,0,0)
+    paramlengths <- c(1,0,RG,0,0,4,1,0,0,0,0,0)
     names(paramlengths) <- c("mu","phi","rowc","col","rowc_col","rowc_cov","cov","colc","row","colc_row","colc_cov","rowc_colc")
 
     expect_equal(rcpp_Rclusterll(c(mu,alpha_r,rowc_cov_coef,cov_coef), "Binary", ydf,
                                  rowcmm, colcmm, covmm,
                                  ppr.m, pi.v, paramlengths = paramlengths,
-                                 RG, p, n, q,
+                                 RG, p, n, q, epsilon=1e-6,
                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
                  -6.049954084, ignore_attr=TRUE, tolerance=1E-4)
 
@@ -233,13 +236,13 @@ test_that("calc.ll produces correct results.", {
     rowc_cov_coef <- c(1.5,0.3,-1.5,-0.3)
     cov_coef <- 0.7
 
-    paramlengths <- c(1,0,2,0,0,4,1,0,0,0,0,0)
+    paramlengths <- c(1,0,RG,0,0,4,1,0,0,0,0,0)
     names(paramlengths) <- c("mu","phi","rowc","col","rowc_col","rowc_cov","cov","colc","row","colc_row","colc_cov","rowc_colc")
 
     expect_equal(rcpp_Rclusterll(c(mu,alpha_r,rowc_cov_coef,cov_coef), "Binary", ydf,
                                  rowcmm, colcmm, covmm,
                                  ppr.m, pi.v, paramlengths = paramlengths,
-                                 RG, p, n, q,
+                                 RG, p, n, q, epsilon=1e-6,
                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
                  -8.207088332, ignore_attr=TRUE, tolerance=1E-4)
 
@@ -254,30 +257,23 @@ test_that("calc.ll produces correct results.", {
 
     colc_cov_coef <- c(1.5,0.3,-1.5,-0.3)
 
-    paramlengths <- c(1,0,2,0,0,0,0,0,0,0,4,0)
+    paramlengths <- c(1,0,RG,0,0,0,0,0,0,0,4,0)
     names(paramlengths) <- c("mu","phi","rowc","col","rowc_col","rowc_cov","cov","colc","row","colc_row","colc_cov","rowc_colc")
 
     expect_equal(rcpp_Biclusterll(c(mu,alpha_r,colc_cov_coef), "Binary", ydf,
                                   rowcmm, colcmm, covmm,
                                   ppr.m, ppc.m, pi.v, kappa.v, paramlengths = paramlengths,
-                                  RG, CG, p, n, q,
+                                  RG, CG, p, n, q, epsilon=1e-6,
                                   constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE, llc=NA),
                  -7.781711754, ignore_attr=TRUE, tolerance=1E-4)
 
 
-
-    # ## Binary INCOMPLETE log-likelihood =====
-    # rcpp_Biclusterll(c(mu,alpha_r,colc_cov_coef), "Binary", ydf,
-    #                  rowcmm, colcmm, covmm,
-    #                  ppr.m, ppc.m, pi.v, kappa.v, paramlengths = paramlengths,
-    #                  RG, CG, p, n, q,
-    #                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=TRUE, llc=NA)
-    #
-    # param.lengths = paramlengths
-    # names(param.lengths) = c("mu","phi","rowc","col","rowc.col","rowc.cov","cov","colc","row","colc.row","colc.cov","rowc.colc")
-    # Bicluster.IncllC(c(mu,alpha_r,colc_cov_coef), "Binary", as.data.frame(ydf),
-    #                  rowcmm, colcmm, covmm, pi.v, kappa.v,
-    #                  param.lengths, RG, CG, p, n, q, constraint.sum.zero=TRUE)
-    #
+    ## Binary INCOMPLETE log-likelihood =====
+    expect_equal(rcpp_Biclusterll(c(mu,alpha_r,colc_cov_coef), "Binary", ydf,
+                     rowcmm, colcmm, covmm,
+                     ppr.m, ppc.m, pi.v, kappa.v, paramlengths = paramlengths,
+                     RG, CG, p, n, q, epsilon=1e-6,
+                     constraint_sum_zero=TRUE, partial=TRUE, incomplete=TRUE, llc=NA),
+                 -0.164418407, ignore_attr=TRUE, tolerance=1E-4)
 
 })

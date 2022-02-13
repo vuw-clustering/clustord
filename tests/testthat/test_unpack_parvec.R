@@ -180,35 +180,35 @@ test_that("unpack.parvec produces correct results.", {
     param.lengths['mu'] <- 4
     param.lengths['phi'] <- 4
     param.lengths['rowc'] <- 3
-    expect_equal(unpack.parvec(c(1,2,3,-1.5,2),model="POM", param.lengths=param.lengths,
+    expect_equal(unpack.parvec(c(1,log(1),log(1),-1.5,2),model="POM", param.lengths=param.lengths,
                                n=n, p=p, q=q, RG=RG, constraint.sum.zero=TRUE),
                  list(mu=c(1,2,3),rowc=c(-1.5,2,-0.5)),
                  ignore_attr=TRUE, tolerance=1E-4)
 
-    expect_equal(unpack.parvec(c(1,2,3,-1.5,2),model="POM",param.lengths=param.lengths,
+    expect_equal(unpack.parvec(c(1,log(1),log(1),-1.5,2),model="POM",param.lengths=param.lengths,
                                n=n, p=p, q=q, RG=RG, constraint.sum.zero=FALSE),
                  list(mu=c(1,2,3),rowc=c(0,-1.5,2)),
                  ignore_attr=TRUE, tolerance=1E-4)
 
     param.lengths['col'] <- p
-    expect_equal(unpack.parvec(c(1,2,3,-1.5,2,1:p),model="POM",param.lengths=param.lengths,
+    expect_equal(unpack.parvec(c(1,log(1),log(1),-1.5,2,1:p),model="POM",param.lengths=param.lengths,
                                n=n, p=p, q=q, RG=RG, constraint.sum.zero=TRUE),
                  list(mu=c(1,2,3),rowc=c(-1.5,2,-0.5),col=1:p),
                  ignore_attr=TRUE, tolerance=1E-4)
 
-    expect_equal(unpack.parvec(c(1,2,3,-1.5,2,1:p),model="POM",param.lengths=param.lengths,
+    expect_equal(unpack.parvec(c(1,log(1),log(1),-1.5,2,1:p),model="POM",param.lengths=param.lengths,
                                n=n, p=p, q=q, RG=RG, constraint.sum.zero=FALSE),
                  list(mu=c(1,2,3),rowc=c(0,-1.5,2),col=1:p),
                  ignore_attr=TRUE, tolerance=1E-4)
 
     param.lengths['rowc.col'] <- RG*p
-    expect_equal(unpack.parvec(c(1,2,3,-1.5,2,1:p,1:(RG*p)),model="POM",
+    expect_equal(unpack.parvec(c(1,log(1),log(1),-1.5,2,1:p,1:(RG*p)),model="POM",
                                param.lengths=param.lengths, n=n, p=p,  q=q, RG=RG, constraint.sum.zero=TRUE),
                  list(mu=c(1,2,3),rowc=c(-1.5,2,-0.5),col=1:p,
                       rowc.col=matrix(1:(RG*p),nrow=p,byrow=TRUE)),
                  ignore_attr=TRUE, tolerance=1E-4)
 
-    expect_equal(unpack.parvec(c(1,2,3,-1.5,2,1:p,1:(RG*p)),model="POM",
+    expect_equal(unpack.parvec(c(1,log(1),log(1),-1.5,2,1:p,1:(RG*p)),model="POM",
                                param.lengths=param.lengths, n=n, p=p,  q=q, RG=RG, constraint.sum.zero=FALSE),
                  list(mu=c(1,2,3),rowc=c(0,-1.5,2),col=1:p,
                       rowc.col=matrix(1:(RG*p),nrow=p,byrow=TRUE)),
@@ -217,36 +217,36 @@ test_that("unpack.parvec produces correct results.", {
     param.lengths['colc'] <- 2
     param.lengths['col'] <- 0
     param.lengths['rowc.col'] <- 0
-    expect_equal(unpack.parvec(c(1,2,3,-1.5,2,1.5),model="POM",param.lengths=param.lengths,
+    expect_equal(unpack.parvec(c(1,log(1),log(1),-1.5,2,1.5),model="POM",param.lengths=param.lengths,
                                n=n, p=p, q=q, RG=RG, CG=2, constraint.sum.zero=TRUE),
                  list(mu=c(1,2,3), rowc=c(-1.5,2,-0.5),colc=c(1.5,-1.5)),
                  ignore_attr=TRUE, tolerance=1E-4)
 
-    expect_equal(unpack.parvec(c(1,2,3,-1.5,2,1.5),model="POM",param.lengths=param.lengths,
+    expect_equal(unpack.parvec(c(1,log(1),log(1),-1.5,2,1.5),model="POM",param.lengths=param.lengths,
                                n=n, p=p, q=q, RG=RG, CG=2, constraint.sum.zero=FALSE),
                  list(mu=c(1,2,3), rowc=c(0,-1.5,2),colc=c(0,1.5)),
                  ignore_attr=TRUE, tolerance=1E-4)
 
     param.lengths['rowc.colc'] <- 6
-    expect_equal(unpack.parvec(c(1,2,3,-1.5,2,1.5,0.5,0.5),model="POM",
+    expect_equal(unpack.parvec(c(1,log(1),log(1),-1.5,2,1.5,0.5,0.5),model="POM",
                                param.lengths=param.lengths, n=n, p=p, q=q, RG=RG, CG=2, constraint.sum.zero=TRUE),
                  list(mu=c(1,2,3), rowc=c(-1.5,2,-0.5),colc=c(1.5,-1.5),
                       rowc.colc=matrix(c(-1,0.5,0.5,1,-0.5,-0.5),nrow=3)),
                  ignore_attr=TRUE, tolerance=1E-4)
 
-    expect_equal(unpack.parvec(c(1,2,3,-1.5,2,1.5,0.5,0.5),model="POM",
+    expect_equal(unpack.parvec(c(1,log(1),log(1),-1.5,2,1.5,0.5,0.5),model="POM",
                                param.lengths=param.lengths, n=n, p=p, q=q, RG=RG, CG=2, constraint.sum.zero=FALSE),
                  list(mu=c(1,2,3), rowc=c(0,-1.5,2),colc=c(0,1.5),
                       rowc.colc=matrix(c(-1,0.5,0.5,1,-0.5,-0.5),nrow=3)),
                  ignore_attr=TRUE, tolerance=1E-4)
 
-    expect_warning(unpack.parvec(c(1,2,3,-1.5,2,1.5,0.5,0.5,0.6),model="POM",
+    expect_warning(unpack.parvec(c(1,log(1),log(1),-1.5,2,1.5,0.5,0.5,0.6),model="POM",
                                  param.lengths=param.lengths, n=n, p=p, q=q, RG=RG, CG=2, constraint.sum.zero=FALSE),
                    "initvect is TOO LONG, the parameters may have been specified incorrectly. Please double-check initvect.")
 
     param.lengths['colc'] <- 4
     param.lengths['rowc.colc'] <- 12
-    expect_equal(unpack.parvec(c(1,2,3,-1.5,2,1.5,-2,1,0.5,-1,1.5,0.5,1,1.5),model="POM",
+    expect_equal(unpack.parvec(c(1,log(1),log(1),-1.5,2,1.5,-2,1,0.5,-1,1.5,0.5,1,1.5),model="POM",
                                param.lengths=param.lengths, n=n, p=p, q=q, RG=RG, CG=4, constraint.sum.zero=TRUE),
                  list(mu=c(1,2,3), rowc=c(-1.5,2,-0.5),colc=c(1.5,-2,1,-0.5),
                       rowc.colc=matrix(c(-1,0.5,0.5,0,-1,1,-3,1.5,1.5,4,-1,-3),nrow=3)),

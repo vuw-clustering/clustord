@@ -301,7 +301,6 @@ double rcpp_linear_part(const NumericMatrix ydf,
     }
     if (paramlengths["col"] > 0) {
         linear_part += col_coef[jj];
-        Rcout << "The value of col_coef: " << col_coef[jj] << "\n";
         // Rcout << "The value of linear_part with col: " << linear_part << "\n";
     }
     if (paramlengths["rowc_col"] > 0) {
@@ -508,7 +507,7 @@ double rcpp_Rclusterll(const NumericVector & invect,
                 } else {
                     log_thetaymat = 0;
                 }
-                Rcout << "The value of log_thetaymat : " << log_thetaymat << "\n";
+                // Rcout << "The value of log_thetaymat : " << log_thetaymat << "\n";
 
                 // Rcout << "The value of llc component : " << pprm(ii,rr)*log_thetaymat << "\n";
                 llc += pprm(ii,rr)*log_thetaymat;
@@ -529,7 +528,7 @@ double rcpp_Rclusterll(const NumericVector & invect,
         double log_theta;
 
         for (ii=0; ii < n; ++ii) {
-            Rcout << "The R-based value of ii : " << ii+1 << "\n";
+            // Rcout << "The R-based value of ii : " << ii+1 << "\n";
 
             log_components.fill(0);
 
@@ -540,7 +539,7 @@ double rcpp_Rclusterll(const NumericVector & invect,
                     if (ydf(ij,1) == ii+1) {
 
                         jj = ydf(ij,2)-1;
-                        Rcout << "The R-based value of jj : " << jj+1 << "\n";
+                        // Rcout << "The R-based value of jj : " << jj+1 << "\n";
                         yval = ydf(ij,0);
                         if (all(is_finite(yval)) & all(!is_nan(yval))) {
                             linear_part = rcpp_linear_part(ydf, rowcmm, colcmm, covmm,
