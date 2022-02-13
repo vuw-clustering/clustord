@@ -897,7 +897,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
         ## of the output of optim
         cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' partial complete-data log.like=', -optim.fit$value ,'\n'))
         cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' complete-data log.like=', llc ,'\n'))
-        cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' incomplete-data log.like=', lli ,'\n'))
+        cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' APPROXIMATE incomplete-data log.like=', lli ,'\n'))
         # cat("parlist.out\n")
         # print(parlist.out)
         # cat("pi",pi.v,"\n")
