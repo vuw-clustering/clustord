@@ -175,6 +175,9 @@ check.formula <- function(formula, long.df, RG, CG) {
     if (row.grep > 0 && row.grep != sum(temp.labels %in% c("ROW","ROW:COLCLUST","COLCLUST:ROW"))) {
         stop("You cannot use functions of ROW, and the only permitted interaction is with COLCLUST.")
     }
+    if (row.grep > 0 && rowc.grep > 0) {
+        stop("You cannot include ROW as well as ROWCLUST.")
+    }
     if (any(temp.labels == "ROW")) {
         row.part <- "ROW"
     }
@@ -186,6 +189,9 @@ check.formula <- function(formula, long.df, RG, CG) {
     col.grep <- length(grep("COL",temp.labels))
     if (col.grep > 0 && col.grep != sum(temp.labels %in% c("COL","COL:ROWCLUST","ROWCLUST:COL"))) {
         stop("You cannot use functions of COL, and the only permitted interaction is with ROWCLUST.")
+    }
+    if (col.grep > 0 && colc.grep > 0) {
+        stop("You cannot include COL as well as COLCLUST.")
     }
     if (any(temp.labels == "COL")) {
         col.part <- "COL"
@@ -218,10 +224,14 @@ check.formula <- function(formula, long.df, RG, CG) {
     }
 
     # A.6  Check that all other variables in the formula are in long.df, and in
-    #      the process separate out the ROW/COL parts, the ROWCLUST parts, the
-    #      COLCLUST parts, and the pure covariate parts
-    #      OUTPUT: errors
-    row.col.idxs <- which(fo.labels %in% c("ROW","COL"))
+    # the process separate out the ROW/COL/ROWCLUST/COLCLUST parts, the ROWCLUST
+    # covaraite parts, the COLCLUST covariate parts, and the pure covariate
+    # parts
+    # OUTPUT: errors
+    row.col.idxs <- which(fo.labels %in% c("ROW","COL","ROWCLUST","COLCLUST",
+                                           "ROWCLUST:COLCLUST","COLCLUST:ROWCLUST",
+                                           "ROWCLUST:COL","COL:ROWCLUST",
+                                           "COLCLUST:ROW","ROW:COLCLUST"))
     row.col.part <- fo.labels[row.col.idxs]
     non.row.col.part <- fo.labels[-row.col.idxs]
 
@@ -270,14 +280,6 @@ check.formula <- function(formula, long.df, RG, CG) {
     if (exists('rowc.cov.part') && length(rowc.cov.part) > 0) param.lengths['rowc.cov'] <- length(rowc.cov.part)*RG
     if (exists('colc.cov.part') && length(colc.cov.part) > 0) param.lengths['colc.cov'] <- length(colc.cov.part)*CG
     if (exists('pure.cov.part') && length(pure.cov.part) > 0) param.lengths['cov'] <- length(pure.cov.part)
-
-    ###### AT THE MOMENT THIS IS DONE BY UNPACK PARVEC, IS THAT STILL WHAT WE WANT?
-    # B.4  IF, and ONLY IF initvect is supplied, check that initvect length
-    #      matches param structure, and check any values in it that should have
-    #      constraints e.g. phi values.
-    #      Also KEEP a copy of the set of initial values provided for the params,
-    #      to be reported at the end so the user can check they supplied correct
-    #      initial values for the different params
 
     # Return model matrices
     # Return list of params

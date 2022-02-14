@@ -48,19 +48,38 @@ test_that("clustord fails for an invalid formula.", {
     expect_error(check.formula(Y ~ I(COLCLUST^2),long.df=long.df,CG=2),
                  "You cannot use functions of COLCLUST, only COLCLUST as-is.")
 
-    expect_error(check.formula(Y ~ ROWCLUST + log(ROW),long.df=long.df,RG=2),
-                 "You cannot use functions of ROW, or interactions with ROW.")
-    expect_error(check.formula(Y ~ ROWCLUST + I(ROW^2),long.df=long.df,RG=2),
-                 "You cannot use functions of ROW, or interactions with ROW.")
-    expect_error(check.formula(Y ~ ROWCLUST + ROW:X,long.df=long.df,RG=2),
-                 "You cannot use functions of ROW, or interactions with ROW.")
+    expect_error(check.formula(Y ~ COLCLUST + log(ROW),long.df=long.df,CG=2),
+                 "You cannot use functions of ROW, and the only permitted interaction is with COLCLUST.")
+    expect_error(check.formula(Y ~ COLCLUST + I(ROW^2),long.df=long.df,CG=2),
+                 "You cannot use functions of ROW, and the only permitted interaction is with COLCLUST.")
+    expect_error(check.formula(Y ~ COLCLUST + ROW:X,long.df=long.df,CG=2),
+                 "You cannot use functions of ROW, and the only permitted interaction is with COLCLUST.")
+    expect_error(check.formula(Y ~ ROWCLUST + ROW,long.df=long.df,RG=2),
+                 "You cannot include ROW as well as ROWCLUST.")
+    expect_error(check.formula(Y ~ ROWCLUST:ROW,long.df=long.df,RG=2),
+                 "You cannot use functions of ROW, and the only permitted interaction is with COLCLUST.")
+    expect_error(check.formula(Y ~ COLCLUST + ROWCLUST + ROW,long.df=long.df,RG=2,CG=2),
+                 "You cannot include ROW as well as ROWCLUST.")
+    expect_error(check.formula(Y ~ COLCLUST:ROWCLUST + ROW,long.df=long.df,RG=2,CG=2),
+                 "You cannot include ROW as well as ROWCLUST.")
 
-    expect_error(check.formula(Y ~ COLCLUST + log(COL),long.df=long.df,CG=2),
-                 "You cannot use functions of COL, or interactions with COL.")
-    expect_error(check.formula(Y ~ COLCLUST + I(COL^2),long.df=long.df,CG=2),
-                 "You cannot use functions of COL, or interactions with COL.")
-    expect_error(check.formula(Y ~ COLCLUST + COL:X,long.df=long.df,CG=2),
-                 "You cannot use functions of COL, or interactions with COL.")
+    expect_error(check.formula(Y ~ ROWCLUST + log(COL),long.df=long.df,RG=2),
+                 "You cannot use functions of COL, and the only permitted interaction is with ROWCLUST.")
+    expect_error(check.formula(Y ~ ROWCLUST + I(COL^2),long.df=long.df,RG=2),
+                 "You cannot use functions of COL, and the only permitted interaction is with ROWCLUST.")
+    expect_error(check.formula(Y ~ ROWCLUST + COL:X,long.df=long.df,RG=2),
+                 "You cannot use functions of COL, and the only permitted interaction is with ROWCLUST.")
+    expect_error(check.formula(Y ~ COLCLUST + COL,long.df=long.df,CG=2),
+                 "You cannot include COL as well as COLCLUST.")
+    expect_error(check.formula(Y ~ COLCLUST:COL,long.df=long.df,CG=2),
+                 "You cannot use functions of COL, and the only permitted interaction is with ROWCLUST.")
+    expect_error(check.formula(Y ~ ROWCLUST + COLCLUST + COL,long.df=long.df,RG=2,CG=2),
+                 "You cannot include COL as well as COLCLUST.")
+    expect_error(check.formula(Y ~ ROWCLUST:COLCLUST + COL,long.df=long.df,RG=2,CG=2),
+                 "You cannot include COL as well as COLCLUST.")
+
+    expect_error(check.formula(Y ~ ROWCLUST:COLCLUST + COL + ROW,long.df=long.df,RG=2,CG=2),
+                 "You cannot include ROW as well as ROWCLUST.")
 
     expect_error(check.formula(Y ~ ROWCLUST:COLCLUST + ROWCLUST:COLCLUST:x,long.df=long.df,RG=2,CG=2),
                  "If you include ROWCLUST and COLCLUST, you cannot include three-way or higher interactions that involve both ROWCLUST and COLCLUST.")
@@ -74,4 +93,17 @@ test_that("clustord fails for an invalid formula.", {
                  "If you include ROWCLUST and COLCLUST, you cannot include three-way or higher interactions that involve both ROWCLUST and COLCLUST.")
     expect_error(check.formula(Y ~ ROWCLUST:COLCLUST + COLCLUST:ROWCLUST:x:z,long.df=long.df,RG=2,CG=2),
                  "If you include ROWCLUST and COLCLUST, you cannot include three-way or higher interactions that involve both ROWCLUST and COLCLUST.")
+
+    expect_silent(check.formula(Y ~ ROWCLUST, long.df=long.df, RG=2, CG=2))
+    expect_silent(check.formula(Y ~ COLCLUST, long.df=long.df, RG=2, CG=2))
+    expect_silent(check.formula(Y ~ ROWCLUST + COLCLUST, long.df=long.df, RG=2, CG=2))
+    expect_silent(check.formula(Y ~ ROWCLUST*COLCLUST, long.df=long.df, RG=2, CG=2))
+    expect_silent(check.formula(Y ~ ROWCLUST:COLCLUST, long.df=long.df, RG=2, CG=2))
+    expect_silent(check.formula(Y ~ ROWCLUST + COL, long.df=long.df, RG=2, CG=2))
+    expect_silent(check.formula(Y ~ ROWCLUST:COL, long.df=long.df, RG=2, CG=2))
+    expect_silent(check.formula(Y ~ ROWCLUST*COL, long.df=long.df, RG=2, CG=2))
+    expect_silent(check.formula(Y ~ COLCLUST + ROW, long.df=long.df, RG=2, CG=2))
+    expect_silent(check.formula(Y ~ COLCLUST:ROW, long.df=long.df, RG=2, CG=2))
+    expect_silent(check.formula(Y ~ COLCLUST*ROW, long.df=long.df, RG=2, CG=2))
 })
+
