@@ -72,6 +72,9 @@ test_that("clustord fails for an invalid formula.", {
     expect_error(check.formula(Y ~ COLCLUST:ROWCLUST + ROW,long.df=long.df,RG=2,CG=2),
                  "You cannot include ROW as well as ROWCLUST.")
 
+    expect_error(check.formula(Y ~ ROWCLUST + ROWCLUST:COL, long.df=long.df, RG=2),
+                 "If including the interaction between row clusters and column effects, you must include both or neither of the main effects ROWCLUST and COL.")
+
     expect_error(check.formula(Y ~ ROWCLUST + log(COL),long.df=long.df,RG=2),
                  "You cannot use functions of COL, and the only permitted interaction is with ROWCLUST.")
     expect_error(check.formula(Y ~ ROWCLUST + I(COL^2),long.df=long.df,RG=2),
@@ -86,6 +89,9 @@ test_that("clustord fails for an invalid formula.", {
                  "You cannot include COL as well as COLCLUST.")
     expect_error(check.formula(Y ~ ROWCLUST:COLCLUST + COL,long.df=long.df,RG=2,CG=2),
                  "You cannot include COL as well as COLCLUST.")
+
+    expect_error(check.formula(Y ~ COLCLUST + COLCLUST:ROW, long.df=long.df, CG=2),
+                 "If including the interaction between column clusters and row effects, you must include both or neither of the main effects COLCLUST and ROW.")
 
     expect_error(check.formula(Y ~ ROWCLUST:COLCLUST + COL + ROW,long.df=long.df,RG=2,CG=2),
                  "You cannot include ROW as well as ROWCLUST.")

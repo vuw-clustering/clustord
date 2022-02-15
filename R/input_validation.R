@@ -189,8 +189,13 @@ check.formula <- function(formula, long.df, RG, CG) {
     if (row.grep > 0 && rowc.grep > 0) {
         stop("You cannot include ROW as well as ROWCLUST.")
     }
-    if (any(temp.labels == "ROW")) {
-        row.part <- "ROW"
+    if (any(fo.labels %in% c("COLCLUST:ROW","ROW:COLCLUST")) &&
+        ((any(fo.labels == "COLCLUST") && !any(fo.labels == "ROW")) ||
+         !any(fo.labels == "COLCLUST") && any(fo.labels == "ROW"))) {
+        stop("If including the interaction between column clusters and row effects, you must include both or neither of the main effects COLCLUST and ROW.")
+    }
+    if (any(temp.labels == "COL")) {
+        col.part <- "COL"
     }
     if (any(temp.labels %in% c("ROW:COLCLUST","COLCLUST:ROW"))) {
         colc.row.part <- "COLCLUST:ROW"
@@ -203,6 +208,11 @@ check.formula <- function(formula, long.df, RG, CG) {
     }
     if (col.grep > 0 && colc.grep > 0) {
         stop("You cannot include COL as well as COLCLUST.")
+    }
+    if (any(fo.labels %in% c("ROWCLUST:COL","COL:ROWCLUST")) &&
+        ((any(fo.labels == "ROWCLUST") && !any(fo.labels == "COL")) ||
+        !any(fo.labels == "ROWCLUST") && any(fo.labels == "COL"))) {
+        stop("If including the interaction between row clusters and column effects, you must include both or neither of the main effects ROWCLUST and COL.")
     }
     if (any(temp.labels == "COL")) {
         col.part <- "COL"
