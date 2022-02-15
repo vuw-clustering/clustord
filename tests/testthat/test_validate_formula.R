@@ -103,6 +103,11 @@ test_that("clustord fails for an invalid formula.", {
     expect_error(check.formula(Y ~ ROWCLUST:COLCLUST + COLCLUST:ROWCLUST:x:z,long.df=long.df,RG=2,CG=2),
                  "If you include ROWCLUST and COLCLUST, you cannot include three-way or higher interactions that involve both ROWCLUST and COLCLUST.")
 
+    expect_error(check.formula(Y ~ ROWCLUST:x, long.df=long.df, RG=2),
+                 "If you are including interactions between row clusters and covariates, you must include the main effect term for ROWCLUST.")
+    expect_error(check.formula(Y ~ COLCLUST:x, long.df=long.df, CG=2),
+                 "If you are including interactions between column clusters and covariates, you must include the main effect term for COLCLUST.")
+
     expect_silent(check.formula(Y ~ ROWCLUST, long.df=long.df, RG=2, CG=2))
     expect_silent(check.formula(Y ~ COLCLUST, long.df=long.df, RG=2, CG=2))
     expect_silent(check.formula(Y ~ ROWCLUST + COLCLUST, long.df=long.df, RG=2, CG=2))

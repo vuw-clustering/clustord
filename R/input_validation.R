@@ -243,12 +243,20 @@ check.formula <- function(formula, long.df, RG, CG) {
                                            "ROWCLUST:COLCLUST","COLCLUST:ROWCLUST",
                                            "ROWCLUST:COL","COL:ROWCLUST",
                                            "COLCLUST:ROW","ROW:COLCLUST"))
-    row.col.part <- fo.labels[row.col.idxs]
-    non.row.col.part <- fo.labels[-row.col.idxs]
+    if (length(row.col.idxs) > 0) {
+        row.col.part <- fo.labels[row.col.idxs]
+        non.row.col.part <- fo.labels[-row.col.idxs]
+    } else {
+        non.row.col.part <- fo.labels
+    }
 
     rowc.mm <- NULL
     rowc.idxs <- grep("ROWCLUST", non.row.col.part)
     if (length(rowc.idxs) > 0) {
+        if (!any(fo.labels == "ROWCLUST")) {
+            stop("If you are including interactions between row clusters and covariates, you must include the main effect term for ROWCLUST.")
+        }
+
         rowc.parts <- extract.covs("ROWCLUST", rowc.idxs, non.row.col.part, long.df)
         rowc.part <- rowc.parts$pure.clust.part
         rowc.cov.part <- rowc.parts$clust.cov.part
@@ -258,6 +266,9 @@ check.formula <- function(formula, long.df, RG, CG) {
     colc.mm <- NULL
     colc.idxs <- grep("COLCLUST", non.row.col.part)
     if (length(colc.idxs) > 0) {
+        if (!any(fo.labels == "COLCLUST")) {
+            stop("If you are including interactions between column clusters and covariates, you must include the main effect term for COLCLUST.")
+        }
 
         colc.parts <- extract.covs("COLCLUST", colc.idxs, non.row.col.part, long.df)
         colc.part <- colc.parts$pure.clust.part
