@@ -48,6 +48,15 @@ test_that("clustord fails for an invalid formula.", {
     expect_error(check.formula(Y ~ I(COLCLUST^2),long.df=long.df,CG=2),
                  "You cannot use functions of COLCLUST, only COLCLUST as-is.")
 
+    expect_error(check.formula(Y ~ ROWCLUST + ROWCLUST:COLCLUST, long.df=long.df, RG=2, CG=2),
+                 "If including the interaction between row and column clustering, you must include both or neither of the main effects ROWCLUST and COLCLUST.")
+    expect_error(check.formula(Y ~ ROWCLUST + COLCLUST:ROWCLUST, long.df=long.df, RG=2, CG=2),
+                 "If including the interaction between row and column clustering, you must include both or neither of the main effects ROWCLUST and COLCLUST.")
+    expect_error(check.formula(Y ~ COLCLUST + ROWCLUST:COLCLUST, long.df=long.df, RG=2, CG=2),
+                 "If including the interaction between row and column clustering, you must include both or neither of the main effects ROWCLUST and COLCLUST.")
+    expect_error(check.formula(Y ~ COLCLUST + COLCLUST:ROWCLUST, long.df=long.df, RG=2, CG=2),
+                 "If including the interaction between row and column clustering, you must include both or neither of the main effects ROWCLUST and COLCLUST.")
+
     expect_error(check.formula(Y ~ COLCLUST + log(ROW),long.df=long.df,CG=2),
                  "You cannot use functions of ROW, and the only permitted interaction is with COLCLUST.")
     expect_error(check.formula(Y ~ COLCLUST + I(ROW^2),long.df=long.df,CG=2),

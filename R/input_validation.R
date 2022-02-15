@@ -161,7 +161,18 @@ check.formula <- function(formula, long.df, RG, CG) {
     if (rowc.grep > 0 && rowc.grep != sum(fo.vars == "ROWCLUST")) stop("You cannot use functions of ROWCLUST, only ROWCLUST as-is.")
     if (colc.grep > 0 && colc.grep != sum(fo.vars == "COLCLUST")) stop("You cannot use functions of COLCLUST, only COLCLUST as-is.")
 
-    # A.4  Check that if ROW or COL is in the formula, there are no functions of
+    # A.4  Check that if the ROWCLUST:COLCLUST interaction term is included, that
+    #      both or neither of the ROWCLUST, COLCLUST main effect terms are
+    #      included
+    #      OUTPUT: errors
+    if (any(fo.labels %in% c("ROWCLUST:COLCLUST","COLCLUST:ROWCLUST"))) {
+        if ((any(fo.labels == "ROWCLUST") && !any(fo.labels == "COLCLUST")) ||
+            (!any(fo.labels == "ROWCLUST") && any(fo.labels == "COLCLUST"))) {
+            stop("If including the interaction between row and column clustering, you must include both or neither of the main effects ROWCLUST and COLCLUST.")
+        }
+    }
+
+    # A.5  Check that if ROW or COL is in the formula, there are no functions of
     #      them, or any interaction terms involving them EXCEPT interactions
     #      between ROW and COLCLUST or between COL and ROWCLUST
     #      OUTPUT: errors
@@ -200,7 +211,7 @@ check.formula <- function(formula, long.df, RG, CG) {
         rowc.col.part <- "ROWCLUST:COL"
     }
 
-    # A.5  Check that there are no three-way or higher-order interactions
+    # A.6  Check that there are no three-way or higher-order interactions
     # involving ROWCLUST and COLCLUST
     rowc.idxs <- grep("ROWCLUST",fo.labels)
     colc.idxs <- grep("COLCLUST",fo.labels)
@@ -223,7 +234,7 @@ check.formula <- function(formula, long.df, RG, CG) {
         }
     }
 
-    # A.6  Check that all other variables in the formula are in long.df, and in
+    # A.7  Check that all other variables in the formula are in long.df, and in
     # the process separate out the ROW/COL/ROWCLUST/COLCLUST parts, the ROWCLUST
     # covaraite parts, the COLCLUST covariate parts, and the pure covariate
     # parts
@@ -263,7 +274,7 @@ check.formula <- function(formula, long.df, RG, CG) {
         cov.mm <- model.matrix(cov.tf, data=long.df)
     }
 
-    # B.3  Construct list of params for ROW, COL, and pure RowClust and ColClust
+    # B.1  Construct list of params for ROW, COL, and pure RowClust and ColClust
     #      terms (i.e. all the remaining params apart from model-specific params
     #      like mu or mu_k, and phi_k)
     #      OUTPUT: params
