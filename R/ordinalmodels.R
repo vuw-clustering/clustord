@@ -60,7 +60,9 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         parlist[['rowc']] <- rowc.coef
         nelts <- nelts + nrowc - 1
 
-        if (length(sub.invect) > (nrowc-1)) sub.invect <- sub.invect[nrowc:length(sub.invect)]
+        if (length(sub.invect) > (nrowc-1)) {
+            sub.invect <- sub.invect[nrowc:length(sub.invect)]
+        } else sub.invect <- NULL
     } else parlist[['rowc']] <- NULL
 
     ncolc <- param.lengths['colc']
@@ -72,25 +74,50 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         parlist[['colc']] <- colc.coef
         nelts <- nelts + ncolc - 1
 
-        if (length(sub.invect) > (ncolc-1)) sub.invect <- sub.invect[ncolc:length(sub.invect)]
+        if (length(sub.invect) > (ncolc-1)) {
+            sub.invect <- sub.invect[ncolc:length(sub.invect)]
+        } else sub.invect <- NULL
     } else parlist[['colc']] <- NULL
 
     nrowc.colc <- param.lengths['rowc.colc']
     if (nrowc.colc > 0) {
-        if (length(sub.invect) < (RG-1)*(CG-1)) stop("invect not long enough for given formula.")
-        rowc.colc.coef <- sub.invect[1:((RG-1)*(CG-1))]
-        rowc.colc.coef <- matrix(rowc.colc.coef,nrow=RG-1,ncol=CG-1,byrow=T)
-        rowc.colc.coef <- cbind(rowc.colc.coef,-rowSums(rowc.colc.coef))
-        # Original POM code had final row of rowc.colc.coef equal to
-        # negative sum of other rows, but this code follows original OSM
-        # code, has FIRST row of rowc.colc.coef equal to negative sum of
-        # other rows
-        rowc.colc.coef <- rbind(-colSums(rowc.colc.coef),rowc.colc.coef)
+        ## The number of independent parameters in the row and column cluster
+        ## interaction depends on whether the main effect terms for row and
+        ## column clusters are included as well
+        if (param.lengths['rowc'] > 0 && param.lengths['colc'] > 0) {
 
-        parlist[['rowc.colc']] <- as.matrix(rowc.colc.coef)
-        nelts <- nelts + (RG-1)*(CG-1)
+            if (length(sub.invect) < (RG-1)*(CG-1)) stop("invect not long enough for given formula.")
+            rowc.colc.coef <- sub.invect[1:((RG-1)*(CG-1))]
+            rowc.colc.coef <- matrix(rowc.colc.coef,nrow=RG-1,ncol=CG-1,byrow=TRUE)
+            rowc.colc.coef <- cbind(rowc.colc.coef,-rowSums(rowc.colc.coef))
+            # Using constraint formulation from original POM code, with final row of
+            # rowc.colc.coef equal to negative sum of other rows. This is unlike the
+            # v0.1 clustord code and the original OSM code, had FIRST row of
+            # rowc.colc.coef equal to negative sum of other rows
+            rowc.colc.coef <- rbind(rowc.colc.coef,-colSums(rowc.colc.coef))
 
-        if (length(sub.invect) > (RG-1)*(CG-1)) sub.invect <- sub.invect[((RG-1)*(CG-1)+1):length(sub.invect)]
+            parlist[['rowc.colc']] <- rowc.colc.coef
+            nelts <- nelts + (RG-1)*(CG-1)
+
+            if (length(sub.invect) > (RG-1)*(CG-1)) {
+                sub.invect <- sub.invect[((RG-1)*(CG-1)+1):length(sub.invect)]
+            } else sub.invect <- NULL
+        } else {
+            if (param.lengths['rowc'] > 0 || param.lengths['colc'] > 0) {
+                browser()
+            }
+
+            if (length(sub.invect) < RG*CG - 1) stop("invect not long enough for given formula.")
+            rowc.colc.coef <- sub.invect[1:(RG*CG-1)]
+            rowc.colc.coef <- c(rowc.colc.coef, -sum(rowc.colc.coef))
+            rowc.colc.coef <- matrix(rowc.colc.coef, nrow=RG, ncol=CG, byrow=TRUE)
+            parlist[['rowc.colc']] <- rowc.colc.coef
+            nelts <- nelts + (RG*CG - 1)
+
+            if (length(sub.invect) > RG*CG-1) {
+                sub.invect <- sub.invect[(RG*CG):length(sub.invect)]
+            } else sub.invect <- NULL
+        }
     } else parlist[['rowc.colc']] <- NULL
 
     nrow <- param.lengths['row']
@@ -101,7 +128,9 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         parlist[['row']] <- row.coef
         nelts <- nelts + n
 
-        if (length(sub.invect) > n) sub.invect <- sub.invect[(n+1):length(sub.invect)]
+        if (length(sub.invect) > n) {
+            sub.invect <- sub.invect[(n+1):length(sub.invect)]
+        } else sub.invect <- NULL
     } else parlist[['row']] <- NULL
     ncol <- param.lengths['col']
     if (ncol > 0) {
@@ -111,45 +140,86 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         parlist[['col']] <- col.coef
         nelts <- nelts + p
 
-        if (length(sub.invect) > p) sub.invect <- sub.invect[(p+1):length(sub.invect)]
+        if (length(sub.invect) > p) {
+            sub.invect <- sub.invect[(p+1):length(sub.invect)]
+        } else sub.invect <- NULL
     } else parlist[['col']] <- NULL
 
     nrowc.col <- param.lengths['rowc.col']
     if (nrowc.col > 0) {
-        if (length(sub.invect) < RG*p) stop("invect not long enough for given formula.")
-        rowc.col.coef <- sub.invect[1:(RG*p)]
+        ## The number of independent parameters in the interaction between row
+        ## clusters and individual column effects depends on whether the main
+        ## effects for row and column clusters are included as well
+        if (param.lengths['rowc'] > 0) {
+            if (length(sub.invect) < (RG-1)*(p-1)) stop("invect not long enough for given formula.")
 
-        rowc.col.coef <- matrix(rowc.col.coef,nrow=RG,ncol=p,byrow=T)
-        # rowc.col.coef <- matrix(rowc.col.coef,nrow=RG-1,ncol=p-1,byrow=T)
-        # rowc.col.coef <- cbind(rowc.col.coef,-rowSums(rowc.col.coef))
-        # # Original POM code had final row of rowc.col.coef equal to negative
-        # # sum of other rows, but this code follows original OSM code,
-        # # has FIRST row of rowc.col.coef equal to negative sum of other rows
-        # rowc.col.coef <- rbind(-colSums(rowc.col.coef),rowc.col.coef)
+            rowc.col.coef <- sub.invect[1:((RG-1)*(p-1))]
+            rowc.col.coef <- matrix(rowc.col.coef,nrow=RG-1,ncol=p-1,byrow=T)
+            rowc.col.coef <- cbind(rowc.col.coef,-rowSums(rowc.col.coef))
+            # Using constraint formulation from original POM code, with final row of
+            # rowc.col.coef equal to negative sum of other rows. This is unlike the
+            # v0.1 clustord code and the original OSM code, had FIRST row of
+            # rowc.col.coef equal to negative sum of other rows
+            rowc.col.coef <- rbind(rowc.col.coef,-colSums(rowc.col.coef))
 
-        parlist[['rowc.col']] <- as.matrix(rowc.col.coef)
-        nelts <- nelts + RG*p
+            parlist[['rowc.col']] <- rowc.col.coef
+            nelts <- nelts + (RG-1)*(p-1)
 
-        if (length(sub.invect) > RG*p) sub.invect <- sub.invect[(RG*p+1):length(sub.invect)]
+            if (length(sub.invect) > (RG-1)*(p-1)) {
+                sub.invect <- sub.invect[((RG-1)*(p-1)+1):length(sub.invect)]
+            } else sub.invect <- NULL
+        } else {
+            if (length(sub.invect) < RG*p-1) stop("invect not long enough for given formula.")
+
+            rowc.col.coef <- sub.invect[1:(RG*p-1)]
+            rowc.col.coef <- c(rowc.col.coef,-sum(rowc.col.coef))
+
+            rowc.col.coef <- matrix(rowc.col.coef,nrow=RG,ncol=p,byrow=T)
+
+            parlist[['rowc.col']] <- rowc.col.coef
+            nelts <- nelts + (RG*p-1)
+
+            if (length(sub.invect) > RG*p - 1) {
+                sub.invect <- sub.invect[(RG*p):length(sub.invect)]
+            } else sub.invect <- NULL
+        }
     } else parlist[['rowc.col']] <- NULL
 
     ncolc.row <- param.lengths['colc.row']
     if (ncolc.row > 0) {
-        if (length(sub.invect) < CG*n) stop("invect not long enough for given formula.")
-        colc.row.coef <- sub.invect[1:(CG*n)]
+        ## The number of independent parameters in the interaction between column
+        ## clusters and individual row effects depends on whether the main
+        ## effects for column clusters and row effects are included as well
+        if (param.lengths['colc'] > 0) {
+            colc.row.coef <- matrix(colc.row.coef,nrow=CG-1,ncol=n-1,byrow=T)
+            colc.row.coef <- cbind(colc.row.coef,-rowSums(colc.row.coef))
+            # Using constraint formulation from original POM code, with final row of
+            # colc.row.coef equal to negative sum of other rows. This is unlike the
+            # v0.1 clustord code and the original OSM code, had FIRST row of
+            # colc.row.coef equal to negative sum of other rows
+            colc.row.coef <- rbind(colc.row.coef,-colSums(colc.row.coef))
 
-        colc.row.coef <- matrix(colc.row.coef,nrow=CG,ncol=n,byrow=T)
-        # colc.row.coef <- matrix(colc.row.coef,nrow=CG-1,ncol=n-1,byrow=T)
-        # colc.row.coef <- cbind(colc.row.coef,-rowSums(colc.row.coef))
-        # Original POM code had final row of colc.row.coef equal to negative
-        # sum of other rows, but this code follows original OSM code,
-        # has FIRST row of colc.row.coef equal to negative sum of other rows
-        # colc.row.coef <- rbind(-colSums(colc.row.coef),colc.row.coef)
+            parlist[['colc.row']] <- colc.row.coef
+            nelts <- nelts + (CG-1)*(n-1)
 
-        parlist[['colc.row']] <- as.matrix(colc.row.coef)
-        nelts <- nelts + CG*n
+            if (length(sub.invect) > (CG-1)*(n-1)) {
+                sub.invect <- sub.invect[((CG-1)*(n-1)+1):length(sub.invect)]
+            } else sub.invect <- NULL
+        } else {
 
-        if (length(sub.invect) > CG*n) sub.invect <- sub.invect[(CG*n+1):length(sub.invect)]
+            if (length(sub.invect) < CG*n) stop("invect not long enough for given formula.")
+            colc.row.coef <- sub.invect[1:(CG*n-1)]
+            colc.row.coef <- c(colc.row.coef, -sum(colc.row.coef))
+
+            colc.row.coef <- matrix(colc.row.coef,nrow=CG,ncol=n,byrow=T)
+
+            parlist[['colc.row']] <- colc.row.coef
+            nelts <- nelts + CG*n-1
+
+            if (length(sub.invect) > CG*n) {
+                sub.invect <- sub.invect[(CG*n):length(sub.invect)]
+            } else sub.invect <- NULL
+        }
     } else parlist[['colc.row']] <- NULL
 
     nrowc.cov <- param.lengths['rowc.cov']
@@ -161,7 +231,9 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         parlist[['rowc.cov']] <- rowc.cov.coef
         nelts <- nelts + nrowc.cov
 
-        if (length(sub.invect) > nrowc.cov) sub.invect <- sub.invect[(nrowc.cov+1):length(sub.invect)]
+        if (length(sub.invect) > nrowc.cov) {
+            sub.invect <- sub.invect[(nrowc.cov+1):length(sub.invect)]
+        } else sub.invect <- NULL
     } else parlist[['rowc.cov']] <- NULL
     ncolc.cov <- param.lengths['colc.cov']
     if (ncolc.cov > 0) {
@@ -172,7 +244,9 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         parlist[['colc.cov']] <- colc.cov.coef
         nelts <- nelts + ncolc.cov
 
-        if (length(sub.invect) > ncolc.cov) sub.invect <- sub.invect[(ncolc.cov+1):length(sub.invect)]
+        if (length(sub.invect) > ncolc.cov) {
+            sub.invect <- sub.invect[(ncolc.cov+1):length(sub.invect)]
+        } else sub.invect <- NULL
     } else parlist[['colc.cov']] <- NULL
 
     ncov <- param.lengths['cov']
@@ -183,7 +257,9 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         parlist[['cov']] <- cov.coef
         nelts <- nelts + ncov
 
-        if (length(sub.invect) > ncov) sub.invect <- sub.invect[(ncov+1):length(sub.invect)]
+        if (length(sub.invect) > ncov) {
+            sub.invect <- sub.invect[(ncov+1):length(sub.invect)]
+        } else sub.invect <- NULL
     } else parlist[['cov']] <- NULL
 
     if (length(invect) != nelts) warning("initvect is TOO LONG, the parameters may have been specified incorrectly. Please double-check initvect.")
