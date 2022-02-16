@@ -143,7 +143,7 @@ void rcpp_unpack(const String & model,
 
         if (paramlengths["rowc"] > 0 && paramlengths["colc"] > 0) {
             std::fill( rowc_colc_coef.row(RG-1).begin(), rowc_colc_coef.row(RG-1).end(), 0 );
-            std::fill( rowc_colc_coef.col(CG-1).begin(), rowc_colc_coef.col(CG-1).end(), 0 );
+            std::fill( rowc_colc_coef.column(CG-1).begin(), rowc_colc_coef.column(CG-1).end(), 0 );
 
             for (rr=0; rr < RG-1; rr++) {
                 for (cc=0; cc < CG-1; cc++) {
@@ -163,14 +163,14 @@ void rcpp_unpack(const String & model,
             }
             nelts += (RG-1)*(CG-1);
         } else {
-            std::fill( rowc_colc_coef.row(RG-1).begin(), rowc_colc_coef.row(RG-1).end(), 0 );
-            std::fill( rowc_colc_coef.col(CG-1).begin(), rowc_colc_coef.col(CG-1).end(), 0 );
+            rowc_colc_coef(RG-1,CG-1) = 0;
 
             for (rr=0; rr < RG; rr++) {
                 for (cc=0; cc < CG; cc++) {
 
                     if (rr != RG-1 || cc != CG-1) {
-                        ind = nelts + rr*(CG-1)+cc;
+                        ind = nelts + rr*CG + cc;
+                        // Rcout << "The index of invect : " << ind << "\n";
                         rowc_colc_coef(rr,cc) = invect[ind];
                         // fill last element with negative sum of other elements
                         rowc_colc_coef(RG-1,CG-1) -= invect[ind];
@@ -179,27 +179,32 @@ void rcpp_unpack(const String & model,
             }
             nelts += (RG*CG-1);
         }
-        Rcout << "The value of nelts : " << nelts << "\n";
-        Rcout << "The value of rowc_colc_coef : " << rowc_colc_coef << "\n";
+        // Rcout << "The value of nelts : " << nelts << "\n";
+        // Rcout << "The value of rowc_colc_coef : " << rowc_colc_coef << "\n";
     }
 
     if (paramlengths["row"] > 0) {
-        for (ii=0; ii < n; ii++) {
+        row_coef[n-1] = 0;
+        for (ii=0; ii < n-1; ii++) {
             ind = nelts + ii;
             // Rcout << "The index of invect : " << ind << "\n";
             row_coef[ii] = invect[ind];
+            row_coef[n-1] -= invect[ind];
         }
-        nelts += n;
+        nelts += n-1;
         // Rcout << "The value of nelts : " << nelts << "\n";
         // Rcout << "The value of row_coef : " << row_coef << "\n";
     }
     if (paramlengths["col"] > 0) {
-        for (jj=0; jj < p; jj++) {
+        col_coef[p-1] = 0;
+        for (jj=0; jj < p-1; jj++) {
             ind = nelts + jj;
             // Rcout << "The index of invect : " << ind << "\n";
             col_coef[jj] = invect[ind];
+            col_coef[p-1] -= invect[ind];
+            // Rcout << "The value of col_coef : " << col_coef << "\n";
         }
-        nelts += p;
+        nelts += p-1;
         // Rcout << "The value of nelts : " << nelts << "\n";
         // Rcout << "The value of col_coef : " << col_coef << "\n";
     }
@@ -208,23 +213,29 @@ void rcpp_unpack(const String & model,
         // NOTE: have to make sure to fill the matrix of rowc_col coefs from the
         // parameter vector IN THE SAME WAY as the matrix is filled in the rr
         // unpack_parvec function!
-        if (paramlengths['rowc'] > 0) {
+        if (paramlengths["rowc"] > 0) {
+            std::fill( rowc_col_coef.row(RG-1).begin(), rowc_col_coef.row(RG-1).end(), 0 );
+            std::fill( rowc_col_coef.column(p-1).begin(), rowc_col_coef.column(p-1).end(), 0 );
+
             for (rr=0; rr < RG-1; rr++) {
                 for (jj=0; jj < p-1; jj++) {
                     ind = nelts + rr*(p-1) + jj;
+                    // Rcout << "The index of invect : " << ind << "\n";
 
-                    rowc_colc_coef(rr,jj) = invect[ind];
-                    rowc_colc_coef(rr,p-1) -= invect[ind]; // fill last column with negative sum of other columns
-                    rowc_colc_coef(RG-1,jj) -= invect[ind]; // fill last row with negative sum of other rows
-                    rowc_colc_coef(RG-1,p-1) += invect[ind]; // fill last element with sum of all independent elements
+                    rowc_col_coef(rr,jj) = invect[ind];
+                    rowc_col_coef(rr,p-1) -= invect[ind]; // fill last column with negative sum of other columns
+                    rowc_col_coef(RG-1,jj) -= invect[ind]; // fill last row with negative sum of other rows
+                    rowc_col_coef(RG-1,p-1) += invect[ind]; // fill last element with sum of all independent elements
                 }
             }
             nelts += (RG-1)*(p-1);
         } else {
+            rowc_col_coef(RG-1,p-1) = 0;
             for (rr=0; rr < RG; rr++) {
                 for (jj=0; jj < p; jj++) {
                     if (rr != RG-1 || jj != p-1) {
                         ind = nelts + rr*p + jj;
+                        // Rcout << "The index of invect : " << ind << "\n";
                         rowc_col_coef(rr,jj) = invect[ind];
                         rowc_col_coef(RG-1,p-1) -= invect[ind];
                     }
@@ -232,39 +243,44 @@ void rcpp_unpack(const String & model,
             }
             nelts += RG*p-1;
         }
-        Rcout << "The value of nelts : " << nelts << "\n";
-        Rcout << "The value of rowc_col_coef : " << rowc_col_coef << "\n";
+        // Rcout << "The value of nelts : " << nelts << "\n";
+        // Rcout << "The value of rowc_col_coef : " << rowc_col_coef << "\n";
     }
     if (paramlengths["colc_row"] > 0) {
         // NOTE: have to make sure to fill the matrix of colc_row coefs from the
         // parameter vector IN THE SAME WAY as the matrix is filled in the rr
         // unpack_parvec function!
-        if (paramlengths['colc'] > 0) {
+        colc_row_coef(CG-1,n-1) = 0;
+        if (paramlengths["colc"] > 0) {
+            std::fill( rowc_colc_coef.row(CG-1).begin(), rowc_colc_coef.row(CG-1).end(), 0 );
+            std::fill( rowc_colc_coef.column(n-1).begin(), rowc_colc_coef.column(n-1).end(), 0 );
+
             for (cc=0; cc < CG-1; cc++) {
                 for (ii=0; ii < n-1; ii++) {
                     ind = nelts + cc*(n-1) + ii;
 
-                    rowc_colc_coef(cc,ii) = invect[ind];
-                    rowc_colc_coef(cc,n-1) -= invect[ind]; // fill last column with negative sum of other columns
-                    rowc_colc_coef(CG-1,ii) -= invect[ind]; // fill last row with negative sum of other rows
-                    rowc_colc_coef(CG-1,n-1) += invect[ind]; // fill last element with sum of all independent elements
+                    colc_row_coef(cc,ii) = invect[ind];
+                    colc_row_coef(cc,n-1) -= invect[ind]; // fill last column with negative sum of other columns
+                    colc_row_coef(CG-1,ii) -= invect[ind]; // fill last row with negative sum of other rows
+                    colc_row_coef(CG-1,n-1) += invect[ind]; // fill last element with sum of all independent elements
                 }
             }
             nelts += (CG-1)*(n-1);
         } else {
+            colc_row_coef(CG-1,n-1) = 0;
             for (cc=0; cc < CG; cc++) {
                 for (ii=0; ii < n; ii++) {
                     if (cc != CG-1 || ii != n-1) {
                         ind = nelts + cc*n + ii;
-                        rowc_col_coef(cc,ii) = invect[ind];
-                        rowc_col_coef(CG-1,n-1) -= invect[ind];
+                        colc_row_coef(cc,ii) = invect[ind];
+                        colc_row_coef(CG-1,n-1) -= invect[ind];
                     }
                 }
             }
             nelts += CG*n-1;
         }
-        Rcout << "The value of nelts : " << nelts << "\n";
-        Rcout << "The value of colc_row_coef : " << colc_row_coef << "\n";
+        // Rcout << "The value of nelts : " << nelts << "\n";
+        // Rcout << "The value of colc_row_coef : " << colc_row_coef << "\n";
     }
 
     if (paramlengths["rowc_cov"] > 0 && RG > 0) {
@@ -274,10 +290,10 @@ void rcpp_unpack(const String & model,
         int nrowccov = paramlengths["rowc_cov"]/RG;
         // Rcout << "The value of nrowccov : " << nrowccov << "\n";
         for (rr=0; rr < RG; rr++) {
-            for (l=0; l < nrowccov; l++) {
-                ind = nelts + rr*nrowccov + l;
+            for (ll=0; ll < nrowccov; ll++) {
+                ind = nelts + rr*nrowccov + ll;
                 // Rcout << "The index of invect : " << ind << "\n";
-                rowc_cov_coef(rr,l) = invect[ind];
+                rowc_cov_coef(rr,ll) = invect[ind];
             }
         }
         nelts += RG*nrowccov;
@@ -290,10 +306,10 @@ void rcpp_unpack(const String & model,
         // unpack_parvec function!
         int ncolccov = paramlengths["colc_cov"]/CG;
         for (cc=0; cc < CG; cc++) {
-            for (l=0; l < ncolccov; l++) {
-                ind = nelts + cc*ncolccov + l;
+            for (ll=0; ll < ncolccov; ll++) {
+                ind = nelts + cc*ncolccov + ll;
                 // Rcout << "The index of invect : " << ind << "\n";
-                colc_cov_coef(cc,l) = invect[ind];
+                colc_cov_coef(cc,ll) = invect[ind];
             }
         }
         nelts += CG*ncolccov;
@@ -303,10 +319,10 @@ void rcpp_unpack(const String & model,
 
     int ncov = paramlengths["cov"];
     if (ncov > 0) {
-        for (l=0; l < ncov; l++) {
-            ind = nelts + l;
+        for (ll=0; ll < ncov; ll++) {
+            ind = nelts + ll;
             // Rcout << "The index of invect : " << ind << "\n";
-            cov_coef[l] = invect[ind];
+            cov_coef[ll] = invect[ind];
         }
         nelts += ncov;
         // Rcout << "The value of nelts : " << nelts << "\n";

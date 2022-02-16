@@ -1,5 +1,11 @@
 test_that("calc.ll produces correct results.", {
 
+    Rcpp::sourceCpp("src/rcpp_likelihoods.cpp")
+    Rcpp::sourceCpp("src/rcpp_likelihoods.cpp")
+    library(testthat)
+
+    names.param.lengths <- c("mu","phi","rowc","col","rowc_col","rowc_cov","cov","colc","row","colc_row","colc_cov","rowc_colc")
+
     n <- 6
     p <- 3
     q <- 3
@@ -8,11 +14,14 @@ test_that("calc.ll produces correct results.", {
     ppr.m <- cbind(z, 1-z)
     pi.v <- colMeans(ppr.m)
 
+    x <- c(0.7,0.9,0.2)
+    ppc.m <- cbind(x,1-x)
+    kappa.v <- colMeans(ppc.m)
+
     mu <- c(-0.5,1)
     phi <- 0.2
     alpha_r <- -1
-    beta_j <- c(1,-2,1)
-    gamma_rj <- c(0.5,1)
+    beta_j <- c(1,-2)
 
     nrowcov <- 1
     ncov <- 1
@@ -24,76 +33,156 @@ test_that("calc.ll produces correct results.", {
     ydf <- as.matrix(data.frame(Y=c(c(1,1,1,2,2,2),c(1,1,2,2,3,3),c(1,2,3,1,2,3)),
                                 ROW=rep(1:6,times=3), COL=rep(1:3,each=6)))
 
-    paramlengths <- c(q,q,RG,0,0,0,0,0,0,0,0,0)
-    names(paramlengths) <- c("mu","phi","rowc","col","rowc_col","rowc_cov","cov","colc","row","colc_row","colc_cov","rowc_colc")
-    expect_equal(rcpp_Rclusterll(c(mu,phi,alpha_r), "OSM", ydf,
-                                 rowcmm, colcmm, covmm,
-                                 ppr.m, pi.v, paramlengths = paramlengths,
-                                 RG, p, n, q, epsilon=1e-6,
-                                 constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
-                 -30.77587457, ignore_attr=TRUE, tolerance=1E-4)
-    paramlengths["col"] <- 3
-    expect_equal(rcpp_Rclusterll(c(mu,phi,alpha_r,beta_j), "OSM", ydf,
-                                 rowcmm, colcmm, covmm,
-                                 ppr.m, pi.v, paramlengths = paramlengths,
-                                 RG, p, n, q, epsilon=1e-6,
-                                 constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
-                 -35.08129788, ignore_attr=TRUE, tolerance=1E-4)
-    paramlengths["rowc_col"] <- 3
-    expect_equal(rcpp_Rclusterll(c(mu,phi,alpha_r,beta_j,gamma_rj), "OSM", ydf,
-                                 rowcmm, colcmm, covmm,
-                                 ppr.m, pi.v, paramlengths = paramlengths,
-                                 RG, p, n, q, epsilon=1e-6,
-                                 constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
-                 -37.2425604, ignore_attr=TRUE, tolerance=1E-4)
+    # # OSM ====
+    # # Row clusters ----
+    # paramlengths <- c(q,q,RG,0,0,0,0,0,0,0,0,0)
+    # names(paramlengths) <- names.param.lengths
+    # expect_equal(rcpp_Rclusterll(c(mu,phi,alpha_r), "OSM", ydf,
+    #                              rowcmm, colcmm, covmm,
+    #                              ppr.m, pi.v, paramlengths = paramlengths,
+    #                              RG, p, n, q, epsilon=1e-6,
+    #                              constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
+    #              -30.77587457, ignore_attr=TRUE, tolerance=1E-4)
+    #
+    # paramlengths <- c(q,q,RG,p,0,0,0,0,0,0,0,0)
+    # names(paramlengths) <- names.param.lengths
+    # expect_equal(rcpp_Rclusterll(c(mu,phi,alpha_r,beta_j), "OSM", ydf,
+    #                              rowcmm, colcmm, covmm,
+    #                              ppr.m, pi.v, paramlengths = paramlengths,
+    #                              RG, p, n, q, epsilon=1e-6,
+    #                              constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
+    #              -35.08129788, ignore_attr=TRUE, tolerance=1E-4)
+    #
+    # # Row clusters and columns with interactions
+    # paramlengths <- c(q,q,RG,p,RG*p,0,0,0,0,0,0,0)
+    # names(paramlengths) <- names.param.lengths
+    # # First, the model with interaction terms and main effects
+    # gamma_rj <- c(-0.5,-1)
+    # expect_equal(rcpp_Rclusterll(c(mu,phi,alpha_r,beta_j,gamma_rj), "OSM", ydf,
+    #                              rowcmm, colcmm, covmm,
+    #                              ppr.m, pi.v, paramlengths = paramlengths,
+    #                              RG, p, n, q, epsilon=1e-6,
+    #                              constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
+    #              -37.2425604, ignore_attr=TRUE, tolerance=1E-4)
+    # # Second, the model with only interaction terms and not main effects
+    # paramlengths <- c(q,q,0,0,RG*p,0,0,0,0,0,0,0)
+    # names(paramlengths) <- names.param.lengths
+    # gamma_rj <- c(-0.9,-0.1,0.4,0.9,1.2)
+    # expect_equal(rcpp_Rclusterll(c(mu,phi,gamma_rj), "OSM", ydf,
+    #                              rowcmm, colcmm, covmm,
+    #                              ppr.m, pi.v, paramlengths = paramlengths,
+    #                              RG, p, n, q, epsilon=1e-6,
+    #                              constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
+    #              -28.54661792, ignore_attr=TRUE, tolerance=1E-4)
+    #
+    # # Biclustering ----
+    # beta_c <- c(0.5)
+    # CG <- 2
+    # x <- c(0.7,0.9,0.2)
+    # ppc.m <- cbind(x, 1-x)
+    # kappa.v <- colMeans(ppc.m)
+    #
+    # paramlengths <- c(q,q,RG,0,0,0,0,CG,0,0,0,0)
+    # names(paramlengths) <- names.param.lengths
+    # expect_equal(rcpp_Biclusterll(c(mu,phi,alpha_r,beta_c), "OSM", ydf,
+    #                               rowcmm, colcmm, covmm,
+    #                               ppr.m, ppc.m, pi.v, kappa.v, paramlengths = paramlengths,
+    #                               RG, CG, p, n, q, epsilon=1e-6,
+    #                               constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE, llc=NA),
+    #              -31.72322174, ignore_attr=TRUE, tolerance=1E-4)
+    #
+    # # First, the model with interaction terms and main effects
+    # gamma_rc <- c(-0.7)
+    # paramlengths <- c(q,q,RG,0,0,0,0,CG,0,0,0,RG*CG)
+    # names(paramlengths) <- names.param.lengths
+    # expect_equal(rcpp_Biclusterll(c(mu,phi,alpha_r,beta_c,gamma_rc), "OSM", ydf,
+    #                               rowcmm, colcmm, covmm,
+    #                               ppr.m, ppc.m, pi.v, kappa.v, paramlengths = paramlengths,
+    #                               RG, CG, p, n, q, epsilon=1e-6,
+    #                               constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE, llc=NA),
+    #              -33.35139077, ignore_attr=TRUE, tolerance=1E-4)
+    # # Second, the model with only interaction terms and not main effects
+    # gamma_rc <- c(0.5,0.9,1.2)
+    # paramlengths <- c(q,q,0,0,0,0,0,0,0,0,0,RG*CG)
+    # names(paramlengths) <- names.param.lengths
+    # expect_equal(rcpp_Biclusterll(c(mu,phi,gamma_rc), "OSM", ydf,
+    #                               rowcmm, colcmm, covmm,
+    #                               ppr.m, ppc.m, pi.v, kappa.v, paramlengths = paramlengths,
+    #                               RG, CG, p, n, q, epsilon=1e-6,
+    #                               constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE, llc=NA),
+    #              -29.3065552, ignore_attr=TRUE, tolerance=1E-4)
 
-    beta_c <- c(0.5)
-    gamma_rc <- c(0.5)
+    # Column clusters ----
+    beta_c <- alpha_r
+    alpha_i <- c(-3,-2,-1,0,2)
     CG <- 2
-    x <- c(0.7,0.9,0.2)
-    ppc.m <- cbind(x, 1-x)
-    kappa.v <- colMeans(ppc.m)
+    transp.ydf <- as.matrix(data.frame(Y=ydf[,'Y'], ROW=ydf[,'COL'], COL=ydf[,'ROW']))
+    paramlengths <- c(q,q,CG,0,0,0,0,0,0,0,0,0)
+    names(paramlengths) <- names.param.lengths
+    expect_equal(rcpp_Rclusterll(c(mu,phi,beta_c), "OSM", transp.ydf,
+                                 rowcmm, colcmm, covmm,
+                                 ppc.m, kappa.v, paramlengths = paramlengths,
+                                 CG, n, p, q, epsilon=1e-6,
+                                 constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
+                 -26.17120036, ignore_attr=TRUE, tolerance=1E-4)
 
-    # Note: For RC model, output is a matrix so need to expect that rather than a single value
-    paramlengths["colc"] <- 2
-    paramlengths["col"] <- 0
-    paramlengths["rowc_col"] <- 0
-    expect_equal(rcpp_Biclusterll(c(mu,phi,alpha_r,beta_c), "OSM", ydf,
-                                  rowcmm, colcmm, covmm,
-                                  ppr.m, ppc.m, pi.v, kappa.v, paramlengths = paramlengths,
-                                  RG, CG, p, n, q, epsilon=1e-6,
-                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE, llc=NA),
-                 -31.72322174, ignore_attr=TRUE, tolerance=1E-4)
-
-    paramlengths["rowc_colc"] = 4
-    expect_equal(rcpp_Biclusterll(c(mu,phi,alpha_r,beta_c,gamma_rc), "OSM", ydf,
-                                  rowcmm, colcmm, covmm,
-                                  ppr.m, ppc.m, pi.v, kappa.v, paramlengths = paramlengths,
-                                  RG, CG, p, n, q, epsilon=1e-6,
-                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE, llc=NA),
-                 -32.7504653, ignore_attr=TRUE, tolerance=1E-4)
-
+    paramlengths <- c(q,q,CG,n,0,0,0,0,0,0,0,0)
+    names(paramlengths) <- names.param.lengths
+    expect_equal(rcpp_Rclusterll(c(mu,phi,beta_c,alpha_i), "OSM", transp.ydf,
+                                 rowcmm, colcmm, covmm,
+                                 ppc.m, kappa.v, paramlengths = paramlengths,
+                                 CG, n, p, q, epsilon=1e-6,
+                                 constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
+                 -21.493366, ignore_attr=TRUE, tolerance=1E-4)
 
     ## POM ====
+    n <- 6
+    p <- 3
+    q <- 3
+    RG <- 2
+    z <- c(0.1,0.2,0.3,0.4,0.8,0.9)
+    ppr.m <- cbind(z, 1-z)
+    pi.v <- colMeans(ppr.m)
+
+    mu <- c(-0.5,1)
+    phi <- 0.2
+    alpha_r <- -1
+    beta_j <- c(1,-2)
+
+    nrowcov <- 1
+    ncov <- 1
+
+    rowcmm <- matrix(1:(n*p*nrowcov),nrow=n*p)
+    colcmm <- matrix(1:(n*p),nrow=n*p)
+    covmm <- matrix(1:(n*p*ncov),nrow=n*p)
+
+    ydf <- as.matrix(data.frame(Y=c(c(1,1,1,2,2,2),c(1,1,2,2,3,3),c(1,2,3,1,2,3)),
+                                ROW=rep(1:6,times=3), COL=rep(1:3,each=6)))
+
     # For mu in POM, have to supply numbers that will be constructed into mu = (1,2,3)
     mu_reparam <- c(-0.5,log(1.5))
 
+    # Row clusters ----
     paramlengths <- c(q,0,RG,0,0,0,0,0,0,0,0,0)
-    names(paramlengths) <- c("mu","phi","rowc","col","rowc_col","rowc_cov","cov","colc","row","colc_row","colc_cov","rowc_colc")
+    names(paramlengths) <- names.param.lengths
     expect_equal(rcpp_Rclusterll(c(mu_reparam,alpha_r), "POM", ydf,
                                  rowcmm, colcmm, covmm,
                                  ppr.m, pi.v, paramlengths = paramlengths,
                                  RG, p, n, q, epsilon=1e-6,
                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
                  -25.93596493, ignore_attr=TRUE, tolerance=1E-4)
-    paramlengths["col"] <- 3
+    paramlengths <- c(q,0,RG,p,0,0,0,0,0,0,0,0,0)
+    names(paramlengths) <- names.param.lengths
     expect_equal(rcpp_Rclusterll(c(mu_reparam,alpha_r,beta_j), "POM", ydf,
                                  rowcmm, colcmm, covmm,
                                  ppr.m, pi.v, paramlengths = paramlengths,
                                  RG, p, n, q, epsilon=1e-6,
                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
                  -31.35665815, ignore_attr=TRUE, tolerance=1E-4)
-    paramlengths["rowc_col"] <- 3
+    # The interaction model including main effects
+    paramlengths <- c(q,0,RG,p,RG*p,0,0,0,0,0,0,0)
+    names(paramlengths) <- names.param.lengths
+    gamma_rj <- c(-0.5,-1)
     expect_equal(rcpp_Rclusterll(c(mu_reparam,alpha_r,beta_j,gamma_rj), "POM", ydf,
                                  rowcmm, colcmm, covmm,
                                  ppr.m, pi.v, paramlengths = paramlengths,
@@ -101,8 +190,32 @@ test_that("calc.ll produces correct results.", {
                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
                  -33.29262377, ignore_attr=TRUE, tolerance=1E-4)
 
+    # Biclustering ----
+    beta_c <- c(0.5)
+    CG <- 2
+    x <- c(0.7,0.9,0.2)
+    ppc.m <- cbind(x, 1-x)
+    kappa.v <- colMeans(ppc.m)
 
+    paramlengths <- c(q,0,RG,0,0,0,0,CG,0,0,0,0)
+    names(paramlengths) <- names.param.lengths
+    expect_equal(rcpp_Biclusterll(c(mu_reparam,alpha_r,beta_c), "POM", ydf,
+                                  rowcmm, colcmm, covmm,
+                                  ppr.m, ppc.m, pi.v, kappa.v, paramlengths = paramlengths,
+                                  RG, CG, p, n, q, epsilon=1e-6,
+                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE, llc=NA),
+                 -26.79095153, ignore_attr=TRUE, tolerance=1E-4)
 
+    # The model with interaction terms and main effects
+    gamma_rc <- c(-0.7)
+    paramlengths <- c(q,0,RG,0,0,0,0,CG,0,0,0,RG*CG)
+    names(paramlengths) <- names.param.lengths
+    expect_equal(rcpp_Biclusterll(c(mu_reparam,alpha_r,beta_c,gamma_rc), "POM", ydf,
+                                  rowcmm, colcmm, covmm,
+                                  ppr.m, ppc.m, pi.v, kappa.v, paramlengths = paramlengths,
+                                  RG, CG, p, n, q, epsilon=1e-6,
+                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE, llc=NA),
+                 -29.62326529, ignore_attr=TRUE, tolerance=1E-4)
 
     # Binary ====
     n <- 4
@@ -119,8 +232,8 @@ test_that("calc.ll produces correct results.", {
 
     mu <- c(-0.5)
     alpha_r <- -1
-    beta_j <- c(2,-2)
-    gamma_rj <- c(-1,1)
+    beta_j <- 2
+    gamma_rj <- 1
 
     nrowcov <- 1
     ncov <- 1
@@ -132,9 +245,9 @@ test_that("calc.ll produces correct results.", {
     ydf <- as.matrix(data.frame(Y=c(c(2,2,1,1),c(2,1,2,1)),
                                 ROW=rep(1:4,times=2), COL=rep(1:2,each=4)))
 
-    paramlengths <- c(1,0,RG,0,0,0,0,0,0,0,0,0)
-    names(paramlengths) <- c("mu","phi","rowc","col","rowc_col","rowc_cov","cov","colc","row","colc_row","colc_cov","rowc_colc")
-
+    # Row clusters ----
+    paramlengths <- c(q,0,RG,0,0,0,0,0,0,0,0,0)
+    names(paramlengths) <- names.param.lengths
     expect_equal(rcpp_Rclusterll(c(mu,alpha_r), "Binary", ydf,
                                  rowcmm, colcmm, covmm,
                                  ppr.m, pi.v, paramlengths = paramlengths,
@@ -142,21 +255,22 @@ test_that("calc.ll produces correct results.", {
                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
                  -5.21102653113038, ignore_attr=TRUE, tolerance=1E-4)
 
-    paramlengths["col"] <- 2
+    paramlengths <- c(q,0,RG,p,0,0,0,0,0,0,0,0)
+    names(paramlengths) <- names.param.lengths
     expect_equal(rcpp_Rclusterll(c(mu,alpha_r,beta_j), "Binary", ydf,
                                  rowcmm, colcmm, covmm,
                                  ppr.m, pi.v, paramlengths = paramlengths,
                                  RG, p, n, q, epsilon=1e-6,
                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
                  -8.123555951, ignore_attr=TRUE, tolerance=1E-4)
-    paramlengths["rowc_col"] <- 2
+    paramlengths <- c(q,0,RG,p,RG*p,0,0,0,0,0,0,0)
+    names(paramlengths) <- names.param.lengths
     expect_equal(rcpp_Rclusterll(c(mu,alpha_r,beta_j,gamma_rj), "Binary", ydf,
                                  rowcmm, colcmm, covmm,
                                  ppr.m, pi.v, paramlengths = paramlengths,
                                  RG, p, n, q, epsilon=1e-6,
                                  constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE),
                  -9.06850841785471, ignore_attr=TRUE, tolerance=1E-4)
-
 
     ## Binary with covariates ====
     n <- 4
@@ -174,8 +288,7 @@ test_that("calc.ll produces correct results.", {
 
     mu <- c(-0.5)
     alpha_r <- -1
-    beta_j <- c(2,-2)
-    gamma_rj <- c(-1,1)
+    beta_j <- 2
 
     ydf <- as.matrix(data.frame(Y=c(c(2,2,1,1),c(2,1,2,1)),
                                 ROW=rep(1:4,times=2), COL=rep(1:2,each=4)))
@@ -210,8 +323,8 @@ test_that("calc.ll produces correct results.", {
     rowc_cov_coef <- c(1.5,0.3,-1.5,-0.3)
     cov_coef <- 0.7
 
-    paramlengths <- c(1,0,RG,0,0,4,1,0,0,0,0,0)
-    names(paramlengths) <- c("mu","phi","rowc","col","rowc_col","rowc_cov","cov","colc","row","colc_row","colc_cov","rowc_colc")
+    paramlengths <- c(q,0,RG,0,0,4,1,0,0,0,0,0)
+    names(paramlengths) <- names.param.lengths
 
     expect_equal(rcpp_Rclusterll(c(mu,alpha_r,rowc_cov_coef,cov_coef), "Binary", ydf,
                                  rowcmm, colcmm, covmm,
@@ -236,8 +349,8 @@ test_that("calc.ll produces correct results.", {
     rowc_cov_coef <- c(1.5,0.3,-1.5,-0.3)
     cov_coef <- 0.7
 
-    paramlengths <- c(1,0,RG,0,0,4,1,0,0,0,0,0)
-    names(paramlengths) <- c("mu","phi","rowc","col","rowc_col","rowc_cov","cov","colc","row","colc_row","colc_cov","rowc_colc")
+    paramlengths <- c(q,0,RG,0,0,4,1,0,0,0,0,0)
+    names(paramlengths) <- names.param.lengths
 
     expect_equal(rcpp_Rclusterll(c(mu,alpha_r,rowc_cov_coef,cov_coef), "Binary", ydf,
                                  rowcmm, colcmm, covmm,
@@ -247,6 +360,7 @@ test_that("calc.ll produces correct results.", {
                  -8.207088332, ignore_attr=TRUE, tolerance=1E-4)
 
     # Covariate test model 3: mu + (alpha_r + delta_c1*log(w1_i) + delta_c2*v1_j)
+    # Biclustering ----
     colc_fo <- Y ~ log(w1) + v1
     colc_tf <- terms(colc_fo)
     attr(colc_tf, "intercept") <- 0
@@ -257,16 +371,14 @@ test_that("calc.ll produces correct results.", {
 
     colc_cov_coef <- c(1.5,0.3,-1.5,-0.3)
 
-    paramlengths <- c(1,0,RG,0,0,0,0,0,0,0,4,0)
-    names(paramlengths) <- c("mu","phi","rowc","col","rowc_col","rowc_cov","cov","colc","row","colc_row","colc_cov","rowc_colc")
-
+    paramlengths <- c(q,0,RG,0,0,0,0,0,0,0,4,0)
+    names(paramlengths) <- names.param.lengths
     expect_equal(rcpp_Biclusterll(c(mu,alpha_r,colc_cov_coef), "Binary", ydf,
                                   rowcmm, colcmm, covmm,
                                   ppr.m, ppc.m, pi.v, kappa.v, paramlengths = paramlengths,
                                   RG, CG, p, n, q, epsilon=1e-6,
                                   constraint_sum_zero=TRUE, partial=TRUE, incomplete=FALSE, llc=NA),
                  -7.781711754, ignore_attr=TRUE, tolerance=1E-4)
-
 
     ## Binary INCOMPLETE log-likelihood =====
     expect_equal(rcpp_Biclusterll(c(mu,alpha_r,colc_cov_coef), "Binary", ydf,
@@ -277,3 +389,4 @@ test_that("calc.ll produces correct results.", {
                  -0.164418407, ignore_attr=TRUE, tolerance=1E-4)
 
 })
+
