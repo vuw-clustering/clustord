@@ -591,7 +591,11 @@ double rcpp_Rclusterll(const NumericVector & invect,
         }
 
         if (!partial) {
-            llc += sum(ppr_m*log(pi_v));
+            for (ii=0; ii < n; ii++) {
+                for (rr=0; rr < RG; rr++) {
+                    llc += ppr_m(ii,rr)*log(pi_v[rr]);
+                }
+            }
         }
 
         logl = llc;
@@ -797,8 +801,16 @@ double rcpp_Biclusterll(const NumericVector & invect,
         }
 
         if (!partial) {
-            llc += sum(ppr_m*log(pi_v));
-            llc += sum(ppc_m*log(kappa_v));
+            for (ii=0; ii < n; ii++) {
+                for (rr=0; rr < RG; rr++) {
+                    llc += ppr_m(ii,rr)*log(pi_v[rr]);
+                }
+            }
+            for (jj=0; jj < n; jj++) {
+                for (cc=0; cc < CG; cc++) {
+                    llc += ppc_m(jj,cc)*log(kappa_v[cc]);
+                }
+            }
         }
 
         logl = llc;
