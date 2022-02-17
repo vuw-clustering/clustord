@@ -640,7 +640,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 
     ## Important: do NOT change the order of the three columns in this call,
     ## because the C++ code relies on having this order for Y, ROW and COL
-    ydf <- as.matrix(long.df[,c("Y","ROW","COL")])
+    ydf <- cbind(long.df$Y, as.numeric(long.df$ROW), as.numeric(long.df$COL))
 
     optim.control$fnscale <- -1
 
@@ -783,7 +783,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 
     ## Important: do NOT change the order of the three columns in this call,
     ## because the C++ code relies on having this order for Y, ROW and COL
-    ydf <- as.matrix(long.df[,c("Y","ROW","COL")])
+    ydf <- cbind(long.df$Y, as.numeric(long.df$ROW), as.numeric(long.df$COL))
 
     optim.control$fnscale <- -1
 
