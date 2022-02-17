@@ -122,26 +122,26 @@ unpack_parvec <- function(invect, model, param_lengths, n, p, q, RG, CG = NULL,
 
     nrow <- param_lengths['row']
     if (nrow > 0) {
-        if (length(sub_invect) < n) stop("invect not long enough for given formula.")
-        row_coef <- sub_invect[1:n]
+        if (length(sub_invect) < n-1) stop("invect not long enough for given formula.")
+        row_coef <- sub_invect[1:(n-1)]
 
         parlist[['row']] <- row_coef
         nelts <- nelts + n
 
-        if (length(sub_invect) > n) {
-            sub_invect <- sub_invect[(n+1):length(sub_invect)]
+        if (length(sub_invect) > n-1) {
+            sub_invect <- sub_invect[n:length(sub_invect)]
         } else sub_invect <- NULL
     } else parlist[['row']] <- NULL
     ncol <- param_lengths['col']
     if (ncol > 0) {
-        if (length(sub_invect) < p) stop("invect not long enough for given formula.")
-        col_coef <- sub_invect[1:p]
+        if (length(sub_invect) < p-1) stop("invect not long enough for given formula.")
+        col_coef <- sub_invect[1:(p-1)]
 
         parlist[['col']] <- col_coef
-        nelts <- nelts + p
+        nelts <- nelts + p-1
 
-        if (length(sub_invect) > p) {
-            sub_invect <- sub_invect[(p+1):length(sub_invect)]
+        if (length(sub_invect) > p-1) {
+            sub_invect <- sub_invect[p:length(sub_invect)]
         } else sub_invect <- NULL
     } else parlist[['col']] <- NULL
 
