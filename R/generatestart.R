@@ -55,7 +55,7 @@ generate.mu.init <- function(long.df, model, use.random=FALSE) {
 }
 
 # TODO: Not sure whether needing to edit this? ====
-generate.mu.beta.init <- function(long.df, model, constraint.sum.zero=TRUE,
+generate.mu.beta.init <- function(long.df, model, constraint_sum_zero=TRUE,
                                   use.random=FALSE) {
 
     p <- max(long.df$COL)
@@ -76,7 +76,7 @@ generate.mu.beta.init <- function(long.df, model, constraint.sum.zero=TRUE,
                            ## If not using constraint that beta sum to zero,
                            ## beta1 will be 0 so need to correct other elements
                            ## of beta accordingly
-                           if (constraint.sum.zero) beta.init <- colMeans(BL.coef)[2:p]
+                           if (constraint_sum_zero) beta.init <- colMeans(BL.coef)[2:p]
                            else beta.init <- colMeans(BL.coef)[3:p]-colMeans(BL.coef)[2]
 
                            done.generating <- TRUE
@@ -106,7 +106,7 @@ generate.mu.beta.init <- function(long.df, model, constraint.sum.zero=TRUE,
                    ## If not using constraint that beta sum to zero,
                    ## beta1 will be 0 so need to correct other elements
                    ## of beta accordingly
-                   if (constraint.sum.zero) beta.init <- PO.sp.out$coef[1:(p-1)]
+                   if (constraint_sum_zero) beta.init <- PO.sp.out$coef[1:(p-1)]
                    else beta.init <- PO.sp.out$coef[2:(p-1)] - PO.sp.out$coef[1]
                },
                "Binary"={
@@ -119,7 +119,7 @@ generate.mu.beta.init <- function(long.df, model, constraint.sum.zero=TRUE,
                    ## If not using constraint that beta sum to zero,
                    ## beta1 will be 0 so need to correct other elements
                    ## of beta accordingly
-                   if (constraint.sum.zero) beta.init <- beta[1:(p-1)]
+                   if (constraint_sum_zero) beta.init <- beta[1:(p-1)]
                    else beta.init <- beta[2:p] - beta[1]
                })
     } else {
@@ -131,7 +131,7 @@ generate.mu.beta.init <- function(long.df, model, constraint.sum.zero=TRUE,
     list(mu.init=mu.init, beta.init=beta.init)
 }
 
-generate.alpha.pi.init <- function(long.df, RG, constraint.sum.zero=TRUE,
+generate.alpha.pi.init <- function(long.df, RG, constraint_sum_zero=TRUE,
                                    use.random=FALSE) {
     if (!use.random & all(table(long.df[,c("ROW","COL")]) == 1)) {
         ## convert to data matrix
@@ -142,7 +142,7 @@ generate.alpha.pi.init <- function(long.df, RG, constraint.sum.zero=TRUE,
         alpha.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
         ## By default, use alpha sum to zero constraint, so DON'T set alpha1 to zero here.
 
-        if (constraint.sum.zero) alpha.init <- alpha.kmeans[-RG]
+        if (constraint_sum_zero) alpha.init <- alpha.kmeans[-RG]
         else {
             alpha.kmeans <- alpha.kmeans-alpha.kmeans[1]
             alpha.init <- alpha.kmeans[-1]
@@ -174,7 +174,7 @@ generate.gamma.init <- function(RG, p=NULL, CG=NULL) {
 generate.initvect.rowcluster <- function(long.df, model, submodel, RG,
                                          EM.control=default.EM.control(),
                                          optim.method="L-BFGS-B", optim.control=default.optim.control(),
-                                         constraint.sum.zero=TRUE,
+                                         constraint_sum_zero=TRUE,
                                          start.from.simple.model=TRUE,
                                          use.random=FALSE) {
 
@@ -186,7 +186,7 @@ generate.initvect.rowcluster <- function(long.df, model, submodel, RG,
                                     use.random=use.random)
     } else {
         mu.beta.init <- generate.mu.beta.init(long.df=long.df, model=model,
-                                              constraint.sum.zero = constraint.sum.zero,
+                                              constraint_sum_zero = constraint_sum_zero,
                                               use.random=use.random)
         mu.init <- mu.beta.init$mu.init
         beta.init <- mu.beta.init$beta.init
@@ -202,7 +202,7 @@ generate.initvect.rowcluster <- function(long.df, model, submodel, RG,
     }
 
     alpha.pi.init <- generate.alpha.pi.init(long.df=long.df, RG=RG,
-                                            constraint.sum.zero=constraint.sum.zero,
+                                            constraint_sum_zero=constraint_sum_zero,
                                             use.random=use.random)
     alpha.init <- alpha.pi.init$alpha.init
     pi.init <- alpha.pi.init$pi.init
@@ -245,7 +245,7 @@ generate.initvect.rowcluster <- function(long.df, model, submodel, RG,
 generate.initvect.bicluster <- function(long.df, model, submodel, RG, CG,
                                         EM.control=default.EM.control(),
                                         optim.method="L-BFGS-B", optim.control=default.optim.control(),
-                                        constraint.sum.zero=TRUE,
+                                        constraint_sum_zero=TRUE,
                                         start.from.simple.model=TRUE,
                                         use.random=FALSE) {
 
@@ -263,7 +263,7 @@ generate.initvect.bicluster <- function(long.df, model, submodel, RG, CG,
     }
 
     alpha.pi.init <- generate.alpha.pi.init(long.df=long.df, RG=RG,
-                                            constraint.sum.zero=constraint.sum.zero,
+                                            constraint_sum_zero=constraint_sum_zero,
                                             use.random=use.random)
     alpha.init <- alpha.pi.init$alpha.init
     pi.init <- alpha.pi.init$pi.init
@@ -272,7 +272,7 @@ generate.initvect.bicluster <- function(long.df, model, submodel, RG, CG,
     long.df.transp$ROW <- long.df$COL
     long.df.transp$COL <- long.df$ROW
     beta.kappa.init <- generate.alpha.pi.init(long.df=long.df.transp, RG=CG,
-                                              constraint.sum.zero=constraint.sum.zero,
+                                              constraint_sum_zero=constraint_sum_zero,
                                               use.random=use.random)
 
     beta.init <- beta.kappa.init$alpha.init
@@ -292,7 +292,7 @@ generate.initvect.bicluster <- function(long.df, model, submodel, RG, CG,
             pi.init <- rs.out$pi.out
         }
 
-        if (constraint.sum.zero) alpha.init <- rs.out$parlist.out$alpha[1:RG-1]
+        if (constraint_sum_zero) alpha.init <- rs.out$parlist.out$alpha[1:RG-1]
         else alpha.init <- rs.out$parlist.out$alpha[2:RG]
 
         cat("Fitting SC model as RS model applied to y with ROW
@@ -309,7 +309,7 @@ generate.initvect.bicluster <- function(long.df, model, submodel, RG, CG,
             kappa.init <- sc.out$pi.out
         }
 
-        if (constraint.sum.zero) beta.init <- sc.out$parlist.out$alpha[1:CG-1]
+        if (constraint_sum_zero) beta.init <- sc.out$parlist.out$alpha[1:CG-1]
         else beta.init <- sc.out$parlist.out$alpha[2:CG]
     }
 
@@ -344,7 +344,7 @@ generate.initvect.bicluster <- function(long.df, model, submodel, RG, CG,
 generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NULL, pi.init=NULL,
                                       EM.control=default.EM.control(),
                                       optim.method="L-BFGS-B", optim.control=default.optim.control(),
-                                      constraint.sum.zero=TRUE, start.from.simple.model=TRUE,
+                                      constraint_sum_zero=TRUE, start.from.simple.model=TRUE,
                                       nstarts=5) {
 
     n <- max(long.df$ROW)
@@ -360,7 +360,7 @@ generate.start.rowcluster <- function(long.df, model, submodel, RG, initvect=NUL
             cat(paste0("Randomly generated start #",s,"\n"))
             # TODO: EDIT THIS to use new format clustering call ====
             initvect.pi.init <- generate.initvect.rowcluster(long.df, model=model, submodel=submodel, RG=RG,
-                                                             constraint.sum.zero = constraint.sum.zero,
+                                                             constraint_sum_zero = constraint_sum_zero,
                                                              start.from.simple.model = start.from.simple.model,
                                                              use.random=(s>1))
 
@@ -400,7 +400,7 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
                                      initvect=NULL, pi.init=NULL, kappa.init=NULL,
                                      EM.control=default.EM.control(),
                                      optim.method="L-BFGS-B", optim.control=default.optim.control(),
-                                     constraint.sum.zero=TRUE, start.from.simple.model=TRUE,
+                                     constraint_sum_zero=TRUE, start.from.simple.model=TRUE,
                                      nstarts=5) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
@@ -415,7 +415,7 @@ generate.start.bicluster <- function(long.df, model, submodel, RG, CG,
             cat(paste0("Randomly generated start #",s,"\n"))
             # TODO: EDIT THIS to use new format clustering call ====
             initvect.pi.kappa.init <- generate.initvect.bicluster(long.df=long.df, model=model, submodel=submodel,
-                                                                  RG=RG, CG=CG, constraint.sum.zero=constraint.sum.zero,
+                                                                  RG=RG, CG=CG, constraint_sum_zero=constraint_sum_zero,
                                                                   start.from.simple.model=start.from.simple.model,
                                                                   use.random=(s>1))
 

@@ -5,7 +5,7 @@ validate.inputs <- function(formula, model,
                             pi.init=NULL, kappa.init=NULL,
                             EM.control=default.EM.control(),
                             optim.method="L-BFGS-B",
-                            constraint.sum.zero=TRUE,
+                            constraint_sum_zero=TRUE,
                             start.from.simple.model=TRUE,
                             nstarts=5) {
 
@@ -85,8 +85,8 @@ validate.inputs <- function(formula, model,
         if (length(kappa.init) != nclus.column || sum(kappa.init) != 1) stop("kappa.init must be the same length as the number of column clusters, and must add up to 1")
     }
 
-    if (!is.logical(constraint.sum.zero) || !is.vector(constraint.sum.zero) ||
-        length(constraint.sum.zero) != 1 || is.na(constraint.sum.zero)) stop("constraint.sum.zero must be TRUE or FALSE.")
+    if (!is.logical(constraint_sum_zero) || !is.vector(constraint_sum_zero) ||
+        length(constraint_sum_zero) != 1 || is.na(constraint_sum_zero)) stop("constraint_sum_zero must be TRUE or FALSE.")
     if (!is.logical(start.from.simple.model) || !is.vector(start.from.simple.model) ||
         length(start.from.simple.model) != 1 || is.na(start.from.simple.model)) stop("start.from.simple.model must be TRUE or FALSE.")
 
@@ -118,8 +118,8 @@ check.factors <- function(long.df) {
     }
 
     # Check that all covariates are factors
-    cov.idxs <- which(!(names(long.df) %in% c("Y","ROW","COL")))
-    for (j in cov.idxs) {
+    cov_idxs <- which(!(names(long.df) %in% c("Y","ROW","COL")))
+    for (j in cov_idxs) {
         if (is.character(long.df[,j])) long.df[,j] <- factor(long.df[,j])
     }
 
@@ -147,19 +147,26 @@ check.formula <- function(formula, long.df, RG, CG) {
     # A.2  Check that either RowClust or ColClust is in the formula, and check
     #      the presence of either or both against whether RG or CG is null
     #      OUTPUT: errors
-    rowc.grep <- length(grep("ROWCLUST",fo.vars))
-    colc.grep <- length(grep("COLCLUST",fo.vars))
-    if (rowc.grep == 0 && colc.grep == 0) {
+    rowc_grep <- length(grep("ROWCLUST",fo.vars))
+    colc_grep <- length(grep("COLCLUST",fo.vars))
+    if (rowc_grep == 0 && colc_grep == 0) {
         stop("You must include ROWCLUST or COLCLUST in the formula.")
     }
-    if (rowc.grep > 0 && is.null(RG)) stop("If you include ROWCLUST in the formula, you must also supply an integer value for nclus.row.")
-    if (colc.grep > 0 && is.null(CG)) stop("If you include COLCLUST in the formula, you must also supply an integer value for nclus.column.")
+    if (rowc_grep > 0 && is.null(RG)) stop("If you include ROWCLUST in the formula, you must also supply an integer value for nclus.row.")
+    if (colc_grep > 0 && is.null(CG)) stop("If you include COLCLUST in the formula, you must also supply an integer value for nclus.column.")
+
+    if (any(fo.labels == "ROWCLUST")) {
+        rowc_part <- "ROWCLUST"
+    }
+    if (any(fo.labels == "COLCLUST")) {
+        colc_part <- "COLCLUST"
+    }
 
     # A.3  Check that there are no functions of RowClust or ColClust included in
     #      the formula (may have interaction terms, but no functions of them)
     #      OUTPUT: errors
-    if (rowc.grep > 0 && rowc.grep != sum(fo.vars == "ROWCLUST")) stop("You cannot use functions of ROWCLUST, only ROWCLUST as-is.")
-    if (colc.grep > 0 && colc.grep != sum(fo.vars == "COLCLUST")) stop("You cannot use functions of COLCLUST, only COLCLUST as-is.")
+    if (rowc_grep > 0 && rowc_grep != sum(fo.vars == "ROWCLUST")) stop("You cannot use functions of ROWCLUST, only ROWCLUST as-is.")
+    if (colc_grep > 0 && colc_grep != sum(fo.vars == "COLCLUST")) stop("You cannot use functions of COLCLUST, only COLCLUST as-is.")
 
     # A.4  Check that if the ROWCLUST:COLCLUST interaction term is included, that
     #      both or neither of the ROWCLUST, COLCLUST main effect terms are
@@ -186,7 +193,7 @@ check.formula <- function(formula, long.df, RG, CG) {
     if (row.grep > 0 && row.grep != sum(temp.labels %in% c("ROW","ROW:COLCLUST","COLCLUST:ROW"))) {
         stop("You cannot use functions of ROW, and the only permitted interaction is with COLCLUST.")
     }
-    if (row.grep > 0 && rowc.grep > 0) {
+    if (row.grep > 0 && rowc_grep > 0) {
         stop("You cannot include ROW as well as ROWCLUST.")
     }
     if (any(fo.labels %in% c("COLCLUST:ROW","ROW:COLCLUST")) &&
@@ -195,10 +202,10 @@ check.formula <- function(formula, long.df, RG, CG) {
         stop("If including the interaction between column clusters and row effects, you must include both or neither of the main effects COLCLUST and ROW.")
     }
     if (any(temp.labels == "COL")) {
-        col.part <- "COL"
+        col_part <- "COL"
     }
     if (any(temp.labels %in% c("ROW:COLCLUST","COLCLUST:ROW"))) {
-        colc.row.part <- "COLCLUST:ROW"
+        colc_row_part <- "COLCLUST:ROW"
     }
 
     temp.labels <- gsub("COLCLUST","ZZ",fo.labels)
@@ -206,7 +213,7 @@ check.formula <- function(formula, long.df, RG, CG) {
     if (col.grep > 0 && col.grep != sum(temp.labels %in% c("COL","COL:ROWCLUST","ROWCLUST:COL"))) {
         stop("You cannot use functions of COL, and the only permitted interaction is with ROWCLUST.")
     }
-    if (col.grep > 0 && colc.grep > 0) {
+    if (col.grep > 0 && colc_grep > 0) {
         stop("You cannot include COL as well as COLCLUST.")
     }
     if (any(fo.labels %in% c("ROWCLUST:COL","COL:ROWCLUST")) &&
@@ -215,31 +222,31 @@ check.formula <- function(formula, long.df, RG, CG) {
         stop("If including the interaction between row clusters and column effects, you must include both or neither of the main effects ROWCLUST and COL.")
     }
     if (any(temp.labels == "COL")) {
-        col.part <- "COL"
+        col_part <- "COL"
     }
     if (any(temp.labels %in% c("COL:ROWCLUST","ROWCLUST:COL"))) {
-        rowc.col.part <- "ROWCLUST:COL"
+        rowc_col_part <- "ROWCLUST:COL"
     }
 
     # A.6  Check that there are no three-way or higher-order interactions
     # involving ROWCLUST and COLCLUST
-    rowc.idxs <- grep("ROWCLUST",fo.labels)
-    colc.idxs <- grep("COLCLUST",fo.labels)
-    if (length(rowc.idxs) > 0 && length(colc.idxs) > 0) {
+    rowc_idxs <- grep("ROWCLUST",fo.labels)
+    colc_idxs <- grep("COLCLUST",fo.labels)
+    if (length(rowc_idxs) > 0 && length(colc_idxs) > 0) {
         # Find terms that involve both ROWCLUST and COLCLUST, then exclude the
         # term "ROWCLUST:COLCLUST" if it exists, because that interaction is allowed.
-        rowc.colc.idxs <- match(rowc.idxs, colc.idxs)
-        rowc.colc.idxs <- rowc.colc.idxs[!is.na(rowc.colc.idxs)]
-        rowc.colc.labels <- fo.labels[colc.idxs[rowc.colc.idxs]]
+        rowc_colc_idxs <- match(rowc_idxs, colc_idxs)
+        rowc_colc_idxs <- rowc_colc_idxs[!is.na(rowc_colc_idxs)]
+        rowc_colc_labels <- fo.labels[colc_idxs[rowc_colc_idxs]]
 
-        rowc.colc.interaction.idxs <- match(c("ROWCLUST:COLCLUST","COLCLUST:ROWCLUST"), rowc.colc.labels)
-        if (any(!is.na(rowc.colc.interaction.idxs))) {
-            rowc.colc.interaction.idxs <- rowc.colc.interaction.idxs[!is.na(rowc.colc.interaction.idxs)]
-            rowc.colc.part  <- rowc.colc.labels[rowc.colc.interaction.idxs]
+        rowc_colc_interaction_idxs <- match(c("ROWCLUST:COLCLUST","COLCLUST:ROWCLUST"), rowc_colc_labels)
+        if (any(!is.na(rowc_colc_interaction_idxs))) {
+            rowc_colc_interaction_idxs <- rowc_colc_interaction_idxs[!is.na(rowc_colc_interaction_idxs)]
+            rowc_colc_part  <- rowc_colc_labels[rowc_colc_interaction_idxs]
 
-            rowc.colc.idxs <- rowc.colc.idxs[-rowc.colc.interaction.idxs]
+            rowc_colc_idxs <- rowc_colc_idxs[-rowc_colc_interaction_idxs]
         }
-        if (length(rowc.colc.idxs) > 0) {
+        if (length(rowc_colc_idxs) > 0) {
             stop("If you include ROWCLUST and COLCLUST, you cannot include three-way or higher interactions that involve both ROWCLUST and COLCLUST.")
         }
     }
@@ -249,106 +256,106 @@ check.formula <- function(formula, long.df, RG, CG) {
     # covaraite parts, the COLCLUST covariate parts, and the pure covariate
     # parts
     # OUTPUT: errors
-    row.col.idxs <- which(fo.labels %in% c("ROW","COL","ROWCLUST","COLCLUST",
+    row.col_idxs <- which(fo.labels %in% c("ROW","COL","ROWCLUST","COLCLUST",
                                            "ROWCLUST:COLCLUST","COLCLUST:ROWCLUST",
                                            "ROWCLUST:COL","COL:ROWCLUST",
                                            "COLCLUST:ROW","ROW:COLCLUST"))
-    if (length(row.col.idxs) > 0) {
-        row.col.part <- fo.labels[row.col.idxs]
-        non.row.col.part <- fo.labels[-row.col.idxs]
+    if (length(row.col_idxs) > 0) {
+        row.col_part <- fo.labels[row.col_idxs]
+        non.row.col_part <- fo.labels[-row.col_idxs]
     } else {
-        non.row.col.part <- fo.labels
+        non.row.col_part <- fo.labels
     }
 
-    rowc.mm <- NULL
-    rowc.idxs <- grep("ROWCLUST", non.row.col.part)
-    if (length(rowc.idxs) > 0) {
+    rowc_mm <- matrix(1)
+    rowc_idxs <- grep("ROWCLUST", non.row.col_part)
+    if (length(rowc_idxs) > 0) {
         if (!any(fo.labels == "ROWCLUST")) {
             stop("If you are including interactions between row clusters and covariates, you must include the main effect term for ROWCLUST.")
         }
 
-        rowc.parts <- extract.covs("ROWCLUST", rowc.idxs, non.row.col.part, long.df)
-        rowc.part <- rowc.parts$pure.clust.part
-        rowc.cov.part <- rowc.parts$clust.cov.part
-        rowc.mm <- rowc.parts$clust.mm
+        rowc_parts <- extract.covs("ROWCLUST", rowc_idxs, non.row.col_part, long.df)
+        rowc_part <- rowc_parts$pure_clust_part
+        rowc_cov_part <- rowc_parts$clust.cov_part
+        rowc_mm <- rowc_parts$clust.mm
     }
 
-    colc.mm <- NULL
-    colc.idxs <- grep("COLCLUST", non.row.col.part)
-    if (length(colc.idxs) > 0) {
+    colc_mm <- matrix(1)
+    colc_idxs <- grep("COLCLUST", non.row.col_part)
+    if (length(colc_idxs) > 0) {
         if (!any(fo.labels == "COLCLUST")) {
             stop("If you are including interactions between column clusters and covariates, you must include the main effect term for COLCLUST.")
         }
 
-        colc.parts <- extract.covs("COLCLUST", colc.idxs, non.row.col.part, long.df)
-        colc.part <- colc.parts$pure.clust.part
-        colc.cov.part <- colc.parts$clust.cov.part
-        colc.mm <- colc.parts$clust.mm
+        colc_parts <- extract.covs("COLCLUST", colc_idxs, non.row.col_part, long.df)
+        colc_part <- colc_parts$pure_clust_part
+        colc_cov_part <- colc_parts$clust.cov_part
+        colc_mm <- colc_parts$clust.mm
     }
 
-    cov.mm <- NULL
-    pure.cov.part <- non.row.col.part[-c(rowc.idxs, colc.idxs)]
-    if (length(pure.cov.part) > 0) {
-        cov.fo <- formula(paste("Y ~",paste(pure.cov.part, collapse="+")))
-        cov.tf <- terms(cov.fo)
-        attr(cov.tf, "intercept") <- 0
-        cov.mm <- model.matrix(cov.tf, data=long.df)
+    cov_mm <- matrix(1)
+    pure_cov_part <- non.row.col_part[-c(rowc_idxs, colc_idxs)]
+    if (length(pure_cov_part) > 0) {
+        cov_fo <- formula(paste("Y ~",paste(pure_cov_part, collapse="+")))
+        cov_tf <- terms(cov_fo)
+        attr(cov_tf, "intercept") <- 0
+        cov_mm <- model.matrix(cov_tf, data=long.df)
     }
 
     # B.1  Construct list of params for ROW, COL, and pure RowClust and ColClust
     #      terms (i.e. all the remaining params apart from model-specific params
     #      like mu or mu_k, and phi_k)
     #      OUTPUT: params
-    paramlengths <- rep(0, 12)
-    names(paramlengths) <- c("mu","phi","rowc","col","rowc.col","rowc.cov","cov",
-                              "colc","rowc.colc","row","colc.row","colc.cov")
-    if (exists('rowc.part')) paramlengths['rowc'] <- RG
-    if (exists('colc.part')) paramlengths['colc'] <- CG
-    if (exists('rowc.colc.part')) paramlengths['rowc.colc'] <- RG*CG
-    if (exists('row.part')) paramlengths['row'] <- n
-    if (exists('colc.row.part')) paramlengths['colc.row'] <- CG*n
-    if (exists('col.part')) paramlengths['col'] <- p
-    if (exists('rowc.col.part')) paramlengths['rowc.col'] <- RG*p
-    if (exists('rowc.cov.part') && length(rowc.cov.part) > 0) paramlengths['rowc.cov'] <- length(rowc.cov.part)*RG
-    if (exists('colc.cov.part') && length(colc.cov.part) > 0) paramlengths['colc.cov'] <- length(colc.cov.part)*CG
-    if (exists('pure.cov.part') && length(pure.cov.part) > 0) paramlengths['cov'] <- length(pure.cov.part)
+    param_lengths <- rep(0, 12)
+    names(param_lengths) <- c("mu","phi","rowc","col","rowc_col","rowc_cov","cov",
+                              "colc","rowc_colc","row","colc_row","colc_cov")
+    if (exists('rowc_part')) param_lengths['rowc'] <- RG
+    if (exists('colc_part')) param_lengths['colc'] <- CG
+    if (exists('rowc_colc_part')) param_lengths['rowc_colc'] <- RG*CG
+    if (exists('row_part')) param_lengths['row'] <- n
+    if (exists('colc_row_part')) param_lengths['colc_row'] <- CG*n
+    if (exists('col_part')) param_lengths['col'] <- p
+    if (exists('rowc_col_part')) param_lengths['rowc_col'] <- RG*p
+    if (exists('rowc_cov_part') && length(rowc_cov_part) > 0) param_lengths['rowc_cov'] <- length(rowc_cov_part)*RG
+    if (exists('colc_cov_part') && length(colc_cov_part) > 0) param_lengths['colc_cov'] <- length(colc_cov_part)*CG
+    if (exists('pure_cov_part') && length(pure_cov_part) > 0) param_lengths['cov'] <- length(pure_cov_part)
 
     # Return model matrices
     # Return list of params
-    list(paramlengths=paramlengths, rowc.mm=rowc.mm, colc.mm=colc.mm, cov.mm=cov.mm)
+    list(param_lengths=param_lengths, rowc_mm=rowc_mm, colc_mm=colc_mm, cov_mm=cov_mm)
 }
 
-extract.covs <- function(clust.name, clust.idxs, non.row.col.part, long.df) {
-    clust.part <- non.row.col.part[clust.idxs]
+extract.covs <- function(clust.name, clust_idxs, non.row.col_part, long.df) {
+    clust_part <- non.row.col_part[clust_idxs]
 
-    pure.clust.idx <- which(clust.part == clust.name)
-    if (length(pure.clust.idx) > 0) {
-        pure.clust.part <- clust.part[pure.clust.idx]
-        clust.cov.part <- clust.part[-pure.clust.idx]
+    pure_clust_idx <- which(clust_part == clust.name)
+    if (length(pure_clust_idx) > 0) {
+        pure_clust_part <- clust_part[pure_clust_idx]
+        clust.cov_part <- clust_part[-pure_clust_idx]
     } else {
-        clust.cov.part <- clust.part
+        clust.cov_part <- clust_part
     }
 
-    if (length(clust.cov.part) > 0) {
+    if (length(clust.cov_part) > 0) {
         # First, remove the COLCLUST term from those parts, because we want to
         # obtain the model matrix of the remaining parts of the terms
-        for (i in seq_along(clust.cov.part)) {
-            term <- clust.cov.part[i]
+        for (i in seq_along(clust.cov_part)) {
+            term <- clust.cov_part[i]
             if (substr(term, 1, 9) == paste0(clust.name, ":")) {
-                clust.cov.part[i] <- substr(term,10,nchar(term))
+                clust.cov_part[i] <- substr(term,10,nchar(term))
             } else {
-                clust.cov.part[i] <- sub(paste0(":",clust.name),"",term)
+                clust.cov_part[i] <- sub(paste0(":",clust.name),"",term)
             }
         }
 
         # Now obtain model matrix, making sure to remove the intercept term
-        clust.fo <- formula(paste("Y ~",paste(clust.cov.part,collapse="+")))
+        clust.fo <- formula(paste("Y ~",paste(clust.cov_part,collapse="+")))
         clust.tf <- terms(clust.fo)
         attr(clust.tf, "intercept") <- 0
         clust.mm <- model.matrix(clust.tf, data=long.df)
     }
 
-    list(pure.clust.part=pure.clust.part, clust.cov.part=clust.cov.part,
+    list(pure_clust_part=pure_clust_part, clust.cov_part=clust.cov_part,
          clust.mm=clust.mm)
 }
 

@@ -18,7 +18,7 @@ double rcpp_logit(double x) {
 
 void rcpp_unpack(const String & model,
                  const NumericVector & invect,
-                 const IntegerVector & paramlengths,
+                 const IntegerVector & param_lengths,
                  NumericVector & mu,
                  NumericVector & phi,
                  NumericVector & rowc_coef,
@@ -36,7 +36,7 @@ void rcpp_unpack(const String & model,
                  const bool constraint_sum_zero) {
 
     // BE CAREFUL! You CANNOT use single quotes to fetch named element of a
-    // vector, only double quotes: paramlengths["rowc"], else you will get a
+    // vector, only double quotes: param_lengths["rowc"], else you will get a
     // fatal error that will crash R;
 
     int ind, kk, rr, cc, ii, jj, ll;
@@ -97,7 +97,7 @@ void rcpp_unpack(const String & model,
         // Rcout << "The value of mu : " << mu << "\n";
     }
 
-    if (paramlengths["rowc"] > 0) {
+    if (param_lengths["rowc"] > 0) {
         if (constraint_sum_zero) {
             rowc_coef[RG-1] = 0;
             for (rr=0; rr < RG-1; rr++) {
@@ -118,7 +118,7 @@ void rcpp_unpack(const String & model,
         // Rcout << "The value of nelts : " << nelts << "\n";
         // Rcout << "The value of rowc_coef : " << rowc_coef << "\n";
     }
-    if (paramlengths["colc"] > 0) {
+    if (param_lengths["colc"] > 0) {
         if (constraint_sum_zero) {
             colc_coef[CG-1] = 0;
             for (cc=0; cc < CG-1; cc++) {
@@ -139,9 +139,9 @@ void rcpp_unpack(const String & model,
         // Rcout << "The value of nelts : " << nelts << "\n";
         // Rcout << "The value of colc_coef : " << colc_coef << "\n";
     }
-    if (paramlengths["rowc_colc"] > 0) {
+    if (param_lengths["rowc_colc"] > 0) {
 
-        if (paramlengths["rowc"] > 0 && paramlengths["colc"] > 0) {
+        if (param_lengths["rowc"] > 0 && param_lengths["colc"] > 0) {
             std::fill( rowc_colc_coef.row(RG-1).begin(), rowc_colc_coef.row(RG-1).end(), 0 );
             std::fill( rowc_colc_coef.column(CG-1).begin(), rowc_colc_coef.column(CG-1).end(), 0 );
 
@@ -183,7 +183,7 @@ void rcpp_unpack(const String & model,
         // Rcout << "The value of rowc_colc_coef : " << rowc_colc_coef << "\n";
     }
 
-    if (paramlengths["row"] > 0) {
+    if (param_lengths["row"] > 0) {
         row_coef[n-1] = 0;
         for (ii=0; ii < n-1; ii++) {
             ind = nelts + ii;
@@ -195,7 +195,7 @@ void rcpp_unpack(const String & model,
         // Rcout << "The value of nelts : " << nelts << "\n";
         // Rcout << "The value of row_coef : " << row_coef << "\n";
     }
-    if (paramlengths["col"] > 0) {
+    if (param_lengths["col"] > 0) {
         col_coef[p-1] = 0;
         for (jj=0; jj < p-1; jj++) {
             ind = nelts + jj;
@@ -209,11 +209,11 @@ void rcpp_unpack(const String & model,
         // Rcout << "The value of col_coef : " << col_coef << "\n";
     }
 
-    if (paramlengths["rowc_col"] > 0) {
+    if (param_lengths["rowc_col"] > 0) {
         // NOTE: have to make sure to fill the matrix of rowc_col coefs from the
         // parameter vector IN THE SAME WAY as the matrix is filled in the rr
         // unpack_parvec function!
-        if (paramlengths["rowc"] > 0) {
+        if (param_lengths["rowc"] > 0) {
             std::fill( rowc_col_coef.row(RG-1).begin(), rowc_col_coef.row(RG-1).end(), 0 );
             std::fill( rowc_col_coef.column(p-1).begin(), rowc_col_coef.column(p-1).end(), 0 );
 
@@ -246,12 +246,12 @@ void rcpp_unpack(const String & model,
         // Rcout << "The value of nelts : " << nelts << "\n";
         // Rcout << "The value of rowc_col_coef : " << rowc_col_coef << "\n";
     }
-    if (paramlengths["colc_row"] > 0) {
+    if (param_lengths["colc_row"] > 0) {
         // NOTE: have to make sure to fill the matrix of colc_row coefs from the
         // parameter vector IN THE SAME WAY as the matrix is filled in the rr
         // unpack_parvec function!
         colc_row_coef(CG-1,n-1) = 0;
-        if (paramlengths["colc"] > 0) {
+        if (param_lengths["colc"] > 0) {
             std::fill( rowc_colc_coef.row(CG-1).begin(), rowc_colc_coef.row(CG-1).end(), 0 );
             std::fill( rowc_colc_coef.column(n-1).begin(), rowc_colc_coef.column(n-1).end(), 0 );
 
@@ -283,11 +283,11 @@ void rcpp_unpack(const String & model,
         // Rcout << "The value of colc_row_coef : " << colc_row_coef << "\n";
     }
 
-    if (paramlengths["rowc_cov"] > 0 && RG > 0) {
+    if (param_lengths["rowc_cov"] > 0 && RG > 0) {
         // NOTE: have to make sure to fill the matrix of rowc_cov coefs from the
         // parameter vector IN THE SAME WAY as the matrix is filled in the rr
         // unpack_parvec function!
-        int nrowccov = paramlengths["rowc_cov"]/RG;
+        int nrowccov = param_lengths["rowc_cov"]/RG;
         // Rcout << "The value of nrowccov : " << nrowccov << "\n";
         for (rr=0; rr < RG; rr++) {
             for (ll=0; ll < nrowccov; ll++) {
@@ -300,11 +300,11 @@ void rcpp_unpack(const String & model,
         // Rcout << "The value of nelts : " << nelts << "\n";
         // Rcout << "The value of rowc_cov_coef : " << rowc_cov_coef << "\n";
     }
-    if (paramlengths["colc_cov"] > 0 && CG > 0) {
+    if (param_lengths["colc_cov"] > 0 && CG > 0) {
         // NOTE: have to make sure to fill the matrix of colc_cov coefs from the
         // parameter vector IN THE SAME WAY as the matrix is filled in the rr
         // unpack_parvec function!
-        int ncolccov = paramlengths["colc_cov"]/CG;
+        int ncolccov = param_lengths["colc_cov"]/CG;
         for (cc=0; cc < CG; cc++) {
             for (ll=0; ll < ncolccov; ll++) {
                 ind = nelts + cc*ncolccov + ll;
@@ -317,7 +317,7 @@ void rcpp_unpack(const String & model,
         // Rcout << "The value of colc_cov_coef : " << colc_cov_coef << "\n";
     }
 
-    int ncov = paramlengths["cov"];
+    int ncov = param_lengths["cov"];
     if (ncov > 0) {
         for (ll=0; ll < ncov; ll++) {
             ind = nelts + ll;
@@ -331,10 +331,10 @@ void rcpp_unpack(const String & model,
 }
 
 double rcpp_linear_part(const NumericMatrix ydf,
-                        const NumericMatrix & rowcmm,
-                        const NumericMatrix & colcmm,
-                        const NumericMatrix & covmm,
-                        const IntegerVector & paramlengths,
+                        const NumericMatrix & rowc_mm,
+                        const NumericMatrix & colc_mm,
+                        const NumericMatrix & cov_mm,
+                        const IntegerVector & param_lengths,
                         const NumericVector & rowc_coef,
                         const NumericVector & colc_coef,
                         const NumericMatrix & rowc_colc_coef,
@@ -358,60 +358,60 @@ double rcpp_linear_part(const NumericMatrix ydf,
     // Rcout << "The R-based value of ii : " << ii+1 << "\n";
     // Rcout << "The R-based value of jj : " << jj+1 << "\n";
 
-    if (paramlengths["rowc"] > 0) {
+    if (param_lengths["rowc"] > 0) {
         linear_part += rowc_coef[rr];
         // Rcout << "The value of linear_part with rowc: " << linear_part << "\n";
     }
-    if (paramlengths["colc"] > 0) {
+    if (param_lengths["colc"] > 0) {
         linear_part += colc_coef[cc];
         // Rcout << "The value of linear_part with colc: " << linear_part << "\n";
     }
-    if (paramlengths["rowc_colc"] > 0) {
+    if (param_lengths["rowc_colc"] > 0) {
         linear_part += rowc_colc_coef(rr,cc);
         // Rcout << "The value of linear_part with rowc_colc: " << linear_part << "\n";
     }
 
-    if (paramlengths["row"] > 0) {
+    if (param_lengths["row"] > 0) {
         linear_part += row_coef[ii];
         // Rcout << "The value of linear_part with row: " << linear_part << "\n";
     }
-    if (paramlengths["col"] > 0) {
+    if (param_lengths["col"] > 0) {
         linear_part += col_coef[jj];
         // Rcout << "The value of linear_part with col: " << linear_part << "\n";
     }
-    if (paramlengths["rowc_col"] > 0) {
+    if (param_lengths["rowc_col"] > 0) {
         linear_part += rowc_col_coef(rr,jj);
         // Rcout << "The value of linear_part with rowc_col: " << linear_part << "\n";
     }
-    if (paramlengths["colc_row"] > 0) {
+    if (param_lengths["colc_row"] > 0) {
         linear_part += colc_row_coef(cc,ii);
         // Rcout << "The value of linear_part with colc_row: " << linear_part << "\n";
     }
 
-    if (paramlengths["rowc_cov"] > 0) {
-        // NumericVector temp = rowcmm.row(ij);
-        // Rcout << "The value of rowcmm: " << temp << "\n";
+    if (param_lengths["rowc_cov"] > 0) {
+        // NumericVector temp = rowc_mm.row(ij);
+        // Rcout << "The value of rowc_mm: " << temp << "\n";
 
         for (ll=0; ll < nrowccov; ll++) {
-            linear_part += rowcmm(ij,ll)*rowc_cov_coef(rr,ll);
+            linear_part += rowc_mm(ij,ll)*rowc_cov_coef(rr,ll);
         }
         // Rcout << "The value of linear_part with rowc_cov: " << linear_part << "\n";
     }
-    if (paramlengths["colc_cov"] > 0) {
-        // NumericVector temp = colcmm.row(ij);
-        // Rcout << "The value of colcmm: " << temp << "\n";
+    if (param_lengths["colc_cov"] > 0) {
+        // NumericVector temp = colc_mm.row(ij);
+        // Rcout << "The value of colc_mm: " << temp << "\n";
 
         // temp = colc_cov_coef.row(cc);
         // Rcout << "The value of colc_cov_coef: " << temp << "\n";
 
         for (ll=0; ll < ncolccov; ll++) {
-            linear_part += colcmm(ij,ll)*colc_cov_coef(cc,ll);
+            linear_part += colc_mm(ij,ll)*colc_cov_coef(cc,ll);
         }
         // Rcout << "The value of linear_part with colc_cov: " << linear_part << "\n";
     }
-    if (paramlengths["cov"] > 0) {
-        for (ll=0; ll < paramlengths["cov"]; ll++) {
-            linear_part += covmm(ij,ll)*cov_coef[ll];
+    if (param_lengths["cov"] > 0) {
+        for (ll=0; ll < param_lengths["cov"]; ll++) {
+            linear_part += cov_mm(ij,ll)*cov_coef[ll];
         }
         // Rcout << "The value of linear_part with cov: " << linear_part << "\n";
     }
@@ -470,18 +470,18 @@ double rcpp_theta_from_linear(const String model,
 double rcpp_Rclusterll(const NumericVector & invect,
                        const String & model,
                        const NumericMatrix & ydf,
-                       const NumericMatrix & rowcmm,
-                       const NumericMatrix & colcmm,
-                       const NumericMatrix & covmm,
-                       const NumericMatrix & pprm,
-                       NumericVector piv,
-                       const IntegerVector & paramlengths,
+                       const NumericMatrix & rowc_mm,
+                       const NumericMatrix & colc_mm,
+                       const NumericMatrix & cov_mm,
+                       const NumericMatrix & ppr_m,
+                       NumericVector pi_v,
+                       const IntegerVector & param_lengths,
                        const int & RG, const int & p, const int & n, const int & q,
                        const double & epsilon, const bool & constraint_sum_zero,
                        const bool & partial, const bool & incomplete) {
 
     // BE CAREFUL! You CANNOT use single quotes to fetch named element of a
-    // vector, only double quotes: paramlengths["rowc"], else you will get a
+    // vector, only double quotes: param_lengths["rowc"], else you will get a
     // fatal error that will crash rr!
 
     // Note that invect MUST be the first argument, so this likelihood function
@@ -498,12 +498,12 @@ double rcpp_Rclusterll(const NumericVector & invect,
     NumericMatrix rowc_col_coef(RG,p);
     std::fill( rowc_col_coef.begin(), rowc_col_coef.end(), NA_REAL ) ;
 
-    int nrowccov = paramlengths["rowc_cov"]/RG;
+    int nrowccov = param_lengths["rowc_cov"]/RG;
     NumericMatrix rowc_cov_coef(RG,nrowccov);
     std::fill( rowc_cov_coef.begin(), rowc_cov_coef.end(), NA_REAL ) ;
     int ncolccov = 0;
 
-    NumericVector cov_coef(paramlengths["cov"],NA_REAL);
+    NumericVector cov_coef(param_lengths["cov"],NA_REAL);
 
     NumericVector colc_coef(1,NA_REAL);
     NumericVector row_coef(1,NA_REAL);
@@ -515,7 +515,7 @@ double rcpp_Rclusterll(const NumericVector & invect,
     std::fill( rowc_colc_coef.begin(), rowc_colc_coef.end(), NA_REAL ) ;
     int CG = 0;
 
-    rcpp_unpack(model, invect, paramlengths, mu, phi, rowc_coef, colc_coef,
+    rcpp_unpack(model, invect, param_lengths, mu, phi, rowc_coef, colc_coef,
                 rowc_colc_coef, row_coef, col_coef, rowc_col_coef, colc_row_coef,
                 rowc_cov_coef, colc_cov_coef, cov_coef,
                 RG, CG, p, n, q, constraint_sum_zero);
@@ -545,9 +545,9 @@ double rcpp_Rclusterll(const NumericVector & invect,
 
     double logl;
 
-    // Adjust very small values of piv to avoid errors when calculating log(piv)
+    // Adjust very small values of pi_v to avoid errors when calculating log(pi_v)
     for (rr=0; rr < RG; rr++) {
-        if (piv[rr] < epsilon) piv[rr] = epsilon;
+        if (pi_v[rr] < epsilon) pi_v[rr] = epsilon;
     }
 
     if (!incomplete) {
@@ -563,8 +563,8 @@ double rcpp_Rclusterll(const NumericVector & invect,
                 // Rcout << "The R-based value of jj : " << jj+1 << "\n";
                 yval = ydf(ij,0);
                 if (all(is_finite(yval)) & all(!is_nan(yval))) {
-                    linear_part = rcpp_linear_part(ydf, rowcmm, colcmm, covmm,
-                                                   paramlengths,
+                    linear_part = rcpp_linear_part(ydf, rowc_mm, colc_mm, cov_mm,
+                                                   param_lengths,
                                                    rowc_coef, colc_coef,
                                                    rowc_colc_coef,
                                                    row_coef, col_coef,
@@ -585,13 +585,13 @@ double rcpp_Rclusterll(const NumericVector & invect,
                 }
                 // Rcout << "The value of log_thetaymat : " << log_thetaymat << "\n";
 
-                // Rcout << "The value of llc component : " << pprm(ii,rr)*log_thetaymat << "\n";
-                llc += pprm(ii,rr)*log_thetaymat;
+                // Rcout << "The value of llc component : " << ppr_m(ii,rr)*log_thetaymat << "\n";
+                llc += ppr_m(ii,rr)*log_thetaymat;
             }
         }
 
         if (!partial) {
-            llc += sum(pprm*log(piv));
+            llc += sum(ppr_m*log(pi_v));
         }
 
         logl = llc;
@@ -609,7 +609,7 @@ double rcpp_Rclusterll(const NumericVector & invect,
             log_components.fill(0);
 
             for (rr=0; rr < RG; rr++) {
-                log_components[rr] = log(piv[rr]);
+                log_components[rr] = log(pi_v[rr]);
 
                 for (ij=0; ij < ydf.nrow(); ij++) {
                     if (ydf(ij,1) == ii+1) {
@@ -618,8 +618,8 @@ double rcpp_Rclusterll(const NumericVector & invect,
                         // Rcout << "The R-based value of jj : " << jj+1 << "\n";
                         yval = ydf(ij,0);
                         if (all(is_finite(yval)) & all(!is_nan(yval))) {
-                            linear_part = rcpp_linear_part(ydf, rowcmm, colcmm, covmm,
-                                                           paramlengths,
+                            linear_part = rcpp_linear_part(ydf, rowc_mm, colc_mm, cov_mm,
+                                                           param_lengths,
                                                            rowc_coef, colc_coef,
                                                            rowc_colc_coef,
                                                            row_coef, col_coef,
@@ -656,14 +656,14 @@ double rcpp_Rclusterll(const NumericVector & invect,
 double rcpp_Biclusterll(const NumericVector & invect,
                         const String & model,
                         const NumericMatrix & ydf,
-                        const NumericMatrix & rowcmm,
-                        const NumericMatrix & colcmm,
-                        const NumericMatrix & covmm,
-                        const NumericMatrix & pprm,
-                        const NumericMatrix & ppcm,
-                        NumericVector piv,
-                        NumericVector kappav,
-                        const IntegerVector & paramlengths,
+                        const NumericMatrix & rowc_mm,
+                        const NumericMatrix & colc_mm,
+                        const NumericMatrix & cov_mm,
+                        const NumericMatrix & ppr_m,
+                        const NumericMatrix & ppc_m,
+                        NumericVector pi_v,
+                        NumericVector kappa_v,
+                        const IntegerVector & param_lengths,
                         const int & RG, const int & CG,
                         const int & p, const int & n, const int & q,
                         const double & epsilon,
@@ -671,7 +671,7 @@ double rcpp_Biclusterll(const NumericVector & invect,
                         const bool & incomplete, double & llc) {
 
     // BE CAREFUL! You CANNOT use single quotes to fetch named element of a
-    // vector, only double quotes: paramlengths["rowc"], else you will get a
+    // vector, only double quotes: param_lengths["rowc"], else you will get a
     // fatal error that will crash rr!
 
     // Note that invect MUST be the first argument, so this likelihood function
@@ -698,23 +698,23 @@ double rcpp_Biclusterll(const NumericVector & invect,
     std::fill( colc_row_coef.begin(), colc_row_coef.end(), NA_REAL ) ;
 
     int nrowccov = 0;
-    if (paramlengths["rowc_cov"] > 0) {
-        nrowccov = paramlengths["rowc_cov"]/RG;
+    if (param_lengths["rowc_cov"] > 0) {
+        nrowccov = param_lengths["rowc_cov"]/RG;
     }
     NumericMatrix rowc_cov_coef(RG,nrowccov);
     std::fill( rowc_cov_coef.begin(), rowc_cov_coef.end(), NA_REAL ) ;
 
     int ncolccov = 0;
-    if (paramlengths["colc_cov"] > 0) {
-        ncolccov = paramlengths["colc_cov"]/CG;
+    if (param_lengths["colc_cov"] > 0) {
+        ncolccov = param_lengths["colc_cov"]/CG;
     }
     // Rcout << "The value of ncolccov: " << ncolccov << "\n";
     NumericMatrix colc_cov_coef(CG,ncolccov);
     std::fill( colc_cov_coef.begin(), colc_cov_coef.end(), NA_REAL ) ;
 
-    NumericVector cov_coef(paramlengths["cov"],NA_REAL);
+    NumericVector cov_coef(param_lengths["cov"],NA_REAL);
 
-    rcpp_unpack(model, invect, paramlengths, mu, phi, rowc_coef, colc_coef,
+    rcpp_unpack(model, invect, param_lengths, mu, phi, rowc_coef, colc_coef,
                 rowc_colc_coef, row_coef, col_coef, rowc_col_coef, colc_row_coef,
                 rowc_cov_coef, colc_cov_coef, cov_coef,
                 RG, CG, p, n, q, constraint_sum_zero);
@@ -743,13 +743,13 @@ double rcpp_Biclusterll(const NumericVector & invect,
 
     double logl = 0;
 
-    // Adjust very small values of piv to avoid errors when calculating log(piv)
+    // Adjust very small values of pi_v to avoid errors when calculating log(pi_v)
     for (rr=0; rr < RG; rr++) {
-        if (piv[rr] < epsilon) piv[rr] = epsilon;
+        if (pi_v[rr] < epsilon) pi_v[rr] = epsilon;
     }
-    // Similarly for kappav
+    // Similarly for kappa_v
     for (cc=0; cc < CG; cc++) {
-        if (kappav[cc] < epsilon) kappav[cc] = epsilon;
+        if (kappa_v[cc] < epsilon) kappa_v[cc] = epsilon;
     }
 
     if (!incomplete || NumericVector::is_na(llc)) {
@@ -770,8 +770,8 @@ double rcpp_Biclusterll(const NumericVector & invect,
 
                         // Rcout << "The value of ymatij_idx : " << ymatij_idx << "\n";
 
-                        linear_part = rcpp_linear_part(ydf, rowcmm, colcmm, covmm,
-                                                       paramlengths,
+                        linear_part = rcpp_linear_part(ydf, rowc_mm, colc_mm, cov_mm,
+                                                       param_lengths,
                                                        rowc_coef, colc_coef,
                                                        rowc_colc_coef,
                                                        row_coef, col_coef,
@@ -790,15 +790,15 @@ double rcpp_Biclusterll(const NumericVector & invect,
                         log_thetaymat = 0;
                     }
                     // Rcout << "The value of log_thetaymat : " << log_thetaymat << "\n";
-                    // Rcout << "The value of llc component : " << pprm(ii,rr)*log_thetaymat*ppcm(jj,cc) << "\n";
-                    llc += pprm(ii,rr)*log_thetaymat*ppcm(jj,cc);
+                    // Rcout << "The value of llc component : " << ppr_m(ii,rr)*log_thetaymat*ppc_m(jj,cc) << "\n";
+                    llc += ppr_m(ii,rr)*log_thetaymat*ppc_m(jj,cc);
                 }
             }
         }
 
         if (!partial) {
-            llc += sum(pprm*log(piv));
-            llc += sum(ppcm*log(kappav));
+            llc += sum(ppr_m*log(pi_v));
+            llc += sum(ppc_m*log(kappa_v));
         }
 
         logl = llc;
@@ -809,22 +809,22 @@ double rcpp_Biclusterll(const NumericVector & invect,
 
         for (ii=0; ii < n; ii++) {
             for (rr=0; rr < RG; rr++) {
-                if (pprm(ii,rr) > 0) {
+                if (ppr_m(ii,rr) > 0) {
                     // Note that the "n*" part is the sum of xhat_jc over j and c,
                     // because the original term is sum_i sum_j sum_r sum_c zhat_ir xhat_jc log(zhat_ir),
                     // but the xhat_jc bit simplifies to p
-                    logl_correction += p*pprm(ii,rr)*log(pprm(ii,rr));
+                    logl_correction += p*ppr_m(ii,rr)*log(ppr_m(ii,rr));
                 }
             }
         }
 
         for (jj=0; jj < p; jj++) {
             for (cc=0; cc < CG; cc++) {
-                if (ppcm(jj,cc) > 0) {
+                if (ppc_m(jj,cc) > 0) {
                     // Note that the "p*" part is the sum of zhat_ir over i and r
                     // because the original term is sum_i sum_j sum_r sum_c zhat_ir xhat_jc log(xhat_jc)
                     // but the zhat_ir bit simplifies to n
-                    logl_correction += n*ppcm(jj,cc)*log(ppcm(jj,cc));
+                    logl_correction += n*ppc_m(jj,cc)*log(ppc_m(jj,cc));
                 }
             }
         }
@@ -847,17 +847,17 @@ double rcpp_Biclusterll(const NumericVector & invect,
 NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
                                   const String & model,
                                   const NumericMatrix & ydf,
-                                  const NumericMatrix & rowcmm,
-                                  const NumericMatrix & colcmm,
-                                  const NumericMatrix & covmm,
-                                  NumericVector piv,
-                                  const IntegerVector & paramlengths,
+                                  const NumericMatrix & rowc_mm,
+                                  const NumericMatrix & colc_mm,
+                                  const NumericMatrix & cov_mm,
+                                  NumericVector pi_v,
+                                  const IntegerVector & param_lengths,
                                   const int & RG, const int & p, const int & n, const int & q,
                                   const double & epsilon,
                                   const bool & constraint_sum_zero) {
 
     // BE CAREFUL! You CANNOT use single quotes to fetch named element of a
-    // vector, only double quotes: paramlengths["rowc"], else you will get a
+    // vector, only double quotes: param_lengths["rowc"], else you will get a
     // fatal error that will crash rr!
 
     // Note that invect MUST be the first argument, so this likelihood function
@@ -874,12 +874,12 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
     NumericMatrix rowc_col_coef(RG,p);
     std::fill( rowc_col_coef.begin(), rowc_col_coef.end(), NA_REAL ) ;
 
-    int nrowccov = paramlengths["rowc_cov"]/RG;
+    int nrowccov = param_lengths["rowc_cov"]/RG;
     NumericMatrix rowc_cov_coef(RG,nrowccov);
     std::fill( rowc_cov_coef.begin(), rowc_cov_coef.end(), NA_REAL ) ;
     int ncolccov = 0;
 
-    NumericVector cov_coef(paramlengths["cov"],NA_REAL);
+    NumericVector cov_coef(param_lengths["cov"],NA_REAL);
 
     NumericVector colc_coef(1,NA_REAL);
     NumericVector row_coef(1,NA_REAL);
@@ -891,7 +891,7 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
     std::fill( rowc_colc_coef.begin(), rowc_colc_coef.end(), NA_REAL ) ;
     int CG = 0;
 
-    rcpp_unpack(model, invect, paramlengths, mu, phi, rowc_coef, colc_coef,
+    rcpp_unpack(model, invect, param_lengths, mu, phi, rowc_coef, colc_coef,
                 rowc_colc_coef, row_coef, col_coef, rowc_col_coef, colc_row_coef,
                 rowc_cov_coef, colc_cov_coef, cov_coef,
                 RG, CG, p, n, q, constraint_sum_zero);
@@ -914,9 +914,9 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
     double theta;
     double log_thetaymat;
 
-    // Adjust very small values of piv to avoid errors when calculating log(piv)
+    // Adjust very small values of pi_v to avoid errors when calculating log(pi_v)
     for (rr=0; rr < RG; rr++) {
-        if (piv[rr] < epsilon) piv[rr] = epsilon;
+        if (pi_v[rr] < epsilon) pi_v[rr] = epsilon;
     }
 
     for (ij=0; ij < ydf.nrow(); ij++) {
@@ -926,14 +926,14 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
 
         for (rr=0; rr < RG; rr++) {
             if (ppm_started(ii,rr) == 0) {
-                ppm_raw(ii,rr) = log(piv[rr]);
+                ppm_raw(ii,rr) = log(pi_v[rr]);
                 ppm_started(ii,rr) = 1;
             }
 
             yval = ydf(ij,0);
             if (all(is_finite(yval)) & all(!is_nan(yval))) {
-                linear_part = rcpp_linear_part(ydf, rowcmm, colcmm, covmm,
-                                               paramlengths,
+                linear_part = rcpp_linear_part(ydf, rowc_mm, colc_mm, cov_mm,
+                                               param_lengths,
                                                rowc_coef, colc_coef,
                                                rowc_colc_coef,
                                                row_coef, col_coef,
@@ -973,12 +973,12 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
 NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
                                    const String & model,
                                    const NumericMatrix & ydf,
-                                   const NumericMatrix & rowcmm,
-                                   const NumericMatrix & colcmm,
-                                   const NumericMatrix & covmm,
-                                   NumericVector piv,
-                                   NumericVector kappav,
-                                   const IntegerVector & paramlengths,
+                                   const NumericMatrix & rowc_mm,
+                                   const NumericMatrix & colc_mm,
+                                   const NumericMatrix & cov_mm,
+                                   NumericVector pi_v,
+                                   NumericVector kappa_v,
+                                   const IntegerVector & param_lengths,
                                    const int & RG, const int & CG,
                                    const int & p, const int & n, const int & q,
                                    const double & epsilon,
@@ -986,7 +986,7 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
                                    const bool & row_clusters) {
 
     // BE CAREFUL! You CANNOT use single quotes to fetch named element of a
-    // vector, only double quotes: paramlengths["rowc"], else you will get a
+    // vector, only double quotes: param_lengths["rowc"], else you will get a
     // fatal error that will crash rr!
 
     // Note that invect MUST be the first argument, so this likelihood function
@@ -1013,23 +1013,23 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
     std::fill( colc_row_coef.begin(), colc_row_coef.end(), NA_REAL ) ;
 
     int nrowccov = 0;
-    if (paramlengths["rowc_cov"] > 0) {
-        nrowccov = paramlengths["rowc_cov"]/RG;
+    if (param_lengths["rowc_cov"] > 0) {
+        nrowccov = param_lengths["rowc_cov"]/RG;
     }
     NumericMatrix rowc_cov_coef(RG,nrowccov);
     std::fill( rowc_cov_coef.begin(), rowc_cov_coef.end(), NA_REAL ) ;
 
     int ncolccov = 0;
-    if (paramlengths["colc_cov"] > 0) {
-        ncolccov = paramlengths["colc_cov"]/CG;
+    if (param_lengths["colc_cov"] > 0) {
+        ncolccov = param_lengths["colc_cov"]/CG;
     }
     // Rcout << "The value of ncolccov: " << ncolccov << "\n";
     NumericMatrix colc_cov_coef(CG,ncolccov);
     std::fill( colc_cov_coef.begin(), colc_cov_coef.end(), NA_REAL ) ;
 
-    NumericVector cov_coef(paramlengths["cov"],NA_REAL);
+    NumericVector cov_coef(param_lengths["cov"],NA_REAL);
 
-    rcpp_unpack(model, invect, paramlengths, mu, phi, rowc_coef, colc_coef,
+    rcpp_unpack(model, invect, param_lengths, mu, phi, rowc_coef, colc_coef,
                 rowc_colc_coef, row_coef, col_coef, rowc_col_coef, colc_row_coef,
                 rowc_cov_coef, colc_cov_coef, cov_coef,
                 RG, CG, p, n, q, constraint_sum_zero);
@@ -1063,13 +1063,13 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
 
     NumericMatrix ppm_started(nelements, nclust);
 
-    // Adjust very small values of piv to avoid errors when calculating log(piv)
+    // Adjust very small values of pi_v to avoid errors when calculating log(pi_v)
     for (rr=0; rr < RG; rr++) {
-        if (piv[rr] < epsilon) piv[rr] = epsilon;
+        if (pi_v[rr] < epsilon) pi_v[rr] = epsilon;
     }
-    // Similarly for kappav
+    // Similarly for kappa_v
     for (cc=0; cc < CG; cc++) {
-        if (kappav[cc] < epsilon) kappav[cc] = epsilon;
+        if (kappa_v[cc] < epsilon) kappa_v[cc] = epsilon;
     }
 
     for (ij=0; ij < ydf.nrow(); ij++) {
@@ -1083,10 +1083,10 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
 
             for (rr=0; rr < RG; rr++) {
                 // Need this step because we are looping over ij, but for each
-                // ii and rr we only want to include one log(piv[rr]), instead of
+                // ii and rr we only want to include one log(pi_v[rr]), instead of
                 // adding one for each jj
                 if (ppm_started(ii,rr) == 0) {
-                    ppm_raw(ii,rr) = log(piv[rr]);
+                    ppm_raw(ii,rr) = log(pi_v[rr]);
                     ppm_started(ii,rr) = 1;
                 }
 
@@ -1096,8 +1096,8 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
                     sum_pikappa_theta = 0;
 
                     for (cc=0; cc < CG; cc++) {
-                        linear_part = rcpp_linear_part(ydf, rowcmm, colcmm, covmm,
-                                                       paramlengths,
+                        linear_part = rcpp_linear_part(ydf, rowc_mm, colc_mm, cov_mm,
+                                                       param_lengths,
                                                        rowc_coef, colc_coef,
                                                        rowc_colc_coef,
                                                        row_coef, col_coef,
@@ -1110,7 +1110,7 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
 
                         theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q, epsilon);
 
-                        sum_pikappa_theta += kappav[cc]*theta;
+                        sum_pikappa_theta += kappa_v[cc]*theta;
                     }
 
                     // Rcout << "The value of the additional log term : " << log(sum_pikappa_theta) << "\n";
@@ -1120,10 +1120,10 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
         } else {
             for (cc=0; cc < CG; cc++) {
                 // Need this step because we are looping over ij, but for each
-                // jj and cc we only want to include one log(kappav[cc]),
+                // jj and cc we only want to include one log(kappa_v[cc]),
                 // instead of adding one for each ii
                 if (ppm_started(jj,cc) == 0) {
-                    ppm_raw(jj,cc) = log(kappav[cc]);
+                    ppm_raw(jj,cc) = log(kappa_v[cc]);
                     ppm_started(jj,cc) = 1;
                 }
 
@@ -1133,8 +1133,8 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
                     sum_pikappa_theta = 0;
 
                     for (rr=0; rr < RG; rr++) {
-                        linear_part = rcpp_linear_part(ydf, rowcmm, colcmm, covmm,
-                                                       paramlengths,
+                        linear_part = rcpp_linear_part(ydf, rowc_mm, colc_mm, cov_mm,
+                                                       param_lengths,
                                                        rowc_coef, colc_coef,
                                                        rowc_colc_coef,
                                                        row_coef, col_coef,
@@ -1147,7 +1147,7 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
 
                         theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q, epsilon);
 
-                        sum_pikappa_theta += piv[rr]*theta;
+                        sum_pikappa_theta += pi_v[rr]*theta;
                     }
                     ppm_raw(jj,cc) += log(sum_pikappa_theta);
                 }

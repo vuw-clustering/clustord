@@ -351,37 +351,37 @@ test_that("rowclustering, columnclustering and biclustering fail for an invalid 
 
 })
 
-## Invalid constraint.sum.zero -------------------------------------------------
-test_that("rowclustering, columnclustering and biclustering fail for an invalid value of constraint.sum.zero", {
+## Invalid constraint_sum_zero -------------------------------------------------
+test_that("rowclustering, columnclustering and biclustering fail for an invalid value of constraint_sum_zero", {
 
     dat <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),ROW=rep(1:20,times=5),COL=rep(1:5,each=20))
 
-    expect_error(clustord(Y~ROWCLUST+COL,"OSM",nclus.row=2,long.df=dat,constraint.sum.zero=NA), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~ROWCLUST+COL,"OSM",nclus.row=2,long.df=dat,constraint.sum.zero=c(1:5,NA)), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~ROWCLUST+COL,"OSM",nclus.row=2,long.df=dat,constraint.sum.zero=c(1:4,Inf)), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~ROWCLUST+COL,"POM",nclus.row=2,long.df=dat,constraint.sum.zero=c(0.5,0.6,"test")), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~ROWCLUST+COL,"POM",nclus.row=2,long.df=dat,constraint.sum.zero="test"), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~ROWCLUST+COL,"POM",nclus.row=2,long.df=dat,constraint.sum.zero=list(a=1,b=2)), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~ROWCLUST+COL,"POM",nclus.row=2,long.df=dat,constraint.sum.zero=array(1:12,dim=c(2,3,2))), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~ROWCLUST+COL,"POM",nclus.row=2,long.df=dat,constraint.sum.zero=data.frame(a=c(1,2),b=c(1,2))), "constraint.sum.zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~ROWCLUST+COL,"OSM",nclus.row=2,long.df=dat,constraint_sum_zero=NA), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~ROWCLUST+COL,"OSM",nclus.row=2,long.df=dat,constraint_sum_zero=c(1:5,NA)), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~ROWCLUST+COL,"OSM",nclus.row=2,long.df=dat,constraint_sum_zero=c(1:4,Inf)), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~ROWCLUST+COL,"POM",nclus.row=2,long.df=dat,constraint_sum_zero=c(0.5,0.6,"test")), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~ROWCLUST+COL,"POM",nclus.row=2,long.df=dat,constraint_sum_zero="test"), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~ROWCLUST+COL,"POM",nclus.row=2,long.df=dat,constraint_sum_zero=list(a=1,b=2)), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~ROWCLUST+COL,"POM",nclus.row=2,long.df=dat,constraint_sum_zero=array(1:12,dim=c(2,3,2))), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~ROWCLUST+COL,"POM",nclus.row=2,long.df=dat,constraint_sum_zero=data.frame(a=c(1,2),b=c(1,2))), "constraint_sum_zero must be TRUE or FALSE.")
 
-    expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=2,long.df=dat,constraint.sum.zero=NA), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=2,long.df=dat,constraint.sum.zero=c(1:5,NA)), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=2,long.df=dat,constraint.sum.zero=c(1:4,Inf)), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~COLCLUST+ROW,"POM",nclus.column=2,long.df=dat,constraint.sum.zero=c(0.5,0.6,"test")), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~COLCLUST+ROW,"POM",nclus.column=2,long.df=dat,constraint.sum.zero="test"), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~COLCLUST+ROW,"POM",nclus.column=2,long.df=dat,constraint.sum.zero=list(a=1,b=2)), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~COLCLUST+ROW,"POM",nclus.column=2,long.df=dat,constraint.sum.zero=array(1:12,dim=c(2,3,2))), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~COLCLUST+ROW,"POM",nclus.column=2,long.df=dat,constraint.sum.zero=data.frame(a=c(1,2),b=c(1,2))), "constraint.sum.zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=2,long.df=dat,constraint_sum_zero=NA), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=2,long.df=dat,constraint_sum_zero=c(1:5,NA)), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=2,long.df=dat,constraint_sum_zero=c(1:4,Inf)), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~COLCLUST+ROW,"POM",nclus.column=2,long.df=dat,constraint_sum_zero=c(0.5,0.6,"test")), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~COLCLUST+ROW,"POM",nclus.column=2,long.df=dat,constraint_sum_zero="test"), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~COLCLUST+ROW,"POM",nclus.column=2,long.df=dat,constraint_sum_zero=list(a=1,b=2)), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~COLCLUST+ROW,"POM",nclus.column=2,long.df=dat,constraint_sum_zero=array(1:12,dim=c(2,3,2))), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~COLCLUST+ROW,"POM",nclus.column=2,long.df=dat,constraint_sum_zero=data.frame(a=c(1,2),b=c(1,2))), "constraint_sum_zero must be TRUE or FALSE.")
 
-    expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=2,nclus.column=3,long.df=dat,constraint.sum.zero=NA), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=2,nclus.column=3,long.df=dat,constraint.sum.zero=c(1:5,NA)), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=2,nclus.column=3,long.df=dat,constraint.sum.zero=c(1:4,Inf)), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~ROWCLUST+COLCLUST,"POM",nclus.row=2,nclus.column=3,long.df=dat,constraint.sum.zero=c(0.5,0.6,"test")), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~ROWCLUST+COLCLUST,"POM",nclus.row=2,nclus.column=3,long.df=dat,constraint.sum.zero="test"), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~ROWCLUST+COLCLUST,"POM",nclus.row=2,nclus.column=3,long.df=dat,constraint.sum.zero=list(a=1,b=2)), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~ROWCLUST+COLCLUST,"POM",nclus.row=2,nclus.column=3,long.df=dat,constraint.sum.zero=array(1:12,dim=c(2,3,2))), "constraint.sum.zero must be TRUE or FALSE.")
-    expect_error(clustord(Y~ROWCLUST+COLCLUST,"POM",nclus.row=2,nclus.column=3,long.df=dat,constraint.sum.zero=data.frame(a=c(1,2),b=c(1,2))), "constraint.sum.zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=2,nclus.column=3,long.df=dat,constraint_sum_zero=NA), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=2,nclus.column=3,long.df=dat,constraint_sum_zero=c(1:5,NA)), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=2,nclus.column=3,long.df=dat,constraint_sum_zero=c(1:4,Inf)), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~ROWCLUST+COLCLUST,"POM",nclus.row=2,nclus.column=3,long.df=dat,constraint_sum_zero=c(0.5,0.6,"test")), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~ROWCLUST+COLCLUST,"POM",nclus.row=2,nclus.column=3,long.df=dat,constraint_sum_zero="test"), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~ROWCLUST+COLCLUST,"POM",nclus.row=2,nclus.column=3,long.df=dat,constraint_sum_zero=list(a=1,b=2)), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~ROWCLUST+COLCLUST,"POM",nclus.row=2,nclus.column=3,long.df=dat,constraint_sum_zero=array(1:12,dim=c(2,3,2))), "constraint_sum_zero must be TRUE or FALSE.")
+    expect_error(clustord(Y~ROWCLUST+COLCLUST,"POM",nclus.row=2,nclus.column=3,long.df=dat,constraint_sum_zero=data.frame(a=c(1,2),b=c(1,2))), "constraint_sum_zero must be TRUE or FALSE.")
 
 })
 

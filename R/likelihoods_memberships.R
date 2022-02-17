@@ -7,15 +7,15 @@ assignments <- function(pp.m) {
     assignments
 }
 
-Bicluster.IncllC <- function(invect, model, ydf, rowc.mm, colc.mm, cov.mm, pi.v, kappa.v,
-                             paramlengths, RG, CG, p, n, q,
-                             constraint.sum.zero=TRUE)
+Bicluster.IncllC <- function(invect, model, ydf, rowc_mm, colc_mm, cov_mm, pi_v, kappa_v,
+                             param_lengths, RG, CG, p, n, q,
+                             constraint_sum_zero=TRUE)
 {
-    parlist <- unpack.parvec(invect, model, paramlengths, n, p, q, RG, CG,
-                             constraint.sum.zero)
+    parlist <- unpack_parvec(invect, model, param_lengths, n, p, q, RG, CG,
+                             constraint_sum_zero)
 
-    pi.v[pi.v==0]=lower.limit
-    kappa.v[kappa.v==0]=lower.limit
+    pi_v[pi_v==0]=lower.limit
+    kappa_v[kappa_v==0]=lower.limit
 
     # Full evaluation using the columns.
     # Use if CG^p is small enough.
@@ -30,37 +30,37 @@ Bicluster.IncllC <- function(invect, model, ydf, rowc.mm, colc.mm, cov.mm, pi.v,
                         yval <- as.numeric(ydf$Y[ij])
 
                         linear_part = 0;
-                        if (paramlengths["rowc"] > 0) {
+                        if (param_lengths["rowc"] > 0) {
                             linear_part <- linear_part + parlist$rowc[rr];
                         }
-                        if (paramlengths["colc"] > 0) {
+                        if (param_lengths["colc"] > 0) {
                             linear_part <- linear_part + parlist$colc[cc];
                         }
-                        if (paramlengths["rowc.colc"] > 0) {
-                            linear_part <- linear_part + parlist$rowc.colc[rr,cc];
+                        if (param_lengths["rowc_colc"] > 0) {
+                            linear_part <- linear_part + parlist$rowc_colc[rr,cc];
                         }
 
-                        if (paramlengths["row"] > 0) {
+                        if (param_lengths["row"] > 0) {
                             linear_part <- linear_part + parlist$row[ii];
                         }
-                        if (paramlengths["col"] > 0) {
+                        if (param_lengths["col"] > 0) {
                             linear_part <- linear_part + parlist$col[jj];
                         }
-                        if (paramlengths["rowc.col"] > 0) {
-                            linear_part <- linear_part + parlist$rowc.col[rr,jj];
+                        if (param_lengths["rowc_col"] > 0) {
+                            linear_part <- linear_part + parlist$rowc_col[rr,jj];
                         }
-                        if (paramlengths["colc.row"] > 0) {
-                            linear_part <- linear_part + parlist$colc.row[cc,ii];
+                        if (param_lengths["colc_row"] > 0) {
+                            linear_part <- linear_part + parlist$colc_row[cc,ii];
                         }
 
-                        if (paramlengths["rowc.cov"] > 0) {
-                            linear_part <- linear_part + sum(rowc.mm[ij,]*parlist$rowc.cov[rr,])
+                        if (param_lengths["rowc_cov"] > 0) {
+                            linear_part <- linear_part + sum(rowc_mm[ij,]*parlist$rowc_cov[rr,])
                         }
-                        if (paramlengths["colc.cov"] > 0) {
-                            linear_part <- linear_part + sum(colc.mm[ij,]*parlist$colc.cov[cc,])
+                        if (param_lengths["colc_cov"] > 0) {
+                            linear_part <- linear_part + sum(colc_mm[ij,]*parlist$colc_cov[cc,])
                         }
-                        if (paramlengths["cov"] > 0) {
-                            linear_part <- linear_part + sum(cov.mm[ij,]*parlist$cov)
+                        if (param_lengths["cov"] > 0) {
+                            linear_part <- linear_part + sum(cov_mm[ij,]*parlist$cov)
                         }
 
                         theta_sum = 0;
@@ -108,7 +108,7 @@ Bicluster.IncllC <- function(invect, model, ydf, rowc.mm, colc.mm, cov.mm, pi.v,
         # Vector of c selections:
         c.v <- combos.mat[aa,]
         # Find the kappa product:
-        alpha.v[aa] <- prod(kappa.v[c.v])
+        alpha.v[aa] <- prod(kappa_v[c.v])
         if (alpha.v[aa]>0)
         {
             # Pick out elements of multi.arr where each col has known CG:
@@ -116,9 +116,9 @@ Bicluster.IncllC <- function(invect, model, ydf, rowc.mm, colc.mm, cov.mm, pi.v,
                 m.a[ii,jj,rr] <- multi.arr[ii,jj,rr,c.v[jj]]
             # Calculate and store row aa of Aair.a:
             for (ii in 1:n) for (rr in 1:RG)
-                Aair.a[aa,ii,rr] <-  log(pi.v[rr]) + sum(log(m.a[ii,,rr]),na.rm=TRUE)
+                Aair.a[aa,ii,rr] <-  log(pi_v[rr]) + sum(log(m.a[ii,,rr]),na.rm=TRUE)
 
-            # May have NA if pi.v[rr]=0, don't use those terms.
+            # May have NA if pi_v[rr]=0, don't use those terms.
             max.Aair <- apply(Aair.a[aa,,],1,max,na.rm=T)
 
             for (ii in 1:n)
@@ -137,17 +137,17 @@ Bicluster.IncllC <- function(invect, model, ydf, rowc.mm, colc.mm, cov.mm, pi.v,
 }
 
 # Rows expansion (use if RG^n small enough):
-Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
+Bicluster.IncllR <- function(long.df, theta, pi_v, kappa_v)
 {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
     q <- length(levels(long.df$Y))
-    RG <- length(pi.v)
-    CG <- length(kappa.v)
+    RG <- length(pi_v)
+    CG <- length(kappa_v)
 
     theta[theta<=0]=lower.limit
-    pi.v[pi.v==0]=lower.limit
-    kappa.v[kappa.v==0]=lower.limit
+    pi_v[pi_v==0]=lower.limit
+    kappa_v[kappa_v==0]=lower.limit
 
     # Full evaluation using the rows.
     # Use if RG^n is small enough.
@@ -180,7 +180,7 @@ Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
         # Vector of r selections:
         r.v <- combos.mat[aa,]
         # Find the pi product:
-        alpha.v[aa] <- prod(pi.v[r.v])
+        alpha.v[aa] <- prod(pi_v[r.v])
         if (alpha.v[aa]>0)
         {
             # Pick out elements of multi.arr where each row has known RG:
@@ -188,8 +188,8 @@ Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
                 m.a[ii,jj,cc] <- multi.arr[ii,jj,r.v[ii],cc]
             # Calculate and store row aa of Aair.a:
             for (jj in 1:p) for (cc in 1:CG)
-                Aajc.a[aa,jj,cc] <-  log(kappa.v[cc]) + sum(log(m.a[,jj,cc]),na.rm=TRUE)
-            # May have NA if kappa.v[cc]=0, don't use those terms.
+                Aajc.a[aa,jj,cc] <-  log(kappa_v[cc]) + sum(log(m.a[,jj,cc]),na.rm=TRUE)
+            # May have NA if kappa_v[cc]=0, don't use those terms.
             max.Aajc <- apply(Aajc.a[aa,,],1,max,na.rm=T)
 
             for (jj in 1:p)

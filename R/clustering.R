@@ -10,14 +10,14 @@ rowclustering <- function(formula,
                           pi.init=NULL,
                           EM.control=default.EM.control(),
                           optim.method="L-BFGS-B", optim.control=default.optim.control(),
-                          constraint.sum.zero=TRUE, start.from.simple.model=TRUE,
+                          constraint_sum_zero=TRUE, start.from.simple.model=TRUE,
                           nstarts=5){
 
     validate.inputs(type="row",
                     formula=formula, model=model, nclus.row=nclus.row,
                     long.df=long.df, initvect=initvect, pi.init=pi.init,
                     EM.control=EM.control, optim.method=optim.method,
-                    constraint.sum.zero=constraint.sum.zero,
+                    constraint_sum_zero=constraint_sum_zero,
                     start.from.simple.model=start.from.simple.model,
                     nstarts=nstarts)
 
@@ -48,7 +48,7 @@ rowclustering <- function(formula,
                                                EM.control=EM.control,
                                                optim.method=optim.method,
                                                optim.control=optim.control,
-                                               constraint.sum.zero=constraint.sum.zero,
+                                               constraint_sum_zero=constraint_sum_zero,
                                                start.from.simple.model=start.from.simple.model,
                                                nstarts=nstarts)
         initvect <- start.par$initvect
@@ -56,7 +56,7 @@ rowclustering <- function(formula,
     }
 
     run.EM.rowcluster(invect=initvect, long.df=long.df, model=model, submodel=submodel,
-                      pi.v=pi.init, constraint.sum.zero=constraint.sum.zero,
+                      pi_v=pi.init, constraint_sum_zero=constraint_sum_zero,
                       EM.control=EM.control,
                       optim.method=optim.method, optim.control=optim.control)
 }
@@ -71,14 +71,14 @@ columnclustering <- function(formula,
                              kappa.init=NULL,
                              EM.control=default.EM.control(),
                              optim.method="L-BFGS-B", optim.control=default.optim.control(),
-                             constraint.sum.zero=TRUE, start.from.simple.model=TRUE,
+                             constraint_sum_zero=TRUE, start.from.simple.model=TRUE,
                              nstarts=5){
 
     validate.inputs(type="column",
                     formula=formula, model=model, nclus.column=nclus.column,
                     long.df=long.df, initvect=initvect, kappa.init=kappa.init,
                     EM.control=EM.control, optim.method=optim.method,
-                    constraint.sum.zero=constraint.sum.zero,
+                    constraint_sum_zero=constraint_sum_zero,
                     start.from.simple.model=start.from.simple.model,
                     nstarts=nstarts)
 
@@ -114,7 +114,7 @@ columnclustering <- function(formula,
                                                EM.control=EM.control,
                                                optim.method=optim.method,
                                                optim.control=optim.control,
-                                               constraint.sum.zero=constraint.sum.zero,
+                                               constraint_sum_zero=constraint_sum_zero,
                                                start.from.simple.model=start.from.simple.model,
                                                nstarts=nstarts)
         initvect <- start.par$initvect
@@ -123,7 +123,7 @@ columnclustering <- function(formula,
 
     results <- run.EM.rowcluster(invect=initvect, long.df=long.df.transp,
                                  model=model, submodel=submodel,
-                                 pi.v=pi.init, constraint.sum.zero=constraint.sum.zero,
+                                 pi_v=pi.init, constraint_sum_zero=constraint_sum_zero,
                                  EM.control=EM.control,
                                  optim.method=optim.method, optim.control=optim.control)
 
@@ -383,7 +383,7 @@ columnclustering <- function(formula,
 #' @param optim.control control list for the \code{optim} call within the M step
 #'     of the EM algorithm. See the control list Details in the \code{optim}
 #'     manual for more info.
-#' @param constraint.sum.zero (default \code{TRUE}) if \code{TRUE}, use constraints that
+#' @param constraint_sum_zero (default \code{TRUE}) if \code{TRUE}, use constraints that
 #'     alpha sums to zero and beta sums to zero; if \code{FALSE}, use constraints alpha_1=0
 #'     and beta_1 = 0. Both versions have the final column of gamma equal to the
 #'     negative sum of the other columns (so \code{gamma} columns sum to zero)
@@ -491,7 +491,7 @@ biclustering <- function(formula,
                          kappa.init=NULL,
                          EM.control=default.EM.control(),
                          optim.method="L-BFGS-B", optim.control=default.optim.control(),
-                         constraint.sum.zero=TRUE, start.from.simple.model=TRUE,
+                         constraint_sum_zero=TRUE, start.from.simple.model=TRUE,
                          nstarts=5){
 
     validate.inputs(type="bi",
@@ -500,7 +500,7 @@ biclustering <- function(formula,
                     long.df=long.df, initvect=initvect,
                     pi.init=pi.init, kappa.init=kappa.init,
                     EM.control=EM.control, optim.method=optim.method,
-                    constraint.sum.zero=constraint.sum.zero,
+                    constraint_sum_zero=constraint_sum_zero,
                     start.from.simple.model=start.from.simple.model,
                     nstarts=nstarts)
 
@@ -533,7 +533,7 @@ biclustering <- function(formula,
                                               EM.control=EM.control,
                                               optim.method=optim.method,
                                               optim.control=optim.control,
-                                              constraint.sum.zero=constraint.sum.zero,
+                                              constraint_sum_zero=constraint_sum_zero,
                                               start.from.simple.model=start.from.simple.model,
                                               nstarts=nstarts)
         initvect <- start.par$initvect
@@ -542,8 +542,8 @@ biclustering <- function(formula,
     }
 
     run.EM.bicluster(invect=initvect, long.df=long.df, model=model, submodel=submodel,
-                     pi.v=pi.init, kappa.v=kappa.init, EM.control=EM.control,
-                     constraint.sum.zero=constraint.sum.zero,
+                     pi_v=pi.init, kappa_v=kappa.init, EM.control=EM.control,
+                     constraint_sum_zero=constraint_sum_zero,
                      optim.method=optim.method, optim.control=optim.control)
 }
 
@@ -565,7 +565,7 @@ new.EM.status <- function() {
 }
 
 update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
-                             parlist.out, pi.v=NULL, kappa.v=NULL, EM.control) {
+                             parlist.out, pi_v=NULL, kappa_v=NULL, EM.control) {
     iter <- EM.status$iter+1
     finished <- FALSE
     converged <- FALSE
@@ -576,8 +576,8 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
         params.for.best.lli <- parlist.out
         params.for.best.lli$n <- NULL
         params.for.best.lli$p <- NULL
-        params.for.best.lli$pi <- pi.v
-        if (!is.null(kappa.v)) params.for.best.lli$kappa <- kappa.v
+        params.for.best.lli$pi <- pi_v
+        if (!is.null(kappa_v)) params.for.best.lli$kappa <- kappa_v
     } else {
         best.lli <- EM.status$best.lli
         llc.for.best.lli <- EM.status$llc.for.best.lli
@@ -605,13 +605,13 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
     if (EM.control$keepallparams) {
         names(new.lli) <- "lli"
         names(new.llc) <- "llc"
-        names(pi.v) <- paste0("pi",seq_along(pi.v))
-        if (!is.null(kappa.v)) {
-            names(kappa.v) <- paste0("kappa",seq_along(kappa.v))
+        names(pi_v) <- paste0("pi",seq_along(pi_v))
+        if (!is.null(kappa_v)) {
+            names(kappa_v) <- paste0("kappa",seq_along(kappa_v))
             newparams <- c(unlist(parlist.out),
-                           pi.v,kappa.v,new.lli,new.llc)
+                           pi_v,kappa_v,new.lli,new.llc)
         } else {
-            newparams <- c(unlist(parlist.out), pi.v,new.lli,new.llc)
+            newparams <- c(unlist(parlist.out), pi_v,new.lli,new.llc)
         }
 
         EM.status.out$params.every.iteration <- rbind(EM.status$params.every.iteration,
@@ -621,20 +621,20 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
     EM.status.out
 }
 
-run.EM.rowcluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
-                              pi.v, paramlengths,
-                              constraint.sum.zero=TRUE,
-                              EM.control=default.EM.control(),
+run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
+                              pi_v, param_lengths,
+                              constraint_sum_zero=TRUE,
+                              model_label="Full", EM.control=default.EM.control(),
                               optim.method="L-BFGS-B", optim.control=default.optim.control()) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
     q <- length(levels(long.df$Y))
-    RG <- length(pi.v)
+    RG <- length(pi_v)
 
     ## Extract parameters in R in order to check that invect is the correct length
-    parlist.in <- unpack.parvec(invect, model=model, paramlengths=paramlengths,
+    parlist.in <- unpack_parvec(invect, model=model, param_lengths=param_lengths,
                                 n, p, q, RG, CG = NULL,
-                                constraint.sum.zero = constraint.sum.zero)
+                                constraint_sum_zero = constraint_sum_zero)
     if (any(sapply(parlist.in,function(elt) any(is.na(elt))))) stop("Error unpacking parameters for model.")
     if (any(sapply(parlist.in,function(elt) is.null(elt)))) stop("Error unpacking parameters for model.")
 
@@ -647,7 +647,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
     epsilon <- EM.control$epsilon
 
     parlist.init <- parlist.in
-    pi.init <- pi.v
+    pi.init <- pi_v
     initvect <- invect
     outvect <- invect
     # Run the EM cycle:
@@ -655,15 +655,15 @@ run.EM.rowcluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
 
     while(!EM.status$finished)
     {
-        ppr.m <- rcpp_Rcluster_Estep(invect, model,
-                                     ydf, rowcmm, colcmm, covmm,
-                                     pi.v, paramlengths,
-                                     RG, p, n, q, epsilon, constraint.sum.zero)
+        ppr_m <- rcpp_Rcluster_Estep(invect, model,
+                                     ydf, rowc_mm, colc_mm, cov_mm,
+                                     pi_v, param_lengths,
+                                     RG, p, n, q, epsilon, constraint_sum_zero)
 
         ## Now set any NA values in the posterior probabilities matrix to 0
-        ppr.m[is.na(ppr.m)] <- 0
+        ppr_m[is.na(ppr_m)] <- 0
 
-        pi.v <- colMeans(ppr.m)
+        pi_v <- colMeans(ppr_m)
 
         invect <- outvect
         # M-step:
@@ -672,14 +672,14 @@ run.EM.rowcluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
                            fn=rcpp_Rclusterll,
                            model=model,
                            ydf=ydf,
-                           rowcmm=rowc.mm,
-                           colcmm=colc.mm,
-                           covmm=cov.mm,
-                           pprm=ppr.m,
-                           piv=pi.v,
-                           paramlengths=paramlengths,
+                           rowc_mm=rowc_mm,
+                           colc_mm=colc_mm,
+                           cov_mm=cov_mm,
+                           ppr_m=ppr_m,
+                           pi_v=pi_v,
+                           param_lengths=param_lengths,
                            RG=RG, p=p, n=n, q=q, epsilon=epsilon,
-                           constraint_sum_zero=constraint.sum.zero,
+                           constraint_sum_zero=constraint_sum_zero,
                            partial=TRUE,
                            incomplete=FALSE,
                            method=optim.method,
@@ -687,98 +687,97 @@ run.EM.rowcluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
 
         outvect <- optim.fit$par
 
-        parlist.out <- unpack.parvec(outvect,model=model, paramlengths=paramlengths,
+        parlist.out <- unpack_parvec(outvect,model=model, param_lengths=param_lengths,
                                      n, p, q, RG, CG = NULL,
-                                     constraint.sum.zero = constraint.sum.zero)
+                                     constraint_sum_zero = constraint_sum_zero)
 
         llc <- rcpp_Rclusterll(outvect,
                                model=model,
                                ydf=ydf,
-                               rowcmm=rowc.mm,
-                               colcmm=colc.mm,
-                               covmm=cov.mm,
-                               pprm=ppr.m,
-                               piv=pi.v,
-                               paramlengths=paramlengths,
+                               rowc_mm=rowc_mm,
+                               colc_mm=colc_mm,
+                               cov_mm=cov_mm,
+                               ppr_m=ppr_m,
+                               pi_v=pi_v,
+                               param_lengths=param_lengths,
                                RG=RG, p=p, n=n, q=q, epsilon=epsilon,
-                               constraint_sum_zero=constraint.sum.zero,
+                               constraint_sum_zero=constraint_sum_zero,
                                partial=FALSE,
                                incomplete=FALSE)
 
         lli <- rcpp_Rclusterll(outvect,
                                model=model,
                                ydf=ydf,
-                               rowcmm=rowc.mm,
-                               colcmm=colc.mm,
-                               covmm=cov.mm,
-                               pprm=ppr.m,
-                               piv=pi.v,
-                               paramlengths=paramlengths,
+                               rowc_mm=rowc_mm,
+                               colc_mm=colc_mm,
+                               cov_mm=cov_mm,
+                               ppr_m=ppr_m,
+                               pi_v=pi_v,
+                               param_lengths=param_lengths,
                                RG=RG, p=p, n=n, q=q, epsilon=epsilon,
-                               constraint_sum_zero=constraint.sum.zero,
+                               constraint_sum_zero=constraint_sum_zero,
                                partial=FALSE,
                                incomplete=TRUE)
 
         EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
                                       parlist.out=parlist.out,
                                       invect=invect,outvect=outvect,
-                                      pi.v=pi.v,EM.control=EM.control)
+                                      pi_v=pi_v,EM.control=EM.control)
 
         ## Report the current incomplete-data log-likelihood, which is the
         ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
         ## of the output of optim
-        # cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' partial complete-data log.like=', -optim.fit$value ,'\n'))
-        # cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' complete-data log.like=', llc ,'\n'))
-        cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' incomplete-data log.like=', lli ,'\n'))
+        # cat(paste(model_label,'model iter=',EM.status$iter, ' partial complete-data log.like=', -optim.fit$value ,'\n'))
+        # cat(paste(model_label,'model iter=',EM.status$iter, ' complete-data log.like=', llc ,'\n'))
+        cat(paste(model_label,'model iter=',EM.status$iter, ' incomplete-data log.like=', lli ,'\n'))
         # cat("parlist.out\n")
         # print(parlist.out)
-        # cat("pi",pi.v,"\n")
+        # cat("pi",pi_v,"\n")
     }
 
     # Find cluster groupings:
-    Rclus <- assignments(ppr.m)
+    Rclus <- assignments(ppr_m)
 
     # Save results:
-    npar <- length(invect) + length(pi.v)-1
+    npar <- length(invect) + length(pi_v)-1
     ninitvect <- length(invect)
     criteria <- calc.criteria(EM.status$best.lli, EM.status$llc.for.best.lli, npar, n, p)
     info <- c(n, p, q, npar, ninitvect, RG)
     names(info) <- c("n","p","q","npar","ninitvect","R")
     list("info"=info,
          "model"=model,
-         "submodel"=submodel,
          "EM.status"=EM.status,
          "criteria"=criteria,
          "numerical.correction.epsilon"=epsilon,
-         "constraint.sum.zero"=constraint.sum.zero,
-         "paramlengths"=paramlengths,
+         "constraint_sum_zero"=constraint_sum_zero,
+         "param_lengths"=param_lengths,
          "initvect"=initvect,
          "outvect"=outvect,
          "parlist.init"=parlist.init,
          "parlist.out"=parlist.out,
          "pi.init"=pi.init,
-         "pi.out"=pi.v,
-         "ppr"=ppr.m,
-         "rowcmm"=rowcmm,
-         "covmm"=covmm,
+         "pi.out"=pi_v,
+         "ppr"=ppr_m,
+         "rowc_mm"=rowc_mm,
+         "cov_mm"=cov_mm,
          "RowClusters"=Rclus)
 }
 
-run.EM.bicluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
-                             pi.v, kappa.v, paramlengths, epsilon,
-                             constraint.sum.zero=TRUE,
-                             EM.control=default.EM.control(),
+run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
+                             pi_v, kappa_v, param_lengths, epsilon,
+                             constraint_sum_zero=TRUE,
+                             model_label="Full", EM.control=default.EM.control(),
                              optim.method="L-BFGS-B", optim.control=default.optim.control()) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
     q <- length(levels(long.df$Y))
-    RG <- length(pi.v)
-    CG <- length(kappa.v)
+    RG <- length(pi_v)
+    CG <- length(kappa_v)
 
     ## Extract parameters in R in order to check that invect is the correct length
-    parlist.in <- unpack.parvec(invect, model=model, paramlengths=paramlengths,
+    parlist.in <- unpack_parvec(invect, model=model, param_lengths=param_lengths,
                                 n, p, q, RG, CG,
-                                constraint.sum.zero = constraint.sum.zero)
+                                constraint_sum_zero = constraint_sum_zero)
     if (any(sapply(parlist.in,function(elt) any(is.na(elt))))) stop("Error unpacking parameters for model.")
     if (any(sapply(parlist.in,function(elt) is.null(elt)))) stop("Error unpacking parameters for model.")
 
@@ -791,8 +790,8 @@ run.EM.bicluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
     epsilon <- EM.control$epsilon
 
     parlist.init <- parlist.in
-    pi.init <- pi.v
-    kappa.init <- kappa.v
+    pi.init <- pi_v
+    kappa.init <- kappa_v
     initvect <- invect
     outvect <- invect
     # Run the EM cycle:
@@ -800,27 +799,27 @@ run.EM.bicluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
 
     while(!EM.status$finished)
     {
-        ppr.m <- rcpp_Rcluster_Estep(invect, model,
-                                     ydf, rowcmm, colcmm, covmm,
-                                     pi.v, kappa.v, paramlengths,
-                                     RG, CG, p, n, q, epsilon, constraint.sum.zero,
+        ppr_m <- rcpp_Rcluster_Estep(invect, model,
+                                     ydf, rowc_mm, colc_mm, cov_mm,
+                                     pi_v, kappa_v, param_lengths,
+                                     RG, CG, p, n, q, epsilon, constraint_sum_zero,
                                      row_clusters=TRUE)
 
         ## Now set any NA values in the posterior probabilities matrix to 0
-        ppr.m[is.na(ppr.m)] <- 0
+        ppr_m[is.na(ppr_m)] <- 0
 
-        pi.v <- colMeans(ppr.m)
+        pi_v <- colMeans(ppr_m)
 
-        ppc.m <- rcpp_Rcluster_Estep(invect, model,
-                                     ydf, rowcmm, colcmm, covmm,
-                                     pi.v, kappa.v, paramlengths,
-                                     RG, CG, p, n, q, epsilon, constraint.sum.zero,
+        ppc_m <- rcpp_Rcluster_Estep(invect, model,
+                                     ydf, rowc_mm, colc_mm, cov_mm,
+                                     pi_v, kappa_v, param_lengths,
+                                     RG, CG, p, n, q, epsilon, constraint_sum_zero,
                                      row_clusters=FALSE)
 
         ## Now set any NA values in the posterior probabilities matrix to 0
-        ppc.m[is.na(ppc.m)] <- 0
+        ppc_m[is.na(ppc_m)] <- 0
 
-        kappa.v <- colMeans(ppc.m)
+        kappa_v <- colMeans(ppc_m)
 
         invect <- outvect
         # M-step:
@@ -829,16 +828,16 @@ run.EM.bicluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
                            fn=rcpp_Biclusterll,
                            model=model,
                            ydf=ydf,
-                           rowcmm=rowc.mm,
-                           colcmm=colc.mm,
-                           covmm=cov.mm,
-                           pprm=ppr.m,
-                           ppcm=ppc.m,
-                           piv=pi.v,
-                           kappav=kappa.v,
-                           paramlengths=paramlengths,
+                           rowc_mm=rowc_mm,
+                           colc_mm=colc_mm,
+                           cov_mm=cov_mm,
+                           ppr_m=ppr_m,
+                           ppc_m=ppc_m,
+                           pi_v=pi_v,
+                           kappa_v=kappa_v,
+                           param_lengths=param_lengths,
                            RG=RG, CG=CG, p=p, n=n, q=q, epsilon=epsilon,
-                           constraint_sum_zero=constraint.sum.zero,
+                           constraint_sum_zero=constraint_sum_zero,
                            partial=TRUE,
                            incomplete=FALSE, llc=NA,
                            method=optim.method,
@@ -846,23 +845,23 @@ run.EM.bicluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
 
         outvect <- optim.fit$par
 
-        parlist.out <- unpack.parvec(outvect,model=model, paramlengths=paramlengths,
+        parlist.out <- unpack_parvec(outvect,model=model, param_lengths=param_lengths,
                                      n, p, q, RG, CG,
-                                     constraint.sum.zero = constraint.sum.zero)
+                                     constraint_sum_zero = constraint_sum_zero)
 
         llc <- rcpp_Biclusterll(outvect,
                                 model=model,
                                 ydf=ydf,
-                                rowcmm=rowc.mm,
-                                colcmm=colc.mm,
-                                covmm=cov.mm,
-                                pprm=ppr.m,
-                                ppcm=ppc.m,
-                                piv=pi.v,
-                                kappav=kappa.v,
-                                paramlengths=paramlengths,
+                                rowc_mm=rowc_mm,
+                                colc_mm=colc_mm,
+                                cov_mm=cov_mm,
+                                ppr_m=ppr_m,
+                                ppc_m=ppc_m,
+                                pi_v=pi_v,
+                                kappa_v=kappa_v,
+                                param_lengths=param_lengths,
                                 RG=RG, CG=CG, p=p, n=n, q=q, epsilon=epsilon,
-                                constraint_sum_zero=constraint.sum.zero,
+                                constraint_sum_zero=constraint_sum_zero,
                                 partial=FALSE,
                                 incomplete=FALSE, llc=NA,
                                 method=optim.method,
@@ -871,16 +870,16 @@ run.EM.bicluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
         lli <- rcpp_Biclusterll(outvect,
                                 model=model,
                                 ydf=ydf,
-                                rowcmm=rowc.mm,
-                                colcmm=colc.mm,
-                                covmm=cov.mm,
-                                pprm=ppr.m,
-                                ppcm=ppc.m,
-                                piv=pi.v,
-                                kappav=kappa.v,
-                                paramlengths=paramlengths,
+                                rowc_mm=rowc_mm,
+                                colc_mm=colc_mm,
+                                cov_mm=cov_mm,
+                                ppr_m=ppr_m,
+                                ppc_m=ppc_m,
+                                pi_v=pi_v,
+                                kappa_v=kappa_v,
+                                param_lengths=param_lengths,
                                 RG=RG, CG=CG, p=p, n=n, q=q, epsilon=epsilon,
-                                constraint_sum_zero=constraint.sum.zero,
+                                constraint_sum_zero=constraint_sum_zero,
                                 partial=FALSE,
                                 incomplete=TRUE, llc=llc,
                                 method=optim.method,
@@ -890,51 +889,50 @@ run.EM.bicluster <- function(invect, model, long.df, rowcmm, colcmm, covmm,
         EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
                                       parlist.out=parlist.out,
                                       invect=invect,outvect=outvect,
-                                      pi.v=pi.v, kappa.v=kappa.v, EM.control=EM.control)
+                                      pi_v=pi_v, kappa_v=kappa_v, EM.control=EM.control)
 
         ## Report the current incomplete-data log-likelihood, which is the
         ## NEGATIVE of the latest value of Bicluster.ll i.e. the NEGATIVE
         ## of the output of optim
-        cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' partial complete-data log.like=', -optim.fit$value ,'\n'))
-        cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' complete-data log.like=', llc ,'\n'))
-        cat(paste(toupper(submodel),'model iter=',EM.status$iter, ' APPROXIMATE incomplete-data log.like=', lli ,'\n'))
+        cat(paste(model_label,'model iter=',EM.status$iter, ' partial complete-data log.like=', -optim.fit$value ,'\n'))
+        cat(paste(model_label,'model iter=',EM.status$iter, ' complete-data log.like=', llc ,'\n'))
+        cat(paste(model_label,'model iter=',EM.status$iter, ' APPROXIMATE incomplete-data log.like=', lli ,'\n'))
         # cat("parlist.out\n")
         # print(parlist.out)
-        # cat("pi",pi.v,"\n")
-        # cat("kappa",kappa.v,"\n")
+        # cat("pi",pi_v,"\n")
+        # cat("kappa",kappa_v,"\n")
     }
 
     # Find cluster groupings:
-    Rclus <- assignments(ppr.m)
-    Cclus <- assignments(ppc.m)
+    Rclus <- assignments(ppr_m)
+    Cclus <- assignments(ppc_m)
 
     # Save results:
-    npar <- length(invect) + length(pi.v)-1 + length(kappa.v)-1
+    npar <- length(invect) + length(pi_v)-1 + length(kappa_v)-1
     ninitvect <- length(initvect)
     criteria <- calc.criteria(EM.status$best.lli, EM.status$llc.for.best.lli, npar, n, p)
     info <- c(n, p, q, npar, ninitvect, RG, CG)
     names(info) <- c("n","p","q","npar","ninitvect","R","C")
     list("info"=info,
          "model"=model,
-         "submodel"=submodel,
          "EM.status"=EM.status,
          "criteria"=criteria,
          "numerical.correction.epsilon"=epsilon,
-         "constraint.sum.zero"=constraint.sum.zero,
-         "paramlengths"=paramlengths,
+         "constraint_sum_zero"=constraint_sum_zero,
+         "param_lengths"=param_lengths,
          "initvect"=initvect,
          "outvect"=outvect,
          "parlist.init"=parlist.init,
          "parlist.out"=parlist.out,
          "pi.init"=pi.init,
          "kappa.init"=kappa.init,
-         "pi.out"=pi.v,
-         "ppr"=ppr.m,
-         "kappa.out"=kappa.v,
-         "ppc"=ppc.m,
-         "rowcmm"=rowcmm,
-         "colcmm"=colcmm,
-         "covmm"=covmm,
+         "pi.out"=pi_v,
+         "ppr"=ppr_m,
+         "kappa.out"=kappa_v,
+         "ppc"=ppc_m,
+         "rowc_mm"=rowc_mm,
+         "colc_mm"=colc_mm,
+         "cov_mm"=cov_mm,
          "RowClusters"=Rclus,
          "ColumnClusters"=Cclus)
 }
@@ -955,16 +953,16 @@ calc.SE.rowcluster <- function(long.df, clust.out,
                             fn=rcpp_Rclusterll,
                             model=clust.out$model,
                             ydf=ydf,
-                            rowcmm=rowc.mm,
-                            colcmm=colc.mm,
-                            covmm=cov.mm,
-                            pprm=clust.out$ppr,
-                            piv=clust.out$pi.out,
-                            paramlengths=clust.out$paramlengths,
+                            rowc_mm=rowc_mm,
+                            colc_mm=colc_mm,
+                            cov_mm=cov_mm,
+                            ppr_m=clust.out$ppr,
+                            pi_v=clust.out$pi.out,
+                            param_lengths=clust.out$param_lengths,
                             RG=clust.out$info["R"], p=clust.out$info["p"],
                             n=clust.out$info["n"], q=clust.out$info["q"],
                             epsilon=clust.out$epsilon,
-                            constraint_sum_zero=clust.out$constraint.sum.zero,
+                            constraint_sum_zero=clust.out$constraint_sum_zero,
                             partial=FALSE,
                             incomplete=TRUE,
                             method=optim.method,
@@ -1024,19 +1022,19 @@ calc.SE.bicluster <- function(long.df, clust.out,
     optim.hess <- optimHess(par=outvect,
                             model=clust.out$model,
                             ydf=ydf,
-                            rowcmm=clust.out$rowc.mm,
-                            colcmm=clust.out$colc.mm,
-                            covmm=clust.out$cov.mm,
-                            pprm=clust.out$ppr,
-                            ppcm=clust.out$ppc,
-                            piv=clust.out$pi.out,
-                            kappav=clust.out$kappa.out,
-                            paramlengths=clust.out$paramlengths,
+                            rowc_mm=clust.out$rowc_mm,
+                            colc_mm=clust.out$colc_mm,
+                            cov_mm=clust.out$cov_mm,
+                            ppr_m=clust.out$ppr,
+                            ppc_m=clust.out$ppc,
+                            pi_v=clust.out$pi.out,
+                            kappa_v=clust.out$kappa.out,
+                            param_lengths=clust.out$param_lengths,
                             RG=clust.out$info["R"], CG=clust.out$info["C"],
                             p=clust.out$info["p"], n=clust.out$info["n"],
                             q=clust.out$info["q"],
                             epsilon=clust.out$epsilon,
-                            constraint_sum_zero=clust.out$constraint.sum.zero,
+                            constraint_sum_zero=clust.out$constraint_sum_zero,
                             partial=FALSE,
                             incomplete=TRUE, llc=NA,
                             method=optim.method,
