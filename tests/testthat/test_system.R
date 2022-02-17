@@ -1,6 +1,8 @@
 ## rowclustering testing -------------------------------------------------------
 test_that("rowclustering runs without errors.", {
 
+    ## Note that expect_error(), comparing to NA, checks that there are no errors.
+
     ## Test that different uses of rowclustering run without errors
     set.seed(30)
     long.df.sim <- data.frame(Y=factor(sample(1:3,5*30,replace=TRUE)),
@@ -31,7 +33,7 @@ test_that("rowclustering runs without errors.", {
 
     if (exists("pi.init")) rm(pi.init)
     initvect <- c(-0.8,0.7,0.2,2)
-    expect_error(results <- clustord(Y~ROW,
+    expect_error(results <- clustord(Y~ROWCLUST,
                                           model="OSM", initvect=initvect,
                                           nclus.row=2, long.df=long.df.sim,
                                           EM.control=list(EMcycles=3,startEMcycles=2),
@@ -440,7 +442,7 @@ test_that("biclustering runs without errors.", {
                                          start.from.simple.model = TRUE,
                                          EM.control=list(EMcycles=3,startEMcycles=2)),NA)
 
-    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+ROWCLUST:COLCLUST)
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+ROWCLUST:COLCLUST,
                                          model="POM",
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          start.from.simple.model = FALSE,

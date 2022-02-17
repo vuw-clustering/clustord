@@ -299,23 +299,23 @@ check.formula <- function(formula, long.df, RG, CG) {
     #      terms (i.e. all the remaining params apart from model-specific params
     #      like mu or mu_k, and phi_k)
     #      OUTPUT: params
-    param.lengths <- rep(0, 12)
-    names(param.lengths) <- c("mu","phi","rowc","col","rowc.col","rowc.cov","cov",
+    paramlengths <- rep(0, 12)
+    names(paramlengths) <- c("mu","phi","rowc","col","rowc.col","rowc.cov","cov",
                               "colc","rowc.colc","row","colc.row","colc.cov")
-    if (exists('rowc.part')) param.lengths['rowc'] <- RG
-    if (exists('colc.part')) param.lengths['colc'] <- CG
-    if (exists('rowc.colc.part')) param.lengths['rowc.colc'] <- RG*CG
-    if (exists('row.part')) param.lengths['row'] <- n
-    if (exists('colc.row.part')) param.lengths['colc.row'] <- CG*n
-    if (exists('col.part')) param.lengths['col'] <- p
-    if (exists('rowc.col.part')) param.lengths['rowc.col'] <- RG*p
-    if (exists('rowc.cov.part') && length(rowc.cov.part) > 0) param.lengths['rowc.cov'] <- length(rowc.cov.part)*RG
-    if (exists('colc.cov.part') && length(colc.cov.part) > 0) param.lengths['colc.cov'] <- length(colc.cov.part)*CG
-    if (exists('pure.cov.part') && length(pure.cov.part) > 0) param.lengths['cov'] <- length(pure.cov.part)
+    if (exists('rowc.part')) paramlengths['rowc'] <- RG
+    if (exists('colc.part')) paramlengths['colc'] <- CG
+    if (exists('rowc.colc.part')) paramlengths['rowc.colc'] <- RG*CG
+    if (exists('row.part')) paramlengths['row'] <- n
+    if (exists('colc.row.part')) paramlengths['colc.row'] <- CG*n
+    if (exists('col.part')) paramlengths['col'] <- p
+    if (exists('rowc.col.part')) paramlengths['rowc.col'] <- RG*p
+    if (exists('rowc.cov.part') && length(rowc.cov.part) > 0) paramlengths['rowc.cov'] <- length(rowc.cov.part)*RG
+    if (exists('colc.cov.part') && length(colc.cov.part) > 0) paramlengths['colc.cov'] <- length(colc.cov.part)*CG
+    if (exists('pure.cov.part') && length(pure.cov.part) > 0) paramlengths['cov'] <- length(pure.cov.part)
 
     # Return model matrices
     # Return list of params
-    list(param.lengths=param.lengths, rowc.mm=rowc.mm, colc.mm=colc.mm, cov.mm=cov.mm)
+    list(paramlengths=paramlengths, rowc.mm=rowc.mm, colc.mm=colc.mm, cov.mm=cov.mm)
 }
 
 extract.covs <- function(clust.name, clust.idxs, non.row.col.part, long.df) {

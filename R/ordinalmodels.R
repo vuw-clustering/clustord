@@ -1,4 +1,4 @@
-unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
+unpack.parvec <- function(invect, model, paramlengths, n, p, q, RG, CG = NULL,
                           constraint.sum.zero = TRUE) {
 
     ## NOTE: I have to set up empty entries for the unused parts of parlist and
@@ -7,7 +7,7 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
 
     sub.invect <- invect
     nelts <- 0
-    parlist <- as.list(param.lengths)
+    parlist <- as.list(paramlengths)
 
     switch(model,
            "OSM"={
@@ -51,7 +51,7 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
                parlist[['phi']] <- NULL
            })
 
-    nrowc <- param.lengths['rowc']
+    nrowc <- paramlengths['rowc']
     if (nrowc > 0) {
         if (length(sub.invect) < (nrowc-1)) stop("invect not long enough for given formula.")
         rowc.coef <- sub.invect[1:(nrowc-1)]
@@ -65,7 +65,7 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         } else sub.invect <- NULL
     } else parlist[['rowc']] <- NULL
 
-    ncolc <- param.lengths['colc']
+    ncolc <- paramlengths['colc']
     if (ncolc > 0) {
         if (length(sub.invect) < (ncolc-1)) stop("invect not long enough for given formula.")
         colc.coef <- sub.invect[1:(ncolc-1)]
@@ -79,12 +79,12 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         } else sub.invect <- NULL
     } else parlist[['colc']] <- NULL
 
-    nrowc.colc <- param.lengths['rowc.colc']
+    nrowc.colc <- paramlengths['rowc.colc']
     if (nrowc.colc > 0) {
         ## The number of independent parameters in the row and column cluster
         ## interaction depends on whether the main effect terms for row and
         ## column clusters are included as well
-        if (param.lengths['rowc'] > 0 && param.lengths['colc'] > 0) {
+        if (paramlengths['rowc'] > 0 && paramlengths['colc'] > 0) {
 
             if (length(sub.invect) < (RG-1)*(CG-1)) stop("invect not long enough for given formula.")
             rowc.colc.coef <- sub.invect[1:((RG-1)*(CG-1))]
@@ -103,7 +103,7 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
                 sub.invect <- sub.invect[((RG-1)*(CG-1)+1):length(sub.invect)]
             } else sub.invect <- NULL
         } else {
-            if (param.lengths['rowc'] > 0 || param.lengths['colc'] > 0) {
+            if (paramlengths['rowc'] > 0 || paramlengths['colc'] > 0) {
                 browser()
             }
 
@@ -120,7 +120,7 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         }
     } else parlist[['rowc.colc']] <- NULL
 
-    nrow <- param.lengths['row']
+    nrow <- paramlengths['row']
     if (nrow > 0) {
         if (length(sub.invect) < n) stop("invect not long enough for given formula.")
         row.coef <- sub.invect[1:n]
@@ -132,7 +132,7 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
             sub.invect <- sub.invect[(n+1):length(sub.invect)]
         } else sub.invect <- NULL
     } else parlist[['row']] <- NULL
-    ncol <- param.lengths['col']
+    ncol <- paramlengths['col']
     if (ncol > 0) {
         if (length(sub.invect) < p) stop("invect not long enough for given formula.")
         col.coef <- sub.invect[1:p]
@@ -145,12 +145,12 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         } else sub.invect <- NULL
     } else parlist[['col']] <- NULL
 
-    nrowc.col <- param.lengths['rowc.col']
+    nrowc.col <- paramlengths['rowc.col']
     if (nrowc.col > 0) {
         ## The number of independent parameters in the interaction between row
         ## clusters and individual column effects depends on whether the main
         ## effects for row and column clusters are included as well
-        if (param.lengths['rowc'] > 0) {
+        if (paramlengths['rowc'] > 0) {
             if (length(sub.invect) < (RG-1)*(p-1)) stop("invect not long enough for given formula.")
 
             rowc.col.coef <- sub.invect[1:((RG-1)*(p-1))]
@@ -185,12 +185,12 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         }
     } else parlist[['rowc.col']] <- NULL
 
-    ncolc.row <- param.lengths['colc.row']
+    ncolc.row <- paramlengths['colc.row']
     if (ncolc.row > 0) {
         ## The number of independent parameters in the interaction between column
         ## clusters and individual row effects depends on whether the main
         ## effects for column clusters and row effects are included as well
-        if (param.lengths['colc'] > 0) {
+        if (paramlengths['colc'] > 0) {
             colc.row.coef <- matrix(colc.row.coef,nrow=CG-1,ncol=n-1,byrow=T)
             colc.row.coef <- cbind(colc.row.coef,-rowSums(colc.row.coef))
             # Using constraint formulation from original POM code, with final row of
@@ -222,7 +222,7 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         }
     } else parlist[['colc.row']] <- NULL
 
-    nrowc.cov <- param.lengths['rowc.cov']
+    nrowc.cov <- paramlengths['rowc.cov']
     if (nrowc.cov > 0) {
         if (length(sub.invect) < nrowc.cov) stop("invect not long enough for given formula.")
         rowc.cov.coef <- sub.invect[1:nrowc.cov]
@@ -235,7 +235,7 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
             sub.invect <- sub.invect[(nrowc.cov+1):length(sub.invect)]
         } else sub.invect <- NULL
     } else parlist[['rowc.cov']] <- NULL
-    ncolc.cov <- param.lengths['colc.cov']
+    ncolc.cov <- paramlengths['colc.cov']
     if (ncolc.cov > 0) {
         if (length(sub.invect) < ncolc.cov) stop("invect not long enough for given formula.")
         colc.cov.coef <- sub.invect[1:ncolc.cov]
@@ -249,7 +249,7 @@ unpack.parvec <- function(invect, model, param.lengths, n, p, q, RG, CG = NULL,
         } else sub.invect <- NULL
     } else parlist[['colc.cov']] <- NULL
 
-    ncov <- param.lengths['cov']
+    ncov <- paramlengths['cov']
     if (ncov > 0) {
         if (length(sub.invect) < ncov) stop("invect not long enough for given formula.")
         cov.coef <- sub.invect[1:ncov]

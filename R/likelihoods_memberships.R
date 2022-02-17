@@ -8,10 +8,10 @@ assignments <- function(pp.m) {
 }
 
 Bicluster.IncllC <- function(invect, model, ydf, rowc.mm, colc.mm, cov.mm, pi.v, kappa.v,
-                             param.lengths, RG, CG, p, n, q,
+                             paramlengths, RG, CG, p, n, q,
                              constraint.sum.zero=TRUE)
 {
-    parlist <- unpack.parvec(invect, model, param.lengths, n, p, q, RG, CG,
+    parlist <- unpack.parvec(invect, model, paramlengths, n, p, q, RG, CG,
                              constraint.sum.zero)
 
     pi.v[pi.v==0]=lower.limit
@@ -30,36 +30,36 @@ Bicluster.IncllC <- function(invect, model, ydf, rowc.mm, colc.mm, cov.mm, pi.v,
                         yval <- as.numeric(ydf$Y[ij])
 
                         linear_part = 0;
-                        if (param.lengths["rowc"] > 0) {
+                        if (paramlengths["rowc"] > 0) {
                             linear_part <- linear_part + parlist$rowc[rr];
                         }
-                        if (param.lengths["colc"] > 0) {
+                        if (paramlengths["colc"] > 0) {
                             linear_part <- linear_part + parlist$colc[cc];
                         }
-                        if (param.lengths["rowc.colc"] > 0) {
+                        if (paramlengths["rowc.colc"] > 0) {
                             linear_part <- linear_part + parlist$rowc.colc[rr,cc];
                         }
 
-                        if (param.lengths["row"] > 0) {
+                        if (paramlengths["row"] > 0) {
                             linear_part <- linear_part + parlist$row[ii];
                         }
-                        if (param.lengths["col"] > 0) {
+                        if (paramlengths["col"] > 0) {
                             linear_part <- linear_part + parlist$col[jj];
                         }
-                        if (param.lengths["rowc.col"] > 0) {
+                        if (paramlengths["rowc.col"] > 0) {
                             linear_part <- linear_part + parlist$rowc.col[rr,jj];
                         }
-                        if (param.lengths["colc.row"] > 0) {
+                        if (paramlengths["colc.row"] > 0) {
                             linear_part <- linear_part + parlist$colc.row[cc,ii];
                         }
 
-                        if (param.lengths["rowc.cov"] > 0) {
+                        if (paramlengths["rowc.cov"] > 0) {
                             linear_part <- linear_part + sum(rowc.mm[ij,]*parlist$rowc.cov[rr,])
                         }
-                        if (param.lengths["colc.cov"] > 0) {
+                        if (paramlengths["colc.cov"] > 0) {
                             linear_part <- linear_part + sum(colc.mm[ij,]*parlist$colc.cov[cc,])
                         }
-                        if (param.lengths["cov"] > 0) {
+                        if (paramlengths["cov"] > 0) {
                             linear_part <- linear_part + sum(cov.mm[ij,]*parlist$cov)
                         }
 
