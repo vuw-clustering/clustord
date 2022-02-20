@@ -125,6 +125,9 @@ unpack_parvec <- function(invect, model, param_lengths, n, p, q, RG, CG = NULL,
         if (length(sub_invect) < n-1) stop("invect not long enough for given formula.")
         row_coef <- sub_invect[1:(n-1)]
 
+        if (constraint_sum_zero) row_coef <- c(row_coef, -sum(row_coef))
+        else row_coef <- c(0, row_coef)
+
         parlist[['row']] <- row_coef
         nelts <- nelts + n
 
@@ -136,6 +139,10 @@ unpack_parvec <- function(invect, model, param_lengths, n, p, q, RG, CG = NULL,
     if (ncol > 0) {
         if (length(sub_invect) < p-1) stop("invect not long enough for given formula.")
         col_coef <- sub_invect[1:(p-1)]
+
+        if (constraint_sum_zero) col_coef <- c(col_coef, -sum(col_coef))
+        else col_coef <- c(0, col_coef)
+
 
         parlist[['col']] <- col_coef
         nelts <- nelts + p-1

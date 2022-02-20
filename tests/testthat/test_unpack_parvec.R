@@ -22,16 +22,16 @@ test_that("unpack_parvec produces correct results.", {
 
     param_lengths <- c(q,q,RG,p,0,0,0,0,0,0,0,0)
     names(param_lengths) <- names_param_lengths
-    expect_equal(unpack_parvec(c(1,2,3,-1,1,-1.5,2,1:p),model="OSM",param_lengths=param_lengths,
+    expect_equal(unpack_parvec(c(1,2,3,-1,1,-1.5,2,1:(p-1)),model="OSM",param_lengths=param_lengths,
                                n=n, p=p, q=q, RG=RG, constraint_sum_zero=TRUE),
                  list(mu=c(0,1,2,3),phi=c(0,expit(-1),expit(-1 + exp(1)),1),
-                      rowc=c(-1.5,2,-0.5),col=1:p),
+                      rowc=c(-1.5,2,-0.5),col=c(1:(p-1),-sum(1:(p-1)))),
                  ignore_attr=TRUE, tolerance=1E-4)
 
-    expect_equal(unpack_parvec(c(1,2,3,-1,1,-1.5,2,1:p),model="OSM",param_lengths=param_lengths,
+    expect_equal(unpack_parvec(c(1,2,3,-1,1,-1.5,2,1:(p-1)),model="OSM",param_lengths=param_lengths,
                                n=n, p=p, q=q, RG=RG, constraint_sum_zero=FALSE),
                  list(mu=c(0,1,2,3),phi=c(0,expit(-1),expit(-1 + exp(1)),1),
-                      rowc=c(0,-1.5,2),col=1:p),
+                      rowc=c(0,-1.5,2),col=c(0,1:(p-1))),
                  ignore_attr=TRUE, tolerance=1E-4)
 
     # First, the model with interaction terms and main effects
@@ -40,16 +40,16 @@ test_that("unpack_parvec produces correct results.", {
     rowc_col <- matrix(1:((RG-1)*(p-1)), nrow=(RG-1), byrow=TRUE)
     rowc_col <- cbind(rowc_col,-rowSums(rowc_col))
     rowc_col <- rbind(rowc_col,-colSums(rowc_col))
-    expect_equal(unpack_parvec(c(1,2,3,-1,1,-1.5,2,1:p,1:((RG-1)*(p-1))),model="OSM",
+    expect_equal(unpack_parvec(c(1,2,3,-1,1,-1.5,2,1:(p-1),1:((RG-1)*(p-1))),model="OSM",
                                param_lengths=param_lengths, n=n, p=p, q=q, RG=RG, constraint_sum_zero=TRUE),
                  list(mu=c(0,1,2,3),phi=c(0,expit(-1),expit(-1 + exp(1)),1),
-                      rowc=c(-1.5,2,-0.5),col=1:p, rowc_col=rowc_col),
+                      rowc=c(-1.5,2,-0.5),col=c(1:(p-1),-sum(1:(p-1))), rowc_col=rowc_col),
                  ignore_attr=TRUE, tolerance=1E-4)
 
-    expect_equal(unpack_parvec(c(1,2,3,-1,1,-1.5,2,1:p,1:((RG-1)*(p-1))),model="OSM",
+    expect_equal(unpack_parvec(c(1,2,3,-1,1,-1.5,2,1:(p-1),1:((RG-1)*(p-1))),model="OSM",
                                param_lengths=param_lengths, n=n, p=p, q=q, RG=RG, constraint_sum_zero=FALSE),
                  list(mu=c(0,1,2,3),phi=c(0,expit(-1),expit(-1 + exp(1)),1),
-                      rowc=c(0,-1.5,2),col=1:p, rowc_col=rowc_col),
+                      rowc=c(0,-1.5,2),col=c(0,1:(p-1)), rowc_col=rowc_col),
                  ignore_attr=TRUE, tolerance=1E-4)
 
     # Second, the model with interaction terms and no main effects
@@ -193,14 +193,14 @@ test_that("unpack_parvec produces correct results.", {
 
     param_lengths <- c(q,0,RG,p,0,0,0,0,0,0,0,0)
     names(param_lengths) <- names_param_lengths
-    expect_equal(unpack_parvec(c(1,log(1),log(1),-1.5,2,1:p),model="POM",param_lengths=param_lengths,
+    expect_equal(unpack_parvec(c(1,log(1),log(1),-1.5,2,1:(p-1)),model="POM",param_lengths=param_lengths,
                                n=n, p=p, q=q, RG=RG, constraint_sum_zero=TRUE),
-                 list(mu=c(1,2,3),rowc=c(-1.5,2,-0.5),col=1:p),
+                 list(mu=c(1,2,3),rowc=c(-1.5,2,-0.5),col=c(1:(p-1),-sum(1:(p-1)))),
                  ignore_attr=TRUE, tolerance=1E-4)
 
-    expect_equal(unpack_parvec(c(1,log(1),log(1),-1.5,2,1:p),model="POM",param_lengths=param_lengths,
+    expect_equal(unpack_parvec(c(1,log(1),log(1),-1.5,2,1:(p-1)),model="POM",param_lengths=param_lengths,
                                n=n, p=p, q=q, RG=RG, constraint_sum_zero=FALSE),
-                 list(mu=c(1,2,3),rowc=c(0,-1.5,2),col=1:p),
+                 list(mu=c(1,2,3),rowc=c(0,-1.5,2),col=c(0,1:(p-1))),
                  ignore_attr=TRUE, tolerance=1E-4)
 
     param_lengths <- c(q,0,RG,p,RG*p,0,0,0,0,0,0,0)
@@ -208,14 +208,14 @@ test_that("unpack_parvec produces correct results.", {
     rowc_col <- matrix(1:((RG-1)*(p-1)), nrow=(RG-1), byrow=TRUE)
     rowc_col <- cbind(rowc_col,-rowSums(rowc_col))
     rowc_col <- rbind(rowc_col,-colSums(rowc_col))
-    expect_equal(unpack_parvec(c(1,log(1),log(1),-1.5,2,1:p,1:((RG-1)*(p-1))),model="POM",
+    expect_equal(unpack_parvec(c(1,log(1),log(1),-1.5,2,1:(p-1),1:((RG-1)*(p-1))),model="POM",
                                param_lengths=param_lengths, n=n, p=p, q=q, RG=RG, constraint_sum_zero=TRUE),
-                 list(mu=c(1,2,3),rowc=c(-1.5,2,-0.5),col=1:p, rowc_col=rowc_col),
+                 list(mu=c(1,2,3),rowc=c(-1.5,2,-0.5),col=c(1:(p-1),-sum(1:(p-1))), rowc_col=rowc_col),
                  ignore_attr=TRUE, tolerance=1E-4)
 
-    expect_equal(unpack_parvec(c(1,log(1),log(1),-1.5,2,1:p,1:((RG-1)*(p-1))),model="POM",
+    expect_equal(unpack_parvec(c(1,log(1),log(1),-1.5,2,1:(p-1),1:((RG-1)*(p-1))),model="POM",
                                param_lengths=param_lengths, n=n, p=p,  q=q, RG=RG, constraint_sum_zero=FALSE),
-                 list(mu=c(1,2,3),rowc=c(0,-1.5,2),col=1:p, rowc_col=rowc_col),
+                 list(mu=c(1,2,3),rowc=c(0,-1.5,2),col=c(0,1:(p-1)), rowc_col=rowc_col),
                  ignore_attr=TRUE, tolerance=1E-4)
 
     CG <- 2
@@ -274,14 +274,14 @@ test_that("unpack_parvec produces correct results.", {
 
     param_lengths <- c(q,0,RG,p,0,0,0,0,0,0,0,0)
     names(param_lengths) <- names_param_lengths
-    expect_equal(unpack_parvec(c(1,-1.5,2,1:p),model="Binary",param_lengths=param_lengths,
+    expect_equal(unpack_parvec(c(1,-1.5,2,1:(p-1)),model="Binary",param_lengths=param_lengths,
                                n=n, p=p, q=q, RG=RG, constraint_sum_zero=TRUE),
-                 list(mu=c(1),rowc=c(-1.5,2,-0.5),col=1:p),
+                 list(mu=c(1),rowc=c(-1.5,2,-0.5),col=c(1:(p-1),-sum(1:(p-1)))),
                  ignore_attr=TRUE, tolerance=1E-4)
 
-    expect_equal(unpack_parvec(c(1,-1.5,2,1:p),model="Binary",param_lengths=param_lengths,
+    expect_equal(unpack_parvec(c(1,-1.5,2,1:(p-1)),model="Binary",param_lengths=param_lengths,
                                n=n, p=p, q=q, RG=RG, constraint_sum_zero=FALSE),
-                 list(mu=c(1),rowc=c(0,-1.5,2),col=1:p),
+                 list(mu=c(1),rowc=c(0,-1.5,2),col=c(0,1:(p-1))),
                  ignore_attr=TRUE, tolerance=1E-4)
 
     param_lengths <- c(q,0,RG,p,RG*p,0,0,0,0,0,0,0)
@@ -289,16 +289,16 @@ test_that("unpack_parvec produces correct results.", {
     rowc_col <- matrix(1:((RG-1)*(p-1)), nrow=(RG-1), byrow=TRUE)
     rowc_col <- cbind(rowc_col,-rowSums(rowc_col))
     rowc_col <- rbind(rowc_col,-colSums(rowc_col))
-    expect_equal(unpack_parvec(c(1,-1.5,2,1:p,1:((RG-1)*(p-1))),model="Binary",
+    expect_equal(unpack_parvec(c(1,-1.5,2,1:(p-1),1:((RG-1)*(p-1))),model="Binary",
                                param_lengths=param_lengths,
                                n=n, p=p, q=q, RG=RG, constraint_sum_zero=TRUE),
-                 list(mu=c(1),rowc=c(-1.5,2,-0.5),col=1:p, rowc_col=rowc_col),
+                 list(mu=c(1),rowc=c(-1.5,2,-0.5),col=c(1:(p-1),-sum(1:(p-1))), rowc_col=rowc_col),
                  ignore_attr=TRUE, tolerance=1E-4)
 
-    expect_equal(unpack_parvec(c(1,-1.5,2,1:p,1:((RG-1)*(p-1))),model="Binary",
+    expect_equal(unpack_parvec(c(1,-1.5,2,1:(p-1),1:((RG-1)*(p-1))),model="Binary",
                                param_lengths=param_lengths,
                                n=n, p=p, q=q, RG=RG, constraint_sum_zero=FALSE),
-                 list(mu=c(1),rowc=c(0,-1.5,2),col=1:p, rowc_col=rowc_col),
+                 list(mu=c(1),rowc=c(0,-1.5,2),col=c(0,1:(p-1)), rowc_col=rowc_col),
                  ignore_attr=TRUE, tolerance=1E-4)
 
     CG <- 2
@@ -343,3 +343,4 @@ test_that("unpack_parvec produces correct results.", {
                       rowc_colc=matrix(c(0.5,-1,1.5,-1,0.5,1,1.5,-3,-1,0,-3,4),nrow=3,byrow=TRUE)),
                  ignore_attr=TRUE, tolerance=1E-4)
 })
+

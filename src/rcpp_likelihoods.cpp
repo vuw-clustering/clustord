@@ -184,25 +184,41 @@ void rcpp_unpack(const String & model,
     }
 
     if (param_lengths["row"] > 0) {
-        row_coef[n-1] = 0;
-        for (ii=0; ii < n-1; ii++) {
-            ind = nelts + ii;
-            // Rcout << "The index of invect : " << ind << "\n";
-            row_coef[ii] = invect[ind];
-            row_coef[n-1] -= invect[ind];
+        if (constraint_sum_zero) {
+            row_coef[n-1] = 0;
+            for (ii=0; ii < n-1; ii++) {
+                ind = nelts + ii;
+                // Rcout << "The index of invect : " << ind << "\n";
+                row_coef[ii] = invect[ind];
+                row_coef[n-1] -= invect[ind];
+            }
+        } else {
+            row_coef[0] = 0;
+            for (ii=0; ii < n-1; ii++) {
+                ind = nelts + ii;
+                row_coef[ii+1] = invect[ind];
+            }
         }
         nelts += n-1;
         // Rcout << "The value of nelts : " << nelts << "\n";
         // Rcout << "The value of row_coef : " << row_coef << "\n";
     }
     if (param_lengths["col"] > 0) {
-        col_coef[p-1] = 0;
-        for (jj=0; jj < p-1; jj++) {
-            ind = nelts + jj;
-            // Rcout << "The index of invect : " << ind << "\n";
-            col_coef[jj] = invect[ind];
-            col_coef[p-1] -= invect[ind];
-            // Rcout << "The value of col_coef : " << col_coef << "\n";
+        if (constraint_sum_zero) {
+            col_coef[p-1] = 0;
+            for (jj=0; jj < p-1; jj++) {
+                ind = nelts + jj;
+                // Rcout << "The index of invect : " << ind << "\n";
+                col_coef[jj] = invect[ind];
+                col_coef[p-1] -= invect[ind];
+                // Rcout << "The value of col_coef : " << col_coef << "\n";
+            }
+        } else {
+            col_coef[0] = 0;
+            for (jj=0; jj < p-1; jj++) {
+                ind = nelts + jj;
+                col_coef[jj+1] = invect[ind];
+            }
         }
         nelts += p-1;
         // Rcout << "The value of nelts : " << nelts << "\n";
