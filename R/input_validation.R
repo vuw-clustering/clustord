@@ -201,8 +201,8 @@ check.formula <- function(formula, long.df, RG, CG) {
          !any(fo_labels == "COLCLUST") && any(fo_labels == "ROW"))) {
         stop("If including the interaction between column clusters and row effects, you must include both or neither of the main effects COLCLUST and ROW.")
     }
-    if (any(temp_labels == "COL")) {
-        col_part <- "COL"
+    if (any(temp_labels == "ROW")) {
+        row_part <- "ROW"
     }
     if (any(temp_labels %in% c("ROW:COLCLUST","COLCLUST:ROW"))) {
         colc_row_part <- "COLCLUST:ROW"
