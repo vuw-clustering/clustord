@@ -764,7 +764,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 }
 
 run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
-                             pi_v, kappa_v, param_lengths, epsilon,
+                             pi_v, kappa_v, param_lengths,
                              constraint_sum_zero=TRUE,
                              model_label="Full", EM.control=default.EM.control(),
                              optim.method="L-BFGS-B", optim.control=default.optim.control()) {
