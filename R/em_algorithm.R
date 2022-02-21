@@ -799,22 +799,22 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 
     while(!EM.status$finished)
     {
-        ppr_m <- rcpp_Rcluster_Estep(invect, model,
-                                     ydf, rowc_mm, colc_mm, cov_mm,
-                                     pi_v, kappa_v, param_lengths,
-                                     RG, CG, p, n, q, epsilon, constraint_sum_zero,
-                                     row_clusters=TRUE)
+        ppr_m <- rcpp_Bicluster_Estep(invect, model,
+                                      ydf, rowc_mm, colc_mm, cov_mm,
+                                      pi_v, kappa_v, param_lengths,
+                                      RG, CG, p, n, q, epsilon, constraint_sum_zero,
+                                      row_clusters=TRUE)
 
         ## Now set any NA values in the posterior probabilities matrix to 0
         ppr_m[is.na(ppr_m)] <- 0
 
         pi_v <- colMeans(ppr_m)
 
-        ppc_m <- rcpp_Rcluster_Estep(invect, model,
-                                     ydf, rowc_mm, colc_mm, cov_mm,
-                                     pi_v, kappa_v, param_lengths,
-                                     RG, CG, p, n, q, epsilon, constraint_sum_zero,
-                                     row_clusters=FALSE)
+        ppc_m <- rcpp_Bicluster_Estep(invect, model,
+                                      ydf, rowc_mm, colc_mm, cov_mm,
+                                      pi_v, kappa_v, param_lengths,
+                                      RG, CG, p, n, q, epsilon, constraint_sum_zero,
+                                      row_clusters=FALSE)
 
         ## Now set any NA values in the posterior probabilities matrix to 0
         ppc_m[is.na(ppc_m)] <- 0
@@ -863,9 +863,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                 RG=RG, CG=CG, p=p, n=n, q=q, epsilon=epsilon,
                                 constraint_sum_zero=constraint_sum_zero,
                                 partial=FALSE,
-                                incomplete=FALSE, llc=NA,
-                                method=optim.method,
-                                hessian=F,control=optim.control)
+                                incomplete=FALSE, llc=NA)
 
         lli <- rcpp_Biclusterll(outvect,
                                 model=model,
@@ -881,9 +879,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                 RG=RG, CG=CG, p=p, n=n, q=q, epsilon=epsilon,
                                 constraint_sum_zero=constraint_sum_zero,
                                 partial=FALSE,
-                                incomplete=TRUE, llc=llc,
-                                method=optim.method,
-                                hessian=F,control=optim.control)
+                                incomplete=TRUE, llc=llc)
         if (is.na(lli)) browser()
 
         EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
