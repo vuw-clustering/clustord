@@ -763,6 +763,8 @@ double rcpp_Biclusterll(const NumericVector & invect,
 
     double logl = 0;
 
+    double pi_kappa_component;
+
     // Adjust very small values of pi_v to avoid errors when calculating log(pi_v)
     for (rr=0; rr < RG; rr++) {
         if (pi_v[rr] < epsilon) pi_v[rr] = epsilon;
@@ -817,16 +819,30 @@ double rcpp_Biclusterll(const NumericVector & invect,
         }
 
         if (!partial) {
+            // Rcout << "The value of pi_v : " << pi_v << "\n";
+            // Rcout << "The value of kappa_v : " << kappa_v << "\n";
+
+            // Rcout << "The value of ppr : " << ppr_m << "\n";
+            // Rcout << "The value of ppc : " << ppc_m << "\n";
+
             for (ii=0; ii < n; ii++) {
                 for (rr=0; rr < RG; rr++) {
-                    llc += ppr_m(ii,rr)*log(pi_v[rr]);
+                    pi_kappa_component = ppr_m(ii,rr)*log(pi_v[rr]);
+                    if (!Rcpp::traits::is_nan<REALSXP>(pi_kappa_component)) {
+                        llc += pi_kappa_component;
+                    }
                 }
             }
-            for (jj=0; jj < n; jj++) {
+            // Rcout << "The value of llc : " << llc << "\n";
+            for (jj=0; jj < p; jj++) {
                 for (cc=0; cc < CG; cc++) {
-                    llc += ppc_m(jj,cc)*log(kappa_v[cc]);
+                    pi_kappa_component = ppc_m(jj,cc)*log(kappa_v[cc]);
+                    if (!Rcpp::traits::is_nan<REALSXP>(pi_kappa_component)) {
+                        llc += pi_kappa_component;
+                    }
                 }
             }
+            // Rcout << "The value of llc : " << llc << "\n";
         }
 
         logl = llc;
@@ -864,7 +880,6 @@ double rcpp_Biclusterll(const NumericVector & invect,
         } else {
             logl = R_NegInf;
         }
-
         // Rcout << "The value of logl : " << logl << "\n";
     }
 
