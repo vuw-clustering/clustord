@@ -44,7 +44,9 @@ generate.mu.init <- function(long.df, model, use_random=FALSE) {
                    mu.init <- POM.sp.out$zeta
                },
                "Binary"={
-                   mu.init <- mean(as.numeric(as.character(long.df$Y)))
+                   num_Y <- as.numeric(long.df$Y)
+                   if (!is.numeric(num_Y)) num_Y <- as.numeric(as.character(long.df$Y))
+                   mu.init <- mean(num_Y)
                })
 
     } else {
@@ -161,17 +163,16 @@ generate.cov_coef.init <- function(long.df, formula_part, mm_part, model, use_ra
         switch(model,
                "OSM"={
                    OSM.out <- osm(formula_part,data=long.df)
-                   cov_coef.init <- OSM.out$beta[length(OSM.out$beta)]
+                   cov_coef.init <- OSM.out$beta
                },
                "POM"={
                    POM.out <- MASS::polr(formula_part,data=long.df)
-                   cov_coef.init <- POM.out$coef[length(POM.out$coef)]
+                   cov_coef.init <- POM.out$coef
                },
                "Binary"={
-                   # Only the binary model still has the intercept, which has been
-                   # removed from the OSM and POM fits
-                   Binary.out <- glm(formula_part, data=long.df, family=binomial(link='logit'))
-                   cov_coef.init <- Binary.out$coef[2:length(Binary.out$coef)]
+                   Binary.out <- glm.fit(x=mm_part, y=long.df$Y, intercept=FALSE,
+                                         family=binomial(link='logit'))
+                   cov_coef.init <- Binary.out$coef
                })
     } else {
         num_coef <- ncol(mm_part)

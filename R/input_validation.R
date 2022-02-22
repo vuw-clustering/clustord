@@ -130,6 +130,7 @@ check.formula <- function(formula, long.df, RG, CG) {
 
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
+    q <- max(as.numeric(long.df$Y))
 
     fo_terms <- terms(formula)
     fo_vars <- as.character(unlist(as.list(attr(fo_terms,"variables"))))
@@ -277,6 +278,7 @@ check.formula <- function(formula, long.df, RG, CG) {
         rowc_cov_part <- rowc_parts$clust_cov_part
         rowc_fo <- rowc_parts$clust_fo
         rowc_mm <- rowc_parts$clust_mm
+        if (nrow(rowc_mm) < nrow(long.df)) stop("NA or NaN rows have been dropped from model matrix, possibly after calculating covariate terms derived from raw covariates. clustord cannot yet handle missing data in covariates. Please check your formula and covariate values and try again.")
     } else {
         rowc_fo <- NULL
         rowc_mm <- matrix(1)
@@ -292,6 +294,7 @@ check.formula <- function(formula, long.df, RG, CG) {
         colc_cov_part <- colc_parts$clust_cov_part
         colc_fo <- colc_parts$clust_fo
         colc_mm <- colc_parts$clust_mm
+        if (nrow(colc_mm) < nrow(long.df)) stop("NA or NaN rows have been dropped from model matrix, possibly after calculating covariate terms derived from raw covariates. clustord cannot yet handle missing data in covariates. Please check your formula and covariate values and try again.")
     } else {
         colc_fo <- NULL
         colc_mm <- matrix(1)
@@ -303,6 +306,7 @@ check.formula <- function(formula, long.df, RG, CG) {
         cov_tf <- terms(cov_fo)
         attr(cov_tf, "intercept") <- 0
         cov_mm <- model.matrix(cov_tf, data=long.df)
+        if (nrow(cov_mm) < nrow(long.df)) stop("NA or NaN rows have been dropped from model matrix, possibly after calculating covariate terms derived from raw covariates. clustord cannot yet handle missing data in covariates. Please check your formula and covariate values and try again.")
     } else {
         cov_fo <- NULL
         cov_mm <- matrix(1)
@@ -315,6 +319,7 @@ check.formula <- function(formula, long.df, RG, CG) {
     param_lengths <- rep(0, 12)
     names(param_lengths) <- c("mu","phi","rowc","col","rowc_col","rowc_cov","cov",
                               "colc","rowc_colc","row","colc_row","colc_cov")
+    param_lengths['mu'] <- q
     if (exists('rowc_part')) param_lengths['rowc'] <- RG
     if (exists('colc_part')) param_lengths['colc'] <- CG
     if (exists('rowc_colc_part')) param_lengths['rowc_colc'] <- RG*CG
@@ -322,9 +327,15 @@ check.formula <- function(formula, long.df, RG, CG) {
     if (exists('colc_row_part')) param_lengths['colc_row'] <- CG*n
     if (exists('col_part')) param_lengths['col'] <- p
     if (exists('rowc_col_part')) param_lengths['rowc_col'] <- RG*p
-    if (exists('rowc_cov_part') && length(rowc_cov_part) > 0) param_lengths['rowc_cov'] <- length(rowc_cov_part)*RG
-    if (exists('colc_cov_part') && length(colc_cov_part) > 0) param_lengths['colc_cov'] <- length(colc_cov_part)*CG
-    if (exists('pure_cov_part') && length(pure_cov_part) > 0) param_lengths['cov'] <- length(pure_cov_part)
+    ## IMPORTANT: for the covariate sections, CANNOT just use the number of
+    ## terms in the formula to indicate the number of covariate terms, because
+    ## the formula only counts a categorical variable once, whereas the model
+    ## matrix may have more columns than that, to accommodate the dummy
+    ## variables for the levels of the categorical variable!
+    ## Need to rely on model matrix instead!
+    if (exists('rowc_cov_part') && length(rowc_cov_part) > 0) param_lengths['rowc_cov'] <- dim(rowc_mm)[2]*RG
+    if (exists('colc_cov_part') && length(colc_cov_part) > 0) param_lengths['colc_cov'] <- dim(colc_mm)[2]*CG
+    if (exists('pure_cov_part') && length(pure_cov_part) > 0) param_lengths['cov'] <- dim(cov_mm)[2]
 
     # Return model matrices
     # Return list of params
