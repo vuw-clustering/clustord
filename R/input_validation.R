@@ -273,8 +273,7 @@ check.formula <- function(formula, long.df, RG, CG) {
             stop("If you are including interactions between row clusters and covariates, you must include the main effect term for ROWCLUST.")
         }
 
-        rowc_parts <- extract.covs("ROWCLUST", rowc_idxs, non_row_col_part, long.df)
-        rowc_part <- rowc_parts$pure_clust_part
+        rowc_parts <- extract.covs("ROWCLUST", non_row_col_part, long.df)
         rowc_cov_part <- rowc_parts$clust_cov_part
         rowc_fo <- rowc_parts$clust_fo
         rowc_mm <- rowc_parts$clust_mm
@@ -289,8 +288,7 @@ check.formula <- function(formula, long.df, RG, CG) {
             stop("If you are including interactions between column clusters and covariates, you must include the main effect term for COLCLUST.")
         }
 
-        colc_parts <- extract.covs("COLCLUST", colc_idxs, non_row_col_part, long.df)
-        colc_part <- colc_parts$pure_clust_part
+        colc_parts <- extract.covs("COLCLUST", non_row_col_part, long.df)
         colc_cov_part <- colc_parts$clust_cov_part
         colc_fo <- colc_parts$clust_fo
         colc_mm <- colc_parts$clust_mm
@@ -334,36 +332,25 @@ check.formula <- function(formula, long.df, RG, CG) {
          colc_fo=colc_fo, colc_mm=colc_mm, cov_fo=cov_fo, cov_mm=cov_mm)
 }
 
-extract.covs <- function(clust_name, clust_idxs, non_row_col_part, long.df) {
-    clust_part <- non_row_col_part[clust_idxs]
+extract.covs <- function(clust_name, non_row_col_part, long.df) {
 
-    pure_clust_idx <- which(clust_part == clust_name)
-    if (length(pure_clust_idx) > 0) {
-        pure_clust_part <- clust_part[pure_clust_idx]
-        clust_cov_part <- clust_part[-pure_clust_idx]
-    } else {
-        clust_cov_part <- clust_part
-    }
-
-    if (length(clust_cov_part) > 0) {
-        # First, remove the COLCLUST term from those parts, because we want to
-        # obtain the model matrix of the remaining parts of the terms
-        for (i in seq_along(clust_cov_part)) {
-            term <- clust_cov_part[i]
-            if (substr(term, 1, 9) == paste0(clust_name, ":")) {
-                clust_cov_part[i] <- substr(term,10,nchar(term))
-            } else {
-                clust_cov_part[i] <- sub(paste0(":",clust_name),"",term)
-            }
+    clust_cov_part <- non_row_col_part
+    # First, remove the clustering term from those parts, because we want to
+    # obtain the model matrix of the remaining parts of the terms
+    for (i in seq_along(clust_cov_part)) {
+        term <- clust_cov_part[i]
+        if (substr(term, 1, 9) == paste0(clust_name, ":")) {
+            clust_cov_part[i] <- substr(term,10,nchar(term))
+        } else {
+            clust_cov_part[i] <- sub(paste0(":",clust_name),"",term)
         }
-
-        # Now obtain model matrix, making sure to remove the intercept term
-        clust_fo <- formula(paste("Y ~",paste(clust_cov_part,collapse="+")))
-        clust_tf <- terms(clust_fo)
-        attr(clust_tf, "intercept") <- 0
-        clust_mm <- model.matrix(clust_tf, data=long.df)
     }
 
-    list(pure_clust_part=pure_clust_part, clust_cov_part=clust_cov_part,
-         clust_fo=clust_fo, clust_mm=clust_mm)
+    # Now obtain model matrix, making sure to remove the intercept term
+    clust_fo <- formula(paste("Y ~",paste(clust_cov_part,collapse="+")))
+    clust_tf <- terms(clust_fo)
+    attr(clust_tf, "intercept") <- 0
+    clust_mm <- model.matrix(clust_tf, data=long.df)
+
+    list(clust_cov_part=clust_cov_part, clust_fo=clust_fo, clust_mm=clust_mm)
 }

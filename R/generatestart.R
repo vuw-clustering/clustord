@@ -161,14 +161,16 @@ generate.cov_coef.init <- function(long.df, formula_part, mm_part, model, use_ra
         switch(model,
                "OSM"={
                    OSM.out <- osm(formula_part,data=long.df)
-                   cov_coef.init <- OSM.out$beta[2:length(OSM.out$beta)]
+                   cov_coef.init <- OSM.out$beta[length(OSM.out$beta)]
                },
                "POM"={
                    POM.out <- MASS::polr(formula_part,data=long.df)
-                   cov_coef.init <- POM.out$coef[2:length(POM.out$coef)]
+                   cov_coef.init <- POM.out$coef[length(POM.out$coef)]
                },
                "Binary"={
-                   Binary.out <- glm(formula_part, data=long.df)
+                   # Only the binary model still has the intercept, which has been
+                   # removed from the OSM and POM fits
+                   Binary.out <- glm(formula_part, data=long.df, family=binomial(link='logit'))
                    cov_coef.init <- Binary.out$coef[2:length(Binary.out$coef)]
                })
     } else {
@@ -272,7 +274,7 @@ generate.initvect <- function(long.df, model, model_structure,
         raw_coef.init <- generate.cov_coef.init(long.df=long.df,
                                                 formula_part = model_structure$rowc_fo,
                                                 mm_part = model_structure$rowc_mm,
-                                                use_random=use_random)
+                                                model=model, use_random=use_random)
         rowc_cov_coef.init <- rep(raw_coef.init, times=RG)
         initvect <- c(initvect, rowc_cov_coef.init)
     }
@@ -280,7 +282,7 @@ generate.initvect <- function(long.df, model, model_structure,
         raw_coef.init <- generate.cov_coef.init(long.df=long.df,
                                                 formula_part = model_structure$colc_fo,
                                                 mm_part = model_structure$colc_mm,
-                                                use_random=use_random)
+                                                model=model, use_random=use_random)
         colc_cov_coef.init <- rep(raw_coef.init, times=CG)
         initvect <- c(initvect, colc_cov_coef.init)
     }
@@ -288,7 +290,7 @@ generate.initvect <- function(long.df, model, model_structure,
         cov_coef.init <- generate.cov_coef.init(long.df=long.df,
                                                 formula_part = model_structure$cov_fo,
                                                 mm_part = model_structure$cov_mm,
-                                                use_random=use_random)
+                                                model=model, use_random=use_random)
         initvect <- c(initvect, cov_coef.init)
     }
 
