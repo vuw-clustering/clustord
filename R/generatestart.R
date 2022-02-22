@@ -162,19 +162,31 @@ generate.cov_coef.init <- function(long.df, formula_part, mm_part, model, use_ra
     if (!use_random) {
         switch(model,
                "OSM"={
-                   OSM.out <- osm(formula_part,data=long.df)
-                   cov_coef.init <- OSM.out$beta
+                   tryCatch({
+                       OSM.out <- osm(formula_part,data=long.df)
+                       cov_coef.init <- OSM.out$beta
+                   }, warning = function(warn) {
+                       message("Problem using osm() to generate starting values for covariate parameters. Generating random starting values instead.")
+                       message(paste("My warning:  ",warn))
+                   })
                },
                "POM"={
-                   POM.out <- MASS::polr(formula_part,data=long.df)
-                   cov_coef.init <- POM.out$coef
+                   tryCatch({
+                       POM.out <- MASS::polr(formula_part,data=long.df)
+                       cov_coef.init <- POM.out$coef
+                   }, warning = function(warn) {
+                       message("Problem using MASS::polr() to generate starting values for covariate parameters. Generating random starting values instead.")
+                       message(paste("My warning:  ",warn))
+                   })
                },
                "Binary"={
                    Binary.out <- glm.fit(x=mm_part, y=long.df$Y, intercept=FALSE,
                                          family=binomial(link='logit'))
                    cov_coef.init <- Binary.out$coef
                })
-    } else {
+    }
+
+    if (!exists("cov_coef.init")) {
         num_coef <- ncol(mm_part)
         cov_coef.init <- runif(num_coef,min=-2,max=2)
     }
