@@ -6,7 +6,7 @@ validate.inputs <- function(formula, model,
                             EM.control=default.EM.control(),
                             optim.method="L-BFGS-B",
                             constraint_sum_zero=TRUE,
-                            start.from.simple.model=TRUE,
+                            start_from_simple_model=TRUE,
                             nstarts=5) {
 
     ## Note the double-& and double-| which stops the later parts being checked
@@ -87,8 +87,8 @@ validate.inputs <- function(formula, model,
 
     if (!is.logical(constraint_sum_zero) || !is.vector(constraint_sum_zero) ||
         length(constraint_sum_zero) != 1 || is.na(constraint_sum_zero)) stop("constraint_sum_zero must be TRUE or FALSE.")
-    if (!is.logical(start.from.simple.model) || !is.vector(start.from.simple.model) ||
-        length(start.from.simple.model) != 1 || is.na(start.from.simple.model)) stop("start.from.simple.model must be TRUE or FALSE.")
+    if (!is.logical(start_from_simple_model) || !is.vector(start_from_simple_model) ||
+        length(start_from_simple_model) != 1 || is.na(start_from_simple_model)) stop("start_from_simple_model must be TRUE or FALSE.")
 
     if (!is.null(nstarts)) {
         if (!is.vector(nstarts) || !is.numeric(nstarts) || length(nstarts) != 1 ||
