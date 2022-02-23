@@ -180,9 +180,10 @@ generate.cov_coef.init <- function(long.df, formula_part, mm_part, model, use_ra
                    })
                },
                "Binary"={
-                   Binary.out <- glm.fit(x=mm_part, y=long.df$Y, intercept=FALSE,
-                                         family=binomial(link='logit'))
-                   cov_coef.init <- Binary.out$coef
+                   # The binary model output includes an intercept term, which
+                   # we want to remove
+                   Binary.out <- glm(formula_part, data=long.df, family=binomial(link='logit'))
+                   cov_coef.init <- Binary.out$coef[2:length(Binary.out$coef)]
                })
     }
 
@@ -471,7 +472,7 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
                                                   start_from_simple_model=start_from_simple_model,
                                                   use_random=(s>1))
 
-            print(initvect.pi.init$initvect)
+            # print(initvect.pi.init$initvect)
 
             init.out <- run.EM.rowcluster(invect=initvect.pi.init$initvect,
                                           model=model, long.df=long.df,
@@ -531,7 +532,7 @@ generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
                                                         start_from_simple_model=start_from_simple_model,
                                                         use_random=(s>1))
 
-            print(initvect.pi.kappa.init$initvect)
+            # print(initvect.pi.kappa.init$initvect)
 
             init.out <- run.EM.bicluster(invect=initvect.pi.kappa.init$initvect,
                                          model=model, long.df=long.df,

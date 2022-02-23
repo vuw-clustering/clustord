@@ -300,12 +300,21 @@ check.formula <- function(formula, long.df, RG, CG) {
         colc_mm <- matrix(1)
     }
 
-    pure_cov_part <- non_row_col_part[-c(rowc_idxs, colc_idxs)]
+    if (length(rowc_idxs) > 0 || length(colc_idxs) > 0) pure_cov_part <- non_row_col_part[-c(rowc_idxs, colc_idxs)]
+    else pure_cov_part <- non_row_col_part
     if (length(pure_cov_part) > 0) {
         cov_fo <- formula(paste("Y ~",paste(pure_cov_part, collapse="+")))
         cov_tf <- terms(cov_fo)
-        attr(cov_tf, "intercept") <- 0
+        # Now obtain model matrix, making sure to remove the intercept column AFTER
+        # constructing the matrix i.e. we want to have only the columns of the model
+        # matrix that would have been there alongside the intercept column
+        # In a regression model, if we take out the intercept term then there's
+        # scope for another independent column for the final category of any
+        # categorical variable, but we don't actually want to include that in our
+        # model matrix
         cov_mm <- model.matrix(cov_tf, data=long.df)
+        # When dropping the intercept column, need to KEEP the matrix structure
+        cov_mm <- cov_mm[,-1, drop=FALSE]
         if (nrow(cov_mm) < nrow(long.df)) stop("NA or NaN rows have been dropped from model matrix, possibly after calculating covariate terms derived from raw covariates. clustord cannot yet handle missing data in covariates. Please check your formula and covariate values and try again.")
     } else {
         cov_fo <- NULL
@@ -357,11 +366,18 @@ extract.covs <- function(clust_name, non_row_col_part, long.df) {
         }
     }
 
-    # Now obtain model matrix, making sure to remove the intercept term
+    # Now obtain model matrix, making sure to remove the intercept column AFTER
+    # constructing the matrix i.e. we want to have only the columns of the model
+    # matrix that would have been there alongside the intercept column
+    # In a regression model, if we take out the intercept term then there's
+    # scope for another independent column for the final category of any
+    # categorical variable, but we don't actually want to include that in our
+    # model matrix
     clust_fo <- formula(paste("Y ~",paste(clust_cov_part,collapse="+")))
     clust_tf <- terms(clust_fo)
-    attr(clust_tf, "intercept") <- 0
     clust_mm <- model.matrix(clust_tf, data=long.df)
+    # When dropping the intercept column, need to KEEP the matrix structure
+    clust_mm <- clust_mm[,-1, drop=FALSE]
 
     list(clust_cov_part=clust_cov_part, clust_fo=clust_fo, clust_mm=clust_mm)
 }
