@@ -58,24 +58,27 @@ test_that("rowclustering, columnclustering and biclustering fail for an invalid 
     expect_error(clustord(Y~ROWCLUST+COL,"OSM",nclus.row=3,long.df=data.frame(Y=factor(1:6),ROW=rep(1:3,times=2),COL=c(NA,1:5))), "long.df\\$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix.")
     expect_error(clustord(Y~ROWCLUST+COL,"OSM",nclus.row=3,long.df=data.frame(Y=factor(1:6),ROW=rep(1:3,times=2),COL=c(1:5,Inf))), "long.df\\$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix.")
 
-    temp <- data.frame(Y=factor(1:6),ROW=rep(1:3,times=2),COL=rep(1:2,each=3))
+    temp <- data.frame(Y=factor(1:12),ROW=rep(1:3,times=4),COL=rep(1:4,each=3))
     temp1 <- temp
-    temp1[[1]] <- list(1:6)
-    expect_error(clustord(Y~ROWCLUST+COL,"OSM",nclus.row=3,long.df=temp1), "long.df\\$Y must be a factor.")
+    temp1[[1]] <- list(1:12)
+    expect_error(clustord(Y~ROWCLUST+COL,"OSM",nclus.row=2,long.df=temp1), "long.df\\$Y must be a factor.")
     temp2 <- temp
-    temp2[[2]] <- list(1:6)
-    expect_error(clustord(Y~ROWCLUST+COL,"OSM",nclus.row=3,long.df=temp2), "long.df\\$ROW must be a factor or integers from 1 to the number of observations, i.e. the number of rows in the original data matrix.")
+    temp2[[2]] <- list(1:12)
+    expect_error(clustord(Y~ROWCLUST+COL,"OSM",nclus.row=2,long.df=temp2), "long.df\\$ROW must be a factor or integers from 1 to the number of observations, i.e. the number of rows in the original data matrix.")
     temp3 <- temp
-    temp3[[3]] <- list(1:6)
-    expect_error(clustord(Y~ROWCLUST+COL,"OSM",nclus.row=3,long.df=temp3), "long.df\\$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix.")
+    temp3[[3]] <- list(1:12)
+    expect_error(clustord(Y~ROWCLUST+COL,"OSM",nclus.row=2,long.df=temp3), "long.df\\$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix.")
+    temp4 <- temp
+    temp4$cov <- rep(1,nrow(temp4))
+    expect_error(clustord(Y~ROWCLUST+COL,"OSM",nclus.row=2,long.df=temp4), "Covariate cov only takes one non-missing value for all entries of the data matrix. Please remove this covariate before continuing.")
 
     temp <- data.frame(Y=factor(1:6),ROW=rep(1:3,times=2),COL=rep(1:2,each=3))
     temp <- rbind(temp,temp[6,])
-    expect_error(clustord(Y~ROWCLUST+COL,"OSM",nclus.row=3,long.df=temp), "Each element from the original data matrix must correspond to no more than 1 row in long.df.")
+    expect_error(clustord(Y~ROWCLUST+COL,"OSM",nclus.row=2,long.df=temp), "Each element from the original data matrix must correspond to no more than 1 row in long.df.")
 
-    expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=3,long.df=NA), "long.df must be a data frame.")
-    expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=3,long.df=1), "long.df must be a data frame.")
-    expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=3,long.df=10.4), "long.df must be a data frame.")
+    expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=2,long.df=NA), "long.df must be a data frame.")
+    expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=2,long.df=1), "long.df must be a data frame.")
+    expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=2,long.df=10.4), "long.df must be a data frame.")
     expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=3,long.df=-6), "long.df must be a data frame.")
     expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=3,long.df=c(1,2)), "long.df must be a data frame.")
     expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=3,long.df=as.factor(c(1,2))), "long.df must be a data frame.")
@@ -100,16 +103,19 @@ test_that("rowclustering, columnclustering and biclustering fail for an invalid 
     expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=3,long.df=data.frame(Y=factor(1:6),ROW=rep(1:3,times=2),COL=c(NA,1:5))), "long.df\\$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix.")
     expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=3,long.df=data.frame(Y=factor(1:6),ROW=rep(1:3,times=2),COL=c(1:5,Inf))), "long.df\\$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix.")
 
-    temp <- data.frame(Y=factor(1:6),ROW=rep(1:3,times=2),COL=rep(1:2,each=3))
+    temp <- data.frame(Y=factor(1:12),ROW=rep(1:3,times=4),COL=rep(1:4,each=3))
     temp1 <- temp
-    temp1[[1]] <- list(1:6)
+    temp1[[1]] <- list(1:12)
     expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=3,long.df=temp1), "long.df\\$Y must be a factor.")
     temp2 <- temp
-    temp2[[2]] <- list(1:6)
+    temp2[[2]] <- list(1:12)
     expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=3,long.df=temp2), "long.df\\$ROW must be a factor or integers from 1 to the number of observations, i.e. the number of rows in the original data matrix.")
     temp3 <- temp
-    temp3[[3]] <- list(1:6)
+    temp3[[3]] <- list(1:12)
     expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=3,long.df=temp3), "long.df\\$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix.")
+    temp4 <- temp
+    temp4$cov <- rep(1,nrow(temp4))
+    expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=3,long.df=temp4), "Covariate cov only takes one non-missing value for all entries of the data matrix. Please remove this covariate before continuing.")
 
     temp <- data.frame(Y=factor(1:6),ROW=rep(1:3,times=2),COL=rep(1:2,each=3))
     temp <- rbind(temp,temp[6,])
@@ -142,16 +148,19 @@ test_that("rowclustering, columnclustering and biclustering fail for an invalid 
     expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=3,nclus.column=2,long.df=data.frame(Y=factor(1:6),ROW=rep(1:3,times=2),COL=c(NA,1:5))), "long.df\\$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix.")
     expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=3,nclus.column=2,long.df=data.frame(Y=factor(1:6),ROW=rep(1:3,times=2),COL=c(1:5,Inf))), "long.df\\$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix.")
 
-    temp <- data.frame(Y=factor(1:6),ROW=rep(1:3,times=2),COL=rep(1:2,each=3))
+    temp <- data.frame(Y=factor(1:12),ROW=rep(1:3,times=4),COL=rep(1:4,each=3))
     temp1 <- temp
-    temp1[[1]] <- list(1:6)
-    expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=3,nclus.column=2,long.df=temp1), "long.df\\$Y must be a factor.")
+    temp1[[1]] <- list(1:12)
+    expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=2,nclus.column=3,long.df=temp1), "long.df\\$Y must be a factor.")
     temp2 <- temp
-    temp2[[2]] <- list(1:6)
-    expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=3,nclus.column=2,long.df=temp2), "long.df\\$ROW must be a factor or integers from 1 to the number of observations, i.e. the number of rows in the original data matrix.")
+    temp2[[2]] <- list(1:12)
+    expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=2,nclus.column=3,long.df=temp2), "long.df\\$ROW must be a factor or integers from 1 to the number of observations, i.e. the number of rows in the original data matrix.")
     temp3 <- temp
-    temp3[[3]] <- list(1:6)
-    expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=3,nclus.column=2,long.df=temp3), "long.df\\$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix.")
+    temp3[[3]] <- list(1:12)
+    expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=2,nclus.column=3,long.df=temp3), "long.df\\$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix.")
+    temp4 <- temp
+    temp4$cov <- rep(1,nrow(temp4))
+    expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=2,nclus.column=3,long.df=temp4), "Covariate cov only takes one non-missing value for all entries of the data matrix. Please remove this covariate before continuing.")
 
     temp <- data.frame(Y=factor(1:6),ROW=rep(1:3,times=2),COL=rep(1:2,each=3))
     temp <- rbind(temp,temp[6,])

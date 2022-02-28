@@ -66,6 +66,13 @@ validate.inputs <- function(formula, model,
 
     if (any(table(long.df[,c("ROW","COL")]) > 1)) stop("Each element from the original data matrix must correspond to no more than 1 row in long.df.")
 
+    cov_idxs <- which(!(names(long.df) %in% c("Y","ROW","COL")))
+    for (j in cov_idxs) {
+        col <- long.df[,j]
+        non_na_col <- col[!is.na(col)]
+        if (length(unique(non_na_col)) == 1) stop(paste("Covariate",names(long.df)[j],"only takes one non-missing value for all entries of the data matrix. Please remove this covariate before continuing."))
+    }
+
     if (!is.null(nclus.row) && nclus.row >= max(as.numeric(long.df$ROW))) stop("nclus.row must be smaller than the maximum value of long.df$ROW.")
     if (!is.null(nclus.column) && nclus.column >= max(as.numeric(long.df$COL))) stop("nclus.column must be smaller than the maximum value of long.df$COL.")
 
