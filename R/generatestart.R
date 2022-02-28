@@ -206,12 +206,12 @@ generate.matrix.init <- function(RG, p=NULL, CG=NULL) {
 
 generate.initvect <- function(long.df, model, model_structure,
                               RG, CG=NULL,
-                              EM.control=default.EM.control(),
-                              optim.method="L-BFGS-B",
-                              optim.control=default.optim.control(),
                               constraint_sum_zero=TRUE,
                               start_from_simple_model=TRUE,
-                              use_random=FALSE) {
+                              use_random=FALSE,
+                              EM.control=default.EM.control(),
+                              optim.method="L-BFGS-B",
+                              optim.control=default.optim.control()) {
 
     pi.init <- NULL; kappa.init <- NULL
 
@@ -470,7 +470,8 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
                                                   model_structure=model_structure,
                                                   RG=RG, constraint_sum_zero=constraint_sum_zero,
                                                   start_from_simple_model=start_from_simple_model,
-                                                  use_random=(s>1))
+                                                  use_random=(s>1),
+                                                  EM.control=startEM.control(EM.control))
 
             # print(initvect.pi.init$initvect)
 
@@ -530,7 +531,8 @@ generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
                                                         RG=RG, CG=CG,
                                                         constraint_sum_zero=constraint_sum_zero,
                                                         start_from_simple_model=start_from_simple_model,
-                                                        use_random=(s>1))
+                                                        use_random=(s>1),
+                                                        EM.control=startEM.control(EM.control))
 
             # print(initvect.pi.kappa.init$initvect)
 
