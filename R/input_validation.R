@@ -55,6 +55,7 @@ validate.inputs <- function(formula, model,
     if (any(is.na(long.df$Y))) stop("long.df$Y has missing values (NA). Please delete these rows and try again.")
     if (is.list(long.df$Y) || any(sapply(long.df$Y,is.list)) ||
         any(sapply(long.df$Y,is.infinite))) stop("long.df$Y is a list, or has list elements or infinite elements. long.df$Y should be a factor with q levels.")
+    if (model == "Binary" && length(unique(long.df$Y)) > 2) stop("For the Binary model, long.df$Y should only have 2 possible values.")
     if (!is.factor(long.df$ROW) &&
         (is.list(long.df$ROW) || any(sapply(long.df$ROW,is.list)) || any(is.na(long.df$ROW)) ||
          any(sapply(long.df$ROW,is.infinite)) || any(long.df$ROW %% 1 != 0) ||

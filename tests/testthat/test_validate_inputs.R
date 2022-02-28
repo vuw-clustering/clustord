@@ -76,6 +76,10 @@ test_that("rowclustering, columnclustering and biclustering fail for an invalid 
     temp <- rbind(temp,temp[6,])
     expect_error(clustord(Y~ROWCLUST+COL,"OSM",nclus.row=2,long.df=temp), "Each element from the original data matrix must correspond to no more than 1 row in long.df.")
 
+    # Binary model -- check Y has only 2 values
+    temp <- data.frame(Y=factor(1:12),ROW=rep(1:3,times=2),COL=rep(1:4,each=3))
+    expect_error(clustord(Y~ROWCLUST+COL,"Binary",nclus.row=3,nclus.column=2,long.df=temp), "For the Binary model, long.df\\$Y should only have 2 possible values.")
+
     expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=2,long.df=NA), "long.df must be a data frame.")
     expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=2,long.df=1), "long.df must be a data frame.")
     expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=2,long.df=10.4), "long.df must be a data frame.")
@@ -121,6 +125,10 @@ test_that("rowclustering, columnclustering and biclustering fail for an invalid 
     temp <- rbind(temp,temp[6,])
     expect_error(clustord(Y~COLCLUST+ROW,"OSM",nclus.column=3,long.df=temp), "Each element from the original data matrix must correspond to no more than 1 row in long.df.")
 
+    # Binary model -- check Y has only 2 values
+    temp <- data.frame(Y=factor(1:12),ROW=rep(1:3,times=2),COL=rep(1:4,each=3))
+    expect_error(clustord(Y~COLCLUST+ROW,"Binary",nclus.row=3,nclus.column=2,long.df=temp), "For the Binary model, long.df\\$Y should only have 2 possible values.")
+
     expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=3,nclus.column=2,long.df=NA), "long.df must be a data frame.")
     expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=3,nclus.column=2,long.df=1), "long.df must be a data frame.")
     expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=3,nclus.column=2,long.df=10.4), "long.df must be a data frame.")
@@ -165,6 +173,10 @@ test_that("rowclustering, columnclustering and biclustering fail for an invalid 
     temp <- data.frame(Y=factor(1:6),ROW=rep(1:3,times=2),COL=rep(1:2,each=3))
     temp <- rbind(temp,temp[6,])
     expect_error(clustord(Y~ROWCLUST+COLCLUST,"OSM",nclus.row=3,nclus.column=2,long.df=temp), "Each element from the original data matrix must correspond to no more than 1 row in long.df.")
+
+    # Binary model -- check Y has only 2 values
+    temp <- data.frame(Y=factor(1:12),ROW=rep(1:3,times=2),COL=rep(1:4,each=3))
+    expect_error(clustord(Y~ROWCLUST+COLCLUST,"Binary",nclus.row=3,nclus.column=2,long.df=temp), "For the Binary model, long.df\\$Y should only have 2 possible values.")
 })
 
 ## Invalid model testing -------------------------------------------------------
