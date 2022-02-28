@@ -395,7 +395,7 @@
 #' Note that the linear-term coefficients have negative signs for the
 #' Proportional Odds Models. This is so that as the row cluster index increases,
 #' or as the column index increases, Y is more likely to fall at higher values
-#' (see Ch4 of Agresti's book "Analysis of Ordinal Categorical Data" 2010).
+#' (see Ch4 of Agresti, 2010).
 #'
 #' The Ordered Stereotype model (\code{model = "OSM}) has the form
 #'
@@ -416,8 +416,8 @@
 #' be the same, but they may not have the same shape. In this sense, the OSM is
 #' more flexible/less restrictive than the POM.
 #'
-#' See Anderson (1984) "Regression and ordered categorical variables" for the
-#' original definition of the ordered stereotype model.
+#' See Anderson (1984) for the original definition of the ordered stereotype
+#' model, and see Fernández et al. (2016) for the application to clustering.
 #'
 #' The phi_k parameters may be treated as "score" parameters. After fitting the
 #' OSM, the fitted phi_k values can give some indication of what the true
@@ -880,6 +880,12 @@
 #'     based on maximum posterior probability of cluster membership (\code{ppr}
 #'     and \code{ppc}).
 #'
+#' @references
+#' Fernandez, D., Arnold, R., & Pledger, S. (2016). Mixture-based clustering for the ordered stereotype model. *Computational Statistics & Data Analysis*, 93, 46-75.
+#' Anderson, J. A. (1984). Regression and ordered categorical variables. *Journal of the Royal Statistical Society: Series B (Methodological)*, 46(1), 1-22.
+#' Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wiley & Sons.
+#'
+#'
 #' @examples
 #### TODO: EDIT EXAMPLES ====
 #' long.df <- data.frame(Y=factor(sample(1:3,5*50,replace=TRUE)),
@@ -913,7 +919,6 @@
 #' biclustering("Y~row+column+row:column",model="POM",nclus.row=2,nclus.column=4,
 #'              long.df,EM.control=list(EMcycles=5), nstarts=1,
 #'              start_from_simple_models=FALSE)
-#' @describeIn biclustering Biclustering
 #' @export
 clustord <- function(formula,
                      model,
