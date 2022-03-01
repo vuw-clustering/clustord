@@ -886,40 +886,36 @@
 #' Anderson, J. A. (1984). Regression and ordered categorical variables. *Journal of the Royal Statistical Society: Series B (Methodological)*, 46(1), 1-22.
 #' Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wiley & Sons.
 #'
-#'
 #' @examples
-#### TODO: EDIT EXAMPLES ====
-#' long.df <- data.frame(Y=factor(sample(1:3,5*50,replace=TRUE)),
-#'                ROW=factor(rep(1:50,times=5)),COL=rep(1:5,each=50))
+#' long.df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),
+#'                ROW=factor(rep(1:20,times=5)),COL=rep(1:5,each=20))
 #'
-#' # Model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*alpha_r with 3 row clustering groups:
-#' rowclustering("Y~row",model="OSM",3,long.df)
+#' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*rowc_coef_r with 3 row clustering groups:
+#' clustord.fit(Y~ROWCLUST,model="OSM",3,long.df=long.df)
 #'
-#' # Model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*(alpha_r+beta_j) with 3 row clustering groups:
-#' rowclustering("Y~row+column",model="OSM",3,long.df)
+#' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + col_coef_j) with 3 row clustering groups:
+#' clustord.fit(Y~ROWCLUST+COL,model="OSM",3,long.df=long.df)
 #'
-#' # Model Logit=mu_k-alpha_r-beta_j-gamma_rj with 2 row clustering groups:
-#' rowclustering("Y~row+column+row:column",model="POM",2,long.df)
+#' # Model Logit(P(Y <= k))=mu_k-rowc_coef_r-col_coef_j-rowc_col_coef_rj with 2 row clustering groups:
+#' clustord.fit(Y~ROWCLUST*COL,model="POM",nclus.row=2,long.df=long.df)
 #'
-#' # Model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*beta_c with 3 column clustering groups:
-#' columnclustering("Y~column",model="OSM",3,long.df)
+#' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c) with 3 column clustering groups:
+#' clustord.fit(Y~COLCLUST,model="OSM",nclus.column=3,long.df=long.df)
 #'
-#' # Model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*(alpha_i+beta_c) with 3 column clustering groups:
-#' columnclustering("Y~row+column",model="OSM",3,long.df)
+#' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c + row_coef_i) with 3 column clustering groups:
+#' clustord.fit(Y~COLCLUST+ROW,model="OSM",nclus.column=3,long.df=long.df)
 #'
-#' # Model Logit=mu_k-alpha_i-beta_c-gamma_ic with 2 column clustering groups:
-#' columnclustering("Y~row+column+row:column",model="POM",2,long.df)
-#'
-#' # Model Log(P(Y=k)/P(Y=1))=mu_k-phi_k*(alpha_r+beta_c)
+#' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + colc_coef_c)
 #' #    with 3 row clustering groups and 2 column clustering groups:
-#' biclustering("Y~row+column",model="OSM",nclus.row=3,nclus.column=2,long.df,
+#' clustord.fit(Y~ROWCLUST+COLCLUST,model="OSM",nclus.row=3,nclus.column=2,long.df=long.df,
 #'              EM.control=list(EMcycles=5), nstarts=1)
 #'
-#' # Model Logit=mu_k-alpha_r-beta_c-gamma_rc
-#' #    with 2 row clustering groups and 4 column clustering groups:
-#' biclustering("Y~row+column+row:column",model="POM",nclus.row=2,nclus.column=4,
-#'              long.df,EM.control=list(EMcycles=5), nstarts=1,
-#'              start_from_simple_models=FALSE)
+#' # Model Logit(P(Y<=k))=mu_k-rowc_coef_r-colc_coef_c-rowc_colc_coef_rc
+#' #    with 2 row clustering groups and 4 column clustering groups, and
+#' #    interactions between them:
+#' clustord.fit(Y~ROWCLUST*COLCLUST, model="POM", nclus.row=2, nclus.column=4,
+#'              long.df=long.df,EM.control=list(EMcycles=5), nstarts=1,
+#'              start_from_simple_model=FALSE)
 #' @export
 clustord.fit <- function(formula,
                          model,
