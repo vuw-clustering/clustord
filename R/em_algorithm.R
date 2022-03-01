@@ -421,14 +421,14 @@ calc.SE.rowcluster <- function(long.df, clust.out,
 
 #' Calculate standard errors of clustering parameters.
 #'
-#' Calculate SE of parameters fitted using \code{\link{clustord}}.
+#' Calculate SE of parameters fitted using \code{\link{clustord.fit}}.
 #'
 #' Note that this is currently not designed for use with column clustering, so
 #' is likely to produce errors if you apply it to column clustering output.
 #'
 #' Calculates SE by running \code{optimHess} (see \code{\link[stats]{optim}}) on
 #' the incomplete-data log-likelihood to find the hessian at the fitted parameter
-#' values from \code{\link{clustord}}.
+#' values from \code{\link{clustord.fit}}.
 #' Then the square roots of the diagonal elements
 #' of the negative inverse of the hessian are the standard errors of the parameters
 #' i.e. \code{SE <- sqrt(diag(solve(-optim.hess))}.
@@ -440,14 +440,14 @@ calc.SE.rowcluster <- function(long.df, clust.out,
 #' for the first RG-1 parameters, the independent ones. This applies similarly
 #' to individual column effect coefficients, etc.
 #'
-#' The function requires an input which is the output of \code{\link{clustord}},
-#' which includes the component \code{outvect}, the final vector of independent
-#' parameter values from the EM algorithm, which will correspond to a subset of
-#' the parameter values in \code{parlist.out}.
+#' The function requires an input which is the output of
+#' \code{\link{clustord.fit}}, which includes the component \code{outvect}, the
+#' final vector of independent parameter values from the EM algorithm, which
+#' will correspond to a subset of the parameter values in \code{parlist.out}.
 #'
-#' @param long.df The data frame, in long format, as passed to \code{clustord}.
+#' @param long.df The data frame, in long format, as passed to \code{clustord.fit}.
 #'
-#' @param clust.out A \code{clustord} object.
+#' @param clust.out A \code{clustord.fit} object.
 #'
 #' @param optim.control control list for the \code{optim} call within the M step
 #'     of the EM algorithm. See the control list Details in the \code{optim}
