@@ -1044,6 +1044,10 @@ clustord.fit <- function(formula,
                                      optim.method=optim.method, optim.control=optim.control)
 
         ## Now convert the results back to row clustering ----
+        column.info <- results$info
+        column.info[c('C','n','p')] <- column.info[c('R','p','n')]
+        column.info <- column.info[-which(names(column.info) == "R")]
+
         column.parlist <- convert.output.row.to.column(results$parlist.out)
 
         column.best.parlist <- convert.output.row.to.column(results$EM.status$params.for.best.lli)
@@ -1051,13 +1055,24 @@ clustord.fit <- function(formula,
         column.EM.status <- results$EM.status
         column.EM.status$params.for.best.lli <- column.best.parlist
 
-        column.results <- list(info=results$info, EM.status=column.EM.status,
+        # Note: keep row-clustering-format param_lengths for
+        column.results <- list(info=column.info,
+                               model=results$model,
+                               EM.status=column.EM.status,
                                criteria=results$criteria,
-                               initvect=initvect, parlist.out=column.parlist,
-                               kappa=results$pi, ppc=results$ppr,
-                               ColumnClusters=results$RowClusters)
-        column.results$info['C'] <- column.results$info['R']
-        column.results$info <- column.results$info[-which(names(column.results$info) == "R")]
+                               numerical.correction.epsilon=results$numerical.correction.epsilon,
+                               constraint_sum_zero=results$constraint_sum_zero,
+                               param_lengths=model_structure$param_lengths,
+                               initvect=initvect,
+                               parlist.out=column.parlist,
+                               kappa.out=results$pi.out, ppc=results$ppr,
+                               colc_mm=model_structure$colc_mm,
+                               cov_mm=model_structure$cov_mm,
+                               ColumnClusters=results$RowClusters,
+                               rowc_format_param_lengths=results$param_lengths,
+                               rowc_format_outvect=results$outvect,
+                               rowc_format_parlist.init=results$parlist.init,
+                               rowc_format_rowc_mm=model_structure.transp$rowc_mm)
 
         column.results
     } else {

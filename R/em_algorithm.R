@@ -394,13 +394,14 @@ calc.SE.rowcluster <- function(long.df, clust.out,
                                optim.control=default.optim.control()) {
     optim.control$fnscale=-1
 
+    # param_lengths indicates use of row clustering, rowc_format_param_lengths
+    # indicates use of column clustering
+    if (!("rowc_format_param_lengths" %in% names(clust.out))) {
     ## Important: do NOT change the order of the three columns in this call,
     ## because the C++ code relies on having this order for Y, ROW and COL
     ydf <- cbind(long.df$Y, as.numeric(long.df$ROW), as.numeric(long.df$COL))
 
-    outvect <- clust.out$outvect
-
-    optim.hess <- optimHess(par=outvect,
+    optim.hess <- optimHess(par=clust.out$outvect,
                             fn=rcpp_Rclusterll,
                             model=clust.out$model,
                             ydf=ydf,
@@ -424,6 +425,39 @@ calc.SE.rowcluster <- function(long.df, clust.out,
                             RG=clust.out$info["R"], p=clust.out$info["p"],
                             n=clust.out$info["n"], q=clust.out$info["q"],
                             constraint_sum_zero = clust.out$constraint_sum_zero)
+
+    } else {
+        ## Important: do NOT change the order of the three columns in this call,
+        ## because the C++ code relies on having this order for Y, ROW and COL
+        ## (and for column clustering results this is TRANSPOSED on purpose!)
+        ydf.transp <- cbind(long.df$Y, as.numeric(long.df$COL), as.numeric(long.df$ROW))
+
+        optim.hess <- optimHess(par=clust.out$rowc_format_outvect,
+                                fn=rcpp_Rclusterll,
+                                model=clust.out$model,
+                                ydf=ydf.transp,
+                                rowc_mm=clust.out$rowc_format_rowc_mm,
+                                colc_mm=matrix(1),
+                                cov_mm=clust.out$cov_mm,
+                                ppr_m=clust.out$ppc,
+                                pi_v=clust.out$kappa.out,
+                                param_lengths=clust.out$rowc_format_param_lengths,
+                                RG=clust.out$info["C"], p=clust.out$info["n"],
+                                n=clust.out$info["p"], q=clust.out$info["q"],
+                                epsilon=clust.out$numerical.correction.epsilon,
+                                constraint_sum_zero=clust.out$constraint_sum_zero,
+                                partial=FALSE,
+                                incomplete=TRUE,
+                                control=optim.control)
+
+        SE <- sqrt(diag(solve(-optim.hess)))
+
+        named_SE <- name_invect(SE, clust.out$model, clust.out$param_lengths,
+                                RG=NULL, CG=clust.out$info["C"],
+                                p=clust.out$info["p"], n=clust.out$info["n"], q=clust.out$info["q"],
+                                constraint_sum_zero = clust.out$constraint_sum_zero)
+    }
+
     named_SE
 }
 
@@ -431,22 +465,22 @@ calc.SE.rowcluster <- function(long.df, clust.out,
 #'
 #' Calculate SE of parameters fitted using \code{\link{clustord.fit}}.
 #'
-#' Note that this is currently not designed for use with column clustering, so
-#' is likely to produce errors if you apply it to column clustering output.
+#' Use \code{calc.SE.rowcluster} to calculate SE for row clustering and column
+#' clustering, or \code{calc.SE.bicluster} to calculate SE for biclustering.
 #'
 #' Calculates SE by running \code{optimHess} (see \code{\link[stats]{optim}}) on
 #' the incomplete-data log-likelihood to find the hessian at the fitted parameter
 #' values from \code{\link{clustord.fit}}.
-#' Then the square roots of the diagonal elements
-#' of the negative inverse of the hessian are the standard errors of the parameters
+#' Then the square roots of the diagonal elements of the negative inverse of the
+#' hessian are the standard errors of the parameters
 #' i.e. \code{SE <- sqrt(diag(solve(-optim.hess))}.
 #'
-#' Note that SE values are \strong{only} calculated for the independent parameters.
-#' For example, if the constraint on the row clustering parameters is set to
-#' constraint_sum_zero = TRUE, where the last row clustering parameter is the
-#' negative sum of the other parameters, SE values will only be calculated
-#' for the first RG-1 parameters, the independent ones. This applies similarly
-#' to individual column effect coefficients, etc.
+#' Note that SE values are \strong{only} calculated for the independent
+#' parameters. For example, if the constraint on the row clustering parameters
+#' is set to constraint_sum_zero = TRUE, where the last row clustering parameter
+#' is the negative sum of the other parameters, SE values will only be
+#' calculated for the first RG-1 parameters, the independent ones. This applies
+#' similarly to individual column effect coefficients, etc.
 #'
 #' The function requires an input which is the output of
 #' \code{\link{clustord.fit}}, which includes the component \code{outvect}, the
