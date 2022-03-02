@@ -394,6 +394,8 @@ calc.SE.rowcluster <- function(long.df, clust.out,
                                optim.control=default.optim.control()) {
     optim.control$fnscale=-1
 
+    if (all(c('R','C') %in% names(clust.out$info))) stop("Use calc.SE.bicluster for biclustering results.")
+
     # param_lengths indicates use of row clustering, rowc_format_param_lengths
     # indicates use of column clustering
     if (!("rowc_format_param_lengths" %in% names(clust.out))) {
@@ -503,6 +505,8 @@ calc.SE.bicluster <- function(long.df, clust.out,
                               optim.control=default.optim.control()) {
 
     optim.control$fnscale=-1
+
+    if (!all(c('R','C') %in% names(clust.out$info))) stop("Use calc.SE.rowcluster for row or column clustering results.")
 
     ## Important: do NOT change the order of the three columns in this call,
     ## because the C++ code relies on having this order for Y, ROW and COL
