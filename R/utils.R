@@ -172,9 +172,10 @@ df2mat <- function(long.df){
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
     mat <- matrix(NA,n,p,byrow=T)
-    for (i in 1:n) for (j in 1:p){
-        yvals <- long.df$Y[long.df$ROW==i & long.df$COL==j]
-        if (length(yvals)==1) mat[i,j] <- yvals
+    for (ij in 1:nrow(long.df)) {
+        i <- long.df$ROW[ij]
+        j <- long.df$COL[ij]
+        mat[i,j] <- long.df$Y[ij]
     }
     return(mat)
 }
