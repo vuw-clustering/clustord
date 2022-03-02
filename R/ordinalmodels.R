@@ -129,7 +129,7 @@ unpack_parvec <- function(invect, model, param_lengths, n, p, q, RG, CG = NULL,
         else row_coef <- c(0, row_coef)
 
         parlist[['row']] <- row_coef
-        nelts <- nelts + n
+        nelts <- nelts + n-1
 
         if (length(sub_invect) > n-1) {
             sub_invect <- sub_invect[n:length(sub_invect)]
@@ -272,4 +272,95 @@ unpack_parvec <- function(invect, model, param_lengths, n, p, q, RG, CG = NULL,
     if (length(invect) != nelts) warning("initvect is TOO LONG, the parameters may have been specified incorrectly. Please double-check initvect.")
 
     parlist
+}
+
+name_invect <- function(invect, model, param_lengths, n, p, q, RG, CG = NULL,
+                        constraint_sum_zero = TRUE) {
+
+    invect_names <- rep("",length(invect))
+    nelts <- 0
+
+    invect_names[1:(q-1)] <- "mu"
+    nelts <- nelts + q-1
+    if (model == "OSM") {
+        invect_names[(nelts+1):(nelts+q-2)] <- "phi"
+        nelts <- nelts + q-2
+    }
+
+    nrowc <- param_lengths['rowc']
+    if (nrowc > 0) {
+        invect_names[(nelts+1):(nelts+nrowc-1)] <- "rowc_r"
+        nelts <- nelts + nrowc - 1
+    }
+    ncolc <- param_lengths['colc']
+    if (ncolc > 0) {
+        invect_names[(nelts+1):(nelts+ncolc-1)] <- "colc_c"
+        nelts <- nelts + ncolc - 1
+    }
+    nrowc_colc <- param_lengths['rowc_colc']
+    if (nrowc_colc > 0) {
+        ## The number of independent parameters in the row and column cluster
+        ## interaction depends on whether the main effect terms for row and
+        ## column clusters are included as well
+        if (param_lengths['rowc'] > 0 && param_lengths['colc'] > 0) {
+
+            invect_names[(nelts+1):(nelts+(RG-1)*(CG-1))] <- "rowc_colc_rc"
+            nelts <- nelts + (RG-1)*(CG-1)
+        } else {
+            invect_names[(nelts+1):(nelts+RG*CG-1)] <- "rowc_colc_rc"
+            nelts <- nelts + (RG*CG - 1)
+        }
+    }
+
+    nrow <- param_lengths['row']
+    if (nrow > 0) {
+        invect_names[(nelts+1):(nelts+n-1)] <- "row_i"
+        nelts <- nelts + n-1
+    }
+    ncol <- param_lengths['col']
+    if (ncol > 0) {
+        invect_names[(nelts+1):(nelts+p-1)] <- "col_j"
+        nelts <- nelts + p-1
+    }
+    nrowc_col <- param_lengths['rowc_col']
+    if (nrowc_col > 0) {
+        if (param_lengths['rowc'] > 0) {
+            invect_names[(nelts+1):(nelts+(RG-1)*(p-1))] <- "rowc_col_rj"
+                        nelts <- nelts + (RG-1)*(p-1)
+
+        } else {
+            invect_names[(nelts+1):(nelts+RG*p-1)] <- "rowc_col_rj"
+            nelts <- nelts + (RG*p-1)
+        }
+    }
+    ncolc_row <- param_lengths['colc_row']
+    if (ncolc_row > 0) {
+        if (param_lengths['colc'] > 0) {
+            invect_names[(nelts+1):(nelts+(CG-1)*(n-1))] <- "colc_row_ci"
+            nelts <- nelts + (CG-1)*(n-1)
+        } else {
+            invect_names[(nelts+1):(nelts+CG*n-1)] <- "colc_row_ci"
+            nelts <- nelts + CG*n-1
+        }
+    }
+
+    nrowc_cov <- param_lengths['rowc_cov']
+    if (nrowc_cov > 0) {
+        invect_names[(nelts+1):(nelts+nrowc_cov)] <- "rowc_cov_rl"
+        nelts <- nelts + nrowc_cov
+    }
+    ncolc_cov <- param_lengths['colc_cov']
+    if (ncolc_cov > 0) {
+        invect_names[(nelts+1):(nelts+ncolc_cov)] <- "colc_cov_cl"
+        nelts <- nelts + ncolc_cov
+    }
+
+    ncov <- param_lengths['cov']
+    if (ncov > 0) {
+        invect_names[(nelts+1):(nelts+ncov)] <- "cov_l"
+        nelts <- nelts + ncov
+    }
+
+    names(invect) <- invect_names
+    invect
 }

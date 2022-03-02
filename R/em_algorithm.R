@@ -190,6 +190,8 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
     Rclus <- assignments(ppr_m)
 
     # Save results:
+    initvect <- name_invect(initvect, model, param_lengths, n, p, q, RG, constraint_sum_zero=constraint_sum_zero)
+    outvect <- name_invect(outvect, model, param_lengths, n, p, q, RG, constraint_sum_zero=constraint_sum_zero)
     npar <- length(invect) + length(pi_v)-1
     ninitvect <- length(invect)
     criteria <- calc.criteria(EM.status$best.lli, EM.status$llc.for.best.lli, npar, n, p)
@@ -355,6 +357,8 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
     Cclus <- assignments(ppc_m)
 
     # Save results:
+    initvect <- name_invect(initvect, model, param_lengths, n, p, q, RG, CG, constraint_sum_zero=constraint_sum_zero)
+    outvect <- name_invect(outvect, model, param_lengths, n, p, q, RG, CG, constraint_sum_zero=constraint_sum_zero)
     npar <- length(invect) + length(pi_v)-1 + length(kappa_v)-1
     ninitvect <- length(initvect)
     criteria <- calc.criteria(EM.status$best.lli, EM.status$llc.for.best.lli, npar, n, p)
@@ -415,7 +419,12 @@ calc.SE.rowcluster <- function(long.df, clust.out,
                             control=optim.control)
 
     SE <- sqrt(diag(solve(-optim.hess)))
-    SE
+
+    named_SE <- name_invect(SE, clust.out$model, clust.out$param_lengths,
+                            RG=clust.out$info["R"], p=clust.out$info["p"],
+                            n=clust.out$info["n"], q=clust.out$info["q"],
+                            constraint_sum_zero = clust.out$constraint_sum_zero)
+    named_SE
 }
 
 #' Calculate standard errors of clustering parameters.
@@ -489,5 +498,11 @@ calc.SE.bicluster <- function(long.df, clust.out,
                             control=optim.control)
 
     SE <- sqrt(diag(solve(-optim.hess)))
-    SE
+
+    named_SE <- name_invect(SE, clust.out$model, clust.out$param_lengths,
+                            RG=clust.out$info["R"], CG=clust.out$info["C"],
+                            p=clust.out$info["p"], n=clust.out$info["n"],
+                            q=clust.out$info["q"],
+                            constraint_sum_zero = clust.out$constraint_sum_zero)
+    named_SE
 }
