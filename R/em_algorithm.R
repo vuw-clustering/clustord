@@ -97,6 +97,11 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 
     epsilon <- EM.control$epsilon
 
+    ## Important: do NOT change the order of these model types, because the Rcpp
+    ## code relies on having this order for the model numbers
+    ## Model numbers are used because comparing strings is MUCH SLOWER in C++
+    model_num <- switch(model,"OSM"=1,"POM"=2,"Binary"=3)
+
     parlist.init <- parlist.in
     pi.init <- pi_v
     initvect <- invect
@@ -106,7 +111,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 
     while(!EM.status$finished)
     {
-        ppr_m <- rcpp_Rcluster_Estep(invect, model,
+        ppr_m <- rcpp_Rcluster_Estep(invect, model_num,
                                      ydf, rowc_mm, colc_mm, cov_mm,
                                      pi_v, param_lengths,
                                      RG, p, n, q, epsilon, constraint_sum_zero)
@@ -121,7 +126,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
         #use numerical maximisation
         optim.fit <- optim(par=invect,
                            fn=rcpp_Rclusterll,
-                           model=model,
+                           model_num=model_num,
                            ydf=ydf,
                            rowc_mm=rowc_mm,
                            colc_mm=colc_mm,
@@ -136,6 +141,8 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                            method=optim.method,
                            hessian=F,control=optim.control)
 
+        print(optim.fit$counts)
+
         outvect <- optim.fit$par
 
         parlist.out <- unpack_parvec(outvect,model=model, param_lengths=param_lengths,
@@ -143,7 +150,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                      constraint_sum_zero = constraint_sum_zero)
 
         llc <- rcpp_Rclusterll(outvect,
-                               model=model,
+                               model_num=model_num,
                                ydf=ydf,
                                rowc_mm=rowc_mm,
                                colc_mm=colc_mm,
@@ -157,7 +164,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                incomplete=FALSE)
 
         lli <- rcpp_Rclusterll(outvect,
-                               model=model,
+                               model_num=model_num,
                                ydf=ydf,
                                rowc_mm=rowc_mm,
                                colc_mm=colc_mm,
@@ -242,6 +249,11 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 
     epsilon <- EM.control$epsilon
 
+    ## Important: do NOT change the order of these model types, because the Rcpp
+    ## code relies on having this order for the model numbers
+    ## Model numbers are used because comparing strings is MUCH SLOWER in C++
+    model_num <- switch(model,"OSM"=1,"POM"=2,"Binary"=3)
+
     parlist.init <- parlist.in
     pi.init <- pi_v
     kappa.init <- kappa_v
@@ -252,7 +264,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 
     while(!EM.status$finished)
     {
-        ppr_m <- rcpp_Bicluster_Estep(invect, model,
+        ppr_m <- rcpp_Bicluster_Estep(invect, model_num,
                                       ydf, rowc_mm, colc_mm, cov_mm,
                                       pi_v, kappa_v, param_lengths,
                                       RG, CG, p, n, q, epsilon, constraint_sum_zero,
@@ -263,7 +275,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 
         pi_v <- colMeans(ppr_m)
 
-        ppc_m <- rcpp_Bicluster_Estep(invect, model,
+        ppc_m <- rcpp_Bicluster_Estep(invect, model_num,
                                       ydf, rowc_mm, colc_mm, cov_mm,
                                       pi_v, kappa_v, param_lengths,
                                       RG, CG, p, n, q, epsilon, constraint_sum_zero,
@@ -279,7 +291,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
         #use numerical maximisation
         optim.fit <- optim(par=invect,
                            fn=rcpp_Biclusterll,
-                           model=model,
+                           model_num=model_num,
                            ydf=ydf,
                            rowc_mm=rowc_mm,
                            colc_mm=matrix(1),
@@ -303,7 +315,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                      constraint_sum_zero = constraint_sum_zero)
 
         llc <- rcpp_Biclusterll(outvect,
-                                model=model,
+                                model_num=model_num,
                                 ydf=ydf,
                                 rowc_mm=rowc_mm,
                                 colc_mm=colc_mm,
@@ -319,7 +331,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                 incomplete=FALSE, llc=NA)
 
         lli <- rcpp_Biclusterll(outvect,
-                                model=model,
+                                model_num=model_num,
                                 ydf=ydf,
                                 rowc_mm=rowc_mm,
                                 colc_mm=colc_mm,
@@ -403,9 +415,14 @@ calc.SE.rowcluster <- function(long.df, clust.out,
     ## because the C++ code relies on having this order for Y, ROW and COL
     ydf <- cbind(long.df$Y, as.numeric(long.df$ROW), as.numeric(long.df$COL))
 
+    ## Important: do NOT change the order of these model types, because the Rcpp
+    ## code relies on having this order for the model numbers
+    ## Model numbers are used because comparing strings is MUCH SLOWER in C++
+    model_num <- switch(clust_out$model,"OSM"=1,"POM"=2,"Binary"=3)
+
     optim.hess <- optimHess(par=clust.out$outvect,
                             fn=rcpp_Rclusterll,
-                            model=clust.out$model,
+                            model_num=model_num,
                             ydf=ydf,
                             rowc_mm=clust.out$rowc_mm,
                             colc_mm=matrix(1),
@@ -436,7 +453,7 @@ calc.SE.rowcluster <- function(long.df, clust.out,
 
         optim.hess <- optimHess(par=clust.out$rowc_format_outvect,
                                 fn=rcpp_Rclusterll,
-                                model=clust.out$model,
+                                model_num=model_num,
                                 ydf=ydf.transp,
                                 rowc_mm=clust.out$rowc_format_rowc_mm,
                                 colc_mm=matrix(1),
@@ -512,11 +529,14 @@ calc.SE.bicluster <- function(long.df, clust.out,
     ## because the C++ code relies on having this order for Y, ROW and COL
     ydf <- cbind(long.df$Y, as.numeric(long.df$ROW), as.numeric(long.df$COL))
 
-    outvect <- clust.out$outvect
+    ## Important: do NOT change the order of these model types, because the Rcpp
+    ## code relies on having this order for the model numbers
+    ## Model numbers are used because comparing strings is MUCH SLOWER in C++
+    model_num <- switch(clust_out$model,"OSM"=1,"POM"=2,"Binary"=3)
 
-    optim.hess <- optimHess(par=outvect,
+    optim.hess <- optimHess(par=clust.out$outvect,
                             fn=rcpp_Biclusterll,
-                            model=clust.out$model,
+                            model_num=model_num,
                             ydf=ydf,
                             rowc_mm=clust.out$rowc_mm,
                             colc_mm=clust.out$colc_mm,
