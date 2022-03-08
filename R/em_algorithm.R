@@ -1,6 +1,6 @@
 default.EM.control <- function() {
-    list(EMcycles=50, EMstoppingpar=1e-6, paramstopping=TRUE, startEMcycles=5,
-         keepallparams=FALSE, epsilon=1e-6)
+    list(EMcycles=50, EMlikelihoodtol=1e-4, EMparamtol=1e-2,
+         paramstopping=TRUE, startEMcycles=5, keepallparams=FALSE, epsilon=1e-6)
 }
 
 default.optim.control <- function() {
@@ -16,7 +16,7 @@ new.EM.status <- function() {
 }
 
 update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
-                             parlist.out, pi_v=NULL, kappa_v=NULL, EM.control) {
+                             parlist.out, n, p, pi_v=NULL, kappa_v=NULL, EM.control) {
     iter <- EM.status$iter+1
     finished <- FALSE
     converged <- FALSE
@@ -39,14 +39,14 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
     param.exp.out <- exp(abs(outvect))
     param.stopping.criterion <- sum(abs(param.exp.in - param.exp.out)/param.exp.out)
 
-    ## Check difference between llc and lli to avoid divide-by-zero error in
-    ## stopping criterion
-    if (abs(new.llc - new.lli) < 1E-10) new.llc <- new.lli + 1E-10
-    likelihood.stopping.criterion <- abs(EM.status$previous.lli - new.lli)/abs(new.llc - new.lli)
+    ## Use the size of the dataset to scale the result, because the lli value is
+    ## strongly negatively correlated with the size of the dataset
+    likelihood.stopping.criterion <- abs(EM.status$previous.lli - new.lli)/(n*p)
+
     # if (is.na(likelihood.stopping.criterion)) browser()
     if (is.infinite(new.lli)) likelihood.stopping.criterion <- Inf
-    if (likelihood.stopping.criterion < EM.control$EMstoppingpar &
-        (!EM.control$paramstopping || param.stopping.criterion < EM.control$EMstoppingpar)) converged <- TRUE
+    if (likelihood.stopping.criterion < EM.control$EMlikelihoodtol &
+        (!EM.control$paramstopping || param.stopping.criterion < EM.control$EMparamtol)) converged <- TRUE
 
     if (converged || iter >= EM.control$EMcycles) finished <- TRUE
     EM.status.out <- list(iter=iter,finished=finished,converged=converged,
@@ -144,7 +144,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                            method=optim.method,
                            hessian=F,control=optim.control)
 
-        print(optim.fit$counts)
+        # print(optim.fit$counts)
 
         outvect <- optim.fit$par
 
@@ -182,7 +182,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 
         EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
                                       parlist.out=parlist.out,
-                                      invect=invect,outvect=outvect,
+                                      invect=invect,outvect=outvect, n=n, p=p,
                                       pi_v=pi_v,EM.control=EM.control)
 
         ## Report the current incomplete-data log-likelihood, which is the
@@ -355,7 +355,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 
         EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
                                       parlist.out=parlist.out,
-                                      invect=invect,outvect=outvect,
+                                      invect=invect,outvect=outvect, n=n, p=p,
                                       pi_v=pi_v, kappa_v=kappa_v, EM.control=EM.control)
 
         ## Report the current incomplete-data log-likelihood, which is the

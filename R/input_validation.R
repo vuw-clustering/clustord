@@ -103,9 +103,10 @@ validate.inputs <- function(formula, model,
             nstarts < 0 || nstarts %% 1 != 0) stop("If supplied, nstarts must be a positive integer.")
     }
 
-    if (!is.list(EM.control) || length(EM.control) == 0 || length(EM.control) > 6 ||
-        !all(names(EM.control) %in% c("EMcycles","EMstoppingpar","paramstopping",
-                                      "startEMcycles","keepallparams","epsilon"))) {
+    if (!is.list(EM.control) || length(EM.control) == 0 || length(EM.control) > 7 ||
+        !all(names(EM.control) %in% c("EMcycles","EMlikelihoodtol","EMparamtol",
+                                      "paramstopping","startEMcycles","keepallparams",
+                                      "epsilon"))) {
         stop("If supplied, EM.control must be a list of control parameters for the EM algorithm. Please see the manual for more info.")
     }
 

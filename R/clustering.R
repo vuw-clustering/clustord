@@ -743,36 +743,63 @@
 #'     User-specified values of \code{kappa.init} must be of length
 #'     \code{(nclus.column-1)} because the final value will be automatically
 #'     calculated so that the values of \code{kappa} sum to 1.
-#' @param EM.control: (default = \code{list(EMcycles=50, EMstoppingpar=1e-6,
-#'     paramstopping=TRUE, startEMcycles=10, keepallparams=FALSE)})
+#' @param EM.control: (default = \code{list(EMcycles=50, EMlikelihoodtol=1e-4,
+#'     EMparamtol=1e-2, paramstopping=TRUE, startEMcycles=10, keepallparams=FALSE,
+#'     epsilon=1e-6)})
 #'     list of parameters controlling the EM algorithm.
 #'
-#'     \code{EMcycles} controls how many EM iterations of the main EM algorithm are
-#'     used to fit the chosen submodel.
+#'     \code{EMcycles} controls how many EM iterations of the main EM algorithm
+#'     are used to fit the chosen submodel.
 #'
-#'     \code{EMstoppingpar} is the tolerance for the stopping criteria in the EM algorithm.
+#'     \code{EMlikelihoodtol} is the tolerance for the stopping criterion for
+#'     the \strong{log-likelihood} in the EM algorithm. The criterion is the
+#'     absolute change in the \strong{incomplete} log-likelihood since the
+#'     previous iteration, scaled by the size of the dataset \code{n*p}, where
+#'     \code{n} is the number of rows in the data matrix and \code{p} is the
+#'     number of columns in the data matrix. The scaling is applied because the
+#'     incomplete log-likelihood is predominantly affected by the dataset size.
+#'
+#'     \code{EMparamtol} is the tolerance for the stopping criterion for the
+#'     \strong{parameters} in the EM algorithm. This is a tolerance for the
+#'     \strong{sum} of the scaled parameter changes from the last iteration,
+#'     i.e. the tolerance is not for any individual parameter but for the sum of
+#'     changes in all the parameters. Thus the default tolerance is 1e-2.
+#'     The individual parameter criteria are the absolute differences between
+#'     the exponentiated absolute parameter value at the current timestep and
+#'     the exponentiated absolute parameter value at the previous timestep, as a
+#'     proportion of the exponentiated absolute parameter value at the current
+#'     timestep. The exponentiation is to rescale parameter values that are
+#'     close to zero.
+#'
+#'     there are around 5 independent parameter values, then at the point of
+#'     convergence using default tolerances for the log-likelihood and the
+#'     parameters, each parameter will have a scaled absolute change since the
+#'     previous iteration of about 1e-4; if there are 20 or 30 independent
+#'     parameters, then each will have a scaled aboslute change of about 1e-6.
 #'
 #'     \code{paramstopping}: if \code{FALSE}, indicates that the EM algorithm
 #'     should only check convergence based on the change in incomplete-data
-#'     log-likelihood, relative to the current difference between the complete-data
-#'     and incomplete-data log-likelihoods, i.e.
+#'     log-likelihood, relative to the current difference between the
+#'     complete-data and incomplete-data log-likelihoods, i.e.
 #'     \code{abs(delta_lli)/abs(llc[iter] - lli[iter])};
-#'     if \code{TRUE}, indicates that as well as checking the likelihood criterion,
-#'     the EM algorithm should also check whether the relative change in the
-#'     exponentials of the absolute values of the current parameters is below
-#'     the tolerance \code{EMstoppingpar}, to see whether the parameters and the
-#'     likelihood have both converged.
+#'     if \code{TRUE}, indicates that as well as checking the likelihood
+#'     criterion, the EM algorithm should also check whether the relative change
+#'     in the exponentials of the absolute values of the current parameters is
+#'     below the tolerance \code{EMstoppingpar}, to see whether the parameters
+#'     and the likelihood have both converged.
 #'
-#'     \code{startEMcycles} controls how many EM iterations are used when fitting the
-#'     simpler submodels to get starting values for fitting models with interaction.
+#'     \code{startEMcycles} controls how many EM iterations are used when
+#'     fitting the simpler submodels to get starting values for fitting models
+#'     with interaction.
 #'
 #'     \code{keepallparams}: if true, keep a record of parameter values
 #'     (including pi_r and kappa_c) for every EM iteration.
 #'
-#'     For \code{columnclustering}, the parameters saved from each iteration will
-#'     NOT be converted to column clustering format, and will be in the row clustering
-#'     format, so \code{alpha} in \code{EM.status$params.every.iteration} will
-#'     correspond to beta_c and \code{pi} will correspond to kappa.
+#'     For \code{columnclustering}, the parameters saved from each iteration
+#'     will NOT be converted to column clustering format, and will be in the row
+#'     clustering format, so \code{alpha} in
+#'     \code{EM.status$params.every.iteration} will correspond to beta_c and
+#'     \code{pi} will correspond to kappa.
 #'
 #'     \code{epsilon}: default 1e-6, small value used to adjust values of pi,
 #'     kappa and theta that are too close to zero so that taking logs of them
