@@ -39,6 +39,8 @@ void rcpp_unpack(const int & model_num,
     // vector, only double quotes: param_lengths["rowc"], else you will get a
     // fatal error that will crash R;
 
+    // param_lengths entries: c('mu','phi','rowc','colc','rowc_colc','row','col','rowc_col','colc_row','rowc_cov','colc_cov','cov')]
+
     int ind, kk, rr, cc, ii, jj, ll;
     int nelts = 0;
 
@@ -97,7 +99,7 @@ void rcpp_unpack(const int & model_num,
         // Rcout << "The value of mu : " << mu << "\n";
     }
 
-    if (param_lengths["rowc"] > 0) {
+    if (param_lengths[2] > 0) {
         if (constraint_sum_zero) {
             rowc_coef[RG-1] = 0;
             for (rr=0; rr < RG-1; rr++) {
@@ -118,7 +120,7 @@ void rcpp_unpack(const int & model_num,
         // Rcout << "The value of nelts : " << nelts << "\n";
         // Rcout << "The value of rowc_coef : " << rowc_coef << "\n";
     }
-    if (param_lengths["colc"] > 0) {
+    if (param_lengths[3] > 0) {
         if (constraint_sum_zero) {
             colc_coef[CG-1] = 0;
             for (cc=0; cc < CG-1; cc++) {
@@ -139,9 +141,9 @@ void rcpp_unpack(const int & model_num,
         // Rcout << "The value of nelts : " << nelts << "\n";
         // Rcout << "The value of colc_coef : " << colc_coef << "\n";
     }
-    if (param_lengths["rowc_colc"] > 0) {
+    if (param_lengths[4] > 0) {
 
-        if (param_lengths["rowc"] > 0 && param_lengths["colc"] > 0) {
+        if (param_lengths[2] > 0 && param_lengths[3] > 0) {
             std::fill( rowc_colc_coef.row(RG-1).begin(), rowc_colc_coef.row(RG-1).end(), 0 );
             std::fill( rowc_colc_coef.column(CG-1).begin(), rowc_colc_coef.column(CG-1).end(), 0 );
 
@@ -183,7 +185,7 @@ void rcpp_unpack(const int & model_num,
         // Rcout << "The value of rowc_colc_coef : " << rowc_colc_coef << "\n";
     }
 
-    if (param_lengths["row"] > 0) {
+    if (param_lengths[5] > 0) {
         if (constraint_sum_zero) {
             row_coef[n-1] = 0;
             for (ii=0; ii < n-1; ii++) {
@@ -203,7 +205,7 @@ void rcpp_unpack(const int & model_num,
         // Rcout << "The value of nelts : " << nelts << "\n";
         // Rcout << "The value of row_coef : " << row_coef << "\n";
     }
-    if (param_lengths["col"] > 0) {
+    if (param_lengths[6] > 0) {
         if (constraint_sum_zero) {
             col_coef[p-1] = 0;
             for (jj=0; jj < p-1; jj++) {
@@ -225,11 +227,11 @@ void rcpp_unpack(const int & model_num,
         // Rcout << "The value of col_coef : " << col_coef << "\n";
     }
 
-    if (param_lengths["rowc_col"] > 0) {
+    if (param_lengths[7] > 0) {
         // NOTE: have to make sure to fill the matrix of rowc_col coefs from the
         // parameter vector IN THE SAME WAY as the matrix is filled in the rr
         // unpack_parvec function!
-        if (param_lengths["rowc"] > 0) {
+        if (param_lengths[2] > 0) {
             std::fill( rowc_col_coef.row(RG-1).begin(), rowc_col_coef.row(RG-1).end(), 0 );
             std::fill( rowc_col_coef.column(p-1).begin(), rowc_col_coef.column(p-1).end(), 0 );
 
@@ -262,12 +264,12 @@ void rcpp_unpack(const int & model_num,
         // Rcout << "The value of nelts : " << nelts << "\n";
         // Rcout << "The value of rowc_col_coef : " << rowc_col_coef << "\n";
     }
-    if (param_lengths["colc_row"] > 0) {
+    if (param_lengths[8] > 0) {
         // NOTE: have to make sure to fill the matrix of colc_row coefs from the
         // parameter vector IN THE SAME WAY as the matrix is filled in the rr
         // unpack_parvec function!
         colc_row_coef(CG-1,n-1) = 0;
-        if (param_lengths["colc"] > 0) {
+        if (param_lengths[3] > 0) {
             std::fill( rowc_colc_coef.row(CG-1).begin(), rowc_colc_coef.row(CG-1).end(), 0 );
             std::fill( rowc_colc_coef.column(n-1).begin(), rowc_colc_coef.column(n-1).end(), 0 );
 
@@ -299,11 +301,11 @@ void rcpp_unpack(const int & model_num,
         // Rcout << "The value of colc_row_coef : " << colc_row_coef << "\n";
     }
 
-    if (param_lengths["rowc_cov"] > 0 && RG > 0) {
+    if (param_lengths[9] > 0 && RG > 0) {
         // NOTE: have to make sure to fill the matrix of rowc_cov coefs from the
         // parameter vector IN THE SAME WAY as the matrix is filled in the rr
         // unpack_parvec function!
-        int nrowccov = param_lengths["rowc_cov"]/RG;
+        int nrowccov = param_lengths[9]/RG;
         // Rcout << "The value of nrowccov : " << nrowccov << "\n";
         for (rr=0; rr < RG; rr++) {
             for (ll=0; ll < nrowccov; ll++) {
@@ -316,11 +318,11 @@ void rcpp_unpack(const int & model_num,
         // Rcout << "The value of nelts : " << nelts << "\n";
         // Rcout << "The value of rowc_cov_coef : " << rowc_cov_coef << "\n";
     }
-    if (param_lengths["colc_cov"] > 0 && CG > 0) {
+    if (param_lengths[10] > 0 && CG > 0) {
         // NOTE: have to make sure to fill the matrix of colc_cov coefs from the
         // parameter vector IN THE SAME WAY as the matrix is filled in the rr
         // unpack_parvec function!
-        int ncolccov = param_lengths["colc_cov"]/CG;
+        int ncolccov = param_lengths[10]/CG;
         for (cc=0; cc < CG; cc++) {
             for (ll=0; ll < ncolccov; ll++) {
                 ind = nelts + cc*ncolccov + ll;
@@ -333,7 +335,7 @@ void rcpp_unpack(const int & model_num,
         // Rcout << "The value of colc_cov_coef : " << colc_cov_coef << "\n";
     }
 
-    int ncov = param_lengths["cov"];
+    int ncov = param_lengths[11];
     if (ncov > 0) {
         for (ll=0; ll < ncov; ll++) {
             ind = nelts + ll;
@@ -371,40 +373,43 @@ double rcpp_linear_part(const NumericMatrix ydf,
     double linear_part = 0;
     int ll;
 
+    double temp;
+
+    // param_lengths entries: c('mu','phi','rowc','colc','rowc_colc','row','col','rowc_col','colc_row','rowc_cov','colc_cov','cov')]
     // Rcout << "The R-based value of ii : " << ii+1 << "\n";
     // Rcout << "The R-based value of jj : " << jj+1 << "\n";
 
-    if (param_lengths["rowc"] > 0) {
+    if (param_lengths[2] > 0) {
         linear_part += rowc_coef[rr];
         // Rcout << "The value of linear_part with rowc: " << linear_part << "\n";
     }
-    if (param_lengths["colc"] > 0) {
+    if (param_lengths[3] > 0) {
         linear_part += colc_coef[cc];
         // Rcout << "The value of linear_part with colc: " << linear_part << "\n";
     }
-    if (param_lengths["rowc_colc"] > 0) {
+    if (param_lengths[4] > 0) {
         linear_part += rowc_colc_coef(rr,cc);
         // Rcout << "The value of linear_part with rowc_colc: " << linear_part << "\n";
     }
 
-    if (param_lengths["row"] > 0) {
+    if (param_lengths[5] > 0) {
         linear_part += row_coef[ii];
         // Rcout << "The value of linear_part with row: " << linear_part << "\n";
     }
-    if (param_lengths["col"] > 0) {
+    if (param_lengths[6] > 0) {
         linear_part += col_coef[jj];
         // Rcout << "The value of linear_part with col: " << linear_part << "\n";
     }
-    if (param_lengths["rowc_col"] > 0) {
+    if (param_lengths[7] > 0) {
         linear_part += rowc_col_coef(rr,jj);
         // Rcout << "The value of linear_part with rowc_col: " << linear_part << "\n";
     }
-    if (param_lengths["colc_row"] > 0) {
+    if (param_lengths[8] > 0) {
         linear_part += colc_row_coef(cc,ii);
         // Rcout << "The value of linear_part with colc_row: " << linear_part << "\n";
     }
 
-    if (param_lengths["rowc_cov"] > 0) {
+    if (param_lengths[9] > 0) {
         // NumericVector temp = rowc_mm.row(ij);
         // Rcout << "The value of rowc_mm: " << temp << "\n";
 
@@ -413,7 +418,7 @@ double rcpp_linear_part(const NumericMatrix ydf,
         }
         // Rcout << "The value of linear_part with rowc_cov: " << linear_part << "\n";
     }
-    if (param_lengths["colc_cov"] > 0) {
+    if (param_lengths[10] > 0) {
         // NumericVector temp = colc_mm.row(ij);
         // Rcout << "The value of colc_mm: " << temp << "\n";
 
@@ -422,11 +427,17 @@ double rcpp_linear_part(const NumericMatrix ydf,
 
         for (ll=0; ll < ncolccov; ll++) {
             linear_part += colc_mm(ij,ll)*colc_cov_coef(cc,ll);
+            if (std::isnan(linear_part)) {
+                temp = colc_mm(ij,ll);
+                Rcout << "The value of colc_mm element: " << temp << "\n";
+                temp = colc_cov_coef(cc,ll);
+                Rcout << "The value of colc_cov_coef element: " << temp << "\n";
+            }
         }
         // Rcout << "The value of linear_part with colc_cov: " << linear_part << "\n";
     }
-    if (param_lengths["cov"] > 0) {
-        for (ll=0; ll < param_lengths["cov"]; ll++) {
+    if (param_lengths[11] > 0) {
+        for (ll=0; ll < param_lengths[11]; ll++) {
             linear_part += cov_mm(ij,ll)*cov_coef[ll];
         }
         // Rcout << "The value of linear_part with cov: " << linear_part << "\n";
@@ -477,6 +488,10 @@ double rcpp_theta_from_linear(const int & model_num,
 
     if (theta <= epsilon) {
         theta = epsilon;
+    }
+
+    if (std::isnan(theta)) {
+        Rcout << "theta nan - The value of linear_part : " << linear_part << "\n";
     }
 
     return theta;
@@ -654,8 +669,8 @@ double rcpp_Rclusterll(const NumericVector & invect,
                             theta = rcpp_theta_from_linear(model_num, linear_part, ymatij_idx, mu, phi, q, epsilon);
                             log_theta = log(theta);
                             if (!NumericVector::is_na(log_theta) &&
-                                !Rcpp::traits::is_nan<REALSXP>(log_theta) &&
-                                !Rcpp::traits::is_infinite<REALSXP>(log_theta)) {
+                                !std::isnan(log_theta) &&
+                                std::isfinite(log_theta)) {
                                 log_components[rr] += log_theta;
                             }
                         }
@@ -805,7 +820,7 @@ double rcpp_Biclusterll(const NumericVector & invect,
                                                        rr, cc, ij, ii, jj);
 
                         theta = rcpp_theta_from_linear(model_num, linear_part, ymatij_idx, mu, phi, q, epsilon);
-                        // Rcout << "The value of theta : " << theta << "\n";
+                        // Rcout << "The value of theta : " << theta << " " << temp << "\n";
 
                         log_thetaymat = log(theta);
                     } else {
@@ -828,7 +843,7 @@ double rcpp_Biclusterll(const NumericVector & invect,
             for (ii=0; ii < n; ii++) {
                 for (rr=0; rr < RG; rr++) {
                     pi_kappa_component = ppr_m(ii,rr)*log(pi_v[rr]);
-                    if (!Rcpp::traits::is_nan<REALSXP>(pi_kappa_component)) {
+                    if (!std::isnan(pi_kappa_component)) {
                         llc += pi_kappa_component;
                     }
                 }
@@ -837,7 +852,7 @@ double rcpp_Biclusterll(const NumericVector & invect,
             for (jj=0; jj < p; jj++) {
                 for (cc=0; cc < CG; cc++) {
                     pi_kappa_component = ppc_m(jj,cc)*log(kappa_v[cc]);
-                    if (!Rcpp::traits::is_nan<REALSXP>(pi_kappa_component)) {
+                    if (!std::isnan(pi_kappa_component)) {
                         llc += pi_kappa_component;
                     }
                 }
@@ -874,8 +889,8 @@ double rcpp_Biclusterll(const NumericVector & invect,
         }
 
         if (!NumericVector::is_na(logl_correction) &&
-            !Rcpp::traits::is_nan<REALSXP>(logl_correction) &&
-            !Rcpp::traits::is_infinite<REALSXP>(logl_correction)) {
+            !std::isnan(logl_correction) &&
+            std::isfinite(logl_correction)) {
             logl = llc - logl_correction;
         } else {
             logl = R_NegInf;

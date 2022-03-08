@@ -97,10 +97,13 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 
     epsilon <- EM.control$epsilon
 
-    ## Important: do NOT change the order of these model types, because the Rcpp
-    ## code relies on having this order for the model numbers
-    ## Model numbers are used because comparing strings is MUCH SLOWER in C++
+    ## Important: do NOT change the order of these model types or entries in
+    ## param_lengths, because the Rcpp code relies on having this order for the
+    ## model numbers
+    ## Numeric version is used because comparing strings is MUCH SLOWER in C++
     model_num <- switch(model,"OSM"=1,"POM"=2,"Binary"=3)
+    param_lengths_num <- param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
+                                         'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
 
     parlist.init <- parlist.in
     pi.init <- pi_v
@@ -113,7 +116,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
     {
         ppr_m <- rcpp_Rcluster_Estep(invect, model_num,
                                      ydf, rowc_mm, colc_mm, cov_mm,
-                                     pi_v, param_lengths,
+                                     pi_v, param_lengths_num,
                                      RG, p, n, q, epsilon, constraint_sum_zero)
 
         ## Now set any NA values in the posterior probabilities matrix to 0
@@ -133,7 +136,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                            cov_mm=cov_mm,
                            ppr_m=ppr_m,
                            pi_v=pi_v,
-                           param_lengths=param_lengths,
+                           param_lengths=param_lengths_num,
                            RG=RG, p=p, n=n, q=q, epsilon=epsilon,
                            constraint_sum_zero=constraint_sum_zero,
                            partial=TRUE,
@@ -157,7 +160,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                cov_mm=cov_mm,
                                ppr_m=ppr_m,
                                pi_v=pi_v,
-                               param_lengths=param_lengths,
+                               param_lengths=param_lengths_num,
                                RG=RG, p=p, n=n, q=q, epsilon=epsilon,
                                constraint_sum_zero=constraint_sum_zero,
                                partial=FALSE,
@@ -171,7 +174,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                cov_mm=cov_mm,
                                ppr_m=ppr_m,
                                pi_v=pi_v,
-                               param_lengths=param_lengths,
+                               param_lengths=param_lengths_num,
                                RG=RG, p=p, n=n, q=q, epsilon=epsilon,
                                constraint_sum_zero=constraint_sum_zero,
                                partial=FALSE,
@@ -249,10 +252,13 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 
     epsilon <- EM.control$epsilon
 
-    ## Important: do NOT change the order of these model types, because the Rcpp
-    ## code relies on having this order for the model numbers
-    ## Model numbers are used because comparing strings is MUCH SLOWER in C++
+    ## Important: do NOT change the order of these model types or entries in
+    ## param_lengths, because the Rcpp code relies on having this order for the
+    ## model numbers
+    ## Numeric version is used because comparing strings is MUCH SLOWER in C++
     model_num <- switch(model,"OSM"=1,"POM"=2,"Binary"=3)
+    param_lengths_num <- param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
+                                         'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
 
     parlist.init <- parlist.in
     pi.init <- pi_v
@@ -266,7 +272,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
     {
         ppr_m <- rcpp_Bicluster_Estep(invect, model_num,
                                       ydf, rowc_mm, colc_mm, cov_mm,
-                                      pi_v, kappa_v, param_lengths,
+                                      pi_v, kappa_v, param_lengths_num,
                                       RG, CG, p, n, q, epsilon, constraint_sum_zero,
                                       row_clusters=TRUE)
 
@@ -277,7 +283,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 
         ppc_m <- rcpp_Bicluster_Estep(invect, model_num,
                                       ydf, rowc_mm, colc_mm, cov_mm,
-                                      pi_v, kappa_v, param_lengths,
+                                      pi_v, kappa_v, param_lengths_num,
                                       RG, CG, p, n, q, epsilon, constraint_sum_zero,
                                       row_clusters=FALSE)
 
@@ -300,7 +306,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                            ppc_m=ppc_m,
                            pi_v=pi_v,
                            kappa_v=kappa_v,
-                           param_lengths=param_lengths,
+                           param_lengths=param_lengths_num,
                            RG=RG, CG=CG, p=p, n=n, q=q, epsilon=epsilon,
                            constraint_sum_zero=constraint_sum_zero,
                            partial=TRUE,
@@ -324,7 +330,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                 ppc_m=ppc_m,
                                 pi_v=pi_v,
                                 kappa_v=kappa_v,
-                                param_lengths=param_lengths,
+                                param_lengths=param_lengths_num,
                                 RG=RG, CG=CG, p=p, n=n, q=q, epsilon=epsilon,
                                 constraint_sum_zero=constraint_sum_zero,
                                 partial=FALSE,
@@ -340,7 +346,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                 ppc_m=ppc_m,
                                 pi_v=pi_v,
                                 kappa_v=kappa_v,
-                                param_lengths=param_lengths,
+                                param_lengths=param_lengths_num,
                                 RG=RG, CG=CG, p=p, n=n, q=q, epsilon=epsilon,
                                 constraint_sum_zero=constraint_sum_zero,
                                 partial=FALSE,
@@ -415,10 +421,13 @@ calc.SE.rowcluster <- function(long.df, clust.out,
     ## because the C++ code relies on having this order for Y, ROW and COL
     ydf <- cbind(long.df$Y, as.numeric(long.df$ROW), as.numeric(long.df$COL))
 
-    ## Important: do NOT change the order of these model types, because the Rcpp
-    ## code relies on having this order for the model numbers
-    ## Model numbers are used because comparing strings is MUCH SLOWER in C++
-    model_num <- switch(clust_out$model,"OSM"=1,"POM"=2,"Binary"=3)
+    ## Important: do NOT change the order of these model types or entries in
+    ## param_lengths, because the Rcpp code relies on having this order for the
+    ## model numbers
+    ## Numeric version is used because comparing strings is MUCH SLOWER in C++
+    model_num <- switch(clust.out$model,"OSM"=1,"POM"=2,"Binary"=3)
+    param_lengths_num <- clust.out$param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
+                                         'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
 
     optim.hess <- optimHess(par=clust.out$outvect,
                             fn=rcpp_Rclusterll,
@@ -429,7 +438,7 @@ calc.SE.rowcluster <- function(long.df, clust.out,
                             cov_mm=clust.out$cov_mm,
                             ppr_m=clust.out$ppr,
                             pi_v=clust.out$pi.out,
-                            param_lengths=clust.out$param_lengths,
+                            param_lengths=param_lengths_num,
                             RG=clust.out$info["R"], p=clust.out$info["p"],
                             n=clust.out$info["n"], q=clust.out$info["q"],
                             epsilon=clust.out$numerical.correction.epsilon,
@@ -451,6 +460,14 @@ calc.SE.rowcluster <- function(long.df, clust.out,
         ## (and for column clustering results this is TRANSPOSED on purpose!)
         ydf.transp <- cbind(long.df$Y, as.numeric(long.df$COL), as.numeric(long.df$ROW))
 
+        ## Important: do NOT change the order of these model types or entries in
+        ## param_lengths, because the Rcpp code relies on having this order for the
+        ## model numbers
+        ## Numeric version is used because comparing strings is MUCH SLOWER in C++
+        model_num <- switch(model,"OSM"=1,"POM"=2,"Binary"=3)
+        param_lengths_num <- clust.out$rowc_format_param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
+                                             'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
+
         optim.hess <- optimHess(par=clust.out$rowc_format_outvect,
                                 fn=rcpp_Rclusterll,
                                 model_num=model_num,
@@ -460,7 +477,7 @@ calc.SE.rowcluster <- function(long.df, clust.out,
                                 cov_mm=clust.out$cov_mm,
                                 ppr_m=clust.out$ppc,
                                 pi_v=clust.out$kappa.out,
-                                param_lengths=clust.out$rowc_format_param_lengths,
+                                param_lengths=param_lengths_num,
                                 RG=clust.out$info["C"], p=clust.out$info["n"],
                                 n=clust.out$info["p"], q=clust.out$info["q"],
                                 epsilon=clust.out$numerical.correction.epsilon,
@@ -545,7 +562,7 @@ calc.SE.bicluster <- function(long.df, clust.out,
                             ppc_m=clust.out$ppc,
                             pi_v=clust.out$pi.out,
                             kappa_v=clust.out$kappa.out,
-                            param_lengths=clust.out$param_lengths,
+                            param_lengths=param_lengths_num,
                             RG=clust.out$info["R"], CG=clust.out$info["C"],
                             p=clust.out$info["p"], n=clust.out$info["n"],
                             q=clust.out$info["q"],
