@@ -16,7 +16,7 @@ double rcpp_logit(double x) {
     return out;
 }
 
-void rcpp_unpack(const String & model,
+void rcpp_unpack(const int & model_num,
                  const NumericVector & invect,
                  const IntegerVector & param_lengths,
                  NumericVector & mu,
@@ -42,7 +42,7 @@ void rcpp_unpack(const String & model,
     int ind, kk, rr, cc, ii, jj, ll;
     int nelts = 0;
 
-    if (model == "OSM") {
+    if (model_num == 1) {
         mu[0] = 0;
         for (kk=1; kk < q; kk++) {
             ind = kk-1;
@@ -80,7 +80,7 @@ void rcpp_unpack(const String & model,
         // Rcout << "The value of nelts : " << nelts << "\n";
         // Rcout << "The value of phi : " << phi << "\n";
 
-    } else if (model == "POM") {
+    } else if (model_num == 2) {
         // Convert to mu from w, where w can vary between -Inf and +Inf
         // but mu must be increasing i.e. mu[1] <= mu[2] <= mu[3]...
         mu[0] = invect[0];
@@ -90,7 +90,7 @@ void rcpp_unpack(const String & model,
         nelts += q-1;
         // Rcout << "The value of nelts : " << nelts << "\n";
         // Rcout << "The value of mu : " << mu << "\n";
-    } else if (model == "Binary") {
+    } else if (model_num == 3) {
         mu[0] = invect[0];
         nelts += 1;
         // Rcout << "The value of nelts : " << nelts << "\n";
@@ -435,7 +435,7 @@ double rcpp_linear_part(const NumericMatrix ydf,
     return linear_part;
 }
 
-double rcpp_theta_from_linear(const String model,
+double rcpp_theta_from_linear(const int & model_num,
                               const double linear_part,
                               const int ymatij_idx,
                               const NumericVector mu,
@@ -450,7 +450,7 @@ double rcpp_theta_from_linear(const String model,
     int kk;
 
     theta_sum = 0;
-    if (model == "OSM") {
+    if (model_num == 1) {
         theta_all[0] = 1;
         theta_sum += 1;
         for (kk=1; kk < q; kk++) {
@@ -458,7 +458,7 @@ double rcpp_theta_from_linear(const String model,
             theta_sum += theta_all[kk];
         }
         theta = theta_all[ymatij_idx]/theta_sum;
-    } else if (model == "POM") {
+    } else if (model_num == 2) {
         theta_all[0] = rcpp_expit(mu[0] - linear_part);
         theta_sum = theta_all[0];
         for (kk=1; kk < q-1; kk++) {
@@ -468,7 +468,7 @@ double rcpp_theta_from_linear(const String model,
         }
         theta_all[q-1] = 1-theta_sum;
         theta = theta_all[ymatij_idx];
-    } else if (model == "Binary") {
+    } else if (model_num == 3) {
         theta_all[0] = 1;
         theta_all[1] = exp(mu[0] + linear_part);
         theta_sum = 1 + theta_all[1];
@@ -484,7 +484,7 @@ double rcpp_theta_from_linear(const String model,
 
 // [[Rcpp::export]]
 double rcpp_Rclusterll(const NumericVector & invect,
-                       const String & model,
+                       const int & model_num,
                        const NumericMatrix & ydf,
                        const NumericMatrix & rowc_mm,
                        const NumericMatrix & colc_mm,
@@ -531,7 +531,7 @@ double rcpp_Rclusterll(const NumericVector & invect,
     std::fill( rowc_colc_coef.begin(), rowc_colc_coef.end(), NA_REAL ) ;
     int CG = 0;
 
-    rcpp_unpack(model, invect, param_lengths, mu, phi, rowc_coef, colc_coef,
+    rcpp_unpack(model_num, invect, param_lengths, mu, phi, rowc_coef, colc_coef,
                 rowc_colc_coef, row_coef, col_coef, rowc_col_coef, colc_row_coef,
                 rowc_cov_coef, colc_cov_coef, cov_coef,
                 RG, CG, p, n, q, constraint_sum_zero);
@@ -593,7 +593,7 @@ double rcpp_Rclusterll(const NumericVector & invect,
 
                     ymatij_idx = ydf(ij,0)-1;
 
-                    theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q, epsilon);
+                    theta = rcpp_theta_from_linear(model_num, linear_part, ymatij_idx, mu, phi, q, epsilon);
 
                     log_thetaymat = log(theta);
                 } else {
@@ -651,7 +651,7 @@ double rcpp_Rclusterll(const NumericVector & invect,
                                                            rr, cc, ij, ii, jj);
                             ymatij_idx = ydf(ij,0)-1;
 
-                            theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q, epsilon);
+                            theta = rcpp_theta_from_linear(model_num, linear_part, ymatij_idx, mu, phi, q, epsilon);
                             log_theta = log(theta);
                             if (!NumericVector::is_na(log_theta) &&
                                 !Rcpp::traits::is_nan<REALSXP>(log_theta) &&
@@ -674,7 +674,7 @@ double rcpp_Rclusterll(const NumericVector & invect,
 
 // [[Rcpp::export]]
 double rcpp_Biclusterll(const NumericVector & invect,
-                        const String & model,
+                        const int & model_num,
                         const NumericMatrix & ydf,
                         const NumericMatrix & rowc_mm,
                         const NumericMatrix & colc_mm,
@@ -734,7 +734,7 @@ double rcpp_Biclusterll(const NumericVector & invect,
 
     NumericVector cov_coef(param_lengths["cov"],NA_REAL);
 
-    rcpp_unpack(model, invect, param_lengths, mu, phi, rowc_coef, colc_coef,
+    rcpp_unpack(model_num, invect, param_lengths, mu, phi, rowc_coef, colc_coef,
                 rowc_colc_coef, row_coef, col_coef, rowc_col_coef, colc_row_coef,
                 rowc_cov_coef, colc_cov_coef, cov_coef,
                 RG, CG, p, n, q, constraint_sum_zero);
@@ -804,7 +804,7 @@ double rcpp_Biclusterll(const NumericVector & invect,
                                                        nrowccov, ncolccov,
                                                        rr, cc, ij, ii, jj);
 
-                        theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q, epsilon);
+                        theta = rcpp_theta_from_linear(model_num, linear_part, ymatij_idx, mu, phi, q, epsilon);
                         // Rcout << "The value of theta : " << theta << "\n";
 
                         log_thetaymat = log(theta);
@@ -888,7 +888,7 @@ double rcpp_Biclusterll(const NumericVector & invect,
 
 // [[Rcpp::export]]
 NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
-                                  const String & model,
+                                  const int & model_num,
                                   const NumericMatrix & ydf,
                                   const NumericMatrix & rowc_mm,
                                   const NumericMatrix & colc_mm,
@@ -934,7 +934,7 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
     std::fill( rowc_colc_coef.begin(), rowc_colc_coef.end(), NA_REAL ) ;
     int CG = 0;
 
-    rcpp_unpack(model, invect, param_lengths, mu, phi, rowc_coef, colc_coef,
+    rcpp_unpack(model_num, invect, param_lengths, mu, phi, rowc_coef, colc_coef,
                 rowc_colc_coef, row_coef, col_coef, rowc_col_coef, colc_row_coef,
                 rowc_cov_coef, colc_cov_coef, cov_coef,
                 RG, CG, p, n, q, constraint_sum_zero);
@@ -989,7 +989,7 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
 
                 ymatij_idx = ydf(ij,0)-1;
 
-                theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q, epsilon);
+                theta = rcpp_theta_from_linear(model_num, linear_part, ymatij_idx, mu, phi, q, epsilon);
 
                 log_thetaymat = log(theta);
             } else {
@@ -1014,7 +1014,7 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
 
 // [[Rcpp::export]]
 NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
-                                   const String & model,
+                                   const int & model_num,
                                    const NumericMatrix & ydf,
                                    const NumericMatrix & rowc_mm,
                                    const NumericMatrix & colc_mm,
@@ -1072,7 +1072,7 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
 
     NumericVector cov_coef(param_lengths["cov"],NA_REAL);
 
-    rcpp_unpack(model, invect, param_lengths, mu, phi, rowc_coef, colc_coef,
+    rcpp_unpack(model_num, invect, param_lengths, mu, phi, rowc_coef, colc_coef,
                 rowc_colc_coef, row_coef, col_coef, rowc_col_coef, colc_row_coef,
                 rowc_cov_coef, colc_cov_coef, cov_coef,
                 RG, CG, p, n, q, constraint_sum_zero);
@@ -1151,7 +1151,7 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
                                                        nrowccov, ncolccov,
                                                        rr, cc, ij, ii, jj);
 
-                        theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q, epsilon);
+                        theta = rcpp_theta_from_linear(model_num, linear_part, ymatij_idx, mu, phi, q, epsilon);
 
                         sum_pikappa_theta += kappa_v[cc]*theta;
                     }
@@ -1188,7 +1188,7 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
                                                        nrowccov, ncolccov,
                                                        rr, cc, ij, ii, jj);
 
-                        theta = rcpp_theta_from_linear(model, linear_part, ymatij_idx, mu, phi, q, epsilon);
+                        theta = rcpp_theta_from_linear(model_num, linear_part, ymatij_idx, mu, phi, q, epsilon);
 
                         sum_pikappa_theta += pi_v[rr]*theta;
                     }
