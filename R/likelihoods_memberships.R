@@ -1,66 +1,3 @@
-onemode.membership.pp <- function(long.df, theta, proportions, nelements, row){
-    nclus <- length(proportions)
-    pp.m <- matrix(NA, nelements, nclus)
-
-    pp.raw <- matrix(log(proportions),nelements,nclus,byrow=T)
-
-    for(idx in 1:nelements){
-        for(clus.idx in 1:nclus){
-            yvals <- long.df$Y[long.df$ROW==idx]
-            if (length(yvals) > 0) {
-                if (row) pp.raw[idx,clus.idx] <- pp.raw[idx,clus.idx] + sum(log(diag(theta[clus.idx,,yvals])))
-                else pp.raw[idx,clus.idx] <- pp.raw[idx,clus.idx] + sum(log(diag(theta[,clus.idx,yvals])))
-            }
-        }
-    }
-    for(idx in 1:nelements) pp.m[idx,] <- pp.raw[idx,] - log(sum(exp(pp.raw[idx,] + min(abs(pp.raw[idx,]))))) + min(abs(pp.raw[idx,]))
-
-    pp.m <- exp(pp.m)
-    pp.m <- pp.m/rowSums(pp.m)
-    pp.m
-}
-
-twomode.membership.pp <- function(long.df, theta, pi.v, kappa.v, nclus, row) {
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
-
-    if (row) {
-        pp.m <- matrix(NA,n,nclus)
-        pp.raw <- matrix(log(pi.v),n,nclus,byrow=T)
-        for(i in 1:n){
-            for(r in 1:nclus){
-                for(j in 1:p){
-                    yval <- long.df$Y[long.df$ROW==i & long.df$COL==j]
-                    if (length(yval) == 1) {
-                        term <- sum(kappa.v*theta[r,,yval])
-                        pp.raw[i,r] <- pp.raw[i,r] + log(term)
-                    }
-                }
-            }
-        }
-    } else {
-        pp.m <- matrix(NA,p,nclus)
-        pp.raw <- matrix(log(kappa.v),p,nclus,byrow=T)
-        for(j in 1:p){
-            for(c in 1:nclus){
-                for(i in 1:n){
-                    yval <- long.df$Y[long.df$ROW==i & long.df$COL==j]
-                    if (length(yval) == 1) {
-                        term <- sum(pi.v*theta[,c,yval])
-                        pp.raw[j,c] <- pp.raw[j,c] + log(term)
-                    }
-                }
-            }
-        }
-    }
-
-    for(idx in 1:nrow(pp.m)) pp.m[idx,] <- pp.raw[idx,]-log(sum(exp(pp.raw[idx,] + min(abs(pp.raw[idx,]))))) + min(abs(pp.raw[idx,]))
-
-    pp.m <- exp(pp.m)
-    pp.m <- pp.m/rowSums(pp.m)
-    pp.m
-}
-
 assignments <- function(pp.m) {
     nelements <- nrow(pp.m)
     nclus <- ncol(pp.m)
@@ -70,155 +7,86 @@ assignments <- function(pp.m) {
     assignments
 }
 
-calc.ll <- function(invect, long.df, y.mat, model, submodel, ppr.m, pi.v, RG,
-                    ppc.m=NULL, kappa.v=NULL, CG=NULL, constraint.sum.zero=TRUE,
-                    partial=FALSE, SE.calc=FALSE) {
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
-    q <- length(levels(long.df$Y))
-
-    parlist <- unpack.parvec(invect,model=model,submodel=submodel,
-                             n=n,p=p,q=q,RG=RG,CG=CG,constraint.sum.zero=constraint.sum.zero)
-
-    this.theta <- calc.theta(parlist,model=model,submodel=submodel)
-
-    if (SE.calc) {
-        if (submodel %in% c("rs","rp","rpi")) {
-            Rcluster.Incll(long.df, this.theta, pi.v, RG)
-        } else if (submodel %in% c("rc","rci")) {
-            Bicluster.IncllApprox(long.df=long.df, y.mat=y.mat, theta=this.theta,
-                                  ppr.m=ppr.m, ppc.m=ppc.m, pi.v=pi.v, kappa.v=kappa.v)
-        }
-    } else {
-        if (submodel %in% c("rs","rp","rpi")) {
-            Rcluster.ll(long.df, y.mat, this.theta, ppr.m, pi.v, RG, partial=partial)
-        } else if (submodel %in% c("rc","rci")) {
-            Bicluster.ll(long.df, y.mat, this.theta, ppr.m, ppc.m, pi.v, kappa.v, partial=partial)
-        }
-    }
-}
-
-Rcluster.ll <- function(long.df, y.mat, theta, ppr.m, pi.v, RG, partial=FALSE){
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
-    q <- length(levels(long.df$Y))
-
-    theta[theta<=0]=lower.limit
-    pi.v[pi.v==0]=lower.limit
-    # llc=0
-    # for (r in 1:RG) {
-    #     # theta.y.mat <- sapply(1:p,function(j) {
-    #     #     yvals <- as.numeric(long.df$Y[long.df$COL==j])
-    #     #     theta[r,j,yvals]
-    #     # }) ## <-- THIS IS VERY VERY SLOW
-    #     # llc <- llc + sum(t(ppr.m[,r])%*%log(theta.y.mat))
-    #     log.theta.y.mat <- sapply(1:p,function(j) {
-    #         raw.log.theta <- log(theta[r,j,y.mat[,j]])
-    #         raw.log.theta[is.na(raw.log.theta) | is.infinite(raw.log.theta)] <- 0
-    #         raw.log.theta
-    #     })
-    #     llc <- llc + sum(t(ppr.m[,r])%*%log.theta.y.mat)
-    # }
-    # if (!partial) llc <- llc + sum(ppr.m%*%log(pi.v))
-    #
-    # if (!is.finite(llc)) browser()
-
-    llc <- rcpparma_Rclusterll(y.mat, theta, ppr.m, pi.v, RG, p, n, as.numeric(partial))
-
-    llc
-}
-
-Rcluster.Incll <- function(long.df, theta, pi.v, RG)
+Bicluster.IncllC <- function(invect, model, ydf, rowc_mm, colc_mm, cov_mm, pi_v, kappa_v,
+                             param_lengths, RG, CG, p, n, q,
+                             constraint_sum_zero=TRUE)
 {
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
-    q <- length(levels(long.df$Y))
+    parlist <- unpack_parvec(invect, model, param_lengths, n, p, q, RG, CG,
+                             constraint_sum_zero)
 
-    theta[theta<=0]=lower.limit
-    pi.v[pi.v==0]=lower.limit
-    logl = 0
-    for(i in 1:n){
-        log.components <- rep(0,RG)
-        yvals <- long.df$Y[long.df$ROW==i]
-        for(r in 1:RG){
-            if (length(yvals) >= 1) {
-                if (length(yvals) == 1) th <- theta[r,,yvals]
-                else if (length(yvals) > 1) th <- diag(theta[r,,yvals])
-                log.components[r] <- log(pi.v[r]) + sum(log(th),na.rm=TRUE)
-            }
-        }
-        log.sumoverR <- log(sum(exp(log.components - max(log.components)))) + max(log.components)
-        logl <- logl + log.sumoverR
-    }
-    if (logl == 0) logl <- -1E-40
-    logl
-}
-
-#The Log-likelihood #
-Bicluster.ll <- function(long.df, y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, partial=FALSE){
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
-    q <- length(levels(long.df$Y))
-
-    RG <- length(pi.v)
-    CG <- length(kappa.v)
-
-    theta[theta<=0]=lower.limit
-    pi.v[pi.v==0]=lower.limit
-    kappa.v[kappa.v==0]=lower.limit
-
-    llc=0
-
-    for (r in 1:RG) {
-        for (c in 1:CG) {
-            # theta.y <- t(sapply(1:n, function(i) {
-            #     sapply(1:p, function(j) {
-            #         # theta[r,c,long.df$Y[long.df$ROW==i & long.df$COL==j]] ## <-- THIS IS VERY VERY SLOW
-            #         if (is.na(y.mat[i,j])) return(0)
-            #         else return(theta[r,c,y.mat[i,j]])
-            #     })
-            # }))
-            # llc <- llc + t(ppr.m[,r])%*%log(theta.y)%*%ppc.m[,c]
-            log.theta.y <- t(sapply(1:n, function(i) {
-                sapply(1:p, function(j) {
-                    if (is.na(y.mat[i,j]) || y.mat[i,j] <= 0) return(0)
-                    else return(log(theta[r,c,y.mat[i,j]]))
-                })
-            }))
-            llc <- llc + t(ppr.m[,r])%*%log.theta.y%*%ppc.m[,c]
-        }
-    }
-    if (!partial) {
-        llc <- llc + sum(ppr.m%*%log(pi.v))
-        llc <- llc + sum(ppc.m%*%log(kappa.v))
-    }
-    llc
-}
-
-#The incomplete log-likelihood,used in model selection#
-Bicluster.IncllC <- function(long.df, theta, pi.v, kappa.v)
-{
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
-    q <- length(levels(long.df$Y))
-    RG <- length(pi.v)
-    CG <- length(kappa.v)
-
-    theta[theta<=0]=lower.limit
-    pi.v[pi.v==0]=lower.limit
-    kappa.v[kappa.v==0]=lower.limit
+    pi_v[pi_v==0]=lower.limit
+    kappa_v[kappa_v==0]=lower.limit
 
     # Full evaluation using the columns.
     # Use if CG^p is small enough.
     # Construct n*p*RG*CG*q array of Multinomial terms:
     multi.arr = array(NA,c(n,p,RG,CG))
-    for(i in 1:n){
-        for(j in 1:p){
-            for(r in 1:RG){
-                for(c in 1:CG){
-                    for(k in 1:q){
-                        yval <- as.numeric(long.df$Y[long.df$ROW==i & long.df$COL==j])
-                        if(length(yval) == 1 && yval==k) multi.arr[i,j,r,c]=theta[r,c,k]
+    for(ii in 1:n){
+        for(jj in 1:p){
+            for(rr in 1:RG){
+                for(cc in 1:CG){
+                    ij <- which(ydf$ROW==ii & ydf$COL==jj)
+                    if(length(ij) == 1) {
+                        yval <- as.numeric(ydf$Y[ij])
+
+                        linear_part = 0;
+                        if (param_lengths["rowc"] > 0) {
+                            linear_part <- linear_part + parlist$rowc[rr];
+                        }
+                        if (param_lengths["colc"] > 0) {
+                            linear_part <- linear_part + parlist$colc[cc];
+                        }
+                        if (param_lengths["rowc_colc"] > 0) {
+                            linear_part <- linear_part + parlist$rowc_colc[rr,cc];
+                        }
+
+                        if (param_lengths["row"] > 0) {
+                            linear_part <- linear_part + parlist$row[ii];
+                        }
+                        if (param_lengths["col"] > 0) {
+                            linear_part <- linear_part + parlist$col[jj];
+                        }
+                        if (param_lengths["rowc_col"] > 0) {
+                            linear_part <- linear_part + parlist$rowc_col[rr,jj];
+                        }
+                        if (param_lengths["colc_row"] > 0) {
+                            linear_part <- linear_part + parlist$colc_row[cc,ii];
+                        }
+
+                        if (param_lengths["rowc_cov"] > 0) {
+                            linear_part <- linear_part + sum(rowc_mm[ij,]*parlist$rowc_cov[rr,])
+                        }
+                        if (param_lengths["colc_cov"] > 0) {
+                            linear_part <- linear_part + sum(colc_mm[ij,]*parlist$colc_cov[cc,])
+                        }
+                        if (param_lengths["cov"] > 0) {
+                            linear_part <- linear_part + sum(cov_mm[ij,]*parlist$cov)
+                        }
+
+                        theta_sum = 0;
+                        if (model == "OSM") {
+                            theta_all <- c(1,exp(mu[2:q] + phi[2:q]*linear_part))
+                            theta = theta_all[yval]/theta_sum;
+                        } else if (model == "POM") {
+                            theta_all[1] <- expit(mu[0] - linear_part)
+                            theta_sum = theta_all[1]
+                            for (kk in 2:q-1) {
+                                theta_all[kk] = rcpp_expit(mu[kk] - linear_part) -
+                                    rcpp_expit(mu[kk-1] - linear_part);
+                                theta_sum <- theta_sum + theta_all[kk];
+                            }
+                            theta_all[q] = 1-theta_sum;
+                            theta = theta_all[yval];
+                        } else if (model == "Binary") {
+                            theta_all <- c(1, exp(mu[1] + linear_part))
+                            theta = theta_all[yval]/sum(theta_all)
+                        }
+
+                        if (theta <= 0) {
+                            theta = 0.0000000001;
+                        }
+
+                        multi.arr[ii,jj,rr,cc] <- theta
                     }
                 }
             }
@@ -240,7 +108,7 @@ Bicluster.IncllC <- function(long.df, theta, pi.v, kappa.v)
         # Vector of c selections:
         c.v <- combos.mat[aa,]
         # Find the kappa product:
-        alpha.v[aa] <- prod(kappa.v[c.v])
+        alpha.v[aa] <- prod(kappa_v[c.v])
         if (alpha.v[aa]>0)
         {
             # Pick out elements of multi.arr where each col has known CG:
@@ -248,9 +116,9 @@ Bicluster.IncllC <- function(long.df, theta, pi.v, kappa.v)
                 m.a[ii,jj,rr] <- multi.arr[ii,jj,rr,c.v[jj]]
             # Calculate and store row aa of Aair.a:
             for (ii in 1:n) for (rr in 1:RG)
-                Aair.a[aa,ii,rr] <-  log(pi.v[rr]) + sum(log(m.a[ii,,rr]),na.rm=TRUE)
+                Aair.a[aa,ii,rr] <-  log(pi_v[rr]) + sum(log(m.a[ii,,rr]),na.rm=TRUE)
 
-            # May have NA if pi.v[rr]=0, don't use those terms.
+            # May have NA if pi_v[rr]=0, don't use those terms.
             max.Aair <- apply(Aair.a[aa,,],1,max,na.rm=T)
 
             for (ii in 1:n)
@@ -269,17 +137,17 @@ Bicluster.IncllC <- function(long.df, theta, pi.v, kappa.v)
 }
 
 # Rows expansion (use if RG^n small enough):
-Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
+Bicluster.IncllR <- function(long.df, theta, pi_v, kappa_v)
 {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
     q <- length(levels(long.df$Y))
-    RG <- length(pi.v)
-    CG <- length(kappa.v)
+    RG <- length(pi_v)
+    CG <- length(kappa_v)
 
     theta[theta<=0]=lower.limit
-    pi.v[pi.v==0]=lower.limit
-    kappa.v[kappa.v==0]=lower.limit
+    pi_v[pi_v==0]=lower.limit
+    kappa_v[kappa_v==0]=lower.limit
 
     # Full evaluation using the rows.
     # Use if RG^n is small enough.
@@ -312,7 +180,7 @@ Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
         # Vector of r selections:
         r.v <- combos.mat[aa,]
         # Find the pi product:
-        alpha.v[aa] <- prod(pi.v[r.v])
+        alpha.v[aa] <- prod(pi_v[r.v])
         if (alpha.v[aa]>0)
         {
             # Pick out elements of multi.arr where each row has known RG:
@@ -320,8 +188,8 @@ Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
                 m.a[ii,jj,cc] <- multi.arr[ii,jj,r.v[ii],cc]
             # Calculate and store row aa of Aair.a:
             for (jj in 1:p) for (cc in 1:CG)
-                Aajc.a[aa,jj,cc] <-  log(kappa.v[cc]) + sum(log(m.a[,jj,cc]),na.rm=TRUE)
-            # May have NA if kappa.v[cc]=0, don't use those terms.
+                Aajc.a[aa,jj,cc] <-  log(kappa_v[cc]) + sum(log(m.a[,jj,cc]),na.rm=TRUE)
+            # May have NA if kappa_v[cc]=0, don't use those terms.
             max.Aajc <- apply(Aajc.a[aa,,],1,max,na.rm=T)
 
             for (jj in 1:p)
@@ -337,59 +205,4 @@ Bicluster.IncllR <- function(long.df, theta, pi.v, kappa.v)
     M.val <- max(Ea.v, na.rm=TRUE)
     logl <- M.val + log(sum(exp(Ea.v-M.val),na.rm=TRUE))
     logl
-}
-
-## Biclustering incomplete-data log-likelihood calculated based on the approximation
-## relating the incomplete-data and complete-data log-likelihoods
-Bicluster.IncllApprox <- function(llc=NULL, long.df, y.mat, theta, pi.v, kappa.v, ppr.m, ppc.m) {
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
-    q <- length(levels(long.df$Y))
-    RG <- length(pi.v)
-    CG <- length(kappa.v)
-
-    theta[theta<1E-40]=lower.limit
-    pi.v[pi.v<1E-40]=lower.limit
-    kappa.v[kappa.v<1E-40]=lower.limit
-
-    if (is.null(llc)) llc <- Bicluster.ll(long.df, y.mat, theta, ppr.m, ppc.m, pi.v, kappa.v, partial=FALSE)
-
-    llc.correction.term <- 0
-
-    for (i in 1:n) {
-        for (j in 1:p) {
-            if (!is.na(y.mat[i,j]) && y.mat[i,j] > 0) {
-                theta.ij <- theta[,,y.mat[i,j]]
-                ## Multiply every row by the corresponding value of pi.v, i.e.
-                ## multiply pi.v down each column, and multiply kappa.v across
-                ## each row
-                denom <- t(apply(apply(theta.ij,2,"*",pi.v),1,"*",kappa.v))
-                tau.ij <- denom/sum(denom)
-                log.tau.ij <- log(tau.ij)
-
-                ## Now do the following calculation in stages, and to avoid Inf*0 = NaN
-                ## forcibly convert any related infinite terms to 0
-                part1 <- ppr.m[i,]%*%log.tau.ij
-                if (any(is.na(part1))) {
-                    na.idxs <- which(is.na(part1))
-                    for (idx in na.idxs) {
-                        log.tau.ij[is.infinite(log.tau.ij[,idx]),idx] <- 0
-                    }
-                    part1 <- ppr.m[i,]%*%log.tau.ij
-                }
-                part2 <- part1%*%ppc.m[j,]
-                if (is.na(part2)) {
-                    part1[is.infinite(part1)] <- 0
-                    part2 <- part1%*%ppc.m[j,]
-                }
-                if (is.na(part2)) browser()
-                llc.correction.term <- llc.correction.term + part2
-                # if (is.na(ppr.m[i,]%*%log(tau.ij)%*%ppc.m[j,])) browser()
-                # llc.correction.term <- llc.correction.term + ppr.m[i,]%*%log(tau.ij)%*%ppc.m[j,]
-            }
-        }
-    }
-
-    if (is.finite(llc.correction.term)) lli <- llc - llc.correction.term
-    else lli <- -Inf
 }

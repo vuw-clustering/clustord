@@ -11,103 +11,121 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// rcpparma_outerproduct
-arma::mat rcpparma_outerproduct(const arma::colvec& x);
-RcppExport SEXP _clustord_rcpparma_outerproduct(SEXP xSEXP) {
+// rcpp_Rclusterll
+double rcpp_Rclusterll(const NumericVector& invect, const int& model_num, const NumericMatrix& ydf, const NumericMatrix& rowc_mm, const NumericMatrix& colc_mm, const NumericMatrix& cov_mm, const NumericMatrix& ppr_m, NumericVector pi_v, const IntegerVector& param_lengths, const int& RG, const int& p, const int& n, const int& q, const double& epsilon, const bool& constraint_sum_zero, const bool& partial, const bool& incomplete);
+RcppExport SEXP _clustord_rcpp_Rclusterll(SEXP invectSEXP, SEXP model_numSEXP, SEXP ydfSEXP, SEXP rowc_mmSEXP, SEXP colc_mmSEXP, SEXP cov_mmSEXP, SEXP ppr_mSEXP, SEXP pi_vSEXP, SEXP param_lengthsSEXP, SEXP RGSEXP, SEXP pSEXP, SEXP nSEXP, SEXP qSEXP, SEXP epsilonSEXP, SEXP constraint_sum_zeroSEXP, SEXP partialSEXP, SEXP incompleteSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::colvec& >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpparma_outerproduct(x));
+    Rcpp::traits::input_parameter< const NumericVector& >::type invect(invectSEXP);
+    Rcpp::traits::input_parameter< const int& >::type model_num(model_numSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type ydf(ydfSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type rowc_mm(rowc_mmSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type colc_mm(colc_mmSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type cov_mm(cov_mmSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type ppr_m(ppr_mSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type pi_v(pi_vSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type param_lengths(param_lengthsSEXP);
+    Rcpp::traits::input_parameter< const int& >::type RG(RGSEXP);
+    Rcpp::traits::input_parameter< const int& >::type p(pSEXP);
+    Rcpp::traits::input_parameter< const int& >::type n(nSEXP);
+    Rcpp::traits::input_parameter< const int& >::type q(qSEXP);
+    Rcpp::traits::input_parameter< const double& >::type epsilon(epsilonSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type constraint_sum_zero(constraint_sum_zeroSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type partial(partialSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type incomplete(incompleteSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_Rclusterll(invect, model_num, ydf, rowc_mm, colc_mm, cov_mm, ppr_m, pi_v, param_lengths, RG, p, n, q, epsilon, constraint_sum_zero, partial, incomplete));
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpparma_innerproduct
-double rcpparma_innerproduct(const arma::colvec& x);
-RcppExport SEXP _clustord_rcpparma_innerproduct(SEXP xSEXP) {
+// rcpp_Biclusterll
+double rcpp_Biclusterll(const NumericVector& invect, const int& model_num, const NumericMatrix& ydf, const NumericMatrix& rowc_mm, const NumericMatrix& colc_mm, const NumericMatrix& cov_mm, const NumericMatrix& ppr_m, const NumericMatrix& ppc_m, NumericVector pi_v, NumericVector kappa_v, const IntegerVector& param_lengths, const int& RG, const int& CG, const int& p, const int& n, const int& q, const double& epsilon, const bool& constraint_sum_zero, const bool& partial, const bool& incomplete, double& llc);
+RcppExport SEXP _clustord_rcpp_Biclusterll(SEXP invectSEXP, SEXP model_numSEXP, SEXP ydfSEXP, SEXP rowc_mmSEXP, SEXP colc_mmSEXP, SEXP cov_mmSEXP, SEXP ppr_mSEXP, SEXP ppc_mSEXP, SEXP pi_vSEXP, SEXP kappa_vSEXP, SEXP param_lengthsSEXP, SEXP RGSEXP, SEXP CGSEXP, SEXP pSEXP, SEXP nSEXP, SEXP qSEXP, SEXP epsilonSEXP, SEXP constraint_sum_zeroSEXP, SEXP partialSEXP, SEXP incompleteSEXP, SEXP llcSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::colvec& >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpparma_innerproduct(x));
+    Rcpp::traits::input_parameter< const NumericVector& >::type invect(invectSEXP);
+    Rcpp::traits::input_parameter< const int& >::type model_num(model_numSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type ydf(ydfSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type rowc_mm(rowc_mmSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type colc_mm(colc_mmSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type cov_mm(cov_mmSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type ppr_m(ppr_mSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type ppc_m(ppc_mSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type pi_v(pi_vSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type kappa_v(kappa_vSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type param_lengths(param_lengthsSEXP);
+    Rcpp::traits::input_parameter< const int& >::type RG(RGSEXP);
+    Rcpp::traits::input_parameter< const int& >::type CG(CGSEXP);
+    Rcpp::traits::input_parameter< const int& >::type p(pSEXP);
+    Rcpp::traits::input_parameter< const int& >::type n(nSEXP);
+    Rcpp::traits::input_parameter< const int& >::type q(qSEXP);
+    Rcpp::traits::input_parameter< const double& >::type epsilon(epsilonSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type constraint_sum_zero(constraint_sum_zeroSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type partial(partialSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type incomplete(incompleteSEXP);
+    Rcpp::traits::input_parameter< double& >::type llc(llcSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_Biclusterll(invect, model_num, ydf, rowc_mm, colc_mm, cov_mm, ppr_m, ppc_m, pi_v, kappa_v, param_lengths, RG, CG, p, n, q, epsilon, constraint_sum_zero, partial, incomplete, llc));
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpparma_bothproducts
-Rcpp::List rcpparma_bothproducts(const arma::colvec& x);
-RcppExport SEXP _clustord_rcpparma_bothproducts(SEXP xSEXP) {
+// rcpp_Rcluster_Estep
+NumericMatrix rcpp_Rcluster_Estep(const NumericVector& invect, const int& model_num, const NumericMatrix& ydf, const NumericMatrix& rowc_mm, const NumericMatrix& colc_mm, const NumericMatrix& cov_mm, NumericVector pi_v, const IntegerVector& param_lengths, const int& RG, const int& p, const int& n, const int& q, const double& epsilon, const bool& constraint_sum_zero);
+RcppExport SEXP _clustord_rcpp_Rcluster_Estep(SEXP invectSEXP, SEXP model_numSEXP, SEXP ydfSEXP, SEXP rowc_mmSEXP, SEXP colc_mmSEXP, SEXP cov_mmSEXP, SEXP pi_vSEXP, SEXP param_lengthsSEXP, SEXP RGSEXP, SEXP pSEXP, SEXP nSEXP, SEXP qSEXP, SEXP epsilonSEXP, SEXP constraint_sum_zeroSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::colvec& >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpparma_bothproducts(x));
+    Rcpp::traits::input_parameter< const NumericVector& >::type invect(invectSEXP);
+    Rcpp::traits::input_parameter< const int& >::type model_num(model_numSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type ydf(ydfSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type rowc_mm(rowc_mmSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type colc_mm(colc_mmSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type cov_mm(cov_mmSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type pi_v(pi_vSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type param_lengths(param_lengthsSEXP);
+    Rcpp::traits::input_parameter< const int& >::type RG(RGSEXP);
+    Rcpp::traits::input_parameter< const int& >::type p(pSEXP);
+    Rcpp::traits::input_parameter< const int& >::type n(nSEXP);
+    Rcpp::traits::input_parameter< const int& >::type q(qSEXP);
+    Rcpp::traits::input_parameter< const double& >::type epsilon(epsilonSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type constraint_sum_zero(constraint_sum_zeroSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_Rcluster_Estep(invect, model_num, ydf, rowc_mm, colc_mm, cov_mm, pi_v, param_lengths, RG, p, n, q, epsilon, constraint_sum_zero));
     return rcpp_result_gen;
 END_RCPP
 }
-// rcpparma_updateliC
-double rcpparma_updateliC(double li, const arma::colvec& columnclusters, const int RG, const int n, const int p, const arma::mat& ymat, const arma::cube& theta, const arma::colvec& pivec, const arma::rowvec& kappavec);
-RcppExport SEXP _clustord_rcpparma_updateliC(SEXP liSEXP, SEXP columnclustersSEXP, SEXP RGSEXP, SEXP nSEXP, SEXP pSEXP, SEXP ymatSEXP, SEXP thetaSEXP, SEXP pivecSEXP, SEXP kappavecSEXP) {
+// rcpp_Bicluster_Estep
+NumericMatrix rcpp_Bicluster_Estep(const NumericVector& invect, const int& model_num, const NumericMatrix& ydf, const NumericMatrix& rowc_mm, const NumericMatrix& colc_mm, const NumericMatrix& cov_mm, NumericVector pi_v, NumericVector kappa_v, const IntegerVector& param_lengths, const int& RG, const int& CG, const int& p, const int& n, const int& q, const double& epsilon, const bool& constraint_sum_zero, const bool& row_clusters);
+RcppExport SEXP _clustord_rcpp_Bicluster_Estep(SEXP invectSEXP, SEXP model_numSEXP, SEXP ydfSEXP, SEXP rowc_mmSEXP, SEXP colc_mmSEXP, SEXP cov_mmSEXP, SEXP pi_vSEXP, SEXP kappa_vSEXP, SEXP param_lengthsSEXP, SEXP RGSEXP, SEXP CGSEXP, SEXP pSEXP, SEXP nSEXP, SEXP qSEXP, SEXP epsilonSEXP, SEXP constraint_sum_zeroSEXP, SEXP row_clustersSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type li(liSEXP);
-    Rcpp::traits::input_parameter< const arma::colvec& >::type columnclusters(columnclustersSEXP);
-    Rcpp::traits::input_parameter< const int >::type RG(RGSEXP);
-    Rcpp::traits::input_parameter< const int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< const int >::type p(pSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type ymat(ymatSEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< const arma::colvec& >::type pivec(pivecSEXP);
-    Rcpp::traits::input_parameter< const arma::rowvec& >::type kappavec(kappavecSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpparma_updateliC(li, columnclusters, RG, n, p, ymat, theta, pivec, kappavec));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rcpparma_updateliR
-double rcpparma_updateliR(double li, const arma::rowvec& rowclusters, const int CG, const int n, const int p, const arma::mat& ymat, const arma::cube& theta, const arma::colvec& pivec, const arma::rowvec& kappavec);
-RcppExport SEXP _clustord_rcpparma_updateliR(SEXP liSEXP, SEXP rowclustersSEXP, SEXP CGSEXP, SEXP nSEXP, SEXP pSEXP, SEXP ymatSEXP, SEXP thetaSEXP, SEXP pivecSEXP, SEXP kappavecSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type li(liSEXP);
-    Rcpp::traits::input_parameter< const arma::rowvec& >::type rowclusters(rowclustersSEXP);
-    Rcpp::traits::input_parameter< const int >::type CG(CGSEXP);
-    Rcpp::traits::input_parameter< const int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< const int >::type p(pSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type ymat(ymatSEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< const arma::colvec& >::type pivec(pivecSEXP);
-    Rcpp::traits::input_parameter< const arma::rowvec& >::type kappavec(kappavecSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpparma_updateliR(li, rowclusters, CG, n, p, ymat, theta, pivec, kappavec));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rcpparma_Rclusterll
-double rcpparma_Rclusterll(arma::mat& ymat, arma::cube& theta, arma::mat& pprm, arma::colvec piv, int RG, int p, int n, bool partial);
-RcppExport SEXP _clustord_rcpparma_Rclusterll(SEXP ymatSEXP, SEXP thetaSEXP, SEXP pprmSEXP, SEXP pivSEXP, SEXP RGSEXP, SEXP pSEXP, SEXP nSEXP, SEXP partialSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat& >::type ymat(ymatSEXP);
-    Rcpp::traits::input_parameter< arma::cube& >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type pprm(pprmSEXP);
-    Rcpp::traits::input_parameter< arma::colvec >::type piv(pivSEXP);
-    Rcpp::traits::input_parameter< int >::type RG(RGSEXP);
-    Rcpp::traits::input_parameter< int >::type p(pSEXP);
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< bool >::type partial(partialSEXP);
-    rcpp_result_gen = Rcpp::wrap(rcpparma_Rclusterll(ymat, theta, pprm, piv, RG, p, n, partial));
+    Rcpp::traits::input_parameter< const NumericVector& >::type invect(invectSEXP);
+    Rcpp::traits::input_parameter< const int& >::type model_num(model_numSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type ydf(ydfSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type rowc_mm(rowc_mmSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type colc_mm(colc_mmSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type cov_mm(cov_mmSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type pi_v(pi_vSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type kappa_v(kappa_vSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type param_lengths(param_lengthsSEXP);
+    Rcpp::traits::input_parameter< const int& >::type RG(RGSEXP);
+    Rcpp::traits::input_parameter< const int& >::type CG(CGSEXP);
+    Rcpp::traits::input_parameter< const int& >::type p(pSEXP);
+    Rcpp::traits::input_parameter< const int& >::type n(nSEXP);
+    Rcpp::traits::input_parameter< const int& >::type q(qSEXP);
+    Rcpp::traits::input_parameter< const double& >::type epsilon(epsilonSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type constraint_sum_zero(constraint_sum_zeroSEXP);
+    Rcpp::traits::input_parameter< const bool& >::type row_clusters(row_clustersSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_Bicluster_Estep(invect, model_num, ydf, rowc_mm, colc_mm, cov_mm, pi_v, kappa_v, param_lengths, RG, CG, p, n, q, epsilon, constraint_sum_zero, row_clusters));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_clustord_rcpparma_outerproduct", (DL_FUNC) &_clustord_rcpparma_outerproduct, 1},
-    {"_clustord_rcpparma_innerproduct", (DL_FUNC) &_clustord_rcpparma_innerproduct, 1},
-    {"_clustord_rcpparma_bothproducts", (DL_FUNC) &_clustord_rcpparma_bothproducts, 1},
-    {"_clustord_rcpparma_updateliC", (DL_FUNC) &_clustord_rcpparma_updateliC, 9},
-    {"_clustord_rcpparma_updateliR", (DL_FUNC) &_clustord_rcpparma_updateliR, 9},
-    {"_clustord_rcpparma_Rclusterll", (DL_FUNC) &_clustord_rcpparma_Rclusterll, 8},
+    {"_clustord_rcpp_Rclusterll", (DL_FUNC) &_clustord_rcpp_Rclusterll, 17},
+    {"_clustord_rcpp_Biclusterll", (DL_FUNC) &_clustord_rcpp_Biclusterll, 21},
+    {"_clustord_rcpp_Rcluster_Estep", (DL_FUNC) &_clustord_rcpp_Rcluster_Estep, 14},
+    {"_clustord_rcpp_Bicluster_Estep", (DL_FUNC) &_clustord_rcpp_Bicluster_Estep, 17},
     {NULL, NULL, 0}
 };
 

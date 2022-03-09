@@ -7,14 +7,16 @@
 calc.cluster.comparisons(ppr1, ppr2)
 }
 \arguments{
-\item{ppr1}{Posterior probabilities of cluster membership, calculated as ppr.m
-or ppc.m in the output of \code{\link{rowclustering}}, \code{\link{columnclustering}}
-or \code{\link{biclustering}}.
-The rows of ppr1 give the entries that have been clustered, and each column
-corresponds to one cluster.}
+\item{ppr1}{Posterior probabilities of cluster membership, named \code{ppr_m}
+or \code{ppc_m} in the output of \code{\link{clustord}}. If you have
+performed biclustering, then \code{ppr1} should be the clustering results
+for just one of the dimensions i.e. just the row clustering results, or
+just the column clustering results. The rows of \code{ppr1} give the
+entries that have been clustered, and each column corresponds to one
+cluster.}
 
 \item{ppr2}{Posterior probabilities of cluster membership from a different
-clustering run, which will be compared to ppr1.}
+clustering run, which will be compared to \code{ppr1}.}
 }
 \value{
 A list with components:
@@ -34,9 +36,10 @@ The three measures are the Adjusted Rand Index (ARI), the Normalised
 Variation of Information (NVI) and the Normalised Information Distance (NID).
 
 The three measures are documented in
-
-Fernández, D., & Pledger, S. (2016). Categorising count data into ordinal
-responses with application to ecological communities.
-Journal of agricultural, biological, and environmental statistics (JABES),
-21(2), 348--362.
+}
+\references{
+Fernández, D., & Pledger, S. (2016). Categorising count data into
+  ordinal responses with application to ecological communities. Journal of
+  agricultural, biological, and environmental statistics (JABES), 21(2),
+  348--362.
 }
