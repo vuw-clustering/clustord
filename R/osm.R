@@ -17,6 +17,7 @@
 #  A copy of the GNU General Public License is available at
 #  http://www.r-project.org/Licenses/
 #
+#' @export
 osm <-
     function(formula, data, weights, start, ..., subset,
              na.action, Hess = FALSE, model = TRUE)
