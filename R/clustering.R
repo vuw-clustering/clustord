@@ -239,7 +239,7 @@
 #' column clustering or biclustering models.
 #'
 #' You can include \strong{interactions between covariates and \code{ROWCLUST}
-#' or \code{COLCLUST} in the formula. But these are \strong{not quite} the same
+#' or \code{COLCLUST}} in the formula. But these are \strong{not quite} the same
 #' as interactions between covariates. The formula
 #'
 #' \code{Y ~ ROWCLUST*xr}
@@ -310,7 +310,7 @@
 #' interacting with clusters, \code{xr1} and \code{xc1}. It also has 1 covariate
 #' term interacting with row clusters, \code{xr1}, with coefficients
 #' \code{rowc_cov_coef_r1}, and 1 covariate term interacting with column
-#' clusters, \code{log(xc1), with coefficients \code{colc_cov_coef_c1}}
+#' clusters, \code{log(xc1)}, with coefficients \code{colc_cov_coef_c1}
 #'
 #' \strong{Restrictions on \code{formula}}
 #'
@@ -398,7 +398,7 @@
 #' or as the column index increases, Y is more likely to fall at higher values
 #' (see Ch4 of Agresti, 2010).
 #'
-#' The Ordered Stereotype model (\code{model = "OSM}) has the form
+#' The Ordered Stereotype model (\code{model = "OSM"}) has the form
 #'
 #' log(P(Y = k)/P(Y = 1)) = mu_k + phi_k(<<linear terms>>)
 #'
@@ -909,9 +909,11 @@
 #'     and \code{ppc}).
 #'
 #' @references
-#' Fernandez, D., Arnold, R., & Pledger, S. (2016). Mixture-based clustering for the ordered stereotype model. *Computational Statistics & Data Analysis*, 93, 46-75.
-#' Anderson, J. A. (1984). Regression and ordered categorical variables. *Journal of the Royal Statistical Society: Series B (Methodological)*, 46(1), 1-22.
-#' Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wiley & Sons.
+#' Fernandez, D., Arnold, R., & Pledger, S. (2016). Mixture-based clustering for the ordered stereotype model. \emph{Computational Statistics & Data Analysis}, 93, 46-75.
+#'
+#' Anderson, J. A. (1984). Regression and ordered categorical variables. \emph{Journal of the Royal Statistical Society: Series B (Methodological)}, 46(1), 1-22.
+#'
+#' Agresti, A. (2010). \emph{Analysis of ordinal categorical data} (Vol. 656). John Wiley & Sons.
 #'
 #' @examples
 #' long.df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),

@@ -31,6 +31,13 @@
 #' memberships of the rows or columns of the data matrix from two different
 #' clustering fits, in a way that avoids the label-switching problem.
 #'
+#' @section Ordinal regression:
+#' \code{osm()} fits a regression model to ordinal response data using the
+#' ordered stereotype model (OSM), enforcing the constraint on the phi scoring
+#' parameters. A similar function is available in the \code{ordinalgmifs} package,
+#' but that does not enforce the ordering constraint so is only suitable for
+#' nominal categorical data.
+#'
 #' @docType package
 #' @name clustord
 NULL

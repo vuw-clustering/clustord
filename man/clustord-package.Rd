@@ -15,7 +15,8 @@ The DESCRIPTION file:
 \packageIndices{clustord}
 The clustord package can perform row, column or biclustering on an ordinal or
 binary dataset, using one of three models: the Ordered Stereotype Model (OSM),
-the Proportional Odds Model (POM) or the Binary model (Binary).
+the Proportional Odds Model (POM) or the Binary model (Binary). The package can
+also fit regression coefficients using the OSM.
 
 The main function is \code{clustord.fit}, which fits a clustering model to the
 data.
@@ -35,7 +36,14 @@ used for biclustering.
 \code{calc.cluster.comparisons} can be used to compare the cluster memberships
 produced by two different runs of \code{clustord.fit}, potentially based on
 different models.
+
+\code{osm} fits a regression model to ordinal response data using the
+ordered stereotype model (OSM), enforcing the constraint on the phi scoring
+parameters. A similar function is available in the \code{ordinalgmifs} package,
+but that does not enforce the ordering constraint so is only suitable for
+nominal categorical data.
 }
+
 \author{
 \packageAuthor{clustord}
 
@@ -51,3 +59,4 @@ J. A. Anderson, "Regression and ordered categorical variables," Journal of the R
 }
 \examples{
 }
+
