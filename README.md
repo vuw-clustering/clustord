@@ -1,5 +1,9 @@
 # clustord
 
+Please install clustord from GitHub using `devtools::install_github("vuw-clustering/clustord")`
+
+# Update
+
 Version 1.0 update released!
 
 The latest version of the package, version 1.0, is a major update from version 0.1. It now has the capacity to fit models including a variety of covariates, to make it consistent with the models that can be fitted with [clustglm](https://github.com/vuw-clustering/clustglm).
