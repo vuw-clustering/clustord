@@ -787,12 +787,9 @@ independent parameters, i.e. more independent parameters than if you included
 the main effects.
 
 If you have column effects alongside row clusters (they are not permitted
-alongside column clusters), without interactions, i.e. the formula
-
-\code{Y ~ ROWCLUST + COL}
-
-with Binary model Logit(P(Y = 1)) = mu + rowc_coef_r + col_coef_j
-
+alongside column clusters), without interactions, i.e. the formula 
+\code{Y ~ ROWCLUST + COL} with Binary model Logit(P(Y = 1)) = mu + 
+rowc_coef_r + col_coef_j
 then the row cluster coefficients have \code{nclus.row - 1} independent
 parameters, and the column effect coefficients have \code{p - 1} independent
 parameters, where p is the number of columns in the original data matrix,
