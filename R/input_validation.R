@@ -1,3 +1,4 @@
+#' @importFrom methods is
 validate.inputs <- function(formula, model,
                             nclus.row=NULL,nclus.column=NULL,
                             long.df,
@@ -12,7 +13,7 @@ validate.inputs <- function(formula, model,
     ## Note the double-& and double-| which stops the later parts being checked
     ## if the earlier parts are false
 
-    if (class(formula) != "formula") stop("formula must be a valid formula.")
+    if (!is(formula, "formula")) stop("formula must be a valid formula.")
 
     ## Check that model is valid
     if (!is.character(model) || !is.vector(model) || length(model) != 1) stop("model must be a string, 'OSM' or 'POM' or 'Binary'.")
