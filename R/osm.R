@@ -17,6 +17,7 @@
 #  A copy of the GNU General Public License is available at
 #  http://www.r-project.org/Licenses/
 #
+#' @importFrom stats .getXlevels binomial glm.fit model.matrix model.offset model.response model.weights
 osm <-
     function(formula, data, weights, start, ..., subset,
              na.action, Hess = FALSE, model = TRUE)
@@ -178,7 +179,7 @@ osm <-
         fit
     }
 
-
+#' @importFrom stats optim
 osm.fit <- function(x, y, wt, start, offset, ...)
 {
     ## Set up the function call to use in optim(), which extracts the parameters

@@ -72,6 +72,7 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
     EM.status.out
 }
 
+#' @importFrom stats optim
 run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                               pi_v, param_lengths,
                               constraint_sum_zero=TRUE,
@@ -407,6 +408,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 }
 
 #' @describeIn calc.SE.bicluster SE for rowclustering
+#' @importFrom stats optimHess
 #' @export
 calc.SE.rowcluster <- function(long.df, clust.out,
                                optim.control=default.optim.control()) {

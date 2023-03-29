@@ -135,6 +135,7 @@ check.factors <- function(long.df) {
     long.df
 }
 
+#' @importFrom stats model.matrix
 check.formula <- function(formula, long.df, RG, CG) {
 
     n <- max(long.df$ROW)
@@ -361,6 +362,7 @@ check.formula <- function(formula, long.df, RG, CG) {
          colc_fo=colc_fo, colc_mm=colc_mm, cov_fo=cov_fo, cov_mm=cov_mm)
 }
 
+#' @importFrom stats model.matrix
 extract.covs <- function(clust_name, non_row_col_part, long.df) {
 
     clust_cov_part <- non_row_col_part

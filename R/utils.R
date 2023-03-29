@@ -33,6 +33,7 @@
 #'
 #'     \code{NID}: Normalised Information Distance.
 #'
+#' @importFrom flexclust randIndex
 #' @export
 calc.cluster.comparisons <- function(ppr1, ppr2) {
 
@@ -53,7 +54,7 @@ calc.cluster.comparisons <- function(ppr1, ppr2) {
 
     NID <- 1 - I.UV/max(H.U,H.V)
 
-    ARI <- flexclust::randIndex(cont.table)
+    ARI <- randIndex(cont.table)
 
     list(NVI=NVI,NID=NID,ARI=ARI)
 }
