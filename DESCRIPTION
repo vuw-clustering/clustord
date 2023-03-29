@@ -26,7 +26,8 @@ Description: Biclustering, row clustering and column clustering using the propor
 License: GPLv3
 Imports: Rcpp (>= 1.0.1), 
          MASS,
-         nnet
+         nnet,
+         flexclust
 LinkingTo: Rcpp, RcppArmadillo
 Suggests: 
     testthat (>= 2.1.0),
