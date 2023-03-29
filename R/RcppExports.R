@@ -2,18 +2,18 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 rcpp_Rclusterll <- function(invect, model_num, ydf, rowc_mm, colc_mm, cov_mm, ppr_m, pi_v, param_lengths, RG, p, n, q, epsilon, constraint_sum_zero, partial, incomplete) {
-    .Call('_clustord_rcpp_Rclusterll', PACKAGE = 'clustord', invect, model_num, ydf, rowc_mm, colc_mm, cov_mm, ppr_m, pi_v, param_lengths, RG, p, n, q, epsilon, constraint_sum_zero, partial, incomplete)
+    .Call(`_clustord_rcpp_Rclusterll`, invect, model_num, ydf, rowc_mm, colc_mm, cov_mm, ppr_m, pi_v, param_lengths, RG, p, n, q, epsilon, constraint_sum_zero, partial, incomplete)
 }
 
 rcpp_Biclusterll <- function(invect, model_num, ydf, rowc_mm, colc_mm, cov_mm, ppr_m, ppc_m, pi_v, kappa_v, param_lengths, RG, CG, p, n, q, epsilon, constraint_sum_zero, partial, incomplete, llc) {
-    .Call('_clustord_rcpp_Biclusterll', PACKAGE = 'clustord', invect, model_num, ydf, rowc_mm, colc_mm, cov_mm, ppr_m, ppc_m, pi_v, kappa_v, param_lengths, RG, CG, p, n, q, epsilon, constraint_sum_zero, partial, incomplete, llc)
+    .Call(`_clustord_rcpp_Biclusterll`, invect, model_num, ydf, rowc_mm, colc_mm, cov_mm, ppr_m, ppc_m, pi_v, kappa_v, param_lengths, RG, CG, p, n, q, epsilon, constraint_sum_zero, partial, incomplete, llc)
 }
 
 rcpp_Rcluster_Estep <- function(invect, model_num, ydf, rowc_mm, colc_mm, cov_mm, pi_v, param_lengths, RG, p, n, q, epsilon, constraint_sum_zero) {
-    .Call('_clustord_rcpp_Rcluster_Estep', PACKAGE = 'clustord', invect, model_num, ydf, rowc_mm, colc_mm, cov_mm, pi_v, param_lengths, RG, p, n, q, epsilon, constraint_sum_zero)
+    .Call(`_clustord_rcpp_Rcluster_Estep`, invect, model_num, ydf, rowc_mm, colc_mm, cov_mm, pi_v, param_lengths, RG, p, n, q, epsilon, constraint_sum_zero)
 }
 
 rcpp_Bicluster_Estep <- function(invect, model_num, ydf, rowc_mm, colc_mm, cov_mm, pi_v, kappa_v, param_lengths, RG, CG, p, n, q, epsilon, constraint_sum_zero, row_clusters) {
-    .Call('_clustord_rcpp_Bicluster_Estep', PACKAGE = 'clustord', invect, model_num, ydf, rowc_mm, colc_mm, cov_mm, pi_v, kappa_v, param_lengths, RG, CG, p, n, q, epsilon, constraint_sum_zero, row_clusters)
+    .Call(`_clustord_rcpp_Bicluster_Estep`, invect, model_num, ydf, rowc_mm, colc_mm, cov_mm, pi_v, kappa_v, param_lengths, RG, CG, p, n, q, epsilon, constraint_sum_zero, row_clusters)
 }
 

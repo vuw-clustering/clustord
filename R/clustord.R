@@ -33,4 +33,6 @@
 #'
 #' @docType package
 #' @name clustord
+#' @useDynLib clustord, .registration=TRUE
+#' @importFrom Rcpp evalCpp
 NULL
