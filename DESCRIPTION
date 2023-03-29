@@ -3,8 +3,25 @@ Type: Package
 Title: Clustering Ordinal Data Using Proportional Odds Model, Ordered Stereotype Model or Binary Model
 Version: 1.0
 Date: 2022-03-09
-Author: Louise McMillan, Daniel Fernandez Martinez, Ying Cui, Eleni Matechou
-Maintainer: Louise McMillan <louise.mcmillan@vuw.ac.nz>
+Authors@R: c(
+    person(given = "Louise", 
+           family = "McMillan", 
+           email = "louise.mcmillan@vuw.ac.nz", 
+           role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0000-0002-0536-8563")), 
+    person(given = "Daniel", 
+           family = "Fernández Martínez", 
+           email = "daniels_email@address.com", 
+           role = c("aut")), 
+    person(given = "Ying", 
+           family = "Cui", 
+           email = "ying.cui@sms.vuw.ac.nz", 
+           role = c("aut")), 
+    person(given = "Eleni", 
+           family = "Matechou", 
+           email = "e.matechou@kent.ac.uk", 
+           role = c("aut"),
+           comment = c(ORCID = "0000-0003-3626-844X")))
 Description: Biclustering, row clustering and column clustering using the proportional odds model (POM), ordered stereotype model (OSM) or binary model for ordinal categorical data.
 License: GPLv3
 Imports: Rcpp (>= 1.0.1), 
@@ -14,4 +31,5 @@ LinkingTo: Rcpp, RcppArmadillo
 Suggests: 
     testthat (>= 2.1.0),
     flexclust (>= 1.4.0)
-RoxygenNote: 7.1.2
+Encoding: UTF-8
+RoxygenNote: 7.2.3
