@@ -17,7 +17,7 @@
 #  A copy of the GNU General Public License is available at
 #  http://www.r-project.org/Licenses/
 #
-#' @importFrom stats .getXlevels binomial glm.fit model.matrix model.offset model.response model.weights
+#' @importFrom stats .getXlevels binomial glm.fit model.matrix model.offset model.response model.weights deviance
 osm <-
     function(formula, data, weights, start, ..., subset,
              na.action, Hess = FALSE, model = TRUE)
