@@ -1,0 +1,14 @@
+Instructions for compiling Daniel's C code into a .so
+
+1) Go to the project, into the src/ folder, and check that it has the "include" folder inside it with R.h etc.
+If on home linux, navigate to the D drive via $ cd /media/louise/Data
+
+4) Run the first command, which includes the full path to the gcc compiler:
+
+$ gcc -c -Iinclude -DBUILDING_EXAMPLE_DLL EMfuncsStereotype_in_C.c -fPIC
+
+5) Run the second command, which again includes the full path to the gcc compiler:
+
+$ gcc -shared -o EMfuncsStereotype_in_C.so EMfuncsStereotype_in_C.o -Wl,--out-implib,EMfuncsStereotype_in_C.a
+
+Note that the "--Wl" option is W<<L>>, not W<<one>>.
