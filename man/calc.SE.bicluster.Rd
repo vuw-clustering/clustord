@@ -49,8 +49,8 @@ will correspond to a subset of the parameter values in \code{parlist.out}.
 }
 \section{Functions}{
 \itemize{
-\item \code{calc.SE.rowcluster}: SE for rowclustering
+\item \code{calc.SE.rowcluster()}: SE for rowclustering
 
-\item \code{calc.SE.bicluster}: SE for biclustering
+\item \code{calc.SE.bicluster()}: SE for biclustering
+
 }}
-
