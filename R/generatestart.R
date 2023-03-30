@@ -6,6 +6,7 @@ startEM.control <- function(EM.control) {
     startEM
 }
 
+#' @importFrom stats runif
 generate.mixing.proportions <- function(nclus) {
     ## Note that simply generating the first nclus-1 values from Unif(0,1/nclus)
     ## then means that only one of the nclus proportions can ever be bigger than
@@ -31,6 +32,7 @@ generate.u.init <- function(q) {
     u.init
 }
 
+#' @importFrom stats coef runif
 generate.mu.init <- function(long.df, model, use_random=FALSE) {
     if (!use_random) {
         switch(model,
@@ -56,6 +58,7 @@ generate.mu.init <- function(long.df, model, use_random=FALSE) {
     mu.init
 }
 
+#' @importFrom stats coef runif
 generate.mu.col_coef.init <- function(long.df, model, constraint_sum_zero=TRUE,
                                       use_random=FALSE) {
 
@@ -132,6 +135,7 @@ generate.mu.col_coef.init <- function(long.df, model, constraint_sum_zero=TRUE,
     list(mu.init=mu.init, col_coef.init=col_coef.init)
 }
 
+#' @importFrom stats kmeans runif
 generate.rowc_coef.pi.init <- function(long.df, RG, constraint_sum_zero=TRUE,
                                        use_random=FALSE) {
     if (!use_random & all(table(long.df[,c("ROW","COL")]) == 1)) {
@@ -158,6 +162,7 @@ generate.rowc_coef.pi.init <- function(long.df, RG, constraint_sum_zero=TRUE,
     list(rowc_coef.init=rowc_coef.init, pi.init=pi.init)
 }
 
+#' @importFrom stats binomial glm runif
 generate.cov_coef.init <- function(long.df, formula_part, mm_part, model, use_random) {
     if (!use_random) {
         switch(model,

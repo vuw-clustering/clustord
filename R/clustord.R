@@ -32,5 +32,7 @@
 #' clustering fits, in a way that avoids the label-switching problem.
 #'
 #' @docType package
-#' @name clustord
+#' @name clustord-package
+#' @useDynLib clustord, .registration=TRUE
+#' @importFrom Rcpp evalCpp
 NULL

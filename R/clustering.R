@@ -238,7 +238,7 @@
 #' as with row covariates. You can similarly add row or column covariates to
 #' column clustering or biclustering models.
 #'
-#' You can include \strong{interactions between covariates and \code{ROWCLUST}
+#' You can include \strong{interactions between covariates} and \code{ROWCLUST}
 #' or \code{COLCLUST} in the formula. But these are \strong{not quite} the same
 #' as interactions between covariates. The formula
 #'
@@ -249,7 +249,7 @@
 #' Logit(P(Y = 1)) = mu + rowc_coef_r + rowc_row_coef_r1*xr_i
 #'
 #' What this means is that there is a term in the linear predictor that involves
-#' the row covariate xr (which has the index i because it's a row covariate),
+#' the row covariate xr (which has the index i because it is a row covariate),
 #' and each cluster (indexed by r) has a different coefficient for
 #' that covariate (as distinct from the non-interaction covariate models above,
 #' which have the same coefficients for the covariates regardless of which
@@ -398,7 +398,7 @@
 #' or as the column index increases, Y is more likely to fall at higher values
 #' (see Ch4 of Agresti, 2010).
 #'
-#' The Ordered Stereotype model (\code{model = "OSM}) has the form
+#' The Ordered Stereotype model (\code{model = "OSM"}) has the form
 #'
 #' log(P(Y = k)/P(Y = 1)) = mu_k + phi_k(<<linear terms>>)
 #'
@@ -548,12 +548,9 @@
 #' the main effects.
 #'
 #' If you have column effects alongside row clusters (they are not permitted
-#' alongside column clusters), without interactions, i.e. the formula
-#'
-#' \code{Y ~ ROWCLUST + COL}
-#'
-#' with Binary model Logit(P(Y = 1)) = mu + rowc_coef_r + col_coef_j
-#'
+#' alongside column clusters), without interactions, i.e. the formula 
+#' \code{Y ~ ROWCLUST + COL} with Binary model Logit(P(Y = 1)) = mu + 
+#' rowc_coef_r + col_coef_j
 #' then the row cluster coefficients have \code{nclus.row - 1} independent
 #' parameters, and the column effect coefficients have \code{p - 1} independent
 #' parameters, where p is the number of columns in the original data matrix,
@@ -1107,6 +1104,7 @@ clustord.fit <- function(formula,
     }
 }
 
+#' @importFrom stats terms formula
 convert.model.row.to.column <- function(row.model_structure) {
     pl <- row.model_structure$param_lengths
 
