@@ -45,6 +45,13 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
 
     # if (is.na(likelihood.stopping.criterion)) browser()
     if (is.infinite(new.lli)) likelihood.stopping.criterion <- Inf
+
+    if (any(is.infinite(param.exp.out))) param.stopping.criterion <- Inf
+
+    # if (!((likelihood.stopping.criterion < EM.control$EMlikelihoodtol) %in% c(TRUE,FALSE)) |
+    #     !(EM.control$paramstopping %in% c(TRUE,FALSE)) |
+    #     !((param.stopping.criterion < EM.control$EMparamtol) %in% c(TRUE,FALSE))) browser()
+
     if (likelihood.stopping.criterion < EM.control$EMlikelihoodtol &
         (!EM.control$paramstopping || param.stopping.criterion < EM.control$EMparamtol)) converged <- TRUE
 
