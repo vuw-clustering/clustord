@@ -47,7 +47,3 @@ D. Fernández, R. Arnold, S. Pledger, I. Liu, & R. Costilla, "Finite mixture bic
 J. A. Anderson, "Regression and ordered categorical variables," Journal of the Royal Statistical Society: Series B (Methodological) vol. 46(1), pp. 1-22, 1984.
 }
 \keyword{ package }
-\seealso{
-}
-\examples{
-}

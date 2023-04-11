@@ -23,31 +23,16 @@ clustord.fit(
 )
 }
 \arguments{
-\item{optim.control}{control list for the \code{optim} call within the M step
-of the EM algorithm. See the control list Details in the \code{optim}
-manual for more info.}
+\item{formula}{model formula (see 'Details').}
 
-\item{constraint_sum_zero}{(default \code{TRUE}) if \code{TRUE}, use constraints
-that cluster effects sum to zero; if \code{FALSE}, use constraints that
-the cluster effect for the first cluster will be 0.
-Both versions have the same constraints for joint row-column cluster
-effects: these effects are described by a matrix of parameters gamma_rc,
-indexed by row cluster and column cluster indices, and the constraints
-are that the final column of gamma_rc is equal to the negative sum of the
-other columns (so \code{gamma} columns sum to zero) and first row of
-gamma_rc is equal to the negative sum of the other rows (so \code{gamma}
-rows sum to zero).}
-
-\item{formula:}{model formula (see 'Details').}
-
-\item{model:}{\code{"OSM"} for Ordered Stereotype Model or \code{"POM"} for
+\item{model}{\code{"OSM"} for Ordered Stereotype Model or \code{"POM"} for
 Proportional Odds Model or \code{"Binary"} for binary data model.}
 
-\item{nclus.row:}{number of row clustering groups.}
+\item{nclus.row}{number of row clustering groups.}
 
-\item{nclus.column:}{number of column clustering groups.}
+\item{nclus.column}{number of column clustering groups.}
 
-\item{long.df:}{data frame with at least three columns, \code{Y} and \code{ROW}
+\item{long.df}{data frame with at least three columns, \code{Y} and \code{ROW}
 and \code{COL}. Each row in the data frame corresponds to a single cell
 in the original data matrix; the response value in that cell is given by
 \code{Y}, and the row and column indices of that cell in the matrix are
@@ -56,7 +41,7 @@ this data frame from your data matrix of responses.
 \code{\link{mat2df}} also allows you to supply data frames of row or
 column covariates which will be incorporated into \code{long.df}.}
 
-\item{initvect:}{(default NULL) vector of starting parameter values for the model.
+\item{initvect}{(default NULL) vector of starting parameter values for the model.
     Note: if the user enters an initial vector of parameter values, it is
     \strong{strongly recommend} that the user also check the values of
     \code{parlist.init} in the output object, to \strong{make sure that the
@@ -66,7 +51,7 @@ column covariates which will be incorporated into \code{long.df}.}
 
     See 'Details' for definitions of the parameters used for different models.}
 
-\item{pi.init:}{(default \code{NULL}) starting parameter values for the proportions
+\item{pi.init}{(default \code{NULL}) starting parameter values for the proportions
     of observations in the different row clusters.
 
     If \code{NULL}, starting values will be generated automatically.
@@ -75,7 +60,7 @@ column covariates which will be incorporated into \code{long.df}.}
     because the final value will be automatically calculated so that the
     values of \code{pi} sum to 1.}
 
-\item{kappa.init:}{(default \code{NULL}) starting parameter values for the
+\item{kappa.init}{(default \code{NULL}) starting parameter values for the
     proportions of observations in the different column clusters.
 
     If \code{NULL}, starting values will be generated automatically.
@@ -84,7 +69,7 @@ column covariates which will be incorporated into \code{long.df}.}
     \code{(nclus.column-1)} because the final value will be automatically
     calculated so that the values of \code{kappa} sum to 1.}
 
-\item{EM.control:}{(default = \code{list(EMcycles=50, EMlikelihoodtol=1e-4,
+\item{EM.control}{(default = \code{list(EMcycles=50, EMlikelihoodtol=1e-4,
     EMparamtol=1e-2, paramstopping=TRUE, startEMcycles=10, keepallparams=FALSE,
     epsilon=1e-6)})
     list of parameters controlling the EM algorithm.
@@ -146,11 +131,26 @@ column covariates which will be incorporated into \code{long.df}.}
     kappa and theta that are too close to zero so that taking logs of them
     does not create infinite values.}
 
-\item{optim.method:}{(default "L-BFGS-B") method to use in optim within the M
+\item{optim.method}{(default "L-BFGS-B") method to use in optim within the M
 step of the EM algorithm. Must be one of 'L-BFGS-B', 'BFGS', 'CG' or
 'Nelder-Mead' (i.e. not the SANN method).}
 
-\item{start_from_simple_model:}{(default \code{TRUE}) if \code{TRUE}, fit a
+\item{optim.control}{control list for the \code{optim} call within the M step
+of the EM algorithm. See the control list Details in the \code{optim}
+manual for more info.}
+
+\item{constraint_sum_zero}{(default \code{TRUE}) if \code{TRUE}, use constraints
+that cluster effects sum to zero; if \code{FALSE}, use constraints that
+the cluster effect for the first cluster will be 0.
+Both versions have the same constraints for joint row-column cluster
+effects: these effects are described by a matrix of parameters gamma_rc,
+indexed by row cluster and column cluster indices, and the constraints
+are that the final column of gamma_rc is equal to the negative sum of the
+other columns (so \code{gamma} columns sum to zero) and first row of
+gamma_rc is equal to the negative sum of the other rows (so \code{gamma}
+rows sum to zero).}
+
+\item{start_from_simple_model}{(default \code{TRUE}) if \code{TRUE}, fit a
 simpler clustering model first and use that to provide starting values for
 all parameters for the model with interactions;
 if \code{FALSE}, use the more basic models to provide starting values only
@@ -162,6 +162,9 @@ row/column effects. If the full model has covariates, then simpler models
 are ones without the covariates (to get starting values for the cluster
 parameters), and ones with the covariates but no clustering (to get
 starting values for the covariates).}
+
+\item{nstarts}{(default 5) number of random starts to generate, if generating
+random starting points for the EM algorithm.}
 }
 \value{
 A list with components:
@@ -549,7 +552,7 @@ This has main effects for row clusters and column clusters, i.e.
 interacting with clusters, \code{xr1} and \code{xc1}. It also has 1 covariate
 term interacting with row clusters, \code{xr1}, with coefficients
 \code{rowc_cov_coef_r1}, and 1 covariate term interacting with column
-clusters, \code{log(xc1), with coefficients \code{colc_cov_coef_c1}}
+clusters, \code{log(xc1)}, with coefficients \code{colc_cov_coef_c1}.
 
 \strong{Restrictions on \code{formula}}
 
@@ -787,8 +790,8 @@ independent parameters, i.e. more independent parameters than if you included
 the main effects.
 
 If you have column effects alongside row clusters (they are not permitted
-alongside column clusters), without interactions, i.e. the formula 
-\code{Y ~ ROWCLUST + COL} with Binary model Logit(P(Y = 1)) = mu + 
+alongside column clusters), without interactions, i.e. the formula
+\code{Y ~ ROWCLUST + COL} with Binary model Logit(P(Y = 1)) = mu +
 rowc_coef_r + col_coef_j
 then the row cluster coefficients have \code{nclus.row - 1} independent
 parameters, and the column effect coefficients have \code{p - 1} independent

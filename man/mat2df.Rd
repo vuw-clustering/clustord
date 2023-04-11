@@ -8,13 +8,13 @@ covariates, if supplied.}
 mat2df(mat, xr.df = NULL, xc.df = NULL)
 }
 \arguments{
-\item{mat:}{matrix of responses to be clustered}
+\item{mat}{matrix of responses to be clustered}
 
-\item{xr.df:}{optional data frame of covariates corresponding to the rows of
+\item{xr.df}{optional data frame of covariates corresponding to the rows of
 \code{mat}. Each row of \code{xr.df} corresponds to one row of \code{mat},
 and each column of \code{xr.df} is a covariate.}
 
-\item{xc.df:}{optional data frame of covariates corresponding to the columns
+\item{xc.df}{optional data frame of covariates corresponding to the columns
 of \code{mat}. Each row of \code{xc.df} corresponds to one \strong{column}
 of \code{mat}, and each column of \code{xc.df} is a covariate.}
 }
