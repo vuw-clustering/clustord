@@ -220,6 +220,7 @@ generate.initvect <- function(long.df, model, model_structure,
 
     pi.init <- NULL; kappa.init <- NULL
 
+    n <- max(long.df$ROW)
     p <- max(long.df$COL)
     q <- length(levels(long.df$Y))
 

@@ -473,7 +473,7 @@ calc.SE.rowcluster <- function(long.df, clust.out,
         ## param_lengths, because the Rcpp code relies on having this order for the
         ## model numbers
         ## Numeric version is used because comparing strings is MUCH SLOWER in C++
-        model_num <- switch(model,"OSM"=1,"POM"=2,"Binary"=3)
+        model_num <- switch(clust.out$model,"OSM"=1,"POM"=2,"Binary"=3)
         param_lengths_num <- clust.out$rowc_format_param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
                                              'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
 
@@ -558,7 +558,9 @@ calc.SE.bicluster <- function(long.df, clust.out,
     ## Important: do NOT change the order of these model types, because the Rcpp
     ## code relies on having this order for the model numbers
     ## Model numbers are used because comparing strings is MUCH SLOWER in C++
-    model_num <- switch(clust_out$model,"OSM"=1,"POM"=2,"Binary"=3)
+    model_num <- switch(clust.out$model,"OSM"=1,"POM"=2,"Binary"=3)
+    param_lengths_num <- clust.out$param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
+                                         'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
 
     optim.hess <- optimHess(par=clust.out$outvect,
                             fn=rcpp_Biclusterll,
