@@ -90,11 +90,11 @@ calc.criteria <- function(ll, llc,  npar, n, p) {
 #' Converting matrix of responses into a long-form data frame and incorporating
 #' covariates, if supplied.
 #'
-#' @param mat: matrix of responses to be clustered
-#' @param xr.df: optional data frame of covariates corresponding to the rows of
+#' @param mat matrix of responses to be clustered
+#' @param xr.df optional data frame of covariates corresponding to the rows of
 #'    \code{mat}. Each row of \code{xr.df} corresponds to one row of \code{mat},
 #'    and each column of \code{xr.df} is a covariate.
-#' @param xc.df: optional data frame of covariates corresponding to the columns
+#' @param xc.df optional data frame of covariates corresponding to the columns
 #'    of \code{mat}. Each row of \code{xc.df} corresponds to one \strong{column}
 #'    of \code{mat}, and each column of \code{xc.df} is a covariate.
 #' @return

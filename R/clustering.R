@@ -310,7 +310,7 @@
 #' interacting with clusters, \code{xr1} and \code{xc1}. It also has 1 covariate
 #' term interacting with row clusters, \code{xr1}, with coefficients
 #' \code{rowc_cov_coef_r1}, and 1 covariate term interacting with column
-#' clusters, \code{log(xc1), with coefficients \code{colc_cov_coef_c1}}
+#' clusters, \code{log(xc1)}, with coefficients \code{colc_cov_coef_c1}.
 #'
 #' \strong{Restrictions on \code{formula}}
 #'
@@ -548,8 +548,8 @@
 #' the main effects.
 #'
 #' If you have column effects alongside row clusters (they are not permitted
-#' alongside column clusters), without interactions, i.e. the formula 
-#' \code{Y ~ ROWCLUST + COL} with Binary model Logit(P(Y = 1)) = mu + 
+#' alongside column clusters), without interactions, i.e. the formula
+#' \code{Y ~ ROWCLUST + COL} with Binary model Logit(P(Y = 1)) = mu +
 #' rowc_coef_r + col_coef_j
 #' then the row cluster coefficients have \code{nclus.row - 1} independent
 #' parameters, and the column effect coefficients have \code{p - 1} independent
@@ -700,12 +700,12 @@
 #' i.e. the matrix would be indexed rowc_colc_coef_rc, r being the row cluster
 #' index and c being the column cluster index.
 #'
-#' @param formula: model formula (see 'Details').
-#' @param model: \code{"OSM"} for Ordered Stereotype Model or \code{"POM"} for
+#' @param formula model formula (see 'Details').
+#' @param model \code{"OSM"} for Ordered Stereotype Model or \code{"POM"} for
 #'     Proportional Odds Model or \code{"Binary"} for binary data model.
-#' @param nclus.row: number of row clustering groups.
-#' @param nclus.column: number of column clustering groups.
-#' @param long.df: data frame with at least three columns, \code{Y} and \code{ROW}
+#' @param nclus.row number of row clustering groups.
+#' @param nclus.column number of column clustering groups.
+#' @param long.df data frame with at least three columns, \code{Y} and \code{ROW}
 #'     and \code{COL}. Each row in the data frame corresponds to a single cell
 #'     in the original data matrix; the response value in that cell is given by
 #'     \code{Y}, and the row and column indices of that cell in the matrix are
@@ -714,7 +714,7 @@
 #'     \code{\link{mat2df}} also allows you to supply data frames of row or
 #'     column covariates which will be incorporated into \code{long.df}.
 #'
-#' @param initvect: (default NULL) vector of starting parameter values for the model.
+#' @param initvect (default NULL) vector of starting parameter values for the model.
 #'     Note: if the user enters an initial vector of parameter values, it is
 #'     \strong{strongly recommend} that the user also check the values of
 #'     \code{parlist.init} in the output object, to \strong{make sure that the
@@ -724,7 +724,7 @@
 #'
 #'     See 'Details' for definitions of the parameters used for different models.
 #'
-#' @param pi.init: (default \code{NULL}) starting parameter values for the proportions
+#' @param pi.init (default \code{NULL}) starting parameter values for the proportions
 #'     of observations in the different row clusters.
 #'
 #'     If \code{NULL}, starting values will be generated automatically.
@@ -732,7 +732,7 @@
 #'     User-specified values of \code{pi.init} must be of length \code{(nclus.row-1)}
 #'     because the final value will be automatically calculated so that the
 #'     values of \code{pi} sum to 1.
-#' @param kappa.init: (default \code{NULL}) starting parameter values for the
+#' @param kappa.init (default \code{NULL}) starting parameter values for the
 #'     proportions of observations in the different column clusters.
 #'
 #'     If \code{NULL}, starting values will be generated automatically.
@@ -740,7 +740,7 @@
 #'     User-specified values of \code{kappa.init} must be of length
 #'     \code{(nclus.column-1)} because the final value will be automatically
 #'     calculated so that the values of \code{kappa} sum to 1.
-#' @param EM.control: (default = \code{list(EMcycles=50, EMlikelihoodtol=1e-4,
+#' @param EM.control (default = \code{list(EMcycles=50, EMlikelihoodtol=1e-4,
 #'     EMparamtol=1e-2, paramstopping=TRUE, startEMcycles=10, keepallparams=FALSE,
 #'     epsilon=1e-6)})
 #'     list of parameters controlling the EM algorithm.
@@ -802,7 +802,7 @@
 #'     kappa and theta that are too close to zero so that taking logs of them
 #'     does not create infinite values.
 #'
-#' @param optim.method: (default "L-BFGS-B") method to use in optim within the M
+#' @param optim.method (default "L-BFGS-B") method to use in optim within the M
 #'     step of the EM algorithm. Must be one of 'L-BFGS-B', 'BFGS', 'CG' or
 #'     'Nelder-Mead' (i.e. not the SANN method).
 #' @param optim.control control list for the \code{optim} call within the M step
@@ -818,7 +818,7 @@
 #'     other columns (so \code{gamma} columns sum to zero) and first row of
 #'     gamma_rc is equal to the negative sum of the other rows (so \code{gamma}
 #'     rows sum to zero).
-#' @param start_from_simple_model: (default \code{TRUE}) if \code{TRUE}, fit a
+#' @param start_from_simple_model (default \code{TRUE}) if \code{TRUE}, fit a
 #'     simpler clustering model first and use that to provide starting values for
 #'     all parameters for the model with interactions;
 #'     if \code{FALSE}, use the more basic models to provide starting values only
@@ -830,6 +830,8 @@
 #'     are ones without the covariates (to get starting values for the cluster
 #'     parameters), and ones with the covariates but no clustering (to get
 #'     starting values for the covariates).
+#' @param nstarts (default 5) number of random starts to generate, if generating
+#'     random starting points for the EM algorithm.
 #' @return
 #' A list with components:
 #'
