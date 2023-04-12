@@ -466,6 +466,10 @@ double rcpp_theta_from_linear(const int & model_num,
         theta_sum += 1;
         for (kk=1; kk < q; kk++) {
             theta_all[kk] = exp(mu[kk] + phi[kk]*linear_part);
+            if (!std::isfinite(theta_all[kk])) {
+                theta_all[kk] = 1;
+            }
+
             theta_sum += theta_all[kk];
         }
         theta = theta_all[ymatij_idx]/theta_sum;
