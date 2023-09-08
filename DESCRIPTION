@@ -23,10 +23,11 @@ Authors@R: c(
            email = "e.matechou@kent.ac.uk", 
            role = c("aut"),
            comment = c(ORCID = "0000-0003-3626-844X")))
-Description: Biclustering, row clustering and column clustering using the proportional odds model (POM), ordered stereotype model (OSM) or binary model for ordinal categorical data.
+Maintainer: Louise McMillan <louise.mcmillan@vuw.ac.nz>
+Description: Biclustering, row clustering and column clustering using the proportional odds model (POM), ordered stereotype model (OSM) or binary model for ordinal categorical data. Fernández, D., Arnold, R., Pledger, S., Liu, I., & Costilla, R. (2019). Finite mixture biclustering of discrete type multivariate data. Advances in Data Analysis and Classification, 13, 117-143.
 License: GPL-3
-URL: https://github.com/vuw-clustering/clustord
-BugReports: https://github.com/vuw-clustering/clustord/issues
+URL: <https://github.com/vuw-clustering/clustord/>
+BugReports: <https://github.com/vuw-clustering/clustord/issues>
 Imports: Rcpp (>= 1.0.1), 
          MASS,
          nnet,

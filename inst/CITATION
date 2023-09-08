@@ -1,0 +1,16 @@
+citHeader("To cite clustord in publications use:")
+
+citEntry(
+  entry    = "Article",
+  title    = "Finite mixture biclustering of discrete type multivariate data",
+  author   = "Daniel Fern{\'a}ndez, Richard Arnold, Shirley Pledger, Ivy Liu, Roy Costilla",
+  journal  = "Advances in Data Analysis and Classification",
+  publisher = "Springer",
+  year     = 2019,
+  volume   = 13,
+  pages    = "117--143",
+  url      = "https://link.springer.com/article/10.1007/s11634-018-0324-3",
+  textVersion = paste(
+    "Fernández, D., Arnold, R., Pledger, S., Liu, I., & Costilla, R. (2019). Finite mixture biclustering of discrete type multivariate data. Advances in Data Analysis and Classification, 13, 117-143."
+  )
+)

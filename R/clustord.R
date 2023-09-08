@@ -8,12 +8,19 @@
 #' \code{mat2df()}, \code{calc.SE.rowcluster()}, \code{calc.SE.bicluster()}, and
 #' \code{calc.cluster.comparisons()}.
 #'
-#' @section Clustering function:
-#' \code{clustord.fit} assumes that you started with a data matrix of responses,
-#' though you will need to convert that data matrix into a long-form data frame
-#' before running \code{clustord.fit}. Every element in the original data matrix
-#' becomes one row in the data frame, and the row and column indices from the
-#' data matrix become the columns ROW and COL in the data frame.
+#' @section Clustering function: The main function is \code{clustord.fit}, which
+#'   fits a clustering model to the data. The model is fitted using
+#'   likelihood-based clustering via the EM algorithm. The package assumes that
+#'   you started with a data matrix of responses, though you will need to
+#'   convert that data matrix into a long-form data frame before running
+#'   \code{clustord.fit}. Every element in the original data matrix becomes one
+#'   row in the data frame, and the row and column indices from the data matrix
+#'   become the columns ROW and COL in the data frame. You can perform
+#'   clustering on rows or columns of the data matrix, or biclustering on both
+#'   rows and columns simultaneously. You can include any number of covariates
+#'   for rows and covariates for columns. Ordinal models used in the package are
+#'   Ordered Stereotype Model (OSM), Proportional Odds Model (POM) and a
+#'   dedicated Binary Model for binary data.
 #'
 #' @section Utility function:
 #' \code{mat2df()} is a utility function provided to convert a data matrix of
