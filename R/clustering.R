@@ -913,40 +913,41 @@
 #' Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wiley & Sons.
 #'
 #' @examples
+#' set.seed(1)
 #' long.df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),
 #'                ROW=factor(rep(1:20,times=5)),COL=rep(1:5,each=20))
 #'
 #' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*rowc_coef_r with 3 row clustering groups:
 #' clustord.fit(Y~ROWCLUST,model="OSM",3,long.df=long.df,
-#'              EM.control=list(EMcycles=2,startEMcycles=2))
+#'              EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
 #'
 #' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + col_coef_j) with 3 row clustering groups:
 #' clustord.fit(Y~ROWCLUST+COL,model="OSM",3,long.df=long.df,
-#'              EM.control=list(EMcycles=2,startEMcycles=2))
+#'              EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
 #'
 #' # Model Logit(P(Y <= k))=mu_k-rowc_coef_r-col_coef_j-rowc_col_coef_rj with 2 row clustering groups:
 #' clustord.fit(Y~ROWCLUST*COL,model="POM",nclus.row=2,long.df=long.df,
-#'              EM.control=list(EMcycles=2,startEMcycles=2))
+#'              EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
 #'
 #' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c) with 3 column clustering groups:
 #' clustord.fit(Y~COLCLUST,model="OSM",nclus.column=3,long.df=long.df,
-#'              EM.control=list(EMcycles=2,startEMcycles=2))
+#'              EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
 #'
 #' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c + row_coef_i) with 3 column clustering groups:
 #' clustord.fit(Y~COLCLUST+ROW,model="OSM",nclus.column=3,long.df=long.df,
-#'              EM.control=list(EMcycles=2,startEMcycles=2))
+#'              EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
 #'
 #'\dontrun{
 #' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + colc_coef_c)
 #' #    with 3 row clustering groups and 2 column clustering groups:
 #' clustord.fit(Y~ROWCLUST+COLCLUST,model="OSM",nclus.row=3,nclus.column=2,long.df=long.df,
-#'              EM.control=list(EMcycles=5), nstarts=1)
+#'              EM.control=list(EMcycles=2), nstarts=1)
 #'
 #' # Model Logit(P(Y<=k))=mu_k-rowc_coef_r-colc_coef_c-rowc_colc_coef_rc
 #' #    with 2 row clustering groups and 4 column clustering groups, and
 #' #    interactions between them:
 #' clustord.fit(Y~ROWCLUST*COLCLUST, model="POM", nclus.row=2, nclus.column=4,
-#'              long.df=long.df,EM.control=list(EMcycles=5), nstarts=1,
+#'              long.df=long.df,EM.control=list(EMcycles=2), nstarts=1,
 #'              start_from_simple_model=FALSE)
 #' }
 #' @export
