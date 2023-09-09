@@ -597,7 +597,7 @@ double rcpp_Rclusterll(const NumericVector & invect,
                 // Rcout << "The R-based value of ii : " << ii+1 << "\n";
                 // Rcout << "The R-based value of jj : " << jj+1 << "\n";
                 yval = ydf(ij,0);
-                if (all(is_finite(yval)) & all(!is_nan(yval))) {
+                if (is_true(all(is_finite(yval))) && is_true(all(!is_nan(yval)))) {
                     linear_part = rcpp_linear_part(ydf, rowc_mm, colc_mm, cov_mm,
                                                    param_lengths,
                                                    rowc_coef, colc_coef,
@@ -656,7 +656,7 @@ double rcpp_Rclusterll(const NumericVector & invect,
                         jj = ydf(ij,2)-1;
                         // Rcout << "The R-based value of jj : " << jj+1 << "\n";
                         yval = ydf(ij,0);
-                        if (all(is_finite(yval)) & all(!is_nan(yval))) {
+                        if (is_true(all(is_finite(yval))) && is_true(all(!is_nan(yval)))) {
                             linear_part = rcpp_linear_part(ydf, rowc_mm, colc_mm, cov_mm,
                                                            param_lengths,
                                                            rowc_coef, colc_coef,
@@ -806,7 +806,7 @@ double rcpp_Biclusterll(const NumericVector & invect,
                     // Rcout << "The R-based value of jj : " << jj+1 << "\n";
 
                     yval = ydf(ij,0);
-                    if (all(is_finite(yval)) & all(!is_nan(yval))) {
+                    if (is_true(all(is_finite(yval))) && is_true(all(!is_nan(yval)))) {
                         ymatij_idx = ydf(ij,0)-1;
 
                         // Rcout << "The value of ymatij_idx : " << ymatij_idx << "\n";
@@ -993,7 +993,7 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
             }
 
             yval = ydf(ij,0);
-            if (all(is_finite(yval)) & all(!is_nan(yval))) {
+            if (is_true(all(is_finite(yval))) && is_true(all(!is_nan(yval)))) {
                 linear_part = rcpp_linear_part(ydf, rowc_mm, colc_mm, cov_mm,
                                                param_lengths,
                                                rowc_coef, colc_coef,
@@ -1153,7 +1153,7 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
                 }
 
                 yval = ydf(ij,0);
-                if (all(is_finite(yval)) & all(!is_nan(yval))) {
+                if (is_true(all(is_finite(yval))) && is_true(all(!is_nan(yval)))) {
                     ymatij_idx = ydf(ij,0)-1;
                     sum_pikappa_theta = 0;
 
@@ -1190,7 +1190,7 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
                 }
 
                 yval = ydf(ij,0);
-                if (all(is_finite(yval)) & all(!is_nan(yval))) {
+                if (is_true(all(is_finite(yval))) && is_true(all(!is_nan(yval)))) {
                     ymatij_idx = ydf(ij,0)-1;
                     sum_pikappa_theta = 0;
 

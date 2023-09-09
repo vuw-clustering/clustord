@@ -1,7 +1,7 @@
 citHeader("To cite clustord in publications use:")
 
-citEntry(
-  entry    = "Article",
+bibentry(
+  bibtype    = "Article",
   title    = "Finite mixture biclustering of discrete type multivariate data",
   author   = "Daniel Fern{\'a}ndez, Richard Arnold, Shirley Pledger, Ivy Liu, Roy Costilla",
   journal  = "Advances in Data Analysis and Classification",

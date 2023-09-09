@@ -931,6 +931,7 @@
 #' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c + row_coef_i) with 3 column clustering groups:
 #' clustord.fit(Y~COLCLUST+ROW,model="OSM",nclus.column=3,long.df=long.df)
 #'
+#'\dontrun{
 #' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + colc_coef_c)
 #' #    with 3 row clustering groups and 2 column clustering groups:
 #' clustord.fit(Y~ROWCLUST+COLCLUST,model="OSM",nclus.row=3,nclus.column=2,long.df=long.df,
@@ -942,6 +943,7 @@
 #' clustord.fit(Y~ROWCLUST*COLCLUST, model="POM", nclus.row=2, nclus.column=4,
 #'              long.df=long.df,EM.control=list(EMcycles=5), nstarts=1,
 #'              start_from_simple_model=FALSE)
+#' }
 #' @export
 clustord.fit <- function(formula,
                          model,

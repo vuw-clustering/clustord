@@ -8,7 +8,7 @@ calc.cluster.comparisons(ppr1, ppr2)
 }
 \arguments{
 \item{ppr1}{Posterior probabilities of cluster membership, named \code{ppr_m}
-or \code{ppc_m} in the output of \code{\link{clustord}}. If you have
+or \code{ppc_m} in the output of \code{\link{clustord.fit}}. If you have
 performed biclustering, then \code{ppr1} should be the clustering results
 for just one of the dimensions i.e. just the row clustering results, or
 just the column clustering results. The rows of \code{ppr1} give the
