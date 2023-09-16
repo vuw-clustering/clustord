@@ -3,3 +3,9 @@ template:
   bootstrap: 5
   bootswatch: sandstone
 
+home:
+  sidebar:
+    structure: [links, license, citation, authors, dev]
+  links:
+    - text: Source code
+      href: https://github.com/vuw-clustering/clustord
