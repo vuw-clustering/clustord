@@ -25,7 +25,7 @@
 #' requirement to provide any covariates, and you can provide only row
 #' covariates, or only column covariates.
 #'
-#' Before running \code{clustord.fit}, you need to run \code{\link{mat2df}} to
+#' Before running \code{clustord}, you need to run \code{\link{mat2df}} to
 #' convert the data matrix into a long form data frame. The data frame needs to
 #' have at least three columns, \code{Y} and \code{ROW} and \code{COL}. Each row
 #' in the data frame corresponds to a single cell in the original data matrix;
@@ -35,7 +35,7 @@
 #' \code{\link{mat2df}} also allows you to supply data frames of row or column
 #' covariates which will be incorporated into \code{long.df}.
 #'
-#' Then, to run the \code{clustord.fit} function, you need to enter your chosen
+#' Then, to run the \code{clustord} function, you need to enter your chosen
 #' formula and model, and the number of clusters you want to fit. The formula
 #' model_structure is akin to that for \code{glm}, but with a few restrictions. You
 #' can include any number of covariates in the same way as for a multiple
@@ -55,7 +55,7 @@
 #' In the \code{formula} argument, the response must be exactly \code{Y}. You
 #' cannot use any functions of \code{Y} as the response, nor can you include
 #' \code{Y} in any terms on the right hand side of the formula. \code{Y} is the
-#' name in \code{clustord.fit} of the response values in the original data matrix.
+#' name in \code{clustord} of the response values in the original data matrix.
 #'
 #' The \code{formula} argument has 4 special variables: \code{ROWCLUST},
 #' \code{COLCLUST}, \code{ROW} and \code{COL}. There are some restrictions on
@@ -73,7 +73,7 @@
 #' simplest row clustering model, for Binary data with \strong{row clustering}
 #' effects only, the basic function call would be
 #'
-#' \code{clustord.fit(Y ~ ROWCLUST, model="Binary", long.df=long.df)}
+#' \code{clustord(Y ~ ROWCLUST, model="Binary", long.df=long.df)}
 #'
 #' and the model fitted would have the form:
 #'
@@ -112,7 +112,7 @@
 #' cluster r and a column cluster c, then that model has a matrix of parameters
 #' indexed by r and c.
 #'
-#' \code{clustord.fit(Y ~ ROWCLUST*COLCLUST, model="Binary", ...)} has the model
+#' \code{clustord(Y ~ ROWCLUST*COLCLUST, model="Binary", ...)} has the model
 #' Logit(P(Y = 1)) = mu + rowc_colc_coef_rc
 #'
 #' This model can instead be called using the equivalent formula
@@ -131,7 +131,7 @@
 #' \code{Y ~ COLCLUST + ROWCLUST:COLCLUST}. This is for simplicity in the code,
 #' and to avoid confusion when interpreting the results.
 #'
-#' However, \code{clustord.fit} allows a lot more flexibility than this. The
+#' However, \code{clustord} allows a lot more flexibility than this. The
 #' variables \code{ROW} and \code{COL} are used to indicate that you want to
 #' also include \strong{individual row or column effects}, respectively.
 #'
@@ -267,7 +267,7 @@
 #' between x1 and x2.
 #'
 #' The coefficients for row clusters interacting with row coefficients are named
-#' \code{row.cluster.row.coef} in the output of \code{clustord.fit} because you
+#' \code{row.cluster.row.coef} in the output of \code{clustord} because you
 #' can also have coefficients for interactions between row clustering and column
 #' covariates, or column clustering and row covariates, or column clustering and
 #' column covariates. Row clustering interacting with column covariates would
@@ -356,7 +356,7 @@
 #' As stated above, you can include interactions between \code{ROWCLUST} or
 #' \code{COLCLUST} and covariates, but you \strong{cannot} include three-way
 #' interactions between \code{ROWCLUST}, \code{COLCLUST} and one or more
-#' covariates are \strong{not permitted} in \code{clustord.fit}, mostly because
+#' covariates are \strong{not permitted} in \code{clustord}, mostly because
 #' of the prohibitive number of parameter values that would need to be fitted,
 #' and the difficulty of interpreting such a model. That is, you cannot use
 #' formulae such as \code{Y ~ ROWCLUST*COLCLUST*xr}, which would have Binary
@@ -364,7 +364,7 @@
 #'
 #' \code{model} \strong{argument details}
 #'
-#' The three models available in \code{clustord.fit} are the Binary model, which
+#' The three models available in \code{clustord} are the Binary model, which
 #' is a Bernoulli model equivalent to the binary model in the package
 #' \code{clustglm}, the Proportional Odds Model (POM) and the Ordered Stereotype
 #' Model (OSM).
@@ -590,7 +590,7 @@
 #' coefficient matrix will have \code{nclus.column*n - 1} independent parameters.
 #'
 #' Any covariate terms included in the formula will be split up by
-#' \code{clustord.fit} into the covariates that interact with row clusters, the
+#' \code{clustord} into the covariates that interact with row clusters, the
 #' covariates that interact with column clusters, and the covariates that do not
 #' interact with row or column clusters.
 #'
@@ -918,40 +918,40 @@
 #'                ROW=factor(rep(1:20,times=5)),COL=rep(1:5,each=20))
 #'
 #' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*rowc_coef_r with 3 row clustering groups:
-#' clustord.fit(Y~ROWCLUST,model="OSM",3,long.df=long.df,
+#' clustord(Y~ROWCLUST,model="OSM",3,long.df=long.df,
 #'              EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
 #'
 #' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + col_coef_j) with 3 row clustering groups:
-#' clustord.fit(Y~ROWCLUST+COL,model="OSM",3,long.df=long.df,
+#' clustord(Y~ROWCLUST+COL,model="OSM",3,long.df=long.df,
 #'              EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
 #'
 #' # Model Logit(P(Y <= k))=mu_k-rowc_coef_r-col_coef_j-rowc_col_coef_rj with 2 row clustering groups:
-#' clustord.fit(Y~ROWCLUST*COL,model="POM",nclus.row=2,long.df=long.df,
+#' clustord(Y~ROWCLUST*COL,model="POM",nclus.row=2,long.df=long.df,
 #'              EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
 #'
 #' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c) with 3 column clustering groups:
-#' clustord.fit(Y~COLCLUST,model="OSM",nclus.column=3,long.df=long.df,
+#' clustord(Y~COLCLUST,model="OSM",nclus.column=3,long.df=long.df,
 #'              EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
 #'
 #' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c + row_coef_i) with 3 column clustering groups:
-#' clustord.fit(Y~COLCLUST+ROW,model="OSM",nclus.column=3,long.df=long.df,
+#' clustord(Y~COLCLUST+ROW,model="OSM",nclus.column=3,long.df=long.df,
 #'              EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
 #'
 #'\dontrun{
 #' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + colc_coef_c)
 #' #    with 3 row clustering groups and 2 column clustering groups:
-#' clustord.fit(Y~ROWCLUST+COLCLUST,model="OSM",nclus.row=3,nclus.column=2,long.df=long.df,
+#' clustord(Y~ROWCLUST+COLCLUST,model="OSM",nclus.row=3,nclus.column=2,long.df=long.df,
 #'              EM.control=list(EMcycles=2), nstarts=1)
 #'
 #' # Model Logit(P(Y<=k))=mu_k-rowc_coef_r-colc_coef_c-rowc_colc_coef_rc
 #' #    with 2 row clustering groups and 4 column clustering groups, and
 #' #    interactions between them:
-#' clustord.fit(Y~ROWCLUST*COLCLUST, model="POM", nclus.row=2, nclus.column=4,
+#' clustord(Y~ROWCLUST*COLCLUST, model="POM", nclus.row=2, nclus.column=4,
 #'              long.df=long.df,EM.control=list(EMcycles=2), nstarts=1,
 #'              start_from_simple_model=FALSE)
 #' }
 #' @export
-clustord.fit <- function(formula,
+clustord <- function(formula,
                          model,
                          nclus.row=NULL,
                          nclus.column=NULL,

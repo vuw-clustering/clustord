@@ -8,16 +8,16 @@ test_that("clustord fails for an invalid formula.", {
 
     long.df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),ROW=rep(1:20,times=5),COL=rep(1:5,each=20))
 
-    expect_error(clustord.fit("Y~column","OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
-    expect_error(clustord.fit("Y","OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
-    expect_error(clustord.fit("test","OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
-    expect_error(clustord.fit(NULL,"OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
-    expect_error(clustord.fit(NA,"OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
-    expect_error(clustord.fit(Inf,"OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
-    expect_error(clustord.fit(2,"OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
-    expect_error(clustord.fit(-0.5,"OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
-    expect_error(clustord.fit(c("Y~row","Y~row+column"),"OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
-    expect_error(clustord.fit(list("Y~row","Y~row+column"),"OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
+    expect_error(clustord("Y~column","OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
+    expect_error(clustord("Y","OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
+    expect_error(clustord("test","OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
+    expect_error(clustord(NULL,"OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
+    expect_error(clustord(NA,"OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
+    expect_error(clustord(Inf,"OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
+    expect_error(clustord(2,"OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
+    expect_error(clustord(-0.5,"OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
+    expect_error(clustord(c("Y~row","Y~row+column"),"OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
+    expect_error(clustord(list("Y~row","Y~row+column"),"OSM",nclus.row=2,long.df=dat), "formula must be a valid formula.")
 
     expect_error(check.formula(X ~ ROWCLUST,long.df=long.df,RG=2,CG=2),
                  "Y must appear in the formula as the response, and you cannot use a function of Y.")

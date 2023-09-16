@@ -19,7 +19,7 @@ for (n in nvals) {
         long.df.sim <- data.frame(Y=factor(sample(1:3,n*p,replace=TRUE)),
                                   ROW=factor(rep(1:n,times=p)),COL=rep(1:p,each=n))
         rowc.time <- system.time(
-            rowc <- clustord.fit(Y~ROWCLUST, model="OSM",
+            rowc <- clustord(Y~ROWCLUST, model="OSM",
                                  nclus.row=3, long.df=long.df.sim,
                                  EM.control=list(EMcycles=2,startEMcycles=2),
                                  nstarts=1, optim.control=list(trace=2))
@@ -28,7 +28,7 @@ for (n in nvals) {
             results[idx, c(1,3)] <- c(rowc$EM.status$best.lli, rowc.time)
         } else {
             rowc_col.time <- system.time(
-                rowc_col <- clustord.fit(Y~ROWCLUST+COL, model="OSM",
+                rowc_col <- clustord(Y~ROWCLUST+COL, model="OSM",
                                          nclus.row=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=2,startEMcycles=2),
                                          nstarts=1, optim.control=list(trace=2))
@@ -91,7 +91,7 @@ for (n in nvals) {
         long.df.sim$xc1 <- rep(xc1, each=n)
 
         rowc_cov.time <- system.time(
-            rowc_cov <- clustord.fit(Y~ROWCLUST+ROWCLUST:xr1+xr2, model="OSM",
+            rowc_cov <- clustord(Y~ROWCLUST+ROWCLUST:xr1+xr2, model="OSM",
                                      nclus.row=3, long.df=long.df.sim,
                                      EM.control=list(EMcycles=2,startEMcycles=2),
                                      nstarts=1, optim.control=list(trace=2))
@@ -99,7 +99,7 @@ for (n in nvals) {
         results_complex[idx, c(1,3)] <- c(rowc_cov$EM.status$best.lli, rowc_cov.time[1])
 
         rowc_colc.time <- system.time(
-            rowc_colc <- clustord.fit(Y~ROWCLUST+COLCLUST, model="OSM",
+            rowc_colc <- clustord(Y~ROWCLUST+COLCLUST, model="OSM",
                                       nclus.row=3, nclus.column=2, long.df=long.df.sim,
                                       EM.control=list(EMcycles=2,startEMcycles=2),
                                       nstarts=1, optim.control=list(trace=2))

@@ -508,14 +508,14 @@ calc.SE.rowcluster <- function(long.df, clust.out,
 
 #' Calculate standard errors of clustering parameters.
 #'
-#' Calculate SE of parameters fitted using \code{\link{clustord.fit}}.
+#' Calculate SE of parameters fitted using \code{\link{clustord}}.
 #'
 #' Use \code{calc.SE.rowcluster} to calculate SE for row clustering and column
 #' clustering, or \code{calc.SE.bicluster} to calculate SE for biclustering.
 #'
 #' Calculates SE by running \code{optimHess} (see \code{\link[stats]{optim}}) on
 #' the incomplete-data log-likelihood to find the hessian at the fitted parameter
-#' values from \code{\link{clustord.fit}}.
+#' values from \code{\link{clustord}}.
 #' Then the square roots of the diagonal elements of the negative inverse of the
 #' hessian are the standard errors of the parameters
 #' i.e. \code{SE <- sqrt(diag(solve(-optim.hess))}.
@@ -528,13 +528,13 @@ calc.SE.rowcluster <- function(long.df, clust.out,
 #' similarly to individual column effect coefficients, etc.
 #'
 #' The function requires an input which is the output of
-#' \code{\link{clustord.fit}}, which includes the component \code{outvect}, the
+#' \code{\link{clustord}}, which includes the component \code{outvect}, the
 #' final vector of independent parameter values from the EM algorithm, which
 #' will correspond to a subset of the parameter values in \code{parlist.out}.
 #'
-#' @param long.df The data frame, in long format, as passed to \code{clustord.fit}.
+#' @param long.df The data frame, in long format, as passed to \code{clustord}.
 #'
-#' @param clust.out A \code{clustord.fit} object.
+#' @param clust.out A \code{clustord} object.
 #'
 #' @param optim.control control list for the \code{optim} call within the M step
 #'     of the EM algorithm. See the control list Details in the \code{optim}

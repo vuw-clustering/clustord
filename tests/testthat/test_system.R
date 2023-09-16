@@ -23,72 +23,72 @@ test_that("row clustering runs without errors.", {
     long.df.sim$xc1 <- rep(xc1, each=30)
 
     ## OSM results -------------------------------------------------------------
-    expect_error(results <- clustord.fit(Y~ROWCLUST, model="OSM",
+    expect_error(results <- clustord(Y~ROWCLUST, model="OSM",
                                          nclus.row=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COL, model="OSM",
+    expect_error(results <- clustord(Y~ROWCLUST+COL, model="OSM",
                                          nclus.row=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COL,
+    expect_error(results <- clustord(Y~ROWCLUST*COL,
                                          model="OSM", nclus.row=2, long.df=long.df.sim,
                                          start_from_simple_model = TRUE,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COL+ROWCLUST:COL,
+    expect_error(results <- clustord(Y~ROWCLUST+COL+ROWCLUST:COL,
                                          model="OSM", nclus.row=2, long.df=long.df.sim,
                                          start_from_simple_model = FALSE,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     # Covariates ----
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + xr1,
+    expect_error(results <- clustord(Y ~ ROWCLUST + xr1,
                                          model="OSM",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + xr2,
+    expect_error(results <- clustord(Y ~ ROWCLUST + xr2,
                                          model="OSM",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + xr3,
+    expect_error(results <- clustord(Y ~ ROWCLUST + xr3,
                                          model="OSM",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + xr1:xr3,
+    expect_error(results <- clustord(Y ~ ROWCLUST + xr1:xr3,
                                          model="OSM",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + xc1,
+    expect_error(results <- clustord(Y ~ ROWCLUST + xc1,
                                          model="OSM",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + log(xr1),
+    expect_error(results <- clustord(Y ~ ROWCLUST + log(xr1),
                                          model="OSM",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + ROWCLUST:xr2,
+    expect_error(results <- clustord(Y ~ ROWCLUST + ROWCLUST:xr2,
                                          model="OSM",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + ROWCLUST:log(xr1):xr2,
+    expect_error(results <- clustord(Y ~ ROWCLUST + ROWCLUST:log(xr1):xr2,
                                          model="OSM",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -96,21 +96,21 @@ test_that("row clustering runs without errors.", {
 
     if (exists("pi.init")) rm(pi.init)
     initvect <- c(-0.8,0.7,0.2,2)
-    expect_error(results <- clustord.fit(Y~ROWCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST,
                                          model="OSM", initvect=initvect,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,0.2,2,rep(0.25,times=4))
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COL,
+    expect_error(results <- clustord(Y~ROWCLUST+COL,
                                          model="OSM", initvect=initvect,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,0.2,2,rep(0.25,times=4),rep(0.4,times=4))
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COL,
+    expect_error(results <- clustord(Y~ROWCLUST*COL,
                                          model="OSM", initvect=initvect,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -118,21 +118,21 @@ test_that("row clustering runs without errors.", {
 
     pi.init <- c(0.1,0.9)
     initvect <- c(-0.8,0.7,0.2,2)
-    expect_error(results <- clustord.fit(Y~ROWCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST,
                                          model="OSM", initvect=initvect, pi.init=pi.init,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,0.2,2,rep(0.25,times=4))
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COL,
+    expect_error(results <- clustord(Y~ROWCLUST+COL,
                                          model="OSM", initvect=initvect, pi.init=pi.init,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,0.2,2,rep(0.25,times=4),rep(0.4,times=4))
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COL,
+    expect_error(results <- clustord(Y~ROWCLUST*COL,
                                          model="OSM", initvect=initvect, pi.init=pi.init,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -140,19 +140,19 @@ test_that("row clustering runs without errors.", {
 
     if (exists("initvect")) rm(initvect)
     pi.init <- c(0.1,0.9)
-    expect_error(results <- clustord.fit(Y~ROWCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST,
                                          model="OSM", pi.init=pi.init,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COL,
+    expect_error(results <- clustord(Y~ROWCLUST+COL,
                                          model="OSM", pi.init=pi.init,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COL,
+    expect_error(results <- clustord(Y~ROWCLUST*COL,
                                          model="OSM", pi.init=pi.init,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -160,32 +160,32 @@ test_that("row clustering runs without errors.", {
 
     ## Some rows in the dataset are missing ------------------------------------
     long.df.sim.missing <- long.df.sim[-5,]
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COL,
+    expect_error(results <- clustord(Y~ROWCLUST*COL,
                                          model="OSM", nclus.row=2, long.df=long.df.sim.missing,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     ### POM results ------------------------------------------------------------
-    expect_error(results <- clustord.fit(Y~ROWCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST,
                                          model="POM",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COL,
+    expect_error(results <- clustord(Y~ROWCLUST+COL,
                                          model="POM",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COL,
+    expect_error(results <- clustord(Y~ROWCLUST*COL,
                                          model="POM",
                                          nclus.row=2, long.df=long.df.sim,
                                          start_from_simple_model = TRUE,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COL+ROWCLUST:COL,
+    expect_error(results <- clustord(Y~ROWCLUST+COL+ROWCLUST:COL,
                                          model="POM",
                                          nclus.row=2, long.df=long.df.sim,
                                          start_from_simple_model = FALSE,
@@ -193,49 +193,49 @@ test_that("row clustering runs without errors.", {
                                          nstarts=1),NA)
 
     # Covariates ----
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + xr1,
+    expect_error(results <- clustord(Y ~ ROWCLUST + xr1,
                                          model="POM",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + xr2,
+    expect_error(results <- clustord(Y ~ ROWCLUST + xr2,
                                          model="POM",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + xr3,
+    expect_error(results <- clustord(Y ~ ROWCLUST + xr3,
                                          model="POM",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + xr1:xr3,
+    expect_error(results <- clustord(Y ~ ROWCLUST + xr1:xr3,
                                          model="POM",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + xc1,
+    expect_error(results <- clustord(Y ~ ROWCLUST + xc1,
                                          model="POM",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + log(xr1),
+    expect_error(results <- clustord(Y ~ ROWCLUST + log(xr1),
                                          model="POM",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + ROWCLUST:xr2,
+    expect_error(results <- clustord(Y ~ ROWCLUST + ROWCLUST:xr2,
                                          model="POM",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + ROWCLUST:log(xr1):xr2,
+    expect_error(results <- clustord(Y ~ ROWCLUST + ROWCLUST:log(xr1):xr2,
                                          model="POM",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -243,21 +243,21 @@ test_that("row clustering runs without errors.", {
 
     if (exists("pi.init")) rm(pi.init)
     initvect <- c(-0.8,0.7,2)
-    expect_error(results <- clustord.fit(Y~ROWCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST,
                                          model="POM", initvect=initvect,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,2,rep(0.25,times=4))
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COL,
+    expect_error(results <- clustord(Y~ROWCLUST+COL,
                                          model="POM", initvect=initvect,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,2,rep(0.25,times=4),rep(0.4,times=4))
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COL,
+    expect_error(results <- clustord(Y~ROWCLUST*COL,
                                          model="POM", initvect=initvect,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -265,21 +265,21 @@ test_that("row clustering runs without errors.", {
 
     pi.init <- c(0.1,0.9)
     initvect <- c(-0.8,0.7,2)
-    expect_error(results <- clustord.fit(Y~ROWCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST,
                                          model="POM", initvect=initvect, pi.init=pi.init,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,2,rep(0.25,times=4))
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COL,
+    expect_error(results <- clustord(Y~ROWCLUST+COL,
                                          model="POM", initvect=initvect, pi.init=pi.init,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,2,rep(0.25,times=4),rep(0.4,times=4))
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COL,
+    expect_error(results <- clustord(Y~ROWCLUST*COL,
                                          model="POM", initvect=initvect, pi.init=pi.init,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -287,19 +287,19 @@ test_that("row clustering runs without errors.", {
 
     if (exists("initvect")) rm(initvect)
     pi.init <- c(0.1,0.9)
-    expect_error(results <- clustord.fit(Y~ROWCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST,
                                          model="POM", pi.init=pi.init,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COL,
+    expect_error(results <- clustord(Y~ROWCLUST+COL,
                                          model="POM", pi.init=pi.init,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COL,
+    expect_error(results <- clustord(Y~ROWCLUST*COL,
                                          model="POM", pi.init=pi.init,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -310,72 +310,72 @@ test_that("row clustering runs without errors.", {
     set.seed(30)
     long.df.sim$Y <- as.factor(sample(1:2,5*30,replace=TRUE))
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST, model="Binary",
+    expect_error(results <- clustord(Y~ROWCLUST, model="Binary",
                                          nclus.row=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COL, model="Binary",
+    expect_error(results <- clustord(Y~ROWCLUST+COL, model="Binary",
                                          nclus.row=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COL,
+    expect_error(results <- clustord(Y~ROWCLUST*COL,
                                          model="Binary", nclus.row=2, long.df=long.df.sim,
                                          start_from_simple_model = TRUE,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COL+ROWCLUST:COL,
+    expect_error(results <- clustord(Y~ROWCLUST+COL+ROWCLUST:COL,
                                          model="Binary", nclus.row=2, long.df=long.df.sim,
                                          start_from_simple_model = FALSE,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     # Covariates ----
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + xr1,
+    expect_error(results <- clustord(Y ~ ROWCLUST + xr1,
                                          model="Binary",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + xr2,
+    expect_error(results <- clustord(Y ~ ROWCLUST + xr2,
                                          model="Binary",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + xr3,
+    expect_error(results <- clustord(Y ~ ROWCLUST + xr3,
                                          model="Binary",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + xr1:xr3,
+    expect_error(results <- clustord(Y ~ ROWCLUST + xr1:xr3,
                                          model="Binary",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + xc1,
+    expect_error(results <- clustord(Y ~ ROWCLUST + xc1,
                                          model="Binary",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + log(xr1),
+    expect_error(results <- clustord(Y ~ ROWCLUST + log(xr1),
                                          model="Binary",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + ROWCLUST:xr2,
+    expect_error(results <- clustord(Y ~ ROWCLUST + ROWCLUST:xr2,
                                          model="Binary",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ ROWCLUST + ROWCLUST:log(xr1):xr2,
+    expect_error(results <- clustord(Y ~ ROWCLUST + ROWCLUST:log(xr1):xr2,
                                          model="Binary",
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -383,21 +383,21 @@ test_that("row clustering runs without errors.", {
 
     if (exists("pi.init")) rm(pi.init)
     initvect <- c(-0.2,2)
-    expect_error(results <- clustord.fit(Y~ROWCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST,
                                          model="Binary", initvect=initvect,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,2,rep(0.25,times=4))
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COL,
+    expect_error(results <- clustord(Y~ROWCLUST+COL,
                                          model="Binary", initvect=initvect,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,2,rep(0.25,times=4),rep(0.4,times=4))
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COL,
+    expect_error(results <- clustord(Y~ROWCLUST*COL,
                                          model="Binary", initvect=initvect,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -405,21 +405,21 @@ test_that("row clustering runs without errors.", {
 
     pi.init <- c(0.1,0.9)
     initvect <- c(-0.8,2)
-    expect_error(results <- clustord.fit(Y~ROWCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST,
                                          model="Binary", initvect=initvect, pi.init=pi.init,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,2,rep(0.25,times=4))
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COL,
+    expect_error(results <- clustord(Y~ROWCLUST+COL,
                                          model="Binary", initvect=initvect, pi.init=pi.init,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,2,rep(0.25,times=4),rep(0.4,times=4))
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COL,
+    expect_error(results <- clustord(Y~ROWCLUST*COL,
                                          model="Binary", initvect=initvect, pi.init=pi.init,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -427,19 +427,19 @@ test_that("row clustering runs without errors.", {
 
     if (exists("initvect")) rm(initvect)
     pi.init <- c(0.1,0.9)
-    expect_error(results <- clustord.fit(Y~ROWCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST,
                                          model="Binary", pi.init=pi.init,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COL,
+    expect_error(results <- clustord(Y~ROWCLUST+COL,
                                          model="Binary", pi.init=pi.init,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COL,
+    expect_error(results <- clustord(Y~ROWCLUST*COL,
                                          model="Binary", pi.init=pi.init,
                                          nclus.row=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -469,72 +469,72 @@ test_that("column clustering runs without errors.", {
     long.df.sim$xr1 <- rep(xr1, times=30)
 
     ## OSM results -------------------------------------------------------------
-    expect_error(results <- clustord.fit(Y~COLCLUST, model="OSM",
+    expect_error(results <- clustord(Y~COLCLUST, model="OSM",
                                          nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~COLCLUST+ROW, model="OSM",
+    expect_error(results <- clustord(Y~COLCLUST+ROW, model="OSM",
                                          nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~COLCLUST*ROW,
+    expect_error(results <- clustord(Y~COLCLUST*ROW,
                                          model="OSM", nclus.column=2, long.df=long.df.sim,
                                          start_from_simple_model = TRUE,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~COLCLUST+ROW+COLCLUST:ROW,
+    expect_error(results <- clustord(Y~COLCLUST+ROW+COLCLUST:ROW,
                                          model="OSM", nclus.column=2, long.df=long.df.sim,
                                          start_from_simple_model = FALSE,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     # Covariates ----
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + xc1,
+    expect_error(results <- clustord(Y ~ COLCLUST + xc1,
                                          model="OSM",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + xc2,
+    expect_error(results <- clustord(Y ~ COLCLUST + xc2,
                                          model="OSM",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + xc3,
+    expect_error(results <- clustord(Y ~ COLCLUST + xc3,
                                          model="OSM",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + xc1:xc3,
+    expect_error(results <- clustord(Y ~ COLCLUST + xc1:xc3,
                                          model="OSM",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + xr1,
+    expect_error(results <- clustord(Y ~ COLCLUST + xr1,
                                          model="OSM",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + log(xc1),
+    expect_error(results <- clustord(Y ~ COLCLUST + log(xc1),
                                          model="OSM",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + COLCLUST:xc2,
+    expect_error(results <- clustord(Y ~ COLCLUST + COLCLUST:xc2,
                                          model="OSM",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + COLCLUST:log(xc1):xc2,
+    expect_error(results <- clustord(Y ~ COLCLUST + COLCLUST:log(xc1):xc2,
                                          model="OSM",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -542,21 +542,21 @@ test_that("column clustering runs without errors.", {
 
     if (exists("kappa.init")) rm(kappa.init)
     initvect <- c(-0.8,0.7,0.2,2)
-    expect_error(results <- clustord.fit(Y~COLCLUST,
+    expect_error(results <- clustord(Y~COLCLUST,
                                          model="OSM", initvect=initvect,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,0.2,2,rep(0.25,times=4))
-    expect_error(results <- clustord.fit(Y~COLCLUST+ROW,
+    expect_error(results <- clustord(Y~COLCLUST+ROW,
                                          model="OSM", initvect=initvect,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,0.2,2,rep(0.25,times=4),rep(0.4,times=4))
-    expect_error(results <- clustord.fit(Y~COLCLUST*ROW,
+    expect_error(results <- clustord(Y~COLCLUST*ROW,
                                          model="OSM", initvect=initvect,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -564,21 +564,21 @@ test_that("column clustering runs without errors.", {
 
     kappa.init <- c(0.1,0.9)
     initvect <- c(-0.8,0.7,0.2,2)
-    expect_error(results <- clustord.fit(Y~COLCLUST,
+    expect_error(results <- clustord(Y~COLCLUST,
                                          model="OSM", initvect=initvect, kappa.init=kappa.init,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,0.2,2,rep(0.25,times=4))
-    expect_error(results <- clustord.fit(Y~COLCLUST+ROW,
+    expect_error(results <- clustord(Y~COLCLUST+ROW,
                                          model="OSM", initvect=initvect, kappa.init=kappa.init,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,0.2,2,rep(0.25,times=4),rep(0.4,times=4))
-    expect_error(results <- clustord.fit(Y~COLCLUST*ROW,
+    expect_error(results <- clustord(Y~COLCLUST*ROW,
                                          model="OSM", initvect=initvect, kappa.init=kappa.init,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -586,19 +586,19 @@ test_that("column clustering runs without errors.", {
 
     if (exists("initvect")) rm(initvect)
     kappa.init <- c(0.1,0.9)
-    expect_error(results <- clustord.fit(Y~COLCLUST,
+    expect_error(results <- clustord(Y~COLCLUST,
                                          model="OSM", kappa.init=kappa.init,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~COLCLUST+ROW,
+    expect_error(results <- clustord(Y~COLCLUST+ROW,
                                          model="OSM", kappa.init=kappa.init,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~COLCLUST*ROW,
+    expect_error(results <- clustord(Y~COLCLUST*ROW,
                                          model="OSM", kappa.init=kappa.init,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -606,32 +606,32 @@ test_that("column clustering runs without errors.", {
 
     ## Some rows in the long data frame are missing ----------------------------
     long.df.sim.missing <- long.df.sim[-5,]
-    expect_error(results <- clustord.fit(Y~COLCLUST*ROW,
+    expect_error(results <- clustord(Y~COLCLUST*ROW,
                                          model="OSM", nclus.column=2, long.df=long.df.sim.missing,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     ### POM results ------------------------------------------------------------
-    expect_error(results <- clustord.fit(Y~COLCLUST,
+    expect_error(results <- clustord(Y~COLCLUST,
                                          model="POM",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~COLCLUST+ROW,
+    expect_error(results <- clustord(Y~COLCLUST+ROW,
                                          model="POM",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~COLCLUST*ROW,
+    expect_error(results <- clustord(Y~COLCLUST*ROW,
                                          model="POM",
                                          nclus.column=2, long.df=long.df.sim,
                                          start_from_simple_model = TRUE,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~COLCLUST+ROW+COLCLUST:ROW,
+    expect_error(results <- clustord(Y~COLCLUST+ROW+COLCLUST:ROW,
                                          model="POM",
                                          nclus.column=2, long.df=long.df.sim,
                                          start_from_simple_model = FALSE,
@@ -639,49 +639,49 @@ test_that("column clustering runs without errors.", {
                                          nstarts=1),NA)
 
     # Covariates ----
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + xc1,
+    expect_error(results <- clustord(Y ~ COLCLUST + xc1,
                                          model="POM",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + xc2,
+    expect_error(results <- clustord(Y ~ COLCLUST + xc2,
                                          model="POM",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + xc3,
+    expect_error(results <- clustord(Y ~ COLCLUST + xc3,
                                          model="POM",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + xc1:xc3,
+    expect_error(results <- clustord(Y ~ COLCLUST + xc1:xc3,
                                          model="POM",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + xr1,
+    expect_error(results <- clustord(Y ~ COLCLUST + xr1,
                                          model="POM",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + log(xc1),
+    expect_error(results <- clustord(Y ~ COLCLUST + log(xc1),
                                          model="POM",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + COLCLUST:xc2,
+    expect_error(results <- clustord(Y ~ COLCLUST + COLCLUST:xc2,
                                          model="POM",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + COLCLUST:log(xc1):xc2,
+    expect_error(results <- clustord(Y ~ COLCLUST + COLCLUST:log(xc1):xc2,
                                          model="POM",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -689,21 +689,21 @@ test_that("column clustering runs without errors.", {
 
     if (exists("kappa.init")) rm(kappa.init)
     initvect <- c(-0.8,0.7,2)
-    expect_error(results <- clustord.fit(Y~COLCLUST,
+    expect_error(results <- clustord(Y~COLCLUST,
                                          model="POM", initvect=initvect,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,2,rep(0.25,times=4))
-    expect_error(results <- clustord.fit(Y~COLCLUST+ROW,
+    expect_error(results <- clustord(Y~COLCLUST+ROW,
                                          model="POM", initvect=initvect,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,2,rep(0.25,times=4),rep(0.4,times=4))
-    expect_error(results <- clustord.fit(Y~COLCLUST*ROW,
+    expect_error(results <- clustord(Y~COLCLUST*ROW,
                                          model="POM", initvect=initvect,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -711,21 +711,21 @@ test_that("column clustering runs without errors.", {
 
     kappa.init <- c(0.1,0.9)
     initvect <- c(-0.8,0.7,2)
-    expect_error(results <- clustord.fit(Y~COLCLUST,
+    expect_error(results <- clustord(Y~COLCLUST,
                                          model="POM", initvect=initvect, kappa.init=kappa.init,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,2,rep(0.25,times=4))
-    expect_error(results <- clustord.fit(Y~COLCLUST+ROW,
+    expect_error(results <- clustord(Y~COLCLUST+ROW,
                                          model="POM", initvect=initvect, kappa.init=kappa.init,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,2,rep(0.25,times=4),rep(0.4,times=4))
-    expect_error(results <- clustord.fit(Y~COLCLUST*ROW,
+    expect_error(results <- clustord(Y~COLCLUST*ROW,
                                          model="POM", initvect=initvect, kappa.init=kappa.init,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -733,19 +733,19 @@ test_that("column clustering runs without errors.", {
 
     if (exists("initvect")) rm(initvect)
     kappa.init <- c(0.1,0.9)
-    expect_error(results <- clustord.fit(Y~COLCLUST,
+    expect_error(results <- clustord(Y~COLCLUST,
                                          model="POM", kappa.init=kappa.init,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~COLCLUST+ROW,
+    expect_error(results <- clustord(Y~COLCLUST+ROW,
                                          model="POM", kappa.init=kappa.init,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~COLCLUST*ROW,
+    expect_error(results <- clustord(Y~COLCLUST*ROW,
                                          model="POM", kappa.init=kappa.init,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -755,72 +755,72 @@ test_that("column clustering runs without errors.", {
     set.seed(30)
     long.df.sim$Y <- as.factor(sample(1:2,30*5,replace=TRUE))
 
-    expect_error(results <- clustord.fit(Y~COLCLUST, model="Binary",
+    expect_error(results <- clustord(Y~COLCLUST, model="Binary",
                                          nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~COLCLUST+ROW, model="Binary",
+    expect_error(results <- clustord(Y~COLCLUST+ROW, model="Binary",
                                          nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~COLCLUST*ROW,
+    expect_error(results <- clustord(Y~COLCLUST*ROW,
                                          model="Binary", nclus.column=2, long.df=long.df.sim,
                                          start_from_simple_model = TRUE,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~COLCLUST+ROW+COLCLUST:ROW,
+    expect_error(results <- clustord(Y~COLCLUST+ROW+COLCLUST:ROW,
                                          model="Binary", nclus.column=2, long.df=long.df.sim,
                                          start_from_simple_model = FALSE,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     # Covariates ----
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + xc1,
+    expect_error(results <- clustord(Y ~ COLCLUST + xc1,
                                          model="Binary",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + xc2,
+    expect_error(results <- clustord(Y ~ COLCLUST + xc2,
                                          model="Binary",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + xc3,
+    expect_error(results <- clustord(Y ~ COLCLUST + xc3,
                                          model="Binary",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + xc1:xc3,
+    expect_error(results <- clustord(Y ~ COLCLUST + xc1:xc3,
                                          model="Binary",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + xr1,
+    expect_error(results <- clustord(Y ~ COLCLUST + xr1,
                                          model="Binary",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + log(xc1),
+    expect_error(results <- clustord(Y ~ COLCLUST + log(xc1),
                                          model="Binary",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + COLCLUST:xc2,
+    expect_error(results <- clustord(Y ~ COLCLUST + COLCLUST:xc2,
                                          model="Binary",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y ~ COLCLUST + COLCLUST:log(xc1):xc2,
+    expect_error(results <- clustord(Y ~ COLCLUST + COLCLUST:log(xc1):xc2,
                                          model="Binary",
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -828,21 +828,21 @@ test_that("column clustering runs without errors.", {
 
     if (exists("kappa.init")) rm(kappa.init)
     initvect <- c(-0.8,2)
-    expect_error(results <- clustord.fit(Y~COLCLUST,
+    expect_error(results <- clustord(Y~COLCLUST,
                                          model="Binary", initvect=initvect,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,2,rep(0.25,times=4))
-    expect_error(results <- clustord.fit(Y~COLCLUST+ROW,
+    expect_error(results <- clustord(Y~COLCLUST+ROW,
                                          model="Binary", initvect=initvect,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,2,rep(0.25,times=4),rep(0.4,times=4))
-    expect_error(results <- clustord.fit(Y~COLCLUST*ROW,
+    expect_error(results <- clustord(Y~COLCLUST*ROW,
                                          model="Binary", initvect=initvect,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -850,21 +850,21 @@ test_that("column clustering runs without errors.", {
 
     kappa.init <- c(0.1,0.9)
     initvect <- c(-0.8,2)
-    expect_error(results <- clustord.fit(Y~COLCLUST,
+    expect_error(results <- clustord(Y~COLCLUST,
                                          model="Binary", initvect=initvect, kappa.init=kappa.init,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,2,rep(0.25,times=4))
-    expect_error(results <- clustord.fit(Y~COLCLUST+ROW,
+    expect_error(results <- clustord(Y~COLCLUST+ROW,
                                          model="Binary", initvect=initvect, kappa.init=kappa.init,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,2,rep(0.25,times=4),rep(0.4,times=4))
-    expect_error(results <- clustord.fit(Y~COLCLUST*ROW,
+    expect_error(results <- clustord(Y~COLCLUST*ROW,
                                          model="Binary", initvect=initvect, kappa.init=kappa.init,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -872,19 +872,19 @@ test_that("column clustering runs without errors.", {
 
     if (exists("initvect")) rm(initvect)
     kappa.init <- c(0.1,0.9)
-    expect_error(results <- clustord.fit(Y~COLCLUST,
+    expect_error(results <- clustord(Y~COLCLUST,
                                          model="Binary", kappa.init=kappa.init,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~COLCLUST+ROW,
+    expect_error(results <- clustord(Y~COLCLUST+ROW,
                                          model="Binary", kappa.init=kappa.init,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~COLCLUST*ROW,
+    expect_error(results <- clustord(Y~COLCLUST*ROW,
                                          model="Binary", kappa.init=kappa.init,
                                          nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -912,75 +912,75 @@ test_that("biclustering runs without errors.", {
     long.df.sim$xc1 <- rep(xc1, each=30)
 
     ## OSM results -------------------------------------------------------------
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST, model="OSM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST, model="OSM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST*COLCLUST,
                                          model="OSM", nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          start_from_simple_model = TRUE,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+ROWCLUST:COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+ROWCLUST:COLCLUST,
                                          model="OSM", nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          start_from_simple_model = FALSE,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     # Covariates ----
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+xr1, model="OSM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+xr1, model="OSM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+xr2, model="OSM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+xr2, model="OSM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+xr3, model="OSM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+xr3, model="OSM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+xc1, model="OSM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+xc1, model="OSM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+ROWCLUST:xr1, model="OSM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+ROWCLUST:xr1, model="OSM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+ROWCLUST:xr2, model="OSM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+ROWCLUST:xr2, model="OSM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+ROWCLUST:xc1, model="OSM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+ROWCLUST:xc1, model="OSM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+COLCLUST:xr1, model="OSM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+COLCLUST:xr1, model="OSM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+COLCLUST:xr2, model="OSM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+COLCLUST:xr2, model="OSM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+COLCLUST:xc1, model="OSM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+COLCLUST:xc1, model="OSM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+COLCLUST:xc1:log(xr1), model="OSM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+COLCLUST:xc1:log(xr1), model="OSM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
@@ -988,14 +988,14 @@ test_that("biclustering runs without errors.", {
     if (exists("pi.init")) rm(pi.init)
     if (exists("kappa.init")) rm(kappa.init)
     initvect <- c(-0.8,0.7,0.2,2,0.25)
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST,
                                          model="OSM", initvect=initvect,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,0.2,2,0.25,0.4)
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST*COLCLUST,
                                          model="OSM", initvect=initvect,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -1004,7 +1004,7 @@ test_that("biclustering runs without errors.", {
     pi.init <- c(0.4,0.6)
     kappa.init <- c(0.1,0.9)
     initvect <- c(-0.8,0.7,0.2,2,0.25)
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST,
                                          model="OSM", initvect=initvect,
                                          pi.init=pi.init, kappa.init=kappa.init,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
@@ -1012,7 +1012,7 @@ test_that("biclustering runs without errors.", {
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,0.2,2,0.25,0.4)
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST*COLCLUST,
                                          model="OSM", initvect=initvect,
                                          pi.init=pi.init, kappa.init=kappa.init,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
@@ -1022,14 +1022,14 @@ test_that("biclustering runs without errors.", {
     if (exists("initvect")) rm(initvect)
     pi.init <- c(0.4,0.6)
     kappa.init <- c(0.1,0.9)
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST,
                                          model="OSM",
                                          pi.init=pi.init, kappa.init=kappa.init,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST*COLCLUST,
                                          model="OSM",
                                          pi.init=pi.init, kappa.init=kappa.init,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
@@ -1038,27 +1038,27 @@ test_that("biclustering runs without errors.", {
 
     ## Some rows in the long data frame are missing ----------------------------
     long.df.sim.missing <- long.df.sim[-5,]
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST*COLCLUST,
                                          model="OSM",
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim.missing,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     ### POM results ------------------------------------------------------------
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST,
                                          model="POM",
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST*COLCLUST,
                                          model="POM",
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          start_from_simple_model = TRUE,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+ROWCLUST:COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+ROWCLUST:COLCLUST,
                                          model="POM",
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          start_from_simple_model = FALSE,
@@ -1066,57 +1066,57 @@ test_that("biclustering runs without errors.", {
                                          nstarts=1),NA)
 
     # Covariates ----
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+xr1, model="POM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+xr1, model="POM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+xr2, model="POM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+xr2, model="POM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+xr3, model="POM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+xr3, model="POM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+xc1, model="POM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+xc1, model="POM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+ROWCLUST:xr1, model="POM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+ROWCLUST:xr1, model="POM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+ROWCLUST:xr2, model="POM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+ROWCLUST:xr2, model="POM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+ROWCLUST:xc1, model="POM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+ROWCLUST:xc1, model="POM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+COLCLUST:xr1, model="POM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+COLCLUST:xr1, model="POM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+COLCLUST:xr2, model="POM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+COLCLUST:xr2, model="POM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+COLCLUST:xc1, model="POM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+COLCLUST:xc1, model="POM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+COLCLUST:xc1:log(xr1), model="POM",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+COLCLUST:xc1:log(xr1), model="POM",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
@@ -1124,14 +1124,14 @@ test_that("biclustering runs without errors.", {
     if (exists("pi.init")) rm(pi.init)
     if (exists("kappa.init")) rm(kappa.init)
     initvect <- c(-0.8,0.7,2,0.25)
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST,
                                          model="POM", initvect=initvect,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,2,0.25,0.4)
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST*COLCLUST,
                                          model="POM", initvect=initvect,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -1140,7 +1140,7 @@ test_that("biclustering runs without errors.", {
     pi.init <- c(0.4,0.6)
     kappa.init <- c(0.1,0.9)
     initvect <- c(-0.8,0.7,2,0.25)
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST,
                                          model="POM", initvect=initvect,
                                          pi.init=pi.init, kappa.init=kappa.init,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
@@ -1148,7 +1148,7 @@ test_that("biclustering runs without errors.", {
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,0.7,2,0.25,0.4)
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST*COLCLUST,
                                          model="POM", initvect=initvect,
                                          pi.init=pi.init, kappa.init=kappa.init,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
@@ -1158,14 +1158,14 @@ test_that("biclustering runs without errors.", {
     if (exists("initvect")) rm(initvect)
     pi.init <- c(0.4,0.6)
     kappa.init <- c(0.1,0.9)
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST,
                                          model="POM",
                                          pi.init=pi.init, kappa.init=kappa.init,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST*COLCLUST,
                                          model="POM",
                                          pi.init=pi.init, kappa.init=kappa.init,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
@@ -1177,75 +1177,75 @@ test_that("biclustering runs without errors.", {
     set.seed(30)
     long.df.sim$Y <- as.factor(sample(1:2,5*30,replace=TRUE))
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST, model="Binary",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST, model="Binary",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST*COLCLUST,
                                          model="Binary", nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          start_from_simple_model = TRUE,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+ROWCLUST:COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+ROWCLUST:COLCLUST,
                                          model="Binary", nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          start_from_simple_model = FALSE,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     # Covariates ----
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+xr1, model="Binary",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+xr1, model="Binary",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+xr2, model="Binary",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+xr2, model="Binary",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+xr3, model="Binary",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+xr3, model="Binary",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+xc1, model="Binary",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+xc1, model="Binary",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+ROWCLUST:xr1, model="Binary",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+ROWCLUST:xr1, model="Binary",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+ROWCLUST:xr2, model="Binary",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+ROWCLUST:xr2, model="Binary",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+ROWCLUST:xc1, model="Binary",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+ROWCLUST:xc1, model="Binary",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+COLCLUST:xr1, model="Binary",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+COLCLUST:xr1, model="Binary",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+COLCLUST:xr2, model="Binary",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+COLCLUST:xr2, model="Binary",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+COLCLUST:xc1, model="Binary",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+COLCLUST:xc1, model="Binary",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST+COLCLUST:xc1:log(xr1), model="Binary",
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST+COLCLUST:xc1:log(xr1), model="Binary",
                                          nclus.row=2, nclus.column=3, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
@@ -1253,14 +1253,14 @@ test_that("biclustering runs without errors.", {
     if (exists("pi.init")) rm(pi.init)
     if (exists("kappa.init")) rm(kappa.init)
     initvect <- c(-0.8,2,0.25)
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST,
                                          model="Binary", initvect=initvect,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,2,0.25,0.4)
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST*COLCLUST,
                                          model="Binary", initvect=initvect,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
@@ -1269,7 +1269,7 @@ test_that("biclustering runs without errors.", {
     pi.init <- c(0.4,0.6)
     kappa.init <- c(0.1,0.9)
     initvect <- c(-0.8,2,0.25)
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST,
                                          model="Binary", initvect=initvect,
                                          pi.init=pi.init, kappa.init=kappa.init,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
@@ -1277,7 +1277,7 @@ test_that("biclustering runs without errors.", {
                                          nstarts=1),NA)
 
     initvect <- c(-0.8,2,0.25,0.4)
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST*COLCLUST,
                                          model="Binary", initvect=initvect,
                                          pi.init=pi.init, kappa.init=kappa.init,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
@@ -1287,14 +1287,14 @@ test_that("biclustering runs without errors.", {
     if (exists("initvect")) rm(initvect)
     pi.init <- c(0.4,0.6)
     kappa.init <- c(0.1,0.9)
-    expect_error(results <- clustord.fit(Y~ROWCLUST+COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST+COLCLUST,
                                          model="Binary",
                                          pi.init=pi.init, kappa.init=kappa.init,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,
                                          EM.control=list(EMcycles=3,startEMcycles=2),
                                          nstarts=1),NA)
 
-    expect_error(results <- clustord.fit(Y~ROWCLUST*COLCLUST,
+    expect_error(results <- clustord(Y~ROWCLUST*COLCLUST,
                                          model="Binary",
                                          pi.init=pi.init, kappa.init=kappa.init,
                                          nclus.row=2, nclus.column=2, long.df=long.df.sim,

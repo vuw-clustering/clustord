@@ -10,9 +10,9 @@ calc.SE.rowcluster(long.df, clust.out, optim.control = default.optim.control())
 calc.SE.bicluster(long.df, clust.out, optim.control = default.optim.control())
 }
 \arguments{
-\item{long.df}{The data frame, in long format, as passed to \code{clustord.fit}.}
+\item{long.df}{The data frame, in long format, as passed to \code{clustord}.}
 
-\item{clust.out}{A \code{clustord.fit} object.}
+\item{clust.out}{A \code{clustord} object.}
 
 \item{optim.control}{control list for the \code{optim} call within the M step
 of the EM algorithm. See the control list Details in the \code{optim}
@@ -22,7 +22,7 @@ manual for more info.}
 The standard errors corresponding to the elements of \code{clust.out$outvect}.
 }
 \description{
-Calculate SE of parameters fitted using \code{\link{clustord.fit}}.
+Calculate SE of parameters fitted using \code{\link{clustord}}.
 }
 \details{
 Use \code{calc.SE.rowcluster} to calculate SE for row clustering and column
@@ -30,7 +30,7 @@ clustering, or \code{calc.SE.bicluster} to calculate SE for biclustering.
 
 Calculates SE by running \code{optimHess} (see \code{\link[stats]{optim}}) on
 the incomplete-data log-likelihood to find the hessian at the fitted parameter
-values from \code{\link{clustord.fit}}.
+values from \code{\link{clustord}}.
 Then the square roots of the diagonal elements of the negative inverse of the
 hessian are the standard errors of the parameters
 i.e. \code{SE <- sqrt(diag(solve(-optim.hess))}.
@@ -43,7 +43,7 @@ calculated for the first RG-1 parameters, the independent ones. This applies
 similarly to individual column effect coefficients, etc.
 
 The function requires an input which is the output of
-\code{\link{clustord.fit}}, which includes the component \code{outvect}, the
+\code{\link{clustord}}, which includes the component \code{outvect}, the
 final vector of independent parameter values from the EM algorithm, which
 will correspond to a subset of the parameter values in \code{parlist.out}.
 }
