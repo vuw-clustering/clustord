@@ -14,7 +14,7 @@ categorical data."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/aja
     
     <a class="navbar-brand me-2" href="../index.html">clustord</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,18 +49,18 @@ categorical data.</p>
 
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The clustord package provides five functions: <code><a href="clustord.fit.html">clustord.fit()</a></code>,
+    <p>The clustord package provides five functions: <code><a href="clustord.html">clustord()</a></code>,
 <code><a href="mat2df.html">mat2df()</a></code>, <code><a href="calc.SE.bicluster.html">calc.SE.rowcluster()</a></code>, <code><a href="calc.SE.bicluster.html">calc.SE.bicluster()</a></code>, and
 <code><a href="calc.cluster.comparisons.html">calc.cluster.comparisons()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="clustering-function">Clustering function<a class="anchor" aria-label="anchor" href="#clustering-function"></a></h2>
-    <p>The main function is <code>clustord.fit</code>, which
+    <p>The main function is <code>clustord</code>, which
   fits a clustering model to the data. The model is fitted using
   likelihood-based clustering via the EM algorithm. The package assumes that
   you started with a data matrix of responses, though you will need to
   convert that data matrix into a long-form data frame before running
-  <code>clustord.fit</code>. Every element in the original data matrix becomes one
+  <code>clustord</code>. Every element in the original data matrix becomes one
   row in the data frame, and the row and column indices from the data matrix
   become the columns ROW and COL in the data frame. You can perform
   clustering on rows or columns of the data matrix, or biclustering on both
@@ -75,7 +75,7 @@ categorical data.</p>
 
 <p><code><a href="mat2df.html">mat2df()</a></code> is a utility function provided to convert a data matrix of
 responses into the long-form data frame format required by
-<code><a href="clustord.fit.html">clustord.fit()</a></code>, and can also attach any covariates to that long-form
+<code><a href="clustord.html">clustord()</a></code>, and can also attach any covariates to that long-form
 data frame if needed.</p>
     </div>
     <div class="section level2">
@@ -83,8 +83,8 @@ data frame if needed.</p>
     
 
 <p><code><a href="calc.SE.bicluster.html">calc.SE.rowcluster()</a></code> and <code><a href="calc.SE.bicluster.html">calc.SE.bicluster()</a></code> are functions to
-run after running <code><a href="clustord.fit.html">clustord.fit()</a></code>, to calculate the standard errors on
-the parameters fitted using <code><a href="clustord.fit.html">clustord.fit()</a></code>.</p>
+run after running <code><a href="clustord.html">clustord()</a></code>, to calculate the standard errors on
+the parameters fitted using <code><a href="clustord.html">clustord()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="clustering-comparisons">Clustering comparisons<a class="anchor" aria-label="anchor" href="#clustering-comparisons"></a></h2>
@@ -94,6 +94,18 @@ the parameters fitted using <code><a href="clustord.fit.html">clustord.fit()</a>
 memberships of the rows or columns of the data matrix from two different
 clustering fits, in a way that avoids the label-switching problem.</p>
     </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p>Useful links:</p><ul><li><p><a href="https://vuw-clustering.github.io/clustord/">https://vuw-clustering.github.io/clustord/</a></p></li>
+</ul></div>
+    </div>
+    <div class="section level2">
+    <h2 id="author">Author<a class="anchor" aria-label="anchor" href="#author"></a></h2>
+    <p><strong>Maintainer</strong>: Louise McMillan <a href="mailto:louise.mcmillan@vuw.ac.nz">louise.mcmillan@vuw.ac.nz</a> (<a href="https://orcid.org/0000-0002-0536-8563" class="external-link">ORCID</a>) [copyright holder]</p>
+<p>Authors:</p><ul><li><p>Daniel Fernández Martínez <a href="mailto:daniel.fernandez.martinez@upc.edu">daniel.fernandez.martinez@upc.edu</a> (<a href="https://orcid.org/0000-0003-0012-2094" class="external-link">ORCID</a>)</p></li>
+<li><p>Ying Cui <a href="mailto:ying.cui@sms.vuw.ac.nz">ying.cui@sms.vuw.ac.nz</a></p></li>
+<li><p>Eleni Matechou <a href="mailto:e.matechou@kent.ac.uk">e.matechou@kent.ac.uk</a> (<a href="https://orcid.org/0000-0003-3626-844X" class="external-link">ORCID</a>)</p></li>
+</ul></div>
 
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
