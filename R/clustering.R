@@ -267,7 +267,7 @@
 #' between x1 and x2.
 #'
 #' The coefficients for row clusters interacting with row coefficients are named
-#' \code{row.cluster.row.coef} in the output of \code{clustord} because you
+#' \code{row_cluster_row_coef} in the output of \code{clustord} because you
 #' can also have coefficients for interactions between row clustering and column
 #' covariates, or column clustering and row covariates, or column clustering and
 #' column covariates. Row clustering interacting with column covariates would
