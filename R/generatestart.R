@@ -33,11 +33,12 @@ generate.u.init <- function(q) {
 }
 
 #' @importFrom stats coef runif
-generate.mu.init <- function(long.df, model, use_random=FALSE) {
+generate.mu.init <- function(long.df, model, use_random=FALSE,
+                             verbose=TRUE) {
     if (!use_random) {
         switch(model,
                "OSM"={
-                   BL.ss.out <- nnet::multinom(Y~1, data=long.df)
+                   BL.ss.out <- nnet::multinom(Y~1, data=long.df, trace=verbose)
                    BL.coef <- coef(BL.ss.out)
                    mu.init <- BL.coef
                },
@@ -59,8 +60,10 @@ generate.mu.init <- function(long.df, model, use_random=FALSE) {
 }
 
 #' @importFrom stats coef runif
-generate.mu.col_coef.init <- function(long.df, model, constraint_sum_zero=TRUE,
-                                      use_random=FALSE) {
+generate.mu.col_coef.init <- function(long.df, model,
+                                      constraint_sum_zero=TRUE,
+                                      use_random=FALSE,
+                                      verbose=TRUE) {
 
     p <- max(long.df$COL)
     if (!use_random) {
@@ -73,7 +76,7 @@ generate.mu.col_coef.init <- function(long.df, model, constraint_sum_zero=TRUE,
                        MaxNWts <- nwts
 
                        tryCatch({
-                           BL.sp.out <- nnet::multinom(Y~as.factor(COL), data=long.df, MaxNWts=MaxNWts)
+                           BL.sp.out <- nnet::multinom(Y~as.factor(COL), data=long.df, MaxNWts=MaxNWts, trace=verbose)
                            BL.coef <- coef(BL.sp.out)
                            mu.init <- BL.coef[,1]
 
@@ -216,7 +219,8 @@ generate.initvect <- function(long.df, model, model_structure,
                               use_random=FALSE,
                               EM.control=default.EM.control(),
                               optim.method="L-BFGS-B",
-                              optim.control=default.optim.control()) {
+                              optim.control=default.optim.control(),
+                              verbose=TRUE) {
 
     pi.init <- NULL; kappa.init <- NULL
 
@@ -228,11 +232,13 @@ generate.initvect <- function(long.df, model, model_structure,
 
     if (param_lengths['col'] == 0) {
         mu.init <- generate.mu.init(long.df=long.df, model=model,
-                                    use_random=use_random)
+                                    use_random=use_random,
+                                    verbose=verbose)
     } else {
         mu.col_coef.init <- generate.mu.col_coef.init(long.df=long.df, model=model,
                                                       constraint_sum_zero = constraint_sum_zero,
-                                                      use_random=use_random)
+                                                      use_random=use_random,
+                                                      verbose=verbose)
         mu.init <- mu.col_coef.init$mu.init
         col_coef.init <- mu.col_coef.init$col_coef.init
     }
@@ -274,7 +280,8 @@ generate.initvect <- function(long.df, model, model_structure,
     if (param_lengths['row'] > 0) {
         mu.row_coef.init <- generate.mu.col_coef.init(long.df=long.df.transp, model=model,
                                                       constraint_sum_zero = constraint_sum_zero,
-                                                      use_random=use_random)
+                                                      use_random=use_random,
+                                                      verbose=verbose)
         row_coef.init <- mu.row_coef.init$col_coef.init
         initvect <- c(initvect,row_coef.init)
     }
@@ -338,7 +345,8 @@ generate.initvect <- function(long.df, model, model_structure,
                                     model_label="Row-cluster-only",
                                     EM.control=startEM.control(EM.control),
                                     optim.method=optim.method,
-                                    optim.control=optim.control)
+                                    optim.control=optim.control,
+                                    verbose=verbose)
         cat("=== End of initial row-cluster-only model fitting ===\n")
         if (all(rs.out$pi.out > 1E-20)) pi.init <- rs.out$pi.out
 
@@ -377,7 +385,8 @@ generate.initvect <- function(long.df, model, model_structure,
                                             model_label="Rowcluster-column",
                                             EM.control=startEM.control(EM.control),
                                             optim.method=optim.method,
-                                            optim.control=optim.control)
+                                            optim.control=optim.control,
+                                            verbose=verbose)
                 cat("=== End of intermediate rowcluster-column model fitting ===\n")
                 if (all(rp.out$pi.out > 1E-20))
                     pi.init <- rp.out$pi.out
@@ -408,7 +417,8 @@ generate.initvect <- function(long.df, model, model_structure,
                                         model_label="Column-cluster-only",
                                         EM.control=startEM.control(EM.control),
                                         optim.method=optim.method,
-                                        optim.control=optim.control)
+                                        optim.control=optim.control,
+                                        verbose=verbose)
 
             cat("=== End of initial column-cluster-only model fitting ===\n")
             if (all(sc.out$pi.out > 1E-20)) {
@@ -460,7 +470,7 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
                                       optim.control=default.optim.control(),
                                       constraint_sum_zero=TRUE,
                                       start_from_simple_model=TRUE,
-                                      nstarts=5) {
+                                      nstarts=5, verbose=TRUE) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
 
@@ -477,7 +487,8 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
                                                   RG=RG, constraint_sum_zero=constraint_sum_zero,
                                                   start_from_simple_model=start_from_simple_model,
                                                   use_random=(s>1),
-                                                  EM.control=startEM.control(EM.control))
+                                                  EM.control=startEM.control(EM.control),
+                                                  verbose=verbose)
 
             # print(initvect.pi.init$initvect)
 
@@ -492,7 +503,8 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
                                           model_label="Random starts",
                                           EM.control=startEM.control(EM.control),
                                           optim.method=optim.method,
-                                          optim.control=optim.control)
+                                          optim.control=optim.control,
+                                          verbose=verbose)
 
             new.lli <- init.out$EM.status$best.lli
             if (new.lli > best.lli) {
@@ -520,7 +532,8 @@ generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
                                      EM.control=default.EM.control(),
                                      optim.method="L-BFGS-B", optim.control=default.optim.control(),
                                      constraint_sum_zero=TRUE,
-                                     start_from_simple_model=TRUE, nstarts=5) {
+                                     start_from_simple_model=TRUE, nstarts=5,
+                                     verbose=TRUE) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
 
@@ -538,7 +551,8 @@ generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
                                                         constraint_sum_zero=constraint_sum_zero,
                                                         start_from_simple_model=start_from_simple_model,
                                                         use_random=(s>1),
-                                                        EM.control=startEM.control(EM.control))
+                                                        EM.control=startEM.control(EM.control),
+                                                        verbose=verbose)
 
             # print(initvect.pi.kappa.init$initvect)
 
@@ -554,7 +568,8 @@ generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
                                          model_label="Random starts",
                                          EM.control=startEM.control(EM.control),
                                          optim.method=optim.method,
-                                         optim.control=optim.control)
+                                         optim.control=optim.control,
+                                         verbose=verbose)
 
             new.lli <- init.out$EM.status$best.lli
             if (new.lli > best.lli) {

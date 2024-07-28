@@ -84,7 +84,8 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                               pi_v, param_lengths,
                               constraint_sum_zero=TRUE,
                               model_label="Full", EM.control=default.EM.control(),
-                              optim.method="L-BFGS-B", optim.control=default.optim.control()) {
+                              optim.method="L-BFGS-B", optim.control=default.optim.control(),
+                              verbose=TRUE) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
     q <- length(levels(long.df$Y))
@@ -196,9 +197,9 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
         ## Report the current incomplete-data log-likelihood, which is the
         ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
         ## of the output of optim
-        # cat(paste(model_label,'model iter=',EM.status$iter, ' partial complete-data log.like=', -optim.fit$value ,'\n'))
-        # cat(paste(model_label,'model iter=',EM.status$iter, ' complete-data log.like=', llc ,'\n'))
-        cat(paste(model_label,'model iter=',EM.status$iter, ' incomplete-data log.like=', lli ,'\n'))
+        # cat(paste(model_label,'model iter=',EM.status$iter, ' partial complete-data log-like=', -optim.fit$value ,'\n'))
+        # cat(paste(model_label,'model iter=',EM.status$iter, ' complete-data log-like=', llc ,'\n'))
+        if (verbose | (!verbose & EM.status$iter %% 10 == 0)) cat(paste(model_label,'model iter=',EM.status$iter, ' incomplete-data log-like=', lli ,'\n'))
         # cat("parlist.out\n")
         # print(parlist.out)
         # cat("pi",pi_v,"\n")
@@ -240,7 +241,8 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                              pi_v, kappa_v, param_lengths,
                              constraint_sum_zero=TRUE,
                              model_label="Full", EM.control=default.EM.control(),
-                             optim.method="L-BFGS-B", optim.control=default.optim.control()) {
+                             optim.method="L-BFGS-B", optim.control=default.optim.control(),
+                             verbose=TRUE) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
     q <- length(levels(long.df$Y))
@@ -371,9 +373,10 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
         ## Report the current incomplete-data log-likelihood, which is the
         ## NEGATIVE of the latest value of Bicluster.ll i.e. the NEGATIVE
         ## of the output of optim
-        cat(paste(model_label,'model iter=',EM.status$iter, ' partial complete-data log.like=', -optim.fit$value ,'\n'))
-        cat(paste(model_label,'model iter=',EM.status$iter, ' complete-data log.like=', llc ,'\n'))
-        cat(paste(model_label,'model iter=',EM.status$iter, ' APPROXIMATE incomplete-data log.like=', lli ,'\n'))
+        if (verbose | (!verbose & EM.status$iter %% 10 == 0))
+        cat(paste(model_label,'model iter=',EM.status$iter, ' partial complete-data log-like=', -optim.fit$value ,'\n'))
+        cat(paste(model_label,'model iter=',EM.status$iter, ' complete-data log-like=', llc ,'\n'))
+        cat(paste(model_label,'model iter=',EM.status$iter, ' APPROXIMATE incomplete-data log-like=', lli ,'\n'))
         # cat("parlist.out\n")
         # print(parlist.out)
         # cat("pi",pi_v,"\n")

@@ -19,7 +19,8 @@ clustord(
   optim.control = default.optim.control(),
   constraint_sum_zero = TRUE,
   start_from_simple_model = TRUE,
-  nstarts = 5
+  nstarts = 5,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -165,6 +166,20 @@ starting values for the covariates).}
 
 \item{nstarts}{(default 5) number of random starts to generate, if generating
 random starting points for the EM algorithm.}
+
+\item{verbose}{(default \code{FALSE}) changes how much is reported to the console
+during the algorithm's progress. If \code{TRUE}, maximal reporting, which
+includes reporting the incomplete-data log-likelihood at every EM algorithm
+iteration and including the trace information from nnet::multinom() during
+the process of fitting initial values for the \code{mu} parameters.
+If \code{FALSE}, the incomplete log-likelihood is only reported every 10
+iterations of the EM algorithm and the initial fitting reporting is
+suppressed.
+Regardless of the verbosity setting the algorithm reports each of the
+random starts and whenever it finds a better log-likelihood than all
+previous starts, and it also reports when it is fitting simpler models
+to find starting values for the parameters vs fitting the final, more
+complex model.}
 }
 \value{
 A list with components:

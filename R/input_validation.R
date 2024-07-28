@@ -8,7 +8,8 @@ validate.inputs <- function(formula, model,
                             optim.method="L-BFGS-B",
                             constraint_sum_zero=TRUE,
                             start_from_simple_model=TRUE,
-                            nstarts=5) {
+                            nstarts=5,
+                            verbose=TRUE) {
 
     ## Note the double-& and double-| which stops the later parts being checked
     ## if the earlier parts are false
@@ -113,6 +114,8 @@ validate.inputs <- function(formula, model,
 
     if (is.null(optim.method) || !is.character(optim.method) || !is.vector(optim.method) ||
         length(optim.method) != 1 || !(optim.method %in% c("Nelder-Mead","BFGS","CG","L-BFGS-B"))) stop("If supplied, optim.method must be one of the valid methods for optim, 'Nelder-Mead', 'CG', 'BFGS' or 'L-BFGS-B'.")
+
+    if (!(verbose %in% c(TRUE,FALSE))) stop("verbose must be TRUE or FALSE.")
 }
 
 check.factors <- function(long.df) {

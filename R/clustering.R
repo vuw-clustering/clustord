@@ -832,6 +832,19 @@
 #'     starting values for the covariates).
 #' @param nstarts (default 5) number of random starts to generate, if generating
 #'     random starting points for the EM algorithm.
+#' @param verbose (default \code{FALSE}) changes how much is reported to the console
+#'     during the algorithm's progress. If \code{TRUE}, maximal reporting, which
+#'     includes reporting the incomplete-data log-likelihood at every EM algorithm
+#'     iteration and including the trace information from nnet::multinom() during
+#'     the process of fitting initial values for the \code{mu} parameters.
+#'     If \code{FALSE}, the incomplete log-likelihood is only reported every 10
+#'     iterations of the EM algorithm and the initial fitting reporting is
+#'     suppressed.
+#'     Regardless of the verbosity setting the algorithm reports each of the
+#'     random starts and whenever it finds a better log-likelihood than all
+#'     previous starts, and it also reports when it is fitting simpler models
+#'     to find starting values for the parameters vs fitting the final, more
+#'     complex model.
 #' @return
 #' A list with components:
 #'
@@ -957,19 +970,20 @@
 #' }
 #' @export
 clustord <- function(formula,
-                         model,
-                         nclus.row=NULL,
-                         nclus.column=NULL,
-                         long.df,
-                         initvect=NULL,
-                         pi.init=NULL,
-                         kappa.init=NULL,
-                         EM.control=default.EM.control(),
-                         optim.method="L-BFGS-B",
-                         optim.control=default.optim.control(),
-                         constraint_sum_zero=TRUE,
-                         start_from_simple_model=TRUE,
-                         nstarts=5){
+                     model,
+                     nclus.row=NULL,
+                     nclus.column=NULL,
+                     long.df,
+                     initvect=NULL,
+                     pi.init=NULL,
+                     kappa.init=NULL,
+                     EM.control=default.EM.control(),
+                     optim.method="L-BFGS-B",
+                     optim.control=default.optim.control(),
+                     constraint_sum_zero=TRUE,
+                     start_from_simple_model=TRUE,
+                     nstarts=5,
+                     verbose=FALSE){
 
     validate.inputs(formula=formula, model=model,
                     nclus.row=nclus.row, nclus.column=nclus.column,
@@ -978,7 +992,7 @@ clustord <- function(formula,
                     EM.control=EM.control, optim.method=optim.method,
                     constraint_sum_zero=constraint_sum_zero,
                     start_from_simple_model=start_from_simple_model,
-                    nstarts=nstarts)
+                    nstarts=nstarts, verbose=verbose)
 
     ## If ROW and COL are factors, convert them to their numeric values before
     ## running clustering
@@ -1011,19 +1025,21 @@ clustord <- function(formula,
                                                   optim.control=optim.control,
                                                   constraint_sum_zero=constraint_sum_zero,
                                                   start_from_simple_model=start_from_simple_model,
-                                                  nstarts=nstarts)
+                                                  nstarts=nstarts,
+                                                  verbose=verbose)
             initvect <- start.par$initvect
             pi.init <- start.par$pi.init
             kappa.init <- start.par$kappa.init
         }
-        run.EM.bicluster(invect=initvect, model=model, long.df=long.df,
-                         rowc_mm=model_structure$rowc_mm, colc_mm=model_structure$colc_mm,
-                         cov_mm=model_structure$cov_mm,
-                         pi_v=pi.init, kappa_v=kappa.init,
-                         param_lengths=model_structure$param_lengths,
-                         constraint_sum_zero=constraint_sum_zero,
-                         EM.control=EM.control,
-                         optim.method=optim.method, optim.control=optim.control)
+        results <- run.EM.bicluster(invect=initvect, model=model, long.df=long.df,
+                                    rowc_mm=model_structure$rowc_mm, colc_mm=model_structure$colc_mm,
+                                    cov_mm=model_structure$cov_mm,
+                                    pi_v=pi.init, kappa_v=kappa.init,
+                                    param_lengths=model_structure$param_lengths,
+                                    constraint_sum_zero=constraint_sum_zero,
+                                    EM.control=EM.control,
+                                    optim.method=optim.method, optim.control=optim.control,
+                                    verbose=verbose)
     } else if (!is.null(RG)) {
         if (is.null(initvect) | is.null(pi.init)) {
             ## generate.start will keep using whichever of initvect and pi.init is not null
@@ -1035,17 +1051,19 @@ clustord <- function(formula,
                                                    optim.control=optim.control,
                                                    constraint_sum_zero=constraint_sum_zero,
                                                    start_from_simple_model=start_from_simple_model,
-                                                   nstarts=nstarts)
+                                                   nstarts=nstarts,
+                                                   verbose=verbose)
             initvect <- start.par$initvect
             pi.init <- start.par$pi.init
         }
-        run.EM.rowcluster(invect=initvect, model=model, long.df=long.df,
-                          rowc_mm=model_structure$rowc_mm, colc_mm=model_structure$colc_mm,
-                          cov_mm=model_structure$cov_mm,
-                          pi_v=pi.init, param_lengths=model_structure$param_lengths,
-                          constraint_sum_zero=constraint_sum_zero,
-                          EM.control=EM.control,
-                          optim.method=optim.method, optim.control=optim.control)
+        results <- run.EM.rowcluster(invect=initvect, model=model, long.df=long.df,
+                                     rowc_mm=model_structure$rowc_mm, colc_mm=model_structure$colc_mm,
+                                     cov_mm=model_structure$cov_mm,
+                                     pi_v=pi.init, param_lengths=model_structure$param_lengths,
+                                     constraint_sum_zero=constraint_sum_zero,
+                                     EM.control=EM.control,
+                                     optim.method=optim.method, optim.control=optim.control,
+                                     verbose=verbose)
     } else if (!is.null(CG)) {
         RG <- nclus.column
         pi.init <- kappa.init
@@ -1066,7 +1084,8 @@ clustord <- function(formula,
                                                    optim.control=optim.control,
                                                    constraint_sum_zero=constraint_sum_zero,
                                                    start_from_simple_model=start_from_simple_model,
-                                                   nstarts=nstarts)
+                                                   nstarts=nstarts,
+                                                   verbose=verbose)
             initvect <- start.par$initvect
             pi.init <- start.par$pi.init
         }
@@ -1080,7 +1099,8 @@ clustord <- function(formula,
                                      param_lengths=model_structure.transp$param_lengths,
                                      constraint_sum_zero=constraint_sum_zero,
                                      EM.control=EM.control,
-                                     optim.method=optim.method, optim.control=optim.control)
+                                     optim.method=optim.method, optim.control=optim.control,
+                                     verbose=verbose)
 
         ## Now convert the results back to row clustering ----
         column.info <- results$info
@@ -1114,10 +1134,14 @@ clustord <- function(formula,
                                rowc_format_parlist.init=results$parlist.init,
                                rowc_format_rowc_mm=model_structure.transp$rowc_mm)
 
-        column.results
+        results <- column.results
     } else {
         stop("Both nclus.row and nclus.col are NULL. Please set one or both to integers and try again.")
     }
+
+    class(results) <- "clustord"
+
+    return(results)
 }
 
 #' @importFrom stats terms formula
