@@ -163,6 +163,13 @@ mat2df <- function(mat, xr.df = NULL, xc.df = NULL) {
         my.df <- cbind(my.df,xc.df2)
     rownames(my.df) <- as.character(1:nrow(my.df))
 
+    ## Delete any NA response rows
+    na.y <- which(is.na(my.df$Y))
+    if (length(na.y) > 0) {
+        warning(paste("Removing",length(na.y),"entries for which Y is NA."))
+        my.df <- my.df[-na.y,]
+    }
+
     ## Return data frame:
     return(my.df)
 }
