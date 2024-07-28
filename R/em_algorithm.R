@@ -15,6 +15,7 @@ new.EM.status <- function() {
          params.every.iteration=vector())
 }
 
+#' @keywords internal
 update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
                              parlist.out, n, p, pi_v=NULL, kappa_v=NULL, EM.control) {
     iter <- EM.status$iter+1

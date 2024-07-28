@@ -3,7 +3,6 @@
 \docType{package}
 \name{clustord-package}
 \alias{clustord-package}
-\alias{_PACKAGE}
 \title{clustord: Clustering Using Proportional Odds Model, Ordered Stereotype Model or Binary Model.}
 \description{
 Biclustering, row clustering and column clustering using the proportional
