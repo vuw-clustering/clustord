@@ -389,8 +389,7 @@ generate.initvect <- function(long.df, model, model_structure,
 
             ## Now fit simpler column clustering model to find starting values
             ## for column clustering
-            cat("Fitting SC model as RS model applied to y with ROW
-                and COL switched, to find starting values for colc_coef and kappa_v\n")
+            cat("Fitting column-cluster-only model (as row-cluster-only model applied to y with ROW and COL switched), to find starting values for colc_coef and kappa_v\n")
             sc.invect <- c(model_specific.init, colc_coef.init)
 
             temp_param_lengths <- param_lengths
@@ -440,8 +439,9 @@ generate.initvect <- function(long.df, model, model_structure,
                                            constraint_sum_zero=constraint_sum_zero,
                                            EM.control=startEM.control(EM.control),
                                            optim.method=optim.method,
-                                           optim.control=optim.control)
-                cat("=== End of RC model fitting ===\n")
+                                           optim.control=optim.control,
+                                           verbose=verbose)
+                cat("=== End of column-cluster-only model fitting ===\n")
 
                 pi.init <- rc.out$pi.out
                 kappa.init <- rc.out$kappa.out
@@ -496,7 +496,7 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
 
             new.lli <- init.out$EM.status$best.lli
             if (new.lli > best.lli) {
-                cat(paste("Found better incomplete LL:",new.lli,"\n"))
+                cat(paste("Found better incomplete log-like:",new.lli,"\n"))
                 best.lli <- new.lli
                 best.initvect.pi.init <- list(initvect=init.out$outvect,pi.init=init.out$pi.out)
                 initvect <- init.out$outvect
