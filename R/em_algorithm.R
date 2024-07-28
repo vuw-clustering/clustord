@@ -205,7 +205,8 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
     }
 
     # Find cluster groupings:
-    Rclus <- assignments(ppr_m)
+    Rclusmem <- assignments(ppr_m)
+    Rclusters <- apply(ppr_m, 1, which.max)
 
     # Save results:
     initvect <- name_invect(initvect, model, param_lengths, n, p, q, RG, constraint_sum_zero=constraint_sum_zero)
@@ -231,7 +232,8 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
          "ppr"=ppr_m,
          "rowc_mm"=rowc_mm,
          "cov_mm"=cov_mm,
-         "RowClusters"=Rclus)
+         "RowClusterMembers"=Rclusmem,
+         "RowClusters"=Rclusters)
 }
 
 run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
@@ -379,8 +381,10 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
     }
 
     # Find cluster groupings:
-    Rclus <- assignments(ppr_m)
-    Cclus <- assignments(ppc_m)
+    Rclusmem <- assignments(ppr_m)
+    Rclusters <- apply(ppr_m, 1, which.max)
+    Cclusmem <- assignments(ppc_m)
+    Cclusters <- apply(ppc_m, 1, which.max)
 
     # Save results:
     initvect <- name_invect(initvect, model, param_lengths, n, p, q, RG, CG, constraint_sum_zero=constraint_sum_zero)
@@ -410,8 +414,10 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
          "rowc_mm"=rowc_mm,
          "colc_mm"=colc_mm,
          "cov_mm"=cov_mm,
-         "RowClusters"=Rclus,
-         "ColumnClusters"=Cclus)
+         "RowClusterMembers"=Rclusmem,
+         "RowClusters"=Rclusters,
+         "ColumnClusterMembers"=Cclusmem,
+         "ColumnClusters"=Cclusters)
 }
 
 #' @describeIn calc.SE.bicluster SE for rowclustering

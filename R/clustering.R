@@ -907,6 +907,11 @@
 #'     based on maximum posterior probability of cluster membership (\code{ppr}
 #'     and \code{ppc}).
 #'
+#'     \code{RowClusterMembers}, \code{ColumnClusterMembers}: vectors of
+#'     assigned members of each row or column cluster, where each row/column is
+#'     assigned to a cluster based on maximum posterior probability of cluster
+#'     membership (\code{ppr} and \code{ppc})
+#'
 #' @references
 #' Fernandez, D., Arnold, R., & Pledger, S. (2016). Mixture-based clustering for the ordered stereotype model. *Computational Statistics & Data Analysis*, 93, 46-75.
 #' Anderson, J. A. (1984). Regression and ordered categorical variables. *Journal of the Royal Statistical Society: Series B (Methodological)*, 46(1), 1-22.
@@ -1103,6 +1108,7 @@ clustord <- function(formula,
                                colc_mm=model_structure$colc_mm,
                                cov_mm=model_structure$cov_mm,
                                ColumnClusters=results$RowClusters,
+                               ColumnClusterMembers=results$RowClusterMembers,
                                rowc_format_param_lengths=results$param_lengths,
                                rowc_format_outvect=results$outvect,
                                rowc_format_parlist.init=results$parlist.init,
