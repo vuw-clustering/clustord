@@ -240,6 +240,11 @@ A list with components:
     clusters, where relevant, where each row/column is assigned to a cluster
     based on maximum posterior probability of cluster membership (\code{ppr}
     and \code{ppc}).
+
+    \code{RowClusterMembers}, \code{ColumnClusterMembers}: vectors of
+    assigned members of each row or column cluster, where each row/column is
+    assigned to a cluster based on maximum posterior probability of cluster
+    membership (\code{ppr} and \code{ppc})
 }
 \description{
 Likelihood-based clustering with parameters fitted using the EM algorithm.
@@ -509,7 +514,7 @@ would include the individual x1 and x2 effects as well as the interaction
 between x1 and x2.
 
 The coefficients for row clusters interacting with row coefficients are named
-\code{row.cluster.row.coef} in the output of \code{clustord} because you
+\code{row_cluster_row_coef} in the output of \code{clustord} because you
 can also have coefficients for interactions between row clustering and column
 covariates, or column clustering and row covariates, or column clustering and
 column covariates. Row clustering interacting with column covariates would
