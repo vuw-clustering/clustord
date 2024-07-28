@@ -508,7 +508,7 @@ as interactions between covariates. The formula
 
 where \code{xr} is some row covariate, corresponds to the Binary model
 
-Logit(P(Y = 1)) = mu + rowc_coef_r + rowc_row_coef_r1*xr_i
+Logit(P(Y = 1)) = mu + rowc_coef_r + cov_coef*xr_i + rowc_row_coef_r1*xr_i
 
 What this means is that there is a term in the linear predictor that involves
 the row covariate xr (which has the index i because it is a row covariate),
@@ -519,9 +519,9 @@ cluster the row is in).
 
 This is different from interaction terms involving only covariates, where two
 or more covariates appear multiplied together in the model and then have a
-shared coefficient term. In a clustering/covariate interaction, the row or
-column clustering pattern controls the coefficients rather than adding a
-different type of covariate.
+shared coefficient term attached to them. In a clustering/covariate
+interaction, the row or column clustering pattern controls the coefficients
+rather than adding a different type of covariate.
 
 Note that the pure cluster effect rowc_coef_r is also included in the model
 automatically, in the same way that a regression formula \code{Y ~ x1*x2}
