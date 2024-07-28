@@ -1,6 +1,6 @@
 # clustord
 
-Please install clustord from GitHub using `devtools::install_github("vuw-clustering/clustord")`
+Please install clustord from GitHub using `remotes::install_github("vuw-clustering/clustord")`
 
 # Update
 
