@@ -122,7 +122,7 @@ check.factors <- function(long.df) {
         long.df$ROW <- as.numeric(long.df$ROW)
     }
     if (is.factor(long.df$COL)) {
-        print("Converting factor COL to numeric")
+        print("Converting factor COL to numeric.")
         attributes(long.df)$COLlevels <- levels(long.df$COL)
         long.df$COL <- as.numeric(long.df$COL)
     }
