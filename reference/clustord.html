@@ -17,7 +17,7 @@ Proportional Odds Model (POM) and a dedicated Binary Model for binary data."></h
 
     <a class="navbar-brand me-2" href="../index.html">clustord</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -844,6 +844,7 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -110.298338942843 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -109.501997036794 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $info</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         n         p         q      npar ninitvect         R </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        20         5         3         7         5         3 </span>
@@ -936,29 +937,29 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                  mu        mu </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      mu_1      mu_2      mu_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.6887195 0.4789973 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$phi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 phi           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     phi_1     phi_2     phi_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.9999998 1.0000000 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$rowc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_r     rowc_r            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_1     rowc_2     rowc_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1.1820221 -0.8433398 -0.3386823 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                  mu        mu </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      mu_1      mu_2      mu_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.6567039 0.4469799 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$phi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 phi           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     phi_1     phi_2     phi_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.9999998 1.0000000 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$rowc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_r     rowc_r            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_1     rowc_2     rowc_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  1.1075408 -0.7844101 -0.3231307 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -1029,6 +1030,7 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of simpler model as initial values for full model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> === End of initial row-cluster-only model fitting ===</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -108.25736731008 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $info</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         n         p         q      npar ninitvect         R </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        20         5         3        11         9         3 </span>
@@ -1129,15 +1131,15 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                  mu        mu </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      mu_1      mu_2      mu_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.4123909 0.2026688 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$phi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 phi           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     phi_1     phi_2     phi_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.9999983 1.0000000 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$rowc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_r     rowc_r            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_1     rowc_2     rowc_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -0.6030957  1.2064014 -0.6033056 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$col</span>
@@ -1147,15 +1149,15 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                  mu        mu </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      mu_1      mu_2      mu_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.3940837 0.1842594 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$phi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 phi           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     phi_1     phi_2     phi_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.9999983 1.0000000 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$rowc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_r     rowc_r            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_1     rowc_2     rowc_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -0.5216699  1.0437275 -0.5220576 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$col</span>
@@ -1234,6 +1236,7 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of intermediate model as initial values for full model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> === End of intermediate rowcluster-column model fitting ===</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -108.732812616331 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $info</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         n         p         q      npar ninitvect         R </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        20         5         3        12        11         2 </span>
@@ -1334,10 +1337,11 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.4990937  1.0755335</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       mu_1       mu_2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -0.4990937  1.0755335 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$rowc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_r            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_1     rowc_2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.2227963 -0.2227963 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$col</span>
@@ -1352,10 +1356,11 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.5159337  1.0587176</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       mu_1       mu_2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -0.5159337  1.0587176 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$rowc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_r            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_1     rowc_2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.2059108 -0.2059108 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$col</span>
@@ -1428,6 +1433,7 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -109.521309322145 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -109.492584417224 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $info</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         n         p         q      npar ninitvect         C </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        20         5         3         7         5         3 </span>
@@ -1470,7 +1476,7 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.998320652 0.001679348 0.000001000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$colc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    rowc_r    rowc_r           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    colc_1    colc_2    colc_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -3.469915 -3.328326  6.798241 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -1516,17 +1522,20 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                mu       mu </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     mu_1     mu_2     mu_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.000000 0.115383 3.374359 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$phi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                       phi              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        phi_1        phi_2        phi_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000000 0.0002802715 1.0000000000 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$colc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    rowc_r    rowc_r           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    colc_1    colc_2    colc_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -3.469915 -3.328326  6.798241 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $kappa.init</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.998242077 0.001757923 0.000001000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $kappa.out</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.998320652 0.001679348 0.000001000</span>
@@ -1605,6 +1614,7 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of simpler model as initial values for full model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> === End of initial row-cluster-only model fitting ===</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -104.662039616002 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $info</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         n         p         q      npar ninitvect         C </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        20         5         3        26        24         3 </span>
@@ -1647,7 +1657,7 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7.951458e-01 1.601254e-06 2.048526e-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$colc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_r     rowc_r            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     colc_1     colc_2     colc_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -0.1138908 -0.1164450  0.2303358 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$row</span>
@@ -1709,27 +1719,30 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                    mu         mu </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       mu_1       mu_2       mu_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.0000000  0.1144083 -0.7105377 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$phi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                       phi              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        phi_1        phi_2        phi_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 0.000000e+00 4.186248e-48 1.000000e+00 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$colc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_r     rowc_r            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     colc_1     colc_2     colc_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -0.1138908 -0.1164450  0.2303358 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$row</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       col_j       col_j       col_j       col_j       col_j       col_j </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           1           2           3           4           5           6 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   0.1136910   1.0988834   1.0988785   0.1136951   0.1136945   1.0988806 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       col_j       col_j       col_j       col_j       col_j       col_j </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           7           8           9          10          11          12 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   1.0988830   1.0988778   1.0988824   1.9135008   1.0988835 -12.8267951 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       col_j       col_j       col_j       col_j       col_j       col_j </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          13          14          15          16          17          18 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   0.1136969   1.0988840   0.1136925   0.1136951   0.1136955   0.1136924 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       col_j             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          19          20 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   1.0988775   0.1138107 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $kappa.init</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7.827983e-01 1.570283e-06 2.172002e-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $kappa.out</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7.951458e-01 1.601254e-06 2.048526e-01</span>
