@@ -437,42 +437,42 @@ calc.SE.rowcluster <- function(long.df, clust.out,
     # param_lengths indicates use of row clustering, rowc_format_param_lengths
     # indicates use of column clustering
     if (!("rowc_format_param_lengths" %in% names(clust.out))) {
-    ## Important: do NOT change the order of the three columns in this call,
-    ## because the C++ code relies on having this order for Y, ROW and COL
-    ydf <- cbind(long.df$Y, as.numeric(long.df$ROW), as.numeric(long.df$COL))
+        ## Important: do NOT change the order of the three columns in this call,
+        ## because the C++ code relies on having this order for Y, ROW and COL
+        ydf <- cbind(long.df$Y, as.numeric(long.df$ROW), as.numeric(long.df$COL))
 
-    ## Important: do NOT change the order of these model types or entries in
-    ## param_lengths, because the Rcpp code relies on having this order for the
-    ## model numbers
-    ## Numeric version is used because comparing strings is MUCH SLOWER in C++
-    model_num <- switch(clust.out$model,"OSM"=1,"POM"=2,"Binary"=3)
-    param_lengths_num <- clust.out$param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
-                                         'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
+        ## Important: do NOT change the order of these model types or entries in
+        ## param_lengths, because the Rcpp code relies on having this order for the
+        ## model numbers
+        ## Numeric version is used because comparing strings is MUCH SLOWER in C++
+        model_num <- switch(clust.out$model,"OSM"=1,"POM"=2,"Binary"=3)
+        param_lengths_num <- clust.out$param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
+                                                       'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
 
-    optim.hess <- optimHess(par=clust.out$outvect,
-                            fn=rcpp_Rclusterll,
-                            model_num=model_num,
-                            ydf=ydf,
-                            rowc_mm=clust.out$rowc_mm,
-                            colc_mm=matrix(1),
-                            cov_mm=clust.out$cov_mm,
-                            ppr_m=clust.out$ppr,
-                            pi_v=clust.out$pi.out,
-                            param_lengths=param_lengths_num,
-                            RG=clust.out$info["R"], p=clust.out$info["p"],
-                            n=clust.out$info["n"], q=clust.out$info["q"],
-                            epsilon=clust.out$numerical.correction.epsilon,
-                            constraint_sum_zero=clust.out$constraint_sum_zero,
-                            partial=FALSE,
-                            incomplete=TRUE,
-                            control=optim.control)
+        optim.hess <- optimHess(par=clust.out$outvect,
+                                fn=rcpp_Rclusterll,
+                                model_num=model_num,
+                                ydf=ydf,
+                                rowc_mm=clust.out$rowc_mm,
+                                colc_mm=matrix(1),
+                                cov_mm=clust.out$cov_mm,
+                                ppr_m=clust.out$ppr,
+                                pi_v=clust.out$pi.out,
+                                param_lengths=param_lengths_num,
+                                RG=clust.out$info["R"], p=clust.out$info["p"],
+                                n=clust.out$info["n"], q=clust.out$info["q"],
+                                epsilon=clust.out$numerical.correction.epsilon,
+                                constraint_sum_zero=clust.out$constraint_sum_zero,
+                                partial=FALSE,
+                                incomplete=TRUE,
+                                control=optim.control)
 
-    SE <- sqrt(diag(solve(-optim.hess)))
+        SE <- sqrt(diag(solve(-optim.hess)))
 
-    named_SE <- name_invect(SE, clust.out$model, clust.out$param_lengths,
-                            RG=clust.out$info["R"], p=clust.out$info["p"],
-                            n=clust.out$info["n"], q=clust.out$info["q"],
-                            constraint_sum_zero = clust.out$constraint_sum_zero)
+        named_SE <- name_invect(SE, clust.out$model, clust.out$param_lengths,
+                                RG=clust.out$info["R"], p=clust.out$info["p"],
+                                n=clust.out$info["n"], q=clust.out$info["q"],
+                                constraint_sum_zero = clust.out$constraint_sum_zero)
 
     } else {
         ## Important: do NOT change the order of the three columns in this call,
@@ -486,7 +486,7 @@ calc.SE.rowcluster <- function(long.df, clust.out,
         ## Numeric version is used because comparing strings is MUCH SLOWER in C++
         model_num <- switch(clust.out$model,"OSM"=1,"POM"=2,"Binary"=3)
         param_lengths_num <- clust.out$rowc_format_param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
-                                             'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
+                                                                   'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
 
         optim.hess <- optimHess(par=clust.out$rowc_format_outvect,
                                 fn=rcpp_Rclusterll,
@@ -571,7 +571,7 @@ calc.SE.bicluster <- function(long.df, clust.out,
     ## Model numbers are used because comparing strings is MUCH SLOWER in C++
     model_num <- switch(clust.out$model,"OSM"=1,"POM"=2,"Binary"=3)
     param_lengths_num <- clust.out$param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
-                                         'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
+                                                   'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
 
     optim.hess <- optimHess(par=clust.out$outvect,
                             fn=rcpp_Biclusterll,
