@@ -1124,7 +1124,9 @@ clustord <- function(formula,
                                param_lengths=model_structure$param_lengths,
                                initvect=initvect,
                                parlist.out=column.parlist,
-                               kappa.out=results$pi.out, ppc=results$ppr,
+                               kappa.init=results$pi.init,
+                               kappa.out=results$pi.out,
+                               ppc=results$ppr,
                                colc_mm=model_structure$colc_mm,
                                cov_mm=model_structure$cov_mm,
                                ColumnClusters=results$RowClusters,
@@ -1139,82 +1141,13 @@ clustord <- function(formula,
         stop("Both nclus.row and nclus.col are NULL. Please set one or both to integers and try again.")
     }
 
+    ## If the model contains individual row or column effects, rename them accordingly
+    results <- tidy.output(results, long.df)
+
+    if (results$EM.status$converged) print("EM algorithm has successfully converged.")
+    else print("EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.")
+
     class(results) <- "clustord"
 
     return(results)
-}
-
-#' @importFrom stats terms formula
-convert.model.row.to.column <- function(row.model_structure) {
-    pl <- row.model_structure$param_lengths
-
-    if (pl['colc'] > 0 && pl['rowc'] == 0) {
-        pl['rowc'] <- pl['colc']
-        pl['colc'] <- 0
-    }
-    if (pl['row'] > 0 && pl['col'] == 0) {
-        pl['col'] <- pl['row']
-        pl['row'] <- 0
-    }
-    if (pl['colc_row'] > 0 && pl['rowc_col'] == 0) {
-        pl['rowc_col'] <- pl['colc_row']
-        pl['colc_row'] <- 0
-    }
-    if (pl['colc_cov'] > 0 && pl['rowc_cov'] == 0) {
-        pl['rowc_cov'] <- pl['colc_cov']
-        pl['colc_cov'] <- 0
-    }
-    rowc_mm <- matrix(1)
-    rowc_fo <- NULL
-    colc_mm <- matrix(1)
-    colc_fo <- NULL
-    cov_mm <- row.model_structure$cov_mm
-    cov_fo <- row.model_structure$cov_fo
-
-    if (any(dim(row.model_structure$colc_mm) > 1) &&
-        all(dim(row.model_structure$rowc_mm) == 1)) {
-        rowc_mm <- row.model_structure$colc_mm
-        colc_mm <- matrix(1)
-
-        colc_terms <- terms(row.model_structure$colc_fo)
-        colc_labels <- attr(colc_terms, "term.labels")
-        rowc_fo <- formula(paste("Y ~",paste(colc_labels, collapse="+")))
-        colc_fo <- NULL
-    }
-
-    if (any(pl[c('colc','row','colc_row','colc_cov')] > 0) ||
-        any(dim(row.model_structure$rowc_mm) > 1)) stop("Error involving model structure.")
-
-    list(param_lengths=pl, rowc_fo=rowc_fo, rowc_mm=rowc_mm,
-         colc_fo=colc_fo, colc_mm=colc_mm, cov_fo=cov_fo, cov_mm=cov_mm)
-}
-
-convert.output.row.to.column <- function(row.parlist) {
-    ## Now convert the results back to row clustering
-    column.parlist <- row.parlist
-    column.parlist$colc <- column.parlist$rowc
-    column.parlist$rowc <- NULL
-
-    ## Note: using [['col']] here instead of $col BECAUSE R cannot tell between
-    ## column.parlist$col and column.parlist$colc, but it can tell between
-    ## column.parlist[['col']] and column.parlist[['colc']]
-    if (!is.null(column.parlist[['col']])) {
-        column.parlist$row <- column.parlist$col
-        column.parlist$col <- NULL
-    }
-    if (!is.null(column.parlist[['rowc_col']])) {
-        column.parlist$colc_row <- column.parlist$rowc_col
-        column.parlist$rowc_col <- NULL
-    }
-    if (!is.null(column.parlist[['rowc_cov']])) {
-        column.parlist$colc_cov <- column.parlist$rowc_cov
-        column.parlist$rowc_cov <- NULL
-    }
-
-    if (exists("column.parlist$pi") && !is.null(column.parlist$pi)) {
-        column.parlist$kappa <- column.parlist$pi
-        column.parlist$pi <- NULL
-    }
-
-    column.parlist
 }

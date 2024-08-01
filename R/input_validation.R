@@ -366,6 +366,53 @@ check.formula <- function(formula, long.df, RG, CG) {
          colc_fo=colc_fo, colc_mm=colc_mm, cov_fo=cov_fo, cov_mm=cov_mm)
 }
 
+## Conversion of the column clustering formula into row clustering format, in
+## order for the actual clustering to be done via the row clustering functions
+#' @importFrom stats terms formula
+convert.model.row.to.column <- function(row.model_structure) {
+    pl <- row.model_structure$param_lengths
+
+    if (pl['colc'] > 0 && pl['rowc'] == 0) {
+        pl['rowc'] <- pl['colc']
+        pl['colc'] <- 0
+    }
+    if (pl['row'] > 0 && pl['col'] == 0) {
+        pl['col'] <- pl['row']
+        pl['row'] <- 0
+    }
+    if (pl['colc_row'] > 0 && pl['rowc_col'] == 0) {
+        pl['rowc_col'] <- pl['colc_row']
+        pl['colc_row'] <- 0
+    }
+    if (pl['colc_cov'] > 0 && pl['rowc_cov'] == 0) {
+        pl['rowc_cov'] <- pl['colc_cov']
+        pl['colc_cov'] <- 0
+    }
+    rowc_mm <- matrix(1)
+    rowc_fo <- NULL
+    colc_mm <- matrix(1)
+    colc_fo <- NULL
+    cov_mm <- row.model_structure$cov_mm
+    cov_fo <- row.model_structure$cov_fo
+
+    if (any(dim(row.model_structure$colc_mm) > 1) &&
+        all(dim(row.model_structure$rowc_mm) == 1)) {
+        rowc_mm <- row.model_structure$colc_mm
+        colc_mm <- matrix(1)
+
+        colc_terms <- terms(row.model_structure$colc_fo)
+        colc_labels <- attr(colc_terms, "term.labels")
+        rowc_fo <- formula(paste("Y ~",paste(colc_labels, collapse="+")))
+        colc_fo <- NULL
+    }
+
+    if (any(pl[c('colc','row','colc_row','colc_cov')] > 0) ||
+        any(dim(row.model_structure$rowc_mm) > 1)) stop("Error involving model structure.")
+
+    list(param_lengths=pl, rowc_fo=rowc_fo, rowc_mm=rowc_mm,
+         colc_fo=colc_fo, colc_mm=colc_mm, cov_fo=cov_fo, cov_mm=cov_mm)
+}
+
 #' @importFrom stats model.matrix
 extract.covs <- function(clust_name, non_row_col_part, long.df) {
 
