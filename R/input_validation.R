@@ -130,7 +130,7 @@ check.factors <- function(long.df) {
         long.df$COL <- as.numeric(long.df$COL)
     }
 
-    # Check that all covariates are factors
+    # Check that all categorical covariates are factors
     cov_idxs <- which(!(names(long.df) %in% c("Y","ROW","COL")))
     for (j in cov_idxs) {
         if (is.character(long.df[,j])) long.df[,j] <- factor(long.df[,j])
@@ -249,7 +249,8 @@ check.formula <- function(formula, long.df, RG, CG) {
     colc_idxs <- grep("COLCLUST",fo_labels)
     if (length(rowc_idxs) > 0 && length(colc_idxs) > 0) {
         # Find terms that involve both ROWCLUST and COLCLUST, then exclude the
-        # term "ROWCLUST:COLCLUST" if it exists, because that interaction is allowed.
+        # term "ROWCLUST:COLCLUST" if it exists, because that interaction is not
+        # allowed.
         rowc_colc_idxs <- match(rowc_idxs, colc_idxs)
         rowc_colc_idxs <- rowc_colc_idxs[!is.na(rowc_colc_idxs)]
         rowc_colc_labels <- fo_labels[colc_idxs[rowc_colc_idxs]]
@@ -268,7 +269,7 @@ check.formula <- function(formula, long.df, RG, CG) {
 
     # A.7  Check that all other variables in the formula are in long.df, and in
     # the process separate out the ROW/COL/ROWCLUST/COLCLUST parts, the ROWCLUST
-    # covaraite parts, the COLCLUST covariate parts, and the pure covariate
+    # covariate parts, the COLCLUST covariate parts, and the pure covariate
     # parts
     # OUTPUT: errors
     row_col_idxs <- which(fo_labels %in% c("ROW","COL","ROWCLUST","COLCLUST",
@@ -288,7 +289,7 @@ check.formula <- function(formula, long.df, RG, CG) {
             stop("If you are including interactions between row clusters and covariates, you must include the main effect term for ROWCLUST.")
         }
 
-        rowc_parts <- extract.covs("ROWCLUST", non_row_col_part, long.df)
+        rowc_parts <- extract.covs("ROWCLUST", non_row_col_part[rowc_idxs], long.df)
         rowc_cov_part <- rowc_parts$clust_cov_part
         rowc_fo <- rowc_parts$clust_fo
         rowc_mm <- rowc_parts$clust_mm
@@ -304,7 +305,7 @@ check.formula <- function(formula, long.df, RG, CG) {
             stop("If you are including interactions between column clusters and covariates, you must include the main effect term for COLCLUST.")
         }
 
-        colc_parts <- extract.covs("COLCLUST", non_row_col_part, long.df)
+        colc_parts <- extract.covs("COLCLUST", non_row_col_part[colc_idxs], long.df)
         colc_cov_part <- colc_parts$clust_cov_part
         colc_fo <- colc_parts$clust_fo
         colc_mm <- colc_parts$clust_mm
