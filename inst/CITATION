@@ -1,4 +1,5 @@
-citHeader("To cite clustord in publications use:")
+bibentry("Manual",
+         other = unlist(citation(auto = meta), recursive = FALSE))
 
 bibentry(
   bibtype    = "Article",
