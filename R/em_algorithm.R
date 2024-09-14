@@ -4,7 +4,7 @@ default.EM.control <- function() {
 }
 
 default.optim.control <- function() {
-    list(maxit=100,trace=0)
+    list(maxit=100,trace=0,pgtol=1e-4,factr=1e11)
 }
 
 new.EM.status <- function() {
@@ -122,6 +122,9 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
     # Run the EM cycle:
     EM.status <- new.EM.status()
 
+    all_likelihoods <- rep(NA,EM.control$EMcycles)
+    all_params <- matrix(rep(NA,length(outvect)*EM.control$EMcycles),ncol=length(outvect))
+
     while(!EM.status$finished)
     {
         ppr_m <- rcpp_Rcluster_Estep(invect, model_num,
@@ -195,6 +198,9 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                       invect=invect,outvect=outvect, n=n, p=p,
                                       pi_v=pi_v,EM.control=EM.control)
 
+        all_likelihoods[(EM.status$iter)] <- lli
+        all_params[(EM.status$iter),] <- outvect
+
         ## Report the current incomplete-data log-likelihood, which is the
         ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
         ## of the output of optim
@@ -206,9 +212,13 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
         # cat("pi",pi_v,"\n")
     }
 
+    all_likelihoods <- all_likelihoods[1:(EM.status$iter)]
+    all_params <- all_params[1:(EM.status$iter),]
+
     # Find cluster groupings:
     Rclusmem <- assignments(ppr_m)
     Rclusters <- apply(ppr_m, 1, which.max)
+    Rsizes <- as.numeric(table(Rclusters))
 
     # Save results:
     initvect <- name_invect(initvect, model, param_lengths, n, p, q, RG, constraint_sum_zero=constraint_sum_zero)
@@ -221,6 +231,8 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
     list("info"=info,
          "model"=model,
          "EM.status"=EM.status,
+         "all_likelihoods"=all_likelihoods,
+         "all_params"=all_params,
          "criteria"=criteria,
          "numerical.correction.epsilon"=epsilon,
          "constraint_sum_zero"=constraint_sum_zero,
@@ -235,7 +247,8 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
          "rowc_mm"=rowc_mm,
          "cov_mm"=cov_mm,
          "RowClusterMembers"=Rclusmem,
-         "RowClusters"=Rclusters)
+         "RowClusters"=Rclusters,
+         "RowClusterSizes"=Rsizes)
 }
 
 run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
@@ -280,6 +293,9 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
     outvect <- invect
     # Run the EM cycle:
     EM.status <- new.EM.status()
+
+    all_likelihoods <- rep(NA,EM.control$EMcycles)
+    all_params <- matrix(rep(NA,length(outvect)*EM.control$EMcycles),ncol=length(outvect))
 
     while(!EM.status$finished)
     {
@@ -371,6 +387,9 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                       invect=invect,outvect=outvect, n=n, p=p,
                                       pi_v=pi_v, kappa_v=kappa_v, EM.control=EM.control)
 
+        all_likelihoods[(EM.status$iter)] <- lli
+        all_params[(EM.status$iter),] <- outvect
+
         ## Report the current incomplete-data log-likelihood, which is the
         ## NEGATIVE of the latest value of Bicluster.ll i.e. the NEGATIVE
         ## of the output of optim
@@ -385,11 +404,16 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
         # cat("kappa",kappa_v,"\n")
     }
 
+    all_likelihoods <- all_likelihoods[1:(EM.status$iter)]
+    all_params <- all_params[1:(EM.status$iter),]
+
     # Find cluster groupings:
     Rclusmem <- assignments(ppr_m)
     Rclusters <- apply(ppr_m, 1, which.max)
+    Rsizes <- as.numeric(table(Rclusters))
     Cclusmem <- assignments(ppc_m)
     Cclusters <- apply(ppc_m, 1, which.max)
+    Csizes <- as.numeric(table(Cclusters))
 
     # Save results:
     initvect <- name_invect(initvect, model, param_lengths, n, p, q, RG, CG, constraint_sum_zero=constraint_sum_zero)
@@ -402,6 +426,8 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
     list("info"=info,
          "model"=model,
          "EM.status"=EM.status,
+         "all_likelihoods"=all_likelihoods,
+         "all_params"=all_params,
          "criteria"=criteria,
          "numerical.correction.epsilon"=epsilon,
          "constraint_sum_zero"=constraint_sum_zero,
@@ -421,8 +447,10 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
          "cov_mm"=cov_mm,
          "RowClusterMembers"=Rclusmem,
          "RowClusters"=Rclusters,
+         "RowClusterSizes"=Rsizes,
          "ColumnClusterMembers"=Cclusmem,
-         "ColumnClusters"=Cclusters)
+         "ColumnClusters"=Cclusters,
+         "ColumnClusterSizes"=Csizes)
 }
 
 #' @describeIn calc.SE.bicluster SE for rowclustering

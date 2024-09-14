@@ -1026,7 +1026,8 @@ clustord <- function(formula,
                                                   constraint_sum_zero=constraint_sum_zero,
                                                   start_from_simple_model=start_from_simple_model,
                                                   nstarts=nstarts,
-                                                  verbose=verbose)
+                                                  verbose=verbose,
+                                                  record_start_likelihoods=TRUE)
             initvect <- start.par$initvect
             pi.init <- start.par$pi.init
             kappa.init <- start.par$kappa.init
@@ -1052,7 +1053,8 @@ clustord <- function(formula,
                                                    constraint_sum_zero=constraint_sum_zero,
                                                    start_from_simple_model=start_from_simple_model,
                                                    nstarts=nstarts,
-                                                   verbose=verbose)
+                                                   verbose=verbose,
+                                                   record_start_likelihoods=TRUE)
             initvect <- start.par$initvect
             pi.init <- start.par$pi.init
         }
@@ -1085,7 +1087,8 @@ clustord <- function(formula,
                                                    constraint_sum_zero=constraint_sum_zero,
                                                    start_from_simple_model=start_from_simple_model,
                                                    nstarts=nstarts,
-                                                   verbose=verbose)
+                                                   verbose=verbose,
+                                                   record_start_likelihoods=TRUE)
             initvect <- start.par$initvect
             pi.init <- start.par$pi.init
         }
@@ -1148,6 +1151,9 @@ clustord <- function(formula,
     else print("EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.")
 
     class(results) <- "clustord"
+
+    results$start_lli <- start.par$start_lli
+    results$start_params <- start.par$start_params
 
     return(results)
 }

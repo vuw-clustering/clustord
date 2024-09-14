@@ -470,7 +470,8 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
                                       optim.control=default.optim.control(),
                                       constraint_sum_zero=TRUE,
                                       start_from_simple_model=TRUE,
-                                      nstarts=5, verbose=TRUE) {
+                                      nstarts=5, verbose=TRUE,
+                                      record_start_likelihoods=FALSE) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
 
@@ -478,6 +479,11 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
 
     ## Generate initvect -------------------------------------------------------
     if (is.null(initvect)) {
+
+        if (record_start_likelihoods) {
+            start_lli <- list()
+            start_params <- list()
+        }
 
         best.lli <- -Inf
         for (s in 1:nstarts) {
@@ -507,6 +513,10 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
                                           verbose=verbose)
 
             new.lli <- init.out$EM.status$best.lli
+            if (record_start_likelihoods) {
+                start_lli[[s]] <- init.out$all_likelihoods
+                start_params[[s]] <- init.out$all_params
+            }
             if (new.lli > best.lli) {
                 cat(paste("Found better incomplete log-like:",new.lli,"\n"))
                 best.lli <- new.lli
@@ -524,6 +534,7 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
         }
     }
 
+    if (record_start_likelihoods) return(list(initvect=initvect, pi.init=pi.init, start_lli=start_lli, start_params=start_params))
     list(initvect=initvect, pi.init=pi.init)
 }
 
@@ -533,7 +544,8 @@ generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
                                      optim.method="L-BFGS-B", optim.control=default.optim.control(),
                                      constraint_sum_zero=TRUE,
                                      start_from_simple_model=TRUE, nstarts=5,
-                                     verbose=TRUE) {
+                                     verbose=TRUE,
+                                     record_start_likelihoods=FALSE) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
 
@@ -541,6 +553,11 @@ generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
 
     ## Generate initvect -------------------------------------------------------
     if (is.null(initvect)) {
+
+        if (record_start_likelihoods) {
+            start_lli <- list()
+            start_params <- list()
+        }
 
         best.lli <- -Inf
         for (s in 1:nstarts) {
@@ -572,6 +589,10 @@ generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
                                          verbose=verbose)
 
             new.lli <- init.out$EM.status$best.lli
+            if (record_start_likelihoods) {
+                start_lli[[s]] <- init.out$all_likelihoods
+                start_params[[s]] <- init.out$all_params
+            }
             if (new.lli > best.lli) {
                 cat(paste("Found better incomplete log-like:",new.lli,"\n"))
                 best.lli <- new.lli
@@ -600,6 +621,6 @@ generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
             kappa.init <- generate.mixing.proportions(CG)
         }
     }
-
+    if (record_start_likelihoods) return(list(initvect=initvect, pi.init=pi.init, kappa.init=kappa.init, start_lli=start_lli, start_params=start_params))
     list(initvect=initvect, pi.init=pi.init, kappa.init=kappa.init)
 }
