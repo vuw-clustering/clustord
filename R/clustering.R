@@ -808,6 +808,27 @@
 #' @param optim.control control list for the \code{optim} call within the M step
 #'     of the EM algorithm. See the control list Details in the \code{optim}
 #'     manual for more info.
+#'     Please note that although \code{optim}, by default, uses \code{pgtol=0}
+#'     and \code{factr=1e7} in the L-BFGS-B method, \code{clustord}, by default,
+#'     alters these to \code{pgtol=1e-4} and \code{factr=1e11}, but you can use
+#'     this \code{optim.control} argument in \code{clustord} to revert them to
+#'     the defaults if you want. The reason for the change is that the chosen
+#'     values in \code{clustord} reduce the tolerance on the log-likelihood
+#'     function optimization in order to speed up the algorithm, and because the
+#'     log-likelihood is on the scale of 1e4 for <100 rows in the data matrix
+#'     and 1e6 for 5000 rows in the data matrix, tolerance at the default
+#'     \code{optim} scale is not as important as the choice of model type and
+#'     structure or the number of starting points. If one model is better than
+#'     another, it will probably have a likelihood that is better by about the
+#'     size of the data matrix, which is far larger than the tolerance in the
+#'     optimization. If one starting point is better than another, it will
+#'     probably have a likelihood that is better on about 1/10th or 1/100th the
+#'     size of the data matrix, which is still far larger than the tolerance in
+#'     the optimization.
+#'     If you need accurate parameter estimates, firstly make sure to try more
+#'     starting points, then perform model selection first, and then finally
+#'     rerun the chosen model with greater tolerance, e.g. the \code{optim}
+#'     defaults, \code{pgtol=0} and \code{factr=1e7}.
 #' @param constraint_sum_zero (default \code{TRUE}) if \code{TRUE}, use constraints
 #'     that cluster effects sum to zero; if \code{FALSE}, use constraints that
 #'     the cluster effect for the first cluster will be 0.
@@ -845,6 +866,11 @@
 #'     previous starts, and it also reports when it is fitting simpler models
 #'     to find starting values for the parameters vs fitting the final, more
 #'     complex model.
+#'     Note that if you want more verbosity regarding the \code{optim}
+#'     maximisation within the M-step of the EM algorithm, you can enable this
+#'     via the \code{trace} entry in the \code{optim.control} argument (i.e.
+#'     \code{optim.control=list(trace=X)}, where X is 1 for least verbose to 6
+#'     for most verbose for the L-BFGS-B optimisation method).
 #' @return
 #' A list with components:
 #'
