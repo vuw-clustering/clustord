@@ -371,11 +371,12 @@ calc_length_invect <- function(param_lengths_num) {
     pt1 <- pt1[pt1 > 0]
     total <- sum(pt1)
 
-    total <- total + max(0,p['phi']-2) +
-        max(0,p['rowc_colc']-p['rowc']-p['colc']+1) +
-        max(0,p['rowc_col']-p['rowc']-p['col']+1) +
-        max(0,p['colc_row']-p['colc']-p['row']+1) +
-        sum(p[c('rowc_cov','colc_cov','cov')])
+    total <- total + max(0,p['phi']-2)
+
+    if (p['rowc_colc'] > 0) total <- total + max(0,p['rowc_colc']-p['rowc']-p['colc']+1)
+    if (p['rowc_col'] > 0) total <- total + max(0,p['rowc_col']-p['rowc']-p['col']+1)
+    if (p['colc_row'] > 0) total <- total + max(0,p['colc_row']-p['colc']-p['row']+1)
+    total <- total + sum(p[c('rowc_cov','colc_cov','cov')])
 
     total
 }
