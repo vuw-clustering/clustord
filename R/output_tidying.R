@@ -2,9 +2,8 @@
 # individual row or column effects with the original names of the rows or
 # columns
 tidy.output <- function(results, long.df) {
-
     results$parlist.out <- rename.pars(results$parlist.out, long.df=long.df)
-    if ("parlist.init" %in% names(results)) results$parlist.init <- rename.pars(results$parlist.init, long.df=long.df)
+    if ("parlist.init" %in% names(results) && !is.null(results$parlist.init)) results$parlist.init <- rename.pars(results$parlist.init, long.df=long.df)
     results
 }
 

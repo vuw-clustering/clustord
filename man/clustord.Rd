@@ -11,6 +11,7 @@ clustord(
   nclus.row = NULL,
   nclus.column = NULL,
   long.df,
+  start.type = "parameters",
   initvect = NULL,
   pi.init = NULL,
   kappa.init = NULL,
@@ -42,7 +43,19 @@ this data frame from your data matrix of responses.
 \code{\link{mat2df}} also allows you to supply data frames of row or
 column covariates which will be incorporated into \code{long.df}.}
 
+\item{start.type}{(default \code{"parameters"}) indicates whether to start by
+estimating the parameters, or estimating the cluster memberships.
+If \code{"parameters"}, the algorithm begins with multiple random starting
+sets of parameters, running the EM algorithm for a few iterations from
+each one before deciding on the best and continuing from there, or the
+user can set initial values using \code{initvect} argument.
+If \code{"clusters"}, the algorithm begins by using multiple runs of
+k-means to allocate elements to clusters. For row or column clustering,
+it will run k-means for the dimension of the data being clustered; for
+biclustering, it will run k-means for both dimensions being clustered.}
+
 \item{initvect}{(default NULL) vector of starting parameter values for the model.
+    \strong{Ignored} if using \code{start.type = "clusters"}.
     Note: if the user enters an initial vector of parameter values, it is
     \strong{strongly recommend} that the user also check the values of
     \code{parlist.init} in the output object, to \strong{make sure that the
@@ -54,6 +67,7 @@ column covariates which will be incorporated into \code{long.df}.}
 
 \item{pi.init}{(default \code{NULL}) starting parameter values for the proportions
     of observations in the different row clusters.
+    \strong{Ignored} if using \code{start.type = "clusters"}.
 
     If \code{NULL}, starting values will be generated automatically.
 
@@ -63,6 +77,7 @@ column covariates which will be incorporated into \code{long.df}.}
 
 \item{kappa.init}{(default \code{NULL}) starting parameter values for the
     proportions of observations in the different column clusters.
+    \strong{Ignored} if using \code{start.type = "clusters"}.
 
     If \code{NULL}, starting values will be generated automatically.
 
@@ -118,6 +133,7 @@ column covariates which will be incorporated into \code{long.df}.}
     \code{startEMcycles} controls how many EM iterations are used when
     fitting the simpler submodels to get starting values for fitting models
     with interaction.
+    \strong{Ignored} if using \code{start.type = "clusters"}.
 
     \code{keepallparams}: if true, keep a record of parameter values
     (including pi_r and kappa_c) for every EM iteration.
@@ -151,11 +167,12 @@ other columns (so \code{gamma} columns sum to zero) and first row of
 gamma_rc is equal to the negative sum of the other rows (so \code{gamma}
 rows sum to zero).}
 
-\item{start_from_simple_model}{(default \code{TRUE}) if \code{TRUE}, fit a
-simpler clustering model first and use that to provide starting values for
-all parameters for the model with interactions;
-if \code{FALSE}, use the more basic models to provide starting values only
-for \code{pi.init} and \code{kappa.init}.
+\item{start_from_simple_model}{(default \code{TRUE})
+\strong{Ignored} if using \code{start.type = "clusters"}.
+If \code{TRUE}, fit a simpler clustering model first and use that to
+provide starting values for all parameters for the model with
+interactions; if \code{FALSE}, use the more basic models to provide
+starting values only for \code{pi.init} and \code{kappa.init}.
 If the full model has interaction terms, then simpler models are ones
 without the interactions. If the model has individual row/column effects
 alongside the clusters, then simpler models are ones without the individual
@@ -165,7 +182,8 @@ parameters), and ones with the covariates but no clustering (to get
 starting values for the covariates).}
 
 \item{nstarts}{(default 5) number of random starts to generate, if generating
-random starting points for the EM algorithm.}
+random starting points for the EM algorithm.
+\strong{Ignored} if using \code{start.type = "clusters"}.}
 
 \item{verbose}{(default \code{FALSE}) changes how much is reported to the console
 during the algorithm's progress. If \code{TRUE}, maximal reporting, which
@@ -229,6 +247,7 @@ A list with components:
     \code{initvect}: the initial \emph{vector} of parameter values, either
     specified by the user or generated automatically. This vector has only
     the \strong{independent} values of the parameters, not the full set.
+    \strong{Not available} if using \code{start.type = "clusters"}.
 
     \code{outvect}: the final \emph{vector} of parameter values, containing
     only the independent parameter values from \code{parlist.out}.
@@ -237,6 +256,7 @@ A list with components:
     the initial parameter vector \code{initvect}. Note that if the initial
     vector has been incorrectly specified, the values of \code{parlist.init}
     may not be as expected, and they should be checked by the user.
+    \strong{Not available} if using \code{start.type = "clusters"}.
 
     \code{parlist.out}: fitted values of parameters.
 
