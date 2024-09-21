@@ -140,7 +140,7 @@ check.factors <- function(long.df) {
 }
 
 #' @importFrom stats model.matrix
-check.formula <- function(formula, long.df, RG, CG) {
+check.formula <- function(formula, model, long.df, RG, CG) {
 
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
@@ -344,6 +344,7 @@ check.formula <- function(formula, long.df, RG, CG) {
     names(param_lengths) <- c("mu","phi","rowc","col","rowc_col","rowc_cov","cov",
                               "colc","rowc_colc","row","colc_row","colc_cov")
     param_lengths['mu'] <- q
+    if (model == "OSM") param_lengths['phi'] <- q
     if (exists('rowc_part')) param_lengths['rowc'] <- RG
     if (exists('colc_part')) param_lengths['colc'] <- CG
     if (exists('rowc_colc_part')) param_lengths['rowc_colc'] <- RG*CG
