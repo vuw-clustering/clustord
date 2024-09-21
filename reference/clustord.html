@@ -58,6 +58,7 @@ Proportional Odds Model (POM) and a dedicated Binary Model for binary data.</p>
 <span>  nclus.row <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nclus.column <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">long.df</span>,</span>
+<span>  start.type <span class="op">=</span> <span class="st">"parameters"</span>,</span>
 <span>  initvect <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  pi.init <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  kappa.init <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -103,8 +104,22 @@ this data frame from your data matrix of responses.
 column covariates which will be incorporated into <code>long.df</code>.</p></dd>
 
 
+<dt id="arg-start-type">start.type<a class="anchor" aria-label="anchor" href="#arg-start-type"></a></dt>
+<dd><p>(default <code>"parameters"</code>) indicates whether to start by
+estimating the parameters, or estimating the cluster memberships.
+If <code>"parameters"</code>, the algorithm begins with multiple random starting
+sets of parameters, running the EM algorithm for a few iterations from
+each one before deciding on the best and continuing from there, or the
+user can set initial values using <code>initvect</code> argument.
+If <code>"clusters"</code>, the algorithm begins by using multiple runs of
+k-means to allocate elements to clusters. For row or column clustering,
+it will run k-means for the dimension of the data being clustered; for
+biclustering, it will run k-means for both dimensions being clustered.</p></dd>
+
+
 <dt id="arg-initvect">initvect<a class="anchor" aria-label="anchor" href="#arg-initvect"></a></dt>
 <dd><p>(default NULL) vector of starting parameter values for the model.
+    <strong>Ignored</strong> if using <code>start.type = "clusters"</code>.
     Note: if the user enters an initial vector of parameter values, it is
     <strong>strongly recommend</strong> that the user also check the values of
     <code>parlist.init</code> in the output object, to <strong>make sure that the
@@ -115,7 +130,8 @@ column covariates which will be incorporated into <code>long.df</code>.</p></dd>
 
 <dt id="arg-pi-init">pi.init<a class="anchor" aria-label="anchor" href="#arg-pi-init"></a></dt>
 <dd><p>(default <code>NULL</code>) starting parameter values for the proportions
-    of observations in the different row clusters.</p>
+    of observations in the different row clusters.
+    <strong>Ignored</strong> if using <code>start.type = "clusters"</code>.</p>
 <p>If <code>NULL</code>, starting values will be generated automatically.</p>
 <p>User-specified values of <code>pi.init</code> must be of length <code>(nclus.row-1)</code>
     because the final value will be automatically calculated so that the
@@ -124,7 +140,8 @@ column covariates which will be incorporated into <code>long.df</code>.</p></dd>
 
 <dt id="arg-kappa-init">kappa.init<a class="anchor" aria-label="anchor" href="#arg-kappa-init"></a></dt>
 <dd><p>(default <code>NULL</code>) starting parameter values for the
-    proportions of observations in the different column clusters.</p>
+    proportions of observations in the different column clusters.
+    <strong>Ignored</strong> if using <code>start.type = "clusters"</code>.</p>
 <p>If <code>NULL</code>, starting values will be generated automatically.</p>
 <p>User-specified values of <code>kappa.init</code> must be of length
     <code>(nclus.column-1)</code> because the final value will be automatically
@@ -173,7 +190,8 @@ column covariates which will be incorporated into <code>long.df</code>.</p></dd>
     and the likelihood have both converged.</p>
 <p><code>startEMcycles</code> controls how many EM iterations are used when
     fitting the simpler submodels to get starting values for fitting models
-    with interaction.</p>
+    with interaction.
+    <strong>Ignored</strong> if using <code>start.type = "clusters"</code>.</p>
 <p><code>keepallparams</code>: if true, keep a record of parameter values
     (including pi_r and kappa_c) for every EM iteration.</p>
 <p>For <code>columnclustering</code>, the parameters saved from each iteration
@@ -212,11 +230,12 @@ rows sum to zero).</p></dd>
 
 
 <dt id="arg-start-from-simple-model">start_from_simple_model<a class="anchor" aria-label="anchor" href="#arg-start-from-simple-model"></a></dt>
-<dd><p>(default <code>TRUE</code>) if <code>TRUE</code>, fit a
-simpler clustering model first and use that to provide starting values for
-all parameters for the model with interactions;
-if <code>FALSE</code>, use the more basic models to provide starting values only
-for <code>pi.init</code> and <code>kappa.init</code>.
+<dd><p>(default <code>TRUE</code>)
+<strong>Ignored</strong> if using <code>start.type = "clusters"</code>.
+If <code>TRUE</code>, fit a simpler clustering model first and use that to
+provide starting values for all parameters for the model with
+interactions; if <code>FALSE</code>, use the more basic models to provide
+starting values only for <code>pi.init</code> and <code>kappa.init</code>.
 If the full model has interaction terms, then simpler models are ones
 without the interactions. If the model has individual row/column effects
 alongside the clusters, then simpler models are ones without the individual
@@ -228,7 +247,8 @@ starting values for the covariates).</p></dd>
 
 <dt id="arg-nstarts">nstarts<a class="anchor" aria-label="anchor" href="#arg-nstarts"></a></dt>
 <dd><p>(default 5) number of random starts to generate, if generating
-random starting points for the EM algorithm.</p></dd>
+random starting points for the EM algorithm.
+<strong>Ignored</strong> if using <code>start.type = "clusters"</code>.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
@@ -286,13 +306,15 @@ complex model.</p></dd>
     <code>nclus.column - 1</code>.</p>
 <p><code>initvect</code>: the initial <em>vector</em> of parameter values, either
     specified by the user or generated automatically. This vector has only
-    the <strong>independent</strong> values of the parameters, not the full set.</p>
+    the <strong>independent</strong> values of the parameters, not the full set.
+    <strong>Not available</strong> if using <code>start.type = "clusters"</code>.</p>
 <p><code>outvect</code>: the final <em>vector</em> of parameter values, containing
     only the independent parameter values from <code>parlist.out</code>.</p>
 <p><code>parlist.init</code>: the initial list of parameters, constructed from
     the initial parameter vector <code>initvect</code>. Note that if the initial
     vector has been incorrectly specified, the values of <code>parlist.init</code>
-    may not be as expected, and they should be checked by the user.</p>
+    may not be as expected, and they should be checked by the user.
+    <strong>Not available</strong> if using <code>start.type = "clusters"</code>.</p>
 <p><code>parlist.out</code>: fitted values of parameters.</p>
 <p><code>pi</code>, <code>kappa</code>: fitted values of pi and kappa, where relevant.</p>
 <p><code>ppr</code>, <code>ppc</code>: the posterior probabilities of membership of the
@@ -846,8 +868,8 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -109.501997036794 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $info</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         n         p         q      npar ninitvect         R </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        20         5         3         7         5         3 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        n        p        q     npar noutvect        R </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       20        5        3        7        5        3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "OSM"</span>
@@ -896,6 +918,9 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$paramstopping</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$start.type</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Estep"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $criteria</span>
@@ -1032,8 +1057,8 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -108.25736731008 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $info</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         n         p         q      npar ninitvect         R </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        20         5         3        11         9         3 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        n        p        q     npar noutvect        R </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       20        5        3       11        9        3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "OSM"</span>
@@ -1086,6 +1111,9 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$paramstopping</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$start.type</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Estep"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $criteria</span>
@@ -1238,8 +1266,8 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -108.732812616331 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $info</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         n         p         q      npar ninitvect         R </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        20         5         3        12        11         2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        n        p        q     npar noutvect        R </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       20        5        3       12       11        2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "POM"</span>
@@ -1292,6 +1320,9 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$paramstopping</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$start.type</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Estep"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $criteria</span>
@@ -1435,8 +1466,8 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -109.492584417224 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $info</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         n         p         q      npar ninitvect         C </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        20         5         3         7         5         3 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        n        p        q     npar noutvect        C </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       20        5        3        7        5        3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "OSM"</span>
@@ -1485,6 +1516,9 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$paramstopping</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$start.type</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Estep"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $criteria</span>
@@ -1616,8 +1650,8 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -104.662039616002 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $info</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         n         p         q      npar ninitvect         C </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        20         5         3        26        24         3 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        n        p        q     npar noutvect        C </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       20        5        3       26       24        3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "OSM"</span>
@@ -1676,6 +1710,9 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$paramstopping</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$start.type</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Estep"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $criteria</span>
