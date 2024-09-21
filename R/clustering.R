@@ -1021,9 +1021,9 @@ clustord <- function(formula,
     RG <- nclus.row
     CG <- nclus.column
 
-    if (is.null(RG) && is.null(CG)) stop("Both nclus.row and nclus.col are NULL. Please set one or both to integers and try again.")
+    model_structure <- check.formula(formula, model, long.df, RG, CG)
 
-    model_structure <- check.formula(formula, long.df, RG, CG)
+    if (is.null(RG) && is.null(CG)) stop("Both nclus.row and nclus.col are NULL. Please set one or both to integers and try again.")
 
     if (sum(model_structure$param_lengths) > nrow(long.df)/2) stop("You are trying to fit a model with more parameters than half the number of cells in the data matrix. You should try a simpler model.")
 

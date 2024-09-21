@@ -170,6 +170,8 @@ mat2df <- function(mat, xr.df = NULL, xc.df = NULL) {
         my.df <- my.df[-na.y,]
     }
 
+    attributes(my.df)$mat <- mat
+
     ## Return data frame:
     return(my.df)
 }
