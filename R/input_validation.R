@@ -2,6 +2,7 @@
 validate.inputs <- function(formula, model,
                             nclus.row=NULL,nclus.column=NULL,
                             long.df,
+                            start.type="parameters",
                             initvect=NULL,
                             pi.init=NULL, kappa.init=NULL,
                             EM.control=default.EM.control(),
@@ -79,31 +80,35 @@ validate.inputs <- function(formula, model,
     if (!is.null(nclus.row) && nclus.row >= max(as.numeric(long.df$ROW))) stop("nclus.row must be smaller than the maximum value of long.df$ROW.")
     if (!is.null(nclus.column) && nclus.column >= max(as.numeric(long.df$COL))) stop("nclus.column must be smaller than the maximum value of long.df$COL.")
 
-    if (!is.null(initvect)) {
-        if (!is.vector(initvect) || !is.numeric(initvect) || any(is.na(initvect)) ||
-            any(is.infinite(initvect))) stop("If supplied, initvect must be a numeric vector with finite values.")
-    }
+    if (!is.vector(start.type) || !is.character(start.type) || !(start.type %in% c("parameters","clusters"))) stop("start.type must be either 'parameters' or 'clusters'.")
 
-    if (!is.null(pi.init)) {
-        if (!is.vector(pi.init) || !is.numeric(pi.init) || any(is.na(pi.init)) ||
-            any(pi.init < 0) || any(pi.init > 1)) stop("If supplied, pi.init must be a vector of numbers between 0 and 1.")
-        if (length(pi.init) != nclus.row || sum(pi.init) != 1) stop("pi.init must be the same length as the number of row clusters, and must add up to 1")
-    }
-    if (!is.null(kappa.init)) {
-        if (!is.vector(kappa.init) || !is.numeric(kappa.init) || any(is.na(kappa.init)) ||
-            any(kappa.init < 0) | any(kappa.init > 1)) stop("If supplied, kappa.init must be a vector of numbers between 0 and 1.")
-        if (length(kappa.init) != nclus.column || sum(kappa.init) != 1) stop("kappa.init must be the same length as the number of column clusters, and must add up to 1")
+    if (start.type == "parameters") {
+        if (!is.null(initvect)) {
+            if (!is.vector(initvect) || !is.numeric(initvect) || any(is.na(initvect)) ||
+                any(is.infinite(initvect))) stop("If supplied, initvect must be a numeric vector with finite values.")
+        }
+
+        if (!is.null(pi.init)) {
+            if (!is.vector(pi.init) || !is.numeric(pi.init) || any(is.na(pi.init)) ||
+                any(pi.init < 0) || any(pi.init > 1)) stop("If supplied, pi.init must be a vector of numbers between 0 and 1.")
+            if (length(pi.init) != nclus.row || sum(pi.init) != 1) stop("pi.init must be the same length as the number of row clusters, and must add up to 1")
+        }
+        if (!is.null(kappa.init)) {
+            if (!is.vector(kappa.init) || !is.numeric(kappa.init) || any(is.na(kappa.init)) ||
+                any(kappa.init < 0) | any(kappa.init > 1)) stop("If supplied, kappa.init must be a vector of numbers between 0 and 1.")
+            if (length(kappa.init) != nclus.column || sum(kappa.init) != 1) stop("kappa.init must be the same length as the number of column clusters, and must add up to 1")
+        }
+
+        if (!is.null(nstarts)) {
+            if (!is.vector(nstarts) || !is.numeric(nstarts) || length(nstarts) != 1 ||
+                nstarts < 0 || nstarts %% 1 != 0) stop("If supplied, nstarts must be a positive integer.")
+        }
     }
 
     if (!is.logical(constraint_sum_zero) || !is.vector(constraint_sum_zero) ||
         length(constraint_sum_zero) != 1 || is.na(constraint_sum_zero)) stop("constraint_sum_zero must be TRUE or FALSE.")
     if (!is.logical(start_from_simple_model) || !is.vector(start_from_simple_model) ||
         length(start_from_simple_model) != 1 || is.na(start_from_simple_model)) stop("start_from_simple_model must be TRUE or FALSE.")
-
-    if (!is.null(nstarts)) {
-        if (!is.vector(nstarts) || !is.numeric(nstarts) || length(nstarts) != 1 ||
-            nstarts < 0 || nstarts %% 1 != 0) stop("If supplied, nstarts must be a positive integer.")
-    }
 
     if (!is.list(EM.control) || length(EM.control) == 0 || length(EM.control) > 7 ||
         !all(names(EM.control) %in% c("EMcycles","EMlikelihoodtol","EMparamtol",
