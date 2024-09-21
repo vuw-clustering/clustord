@@ -619,7 +619,7 @@ impute.missing <- function(mat) {
         }
     }
 
-    if (num_missing/n/p > 0.1) warning("More than 10% of the data is missing. It is recommended that you use start.type = 'parameters' instead, because it copes better with missing data.")
+    if (num_missing/nrow(mat)/ncol(mat) > 0.1) warning("More than 10% of the data is missing. It is recommended that you use start.type = 'parameters' instead, because it copes better with missing data.")
 
     mat
 }
