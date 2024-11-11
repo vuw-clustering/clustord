@@ -37,7 +37,8 @@ Suggests:
     knitr,
     formatR,
     rmarkdown,
+    tinytex,
     testthat (>= 2.1.0)
 Encoding: UTF-8
 RoxygenNote: 7.3.2
-VignetteBuilder: knitr, formatR
+VignetteBuilder: knitr, formatR, tinytex
