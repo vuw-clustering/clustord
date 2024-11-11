@@ -35,8 +35,9 @@ Imports: Rcpp (>= 1.0.1),
 LinkingTo: Rcpp, RcppArmadillo
 Suggests: 
     knitr,
+    formatR,
     rmarkdown,
     testthat (>= 2.1.0)
 Encoding: UTF-8
 RoxygenNote: 7.3.2
-VignetteBuilder: knitr
+VignetteBuilder: knitr, formatR
