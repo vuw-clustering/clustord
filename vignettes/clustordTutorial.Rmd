@@ -6,6 +6,7 @@ output:
   pdf_document:
     toc: yes
     toc_depth: 4
+    latex_engine: xelatex
 vignette: >
   %\VignetteIndexEntry{clustordTutorial}
   %\VignetteEngine{knitr::rmarkdown}
@@ -147,7 +148,7 @@ dim(df)
 
 The illustrations show a tiny exemplar dataset. The actual dataset in this analysis has 82 rows (subjects) and 12 columns (questions).
 
-We will refer to the data matrix as $\bm{Y}$. We index the rows of the data matrix  with $i$ and the columns of the data matrix with $j$, so an individual response value is defined as $Y_{ij}$.
+We will refer to the data matrix as $\bm{{Y}}$. We index the rows of the data matrix  with $i$ and the columns of the data matrix with $j$, so an individual response value is defined as $Y_{ij}$.
 
 ```{r, echo=FALSE, out.width="70%", fig.align="center"}
 knitr::include_graphics('vignette_fig/survey_table_single_cell.png')
