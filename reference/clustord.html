@@ -26,6 +26,12 @@ Proportional Odds Model (POM) and a dedicated Binary Model for binary data."></h
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clustordOrdinalModels.html">`clustord` Ordinal Models</a></li>
+    <li><a class="dropdown-item" href="../articles/clustordStructureSummary.html">`clustord` Structure Summary</a></li>
+    <li><a class="dropdown-item" href="../articles/clustordTutorial.html">`clustord` Tutorial</a></li>
+  </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
@@ -249,7 +255,7 @@ complex model.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with components:</p>
+    <p>A <code>clustord</code> object, i.e. a list with components:</p>
 <p><code>info</code>: Basic info n, p, q, the number of parameters, the number of
     row clusters and the number of column clusters, where relevant.</p>
 <p><code>model</code>: The model used for fitting, "OSM" for Ordered Stereotype
@@ -845,177 +851,20 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -109.501997036794 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $info</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         n         p         q      npar ninitvect         R </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        20         5         3         7         5         3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $model</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "OSM"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ ROWCLUST, model = "OSM", nclus.row = 3, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     long.df = long.df, EM.control = list(EMcycles = 2, startEMcycles = 2), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     nstarts = 2)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$iter</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Clustering mode:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  row clustering</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$finished</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Converged:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$converged</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$new.llc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -124.6967</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$new.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -109.4778</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$previous.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -109.4799</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$llc.for.best.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -124.6967</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                  mu        mu </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.6567039 0.4469799 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$phi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 phi           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.9999998 1.0000000 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$rowc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_r     rowc_r            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1.1075408 -0.7844101 -0.3231307 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$pi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.0904055 0.6303752 0.2792193</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$best.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -109.4778</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$paramstopping</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$Res.Dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 218.9556</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$AIC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 232.9556</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$AICc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 234.538</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$BIC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 251.1918</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$ICL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 281.6297</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $numerical.correction.epsilon</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1e-06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $constraint_sum_zero</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $param_lengths</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        mu       phi      rowc       col  rowc_col  rowc_cov       cov      colc </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         3         3         3         0         0         0         0         0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rowc_colc       row  colc_row  colc_cov </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         0         0         0         0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $initvect</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         mu         mu        phi     rowc_r     rowc_r </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.6887195  0.4789973 15.5477492  1.1820221 -0.8433398 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $outvect</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         mu         mu        phi     rowc_r     rowc_r </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.6567039  0.4469799 15.5477501  1.1075408 -0.7844101 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      mu_1      mu_2      mu_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.6887195 0.4789973 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$phi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     phi_1     phi_2     phi_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.9999998 1.0000000 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$rowc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_1     rowc_2     rowc_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1.1820221 -0.8433398 -0.3386823 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      mu_1      mu_2      mu_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.6567039 0.4469799 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$phi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     phi_1     phi_2     phi_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.9999998 1.0000000 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$rowc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_1     rowc_2     rowc_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1.1075408 -0.7844101 -0.3231307 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $pi.init</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.09870921 0.62415679 0.27713400</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $pi.out</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.0904055 0.6303752 0.2792193</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ppr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              [,1]      [,2]      [,3]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] 0.002238307 0.8134125 0.1843491</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] 0.002238308 0.8134125 0.1843492</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] 0.002238308 0.8134125 0.1843492</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] 0.088802140 0.5618339 0.3493639</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] 0.002238307 0.8134125 0.1843491</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] 0.014936400 0.7161989 0.2688647</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] 0.014936400 0.7161989 0.2688647</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] 0.088802167 0.5618339 0.3493639</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] 0.371106511 0.3097987 0.3190948</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] 0.088802193 0.5618339 0.3493639</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [11,] 0.088802167 0.5618339 0.3493639</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [12,] 0.002238306 0.8134126 0.1843491</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13,] 0.014936395 0.7161989 0.2688647</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [14,] 0.014936400 0.7161989 0.2688647</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [15,] 0.371106437 0.3097988 0.3190948</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [16,] 0.088802140 0.5618339 0.3493639</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [17,] 0.088802140 0.5618339 0.3493639</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [18,] 0.088802140 0.5618339 0.3493639</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [19,] 0.371106511 0.3097987 0.3190948</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [20,] 0.002238307 0.8134125 0.1843491</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rowc_mm</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $cov_mm</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $RowClusterMembers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $RowClusterMembers[[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  9 15 19</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $RowClusterMembers[[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  1  2  3  4  5  6  7  8 10 11 12 13 14 16 17 18 20</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $RowClusterMembers[[3]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> integer(0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $RowClusters</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 2 2 2 2 2 2 2 2 1 2 2 2 2 2 1 2 2 2 1 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clustord"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Cluster sizes:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row clusters:  3 17 0 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + col_coef_j) with 3 row clustering groups:</span></span></span>
 <span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">ROWCLUST</span><span class="op">+</span><span class="va">COL</span>,model<span class="op">=</span><span class="st">"OSM"</span>,<span class="fl">3</span>,long.df<span class="op">=</span><span class="va">long.df</span>,</span></span>
@@ -1031,193 +880,20 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> === End of initial row-cluster-only model fitting ===</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -108.25736731008 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $info</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         n         p         q      npar ninitvect         R </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        20         5         3        11         9         3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $model</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "OSM"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ ROWCLUST + COL, model = "OSM", nclus.row = 3, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     long.df = long.df, EM.control = list(EMcycles = 2, startEMcycles = 2), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     nstarts = 2)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$iter</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Clustering mode:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  row clustering</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$finished</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Converged:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$converged</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$new.llc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -122.4628</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$new.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -108.1578</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$previous.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -108.1662</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$llc.for.best.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -122.4628</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                  mu        mu </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.3940837 0.1842594 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$phi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 phi           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.9999983 1.0000000 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$rowc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_r     rowc_r            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -0.5216699  1.0437275 -0.5220576 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$col</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      col_j      col_j      col_j      col_j            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -0.1179480 -0.3468197  0.6875302 -0.3468183  0.1240557 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$pi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.1284571 0.2239484 0.6475945</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$best.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -108.1578</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$paramstopping</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$Res.Dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 216.3156</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$AIC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 238.3156</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$AICc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 241.9018</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$BIC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 266.9725</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$ICL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 295.5825</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $numerical.correction.epsilon</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1e-06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $constraint_sum_zero</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $param_lengths</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        mu       phi      rowc       col  rowc_col  rowc_cov       cov      colc </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         3         3         3         5         0         0         0         0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rowc_colc       row  colc_row  colc_cov </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         0         0         0         0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $initvect</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         mu         mu        phi     rowc_r     rowc_r      col_j      col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.4123909  0.2026688 13.3124858 -0.6030957  1.2064014 -0.1194954 -0.3542456 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      col_j      col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.6999817 -0.3542444 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $outvect</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         mu         mu        phi     rowc_r     rowc_r      col_j      col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.3940837  0.1842594 13.3125016 -0.5216699  1.0437275 -0.1179480 -0.3468197 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      col_j      col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.6875302 -0.3468183 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      mu_1      mu_2      mu_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.4123909 0.2026688 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$phi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     phi_1     phi_2     phi_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.9999983 1.0000000 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$rowc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_1     rowc_2     rowc_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -0.6030957  1.2064014 -0.6033056 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$col</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      col_j      col_j      col_j      col_j            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -0.1194954 -0.3542456  0.6999817 -0.3542444  0.1280038 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      mu_1      mu_2      mu_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.3940837 0.1842594 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$phi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     phi_1     phi_2     phi_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.9999983 1.0000000 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$rowc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_1     rowc_2     rowc_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -0.5216699  1.0437275 -0.5220576 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$col</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      col_j      col_j      col_j      col_j            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -0.1179480 -0.3468197  0.6875302 -0.3468183  0.1240557 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $pi.init</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.1243251 0.2488937 0.6267813</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $pi.out</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.1284571 0.2239484 0.6475945</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ppr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             [,1]       [,2]      [,3]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] 0.16371036 0.01079021 0.8254994</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] 0.16371035 0.01079024 0.8254994</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] 0.16371035 0.01079024 0.8254994</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] 0.11766414 0.28927071 0.5930652</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] 0.16371036 0.01079021 0.8254994</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] 0.15518505 0.06246809 0.7823469</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] 0.15518505 0.06246809 0.7823469</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] 0.11766403 0.28927133 0.5930646</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] 0.04749713 0.71315231 0.2393506</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] 0.11766393 0.28927194 0.5930641</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [11,] 0.11766403 0.28927133 0.5930646</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [12,] 0.16371036 0.01079018 0.8254995</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13,] 0.15518508 0.06246792 0.7823470</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [14,] 0.15518505 0.06246809 0.7823469</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [15,] 0.04749723 0.71315170 0.2393511</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [16,] 0.11766414 0.28927071 0.5930652</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [17,] 0.11766414 0.28927071 0.5930652</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [18,] 0.11766414 0.28927071 0.5930652</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [19,] 0.04749713 0.71315231 0.2393506</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [20,] 0.16371036 0.01079021 0.8254994</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rowc_mm</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $cov_mm</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $RowClusterMembers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $RowClusterMembers[[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> integer(0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $RowClusterMembers[[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  9 15 19</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $RowClusterMembers[[3]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  1  2  3  4  5  6  7  8 10 11 12 13 14 16 17 18 20</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $RowClusters</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 3 3 3 3 3 3 3 3 2 3 3 3 3 3 2 3 3 3 2 3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clustord"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Cluster sizes:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row clusters:  0 3 17 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Model Logit(P(Y &lt;= k))=mu_k-rowc_coef_r-col_coef_j-rowc_col_coef_rj with 2 row clustering groups:</span></span></span>
 <span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">ROWCLUST</span><span class="op">*</span><span class="va">COL</span>,model<span class="op">=</span><span class="st">"POM"</span>,nclus.row<span class="op">=</span><span class="fl">2</span>,long.df<span class="op">=</span><span class="va">long.df</span>,</span></span>
@@ -1237,192 +913,20 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> === End of intermediate rowcluster-column model fitting ===</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -108.732812616331 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $info</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         n         p         q      npar ninitvect         R </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        20         5         3        12        11         2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $model</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "POM"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ ROWCLUST * COL, model = "POM", nclus.row = 2, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     long.df = long.df, EM.control = list(EMcycles = 2, startEMcycles = 2), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     nstarts = 2)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$iter</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Clustering mode:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  row clustering</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$finished</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Converged:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$converged</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$new.llc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -108.8409</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$new.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -108.7324</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$previous.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -108.7324</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$llc.for.best.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -108.8421</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.5159538  1.0586624</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$rowc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_r            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.2059271 -0.2059271 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$col</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      col_j      col_j      col_j      col_j            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -0.3368974 -0.3716237  0.2439856  0.0500089  0.4145266 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$rowc_col</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]        [,2]       [,3]        [,4]       [,5]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  0.2846683 -0.01872846 -0.1785406  0.01575538 -0.1031546</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -0.2846683  0.01872846  0.1785406 -0.01575538  0.1031546</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$pi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.9993228276 0.0006771724</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$best.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -108.7324</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$paramstopping</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$Res.Dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 217.4649</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$AIC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 241.4649</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$AICc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 245.6974</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$BIC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 272.7269</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$ICL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 272.9462</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $numerical.correction.epsilon</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1e-06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $constraint_sum_zero</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $param_lengths</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        mu       phi      rowc       col  rowc_col  rowc_cov       cov      colc </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         3         0         2         5        10         0         0         0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rowc_colc       row  colc_row  colc_cov </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         0         0         0         0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $initvect</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          mu          mu      rowc_r       col_j       col_j       col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -0.49909366  0.45401854  0.22279627 -0.34610629 -0.42508603  0.19612398 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       col_j rowc_col_rj rowc_col_rj rowc_col_rj rowc_col_rj </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.02606513  0.29382085  0.03486621 -0.13058671  0.03966211 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $outvect</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          mu          mu      rowc_r       col_j       col_j       col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -0.51593372  0.45403387  0.20591079 -0.33693490 -0.37160997  0.24398830 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       col_j rowc_col_rj rowc_col_rj rowc_col_rj rowc_col_rj </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.04999175  0.28470027 -0.01874373 -0.17853688  0.01577379 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       mu_1       mu_2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -0.4990937  1.0755335 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$rowc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_1     rowc_2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.2227963 -0.2227963 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$col</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       col_j       col_j       col_j       col_j             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -0.34610629 -0.42508603  0.19612398  0.02606513  0.54900321 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.init$rowc_col</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]        [,2]       [,3]        [,4]       [,5]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  0.2938208  0.03486621 -0.1305867  0.03966211 -0.2377625</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -0.2938208 -0.03486621  0.1305867 -0.03966211  0.2377625</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       mu_1       mu_2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -0.5159337  1.0587176 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$rowc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_1     rowc_2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.2059108 -0.2059108 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$col</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       col_j       col_j       col_j       col_j             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -0.33693490 -0.37160997  0.24398830  0.04999175  0.41456481 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$rowc_col</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]        [,2]       [,3]        [,4]       [,5]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  0.2847003 -0.01874373 -0.1785369  0.01577379 -0.1031934</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -0.2847003  0.01874373  0.1785369 -0.01577379  0.1031934</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $pi.init</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.9993139936 0.0006860064</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $pi.out</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.9993315451 0.0006684549</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ppr</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]         [,2]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] 0.9989548 0.0010451938</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] 0.9997100 0.0002900476</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] 0.9991027 0.0008972629</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] 0.9993577 0.0006422956</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] 0.9988224 0.0011775650</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] 0.9998096 0.0001904366</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] 0.9996870 0.0003129922</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] 0.9995379 0.0004620877</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] 0.9996966 0.0003034109</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] 0.9996844 0.0003156288</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [11,] 0.9996913 0.0003087129</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [12,] 0.9978832 0.0021168146</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13,] 0.9989350 0.0010650269</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [14,] 0.9989430 0.0010569897</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [15,] 0.9996842 0.0003158436</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [16,] 0.9996619 0.0003380514</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [17,] 0.9993783 0.0006217143</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [18,] 0.9993783 0.0006217143</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [19,] 0.9997579 0.0002421155</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [20,] 0.9989548 0.0010451938</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rowc_mm</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $cov_mm</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $RowClusterMembers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $RowClusterMembers[[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $RowClusterMembers[[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> integer(0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $RowClusters</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clustord"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Cluster sizes:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row clusters:  20 0 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c) with 3 column clustering groups:</span></span></span>
 <span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">COLCLUST</span>,model<span class="op">=</span><span class="st">"OSM"</span>,nclus.column<span class="op">=</span><span class="fl">3</span>,long.df<span class="op">=</span><span class="va">long.df</span>,</span></span>
@@ -1434,172 +938,20 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -109.492584417224 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $info</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         n         p         q      npar ninitvect         C </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        20         5         3         7         5         3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $model</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "OSM"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ COLCLUST, model = "OSM", nclus.column = 3, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     long.df = long.df, EM.control = list(EMcycles = 2, startEMcycles = 2), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     nstarts = 2)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$iter</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Clustering mode:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  column clustering</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$finished</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Converged:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$converged</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$new.llc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -109.5541</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$new.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -109.4925</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$previous.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -109.4925</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$llc.for.best.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -109.5541</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                mu       mu </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.000000 0.115383 3.374359 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$phi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                       phi              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000000 0.0002802715 1.0000000000 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$pi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.998320652 0.001679348 0.000001000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$colc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    colc_1    colc_2    colc_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -3.469915 -3.328326  6.798241 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$best.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -109.4925</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$paramstopping</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$Res.Dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 218.985</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$AIC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 232.985</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$AICc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 234.5674</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$BIC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 251.2211</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$ICL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 251.3443</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $numerical.correction.epsilon</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1e-06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $constraint_sum_zero</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $param_lengths</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        mu       phi      rowc       col  rowc_col  rowc_cov       cov      colc </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         3         3         0         0         0         0         0         3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rowc_colc       row  colc_row  colc_cov </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         0         0         0         0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $initvect</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         mu         mu        phi     rowc_r     rowc_r </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.1153871  3.3933315 -8.1794689 -3.4890065 -3.2902619 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     mu_1     mu_2     mu_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.000000 0.115383 3.374359 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$phi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        phi_1        phi_2        phi_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000000 0.0002802715 1.0000000000 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$colc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    colc_1    colc_2    colc_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -3.469915 -3.328326  6.798241 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $kappa.init</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.998242077 0.001757923 0.000001000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $kappa.out</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.998320652 0.001679348 0.000001000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ppc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           [,1]        [,2]         [,3]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.9984212 0.001578786 1.085232e-58</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.9989384 0.001061561 1.312463e-67</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.9989382 0.001061797 1.327658e-67</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.9976528 0.002347166 8.919670e-50</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.9976526 0.002347427 8.971156e-50</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $colc_mm</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $cov_mm</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ColumnClusters</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 1 1 1 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ColumnClusterMembers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ColumnClusterMembers[[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3 4 5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ColumnClusterMembers[[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> integer(0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ColumnClusterMembers[[3]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> integer(0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rowc_format_param_lengths</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        mu       phi      rowc       col  rowc_col  rowc_cov       cov      colc </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         3         3         3         0         0         0         0         0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rowc_colc       row  colc_row  colc_cov </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         0         0         0         0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rowc_format_outvect</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        mu        mu       phi    rowc_r    rowc_r </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.115383  3.374359 -8.179472 -3.469915 -3.328326 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rowc_format_parlist.init</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rowc_format_parlist.init$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                  mu        mu </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000 0.1153871 3.3933315 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rowc_format_parlist.init$phi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                       phi              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.0000000000 0.0002802722 1.0000000000 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rowc_format_parlist.init$rowc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    rowc_r    rowc_r           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -3.489007 -3.290262  6.779268 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rowc_format_rowc_mm</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clustord"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Cluster sizes:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Column clusters:  5 0 0 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c + row_coef_i) with 3 column clustering groups:</span></span></span>
 <span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">COLCLUST</span><span class="op">+</span><span class="va">ROW</span>,model<span class="op">=</span><span class="st">"OSM"</span>,nclus.column<span class="op">=</span><span class="fl">3</span>,long.df<span class="op">=</span><span class="va">long.df</span>,</span></span>
@@ -1615,214 +967,20 @@ Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wile
 <span class="r-out co"><span class="r-pr">#&gt;</span> === End of initial row-cluster-only model fitting ===</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -104.662039616002 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $info</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         n         p         q      npar ninitvect         C </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        20         5         3        26        24         3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $model</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "OSM"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ COLCLUST + ROW, model = "OSM", nclus.column = 3, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     long.df = long.df, EM.control = list(EMcycles = 2, startEMcycles = 2), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     nstarts = 2)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$iter</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Clustering mode:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  column clustering</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$finished</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Converged:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$converged</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$new.llc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -106.9178</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$new.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -104.6137</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$previous.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -104.6146</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$llc.for.best.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -106.9178</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                    mu         mu </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.0000000  0.1144083 -0.7105377 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$phi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                       phi              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.000000e+00 4.186248e-48 1.000000e+00 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$pi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7.951458e-01 1.601254e-06 2.048526e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$colc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     colc_1     colc_2     colc_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -0.1138908 -0.1164450  0.2303358 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$params.for.best.lli$row</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       col_j       col_j       col_j       col_j       col_j       col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.1136910   1.0988834   1.0988785   0.1136951   0.1136945   1.0988806 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       col_j       col_j       col_j       col_j       col_j       col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1.0988830   1.0988778   1.0988824   1.9135008   1.0988835 -12.8267951 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       col_j       col_j       col_j       col_j       col_j       col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.1136969   1.0988840   0.1136925   0.1136951   0.1136955   0.1136924 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       col_j             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1.0988775   0.1138107 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$best.lli</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -104.6137</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $EM.status$paramstopping</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$Res.Dev</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 209.2275</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$AIC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 261.2275</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$AICc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 282.2275</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$BIC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 328.9619</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $criteria$ICL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 333.5701</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $numerical.correction.epsilon</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1e-06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $constraint_sum_zero</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $param_lengths</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        mu       phi      rowc       col  rowc_col  rowc_cov       cov      colc </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         3         3         0         0         0         0         0         3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rowc_colc       row  colc_row  colc_cov </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         0        20         0         0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $initvect</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           mu           mu          phi       rowc_r       rowc_r        col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0.1144202   -0.6966768 -109.0922797   -0.1640916   -0.1484772    0.1112669 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        col_j        col_j        col_j        col_j        col_j        col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    1.1006846    1.1007687    0.1113203    0.1113121    1.1007325    1.1006901 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        col_j        col_j        col_j        col_j        col_j        col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    1.1007796    1.1007020    1.9190815    1.1006822  -12.8273574    0.1113439 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        col_j        col_j        col_j        col_j        col_j        col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    1.1006740    0.1112870    0.1113206    0.1113249    0.1112852    1.1007855 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       mu_1       mu_2       mu_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.0000000  0.1144083 -0.7105377 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$phi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        phi_1        phi_2        phi_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.000000e+00 4.186248e-48 1.000000e+00 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$colc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     colc_1     colc_2     colc_3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -0.1138908 -0.1164450  0.2303358 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $parlist.out$row</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           1           2           3           4           5           6 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.1136910   1.0988834   1.0988785   0.1136951   0.1136945   1.0988806 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           7           8           9          10          11          12 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1.0988830   1.0988778   1.0988824   1.9135008   1.0988835 -12.8267951 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          13          14          15          16          17          18 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.1136969   1.0988840   0.1136925   0.1136951   0.1136955   0.1136924 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          19          20 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1.0988775   0.1138107 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $kappa.init</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7.827983e-01 1.570283e-06 2.172002e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $kappa.out</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7.951458e-01 1.601254e-06 2.048526e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ppc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           [,1]         [,2]       [,3]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.8272984 1.672632e-06 0.17269998</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.9255256 1.813694e-06 0.07447261</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.9255256 1.813694e-06 0.07447261</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.6486898 1.353124e-06 0.35130887</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.6486898 1.353124e-06 0.35130887</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $colc_mm</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $cov_mm</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ColumnClusters</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 1 1 1 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ColumnClusterMembers</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ColumnClusterMembers[[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3 4 5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ColumnClusterMembers[[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> integer(0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ColumnClusterMembers[[3]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> integer(0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rowc_format_param_lengths</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        mu       phi      rowc       col  rowc_col  rowc_cov       cov      colc </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         3         3         3        20         0         0         0         0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rowc_colc       row  colc_row  colc_cov </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         0         0         0         0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rowc_format_outvect</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           mu           mu          phi       rowc_r       rowc_r        col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0.1144083   -0.7105377 -109.0922797   -0.1138908   -0.1164450    0.1136910 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        col_j        col_j        col_j        col_j        col_j        col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    1.0988834    1.0988785    0.1136951    0.1136945    1.0988806    1.0988830 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        col_j        col_j        col_j        col_j        col_j        col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    1.0988778    1.0988824    1.9135008    1.0988835  -12.8267951    0.1136969 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        col_j        col_j        col_j        col_j        col_j        col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    1.0988840    0.1136925    0.1136951    0.1136955    0.1136924    1.0988775 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rowc_format_parlist.init</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rowc_format_parlist.init$mu</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                    mu         mu </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.0000000  0.1144202 -0.6966768 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rowc_format_parlist.init$phi</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                       phi              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.000000e+00 4.186248e-48 1.000000e+00 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rowc_format_parlist.init$rowc</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     rowc_r     rowc_r            </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -0.1640916 -0.1484772  0.3125688 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rowc_format_parlist.init$col</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       col_j       col_j       col_j       col_j       col_j       col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.1112669   1.1006846   1.1007687   0.1113203   0.1113121   1.1007325 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       col_j       col_j       col_j       col_j       col_j       col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1.1006901   1.1007796   1.1007020   1.9190815   1.1006822 -12.8273574 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       col_j       col_j       col_j       col_j       col_j       col_j </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.1113439   1.1006740   0.1112870   0.1113206   0.1113249   0.1112852 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       col_j             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1.1007855   0.1113162 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $rowc_format_rowc_mm</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]    1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clustord"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Cluster sizes:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Column clusters:  5 0 0 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="co"># Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + colc_coef_c)</span></span></span>

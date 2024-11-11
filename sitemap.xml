@@ -1,5 +1,9 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://vuw-clustering.github.io/clustord/404.html</loc></url>
+<url><loc>https://vuw-clustering.github.io/clustord/articles/clustordOrdinalModels.html</loc></url>
+<url><loc>https://vuw-clustering.github.io/clustord/articles/clustordStructureSummary.html</loc></url>
+<url><loc>https://vuw-clustering.github.io/clustord/articles/clustordTutorial.html</loc></url>
+<url><loc>https://vuw-clustering.github.io/clustord/articles/index.html</loc></url>
 <url><loc>https://vuw-clustering.github.io/clustord/authors.html</loc></url>
 <url><loc>https://vuw-clustering.github.io/clustord/index.html</loc></url>
 <url><loc>https://vuw-clustering.github.io/clustord/reference/calc.SE.bicluster.html</loc></url>

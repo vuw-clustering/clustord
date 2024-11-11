@@ -1,8 +1,11 @@
 pandoc: 3.1.11
 pkgdown: 2.1.1
 pkgdown_sha: ~
-articles: {}
-last_built: 2024-09-21T18:52Z
+articles:
+  clustordOrdinalModels: clustordOrdinalModels.html
+  clustordStructureSummary: clustordStructureSummary.html
+  clustordTutorial: clustordTutorial.html
+last_built: 2024-11-11T11:18Z
 urls:
   reference: https://vuw-clustering.github.io/clustord/reference
   article: https://vuw-clustering.github.io/clustord/articles
