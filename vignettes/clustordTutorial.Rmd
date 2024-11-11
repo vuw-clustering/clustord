@@ -6,7 +6,6 @@ output:
   pdf_document:
     toc: yes
     toc_depth: 4
-    latex_engine: xelatex
 vignette: >
   %\VignetteIndexEntry{clustordTutorial}
   %\VignetteEngine{knitr::rmarkdown}
