@@ -13,3 +13,6 @@ Results_*
 scripts/linguistics/
 *.gif
 docs
+inst/doc
+/doc/
+/Meta/
