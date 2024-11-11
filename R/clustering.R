@@ -845,8 +845,8 @@
 #'     previous starts, and it also reports when it is fitting simpler models
 #'     to find starting values for the parameters vs fitting the final, more
 #'     complex model.
-#' @return
-#' A list with components:
+#' @returns
+#' A \code{clustord} object, i.e. a list with components:
 #'
 #'     \code{info}: Basic info n, p, q, the number of parameters, the number of
 #'     row clusters and the number of column clusters, where relevant.
@@ -1117,6 +1117,7 @@ clustord <- function(formula,
         # Note: keep row-clustering-format param_lengths for
         column.results <- list(info=column.info,
                                model=results$model,
+                               clustering_mode="column clustering",
                                EM.status=column.EM.status,
                                criteria=results$criteria,
                                numerical.correction.epsilon=results$numerical.correction.epsilon,
@@ -1147,7 +1148,91 @@ clustord <- function(formula,
     if (results$EM.status$converged) print("EM algorithm has successfully converged.")
     else print("EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.")
 
+    results$call <- match.call()
+    results$formula <- formula
+    results$terms <- terms(formula)
+
     class(results) <- "clustord"
 
     return(results)
+}
+
+#' @export
+print.clustord <- function(x, digits = max(3L, getOption("digits") - 3L), ...)
+{
+    cat("\nCall:\n",
+        paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
+
+    cat("Clustering mode:\n",
+        x$clustering_mode)
+
+    cat("\n\nConverged:\n",
+        x$EM.status$converged)
+
+    cat("\n\nCluster sizes:\n")
+    if ("RowClusterMembers" %in% names(x)) {
+        cat("Row clusters: ", sapply(x$RowClusterMembers, length), "\n")
+    }
+    if ("ColumnClusterMembers" %in% names(x)) {
+        cat("Column clusters: ", sapply(x$ColumnClusterMembers, length), "\n")
+    }
+
+    # cat("\nParameter estimates:\n")
+    # print.default(format(x$parlist.out), digits=digits, print.gap=1L, quote=FALSE)
+
+    invisible(x)
+}
+
+#' @export
+summary.clustord <- function (object, ...)
+{
+    z <- object
+
+    ans <- z[c("call", "terms", "formula", "model", "clustering_mode")]
+
+    ans$convergence <- z$EM.status$converged
+
+    ans$numiter <- z$EM.status$iter
+    ans$loglikelihood <- z$EM.status$best.lli
+    ans$loglikelihood_type <- ifelse(z$clustering_mode == "biclustering","approximate","exact")
+    ans$AIC <- z$criteria$AIC
+    ans$BIC <- z$criteria$BIC
+
+    ans$estimates <- z$parlist.out
+
+    if("RowClusterMembers" %in% names(z)) {
+        ans$rowclustersizes <- sapply(z$RowClusterMembers, length)
+    }
+    if ("ColumnClusterMembers" %in% names(z)) {
+        ans$colclustersizes <- sapply(z$ColumnClusterMembers, length)
+    }
+
+    class(ans) <- "summary.clustord"
+    ans
+}
+
+#' @export
+print.summary.clustord <- function (x, digits = max(3L, getOption("digits") - 3L), ...) {
+    cat("\nCall:\n", # S has ' ' instead of '\n'
+        paste(deparse(x$call), sep="\n", collapse = "\n"), "\n\n", sep = "")
+
+    cat("Clustering mode:\n",
+        x$clustering_mode)
+
+    cat("\n\nConverged:\n",
+        x$convergence)
+
+    cat("\n\nCluster sizes:\n")
+    if ("rowclustersizes" %in% names(x)) {
+        cat("Row clusters: ", x$rowclustersizes, "\n")
+    }
+    if ("colclustersizes" %in% names(x)) {
+        cat("Column clusters: ", x$colclustersizes, "\n")
+    }
+
+    cat("\nParameter estimates:\n")
+    print.default(x$estimates, digits=digits, print.gap=1L, quote=FALSE)
+
+    cat("\n")
+    invisible(x)
 }

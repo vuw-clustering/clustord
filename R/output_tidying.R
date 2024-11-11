@@ -26,6 +26,9 @@ rename.pars <- function(parlist, long.df) {
                 colnames(parlist$colc_row) <- row_levels
             }
         }
+    } else {
+        if ("row" %in% names(parlist)) names(parlist$row) <- paste0("row",1:length(parlist$row))
+        if ("colc_row" %in% names(parlist)) colnames(parlist$colc_row) <- paste0("row",1:length(parlist$row))
     }
 
     ## Note: do NOT use grep to find col parameters because that will find colc
@@ -44,6 +47,9 @@ rename.pars <- function(parlist, long.df) {
                 colnames(parlist$rowc_col) <- col_levels
             }
         }
+    } else {
+        if ("col" %in% names(parlist)) names(parlist$col) <- paste0("col",1:length(parlist$col))
+        if ("rowc_col" %in% names(parlist)) colnames(parlist$rowc_col) <- paste0("col",1:length(parlist$col))
     }
 
     ## Rename cluster parameters with the cluster numbers

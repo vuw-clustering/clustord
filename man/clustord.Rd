@@ -182,7 +182,7 @@ to find starting values for the parameters vs fitting the final, more
 complex model.}
 }
 \value{
-A list with components:
+A \code{clustord} object, i.e. a list with components:
 
     \code{info}: Basic info n, p, q, the number of parameters, the number of
     row clusters and the number of column clusters, where relevant.
