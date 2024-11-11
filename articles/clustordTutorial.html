@@ -234,8 +234,8 @@ set up to handle datasets where some questions have more responses than
 others.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="st">"eval_survey.txt"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Q"</span>,<span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"ID"</span>,<span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Q"</span>, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"ID"</span>, <span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##     Q1 Q2 Q3 Q4 Q5 Q6 Q7 Q8 Q9 Q10 Q11 Q12</span></span>
 <span><span class="co">## ID1  6  2  2  2  2  3  3  3  3   3   2   2</span></span>
@@ -377,8 +377,9 @@ of the arguments at their default values, we fit the basic row
 clustering model to our dataset:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
-<span><span class="va">fit_rowclust_only</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">ROWCLUST</span>, <span class="st">"POM"</span>, nclus.row<span class="op">=</span><span class="fl">2</span>, </span>
-<span>                              long.df<span class="op">=</span><span class="va">long.df</span>, verbose<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">fit_rowclust_only</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">ROWCLUST</span>,</span>
+<span>    <span class="st">"POM"</span>, nclus.row <span class="op">=</span> <span class="fl">2</span>, long.df <span class="op">=</span> <span class="va">long.df</span>,</span>
+<span>    verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p>This also uses the option <code>verbose=FALSE</code> which displays
 reduced output during the progress of the algorithm. We will discuss the
 meaning of the outputs in the section on important algorithm
@@ -398,7 +399,7 @@ converged:</p>
 <pre><code><span><span class="co">## [1] TRUE</span></span></code></pre>
 <p>Then we can look at the probabilities of cluster membership:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_rowclust_only</span><span class="op">$</span><span class="va">ppr</span>,<span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_rowclust_only</span><span class="op">$</span><span class="va">ppr</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##       [,1] [,2]</span></span>
 <span><span class="co">##  [1,] 1.00 0.00</span></span>
 <span><span class="co">##  [2,] 1.00 0.00</span></span>
@@ -535,9 +536,9 @@ cluster.</p>
 <p>We can also check this against the mean value of responses for
 individuals in the first and second clusters:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span>, <span class="va">fit_rowclust_only</span><span class="op">$</span><span class="va">RowClusters</span><span class="op">)</span>, </span>
-<span>        <span class="st">"Mean response values across all questions for each individual"</span>, </span>
-<span>        names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cluster 1"</span>, <span class="st">"Cluster 2"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span>, <span class="va">fit_rowclust_only</span><span class="op">$</span><span class="va">RowClusters</span><span class="op">)</span>,</span>
+<span>    <span class="st">"Mean response values across all questions for each individual"</span>,</span>
+<span>    names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cluster 1"</span>, <span class="st">"Cluster 2"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="clustordTutorial_files/figure-html/unnamed-chunk-25-1.png" width="700"></p>
 <p>We will discuss goodness-of-fit later in the section about model
 selection.</p>
@@ -585,8 +586,9 @@ before fitting the model with column effects.</p>
 <p>We will fit this model using the same model type as before, POM:</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span>
-<span><span class="va">fit_rowclust_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">ROWCLUST</span> <span class="op">+</span> <span class="va">COL</span>, <span class="st">"POM"</span>, </span>
-<span>                              nclus.row<span class="op">=</span><span class="fl">2</span>, long.df<span class="op">=</span><span class="va">long.df</span>, verbose<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">fit_rowclust_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">ROWCLUST</span> <span class="op">+</span></span>
+<span>    <span class="va">COL</span>, <span class="st">"POM"</span>, nclus.row <span class="op">=</span> <span class="fl">2</span>, long.df <span class="op">=</span> <span class="va">long.df</span>,</span>
+<span>    verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level5">
 <h5 id="checking-the-output-1">Checking the output<a class="anchor" aria-label="anchor" href="#checking-the-output-1"></a>
@@ -720,14 +722,17 @@ the fact that the order has changed.</p>
 <p>Again, let’s check the mean value of responses for individuals in the
 first and second clusters:</p>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span>, <span class="va">fit_rowclust_cols</span><span class="op">$</span><span class="va">RowClusters</span><span class="op">)</span>, <span class="st">"Mean response values across all questions for each individual"</span>, names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cluster 1"</span>, <span class="st">"Cluster 2"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span>, <span class="va">fit_rowclust_cols</span><span class="op">$</span><span class="va">RowClusters</span><span class="op">)</span>,</span>
+<span>    <span class="st">"Mean response values across all questions for each individual"</span>,</span>
+<span>    names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cluster 1"</span>, <span class="st">"Cluster 2"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="clustordTutorial_files/figure-html/unnamed-chunk-32-1.png" width="700"></p>
 <p>You can see that although the order of the clusters is different than
 before, there is still a clear differentiation between the typical
 responses in Cluster 1 vs. Cluster 2.</p>
 <p>Now let’s also check the column effect parameters:</p>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_rowclust_cols</span><span class="op">$</span><span class="va">parlist.out</span><span class="op">$</span><span class="va">col</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_rowclust_cols</span><span class="op">$</span><span class="va">parlist.out</span><span class="op">$</span><span class="va">col</span>,</span>
+<span>    <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##    Q1    Q2    Q3    Q4    Q5    Q6    Q7    Q8    Q9   Q10   Q11   Q12 </span></span>
 <span><span class="co">##  6.80 -1.43 -2.79 -3.18 -0.62  0.84 -0.36  1.05  1.17  0.69 -1.72 -0.45</span></span></code></pre>
 <p>You can see that the first column parameter, for Q1, is much higher
@@ -812,8 +817,9 @@ are equivalent:</p>
 <pre><code><span><span class="co">## Y ~ ROWCLUST * COL</span></span></code></pre>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">fit_rowclust_cols_interact</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">ROWCLUST</span> <span class="op">*</span> <span class="va">COL</span>, <span class="st">"POM"</span>, </span>
-<span>                                       nclus.row<span class="op">=</span><span class="fl">2</span>, long.df<span class="op">=</span><span class="va">long.df</span>, verbose<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">fit_rowclust_cols_interact</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span></span>
+<span>    <span class="va">ROWCLUST</span> <span class="op">*</span> <span class="va">COL</span>, <span class="st">"POM"</span>, nclus.row <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>    long.df <span class="op">=</span> <span class="va">long.df</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level5">
 <h5 id="checking-the-output-2">Checking the output<a class="anchor" aria-label="anchor" href="#checking-the-output-2"></a>
@@ -928,18 +934,22 @@ converged:</p>
 values than the second cluster, although now there appears to be more
 overlap:</p>
 <div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span>, <span class="va">fit_rowclust_cols_interact</span><span class="op">$</span><span class="va">RowClusters</span><span class="op">)</span>, <span class="st">"Mean response values across all questions for each individual"</span>, names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cluster 1"</span>, <span class="st">"Cluster 2"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span>, <span class="va">fit_rowclust_cols_interact</span><span class="op">$</span><span class="va">RowClusters</span><span class="op">)</span>,</span>
+<span>    <span class="st">"Mean response values across all questions for each individual"</span>,</span>
+<span>    names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cluster 1"</span>, <span class="st">"Cluster 2"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="clustordTutorial_files/figure-html/unnamed-chunk-39-1.png" width="700"></p>
 <p>Now let’s check the column effect parameters:</p>
 <div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_rowclust_cols_interact</span><span class="op">$</span><span class="va">parlist.out</span><span class="op">$</span><span class="va">col</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_rowclust_cols_interact</span><span class="op">$</span><span class="va">parlist.out</span><span class="op">$</span><span class="va">col</span>,</span>
+<span>    <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##    Q1    Q2    Q3    Q4    Q5    Q6    Q7    Q8    Q9   Q10   Q11   Q12 </span></span>
 <span><span class="co">##  7.14 -1.48 -2.91 -3.30 -0.72  1.10 -0.40  1.10  1.27  0.63 -1.84 -0.59</span></span></code></pre>
 <p>When we include the interaction terms, the column effects have become
 a bit larger than before for some columns.</p>
 <p>We can then finally check the interaction effects:</p>
 <div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_rowclust_cols_interact</span><span class="op">$</span><span class="va">parlist.out</span><span class="op">$</span><span class="va">rowc_col</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_rowclust_cols_interact</span><span class="op">$</span><span class="va">parlist.out</span><span class="op">$</span><span class="va">rowc_col</span>,</span>
+<span>    <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##         Q1    Q2    Q3    Q4    Q5    Q6    Q7    Q8    Q9   Q10   Q11   Q12</span></span>
 <span><span class="co">## [1,] -1.18 -0.19 -0.12 -0.18  0.46 -0.94  0.29  0.33  0.14  0.64  0.11  0.63</span></span>
 <span><span class="co">## [2,]  1.18  0.19  0.12  0.18 -0.46  0.94 -0.29 -0.33 -0.14 -0.64 -0.11 -0.63</span></span></code></pre>
@@ -947,11 +957,15 @@ a bit larger than before for some columns.</p>
 interaction effects:</p>
 <div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rowc_col</span> <span class="op">&lt;-</span> <span class="va">fit_rowclust_cols_interact</span><span class="op">$</span><span class="va">parlist.out</span><span class="op">$</span><span class="va">rowc_col</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rowc_col</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span>, type<span class="op">=</span><span class="st">"b"</span>, col<span class="op">=</span><span class="st">"black"</span>, lwd<span class="op">=</span><span class="fl">2</span>, ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1.3</span>,<span class="fl">1.3</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">rowc_col</span><span class="op">[</span><span class="fl">2</span>,<span class="op">]</span>, lty<span class="op">=</span><span class="fl">2</span>, col<span class="op">=</span><span class="st">"blue"</span>, lwd<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">rowc_col</span><span class="op">[</span><span class="fl">2</span>,<span class="op">]</span>, lty<span class="op">=</span><span class="fl">2</span>, col<span class="op">=</span><span class="st">"blue"</span>, lwd<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"bottomright"</span>, legend<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cluster 1"</span>,<span class="st">"Cluster 2"</span><span class="op">)</span>, col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"black"</span>,<span class="st">"blue"</span><span class="op">)</span>,</span>
-<span>       lwd<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">2</span><span class="op">)</span>, lty<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rowc_col</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span>, type <span class="op">=</span> <span class="st">"b"</span>, col <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>    lwd <span class="op">=</span> <span class="fl">2</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1.3</span>, <span class="fl">1.3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">rowc_col</span><span class="op">[</span><span class="fl">2</span>, <span class="op">]</span>, lty <span class="op">=</span> <span class="fl">2</span>, col <span class="op">=</span> <span class="st">"blue"</span>,</span>
+<span>    lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">rowc_col</span><span class="op">[</span><span class="fl">2</span>, <span class="op">]</span>, lty <span class="op">=</span> <span class="fl">2</span>, col <span class="op">=</span> <span class="st">"blue"</span>,</span>
+<span>    lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"bottomright"</span>, legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cluster 1"</span>,</span>
+<span>    <span class="st">"Cluster 2"</span><span class="op">)</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"black"</span>, <span class="st">"blue"</span><span class="op">)</span>,</span>
+<span>    lwd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>, lty <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p><img src="clustordTutorial_files/figure-html/unnamed-chunk-42-1.png" width="700"></p>
 <p>This suggests that individuals in cluster 1 tend to give low-value
 responses to questions 1 and 6, and high-value responses for the rest,
@@ -1068,8 +1082,9 @@ formula, and we need to set <code>nclus.column</code> instead of
 <code>nclus.row</code>:</p>
 <div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">fit_colclust_only</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">COLCLUST</span>, model <span class="op">=</span> <span class="st">"POM"</span>, nclus.column <span class="op">=</span> <span class="fl">2</span>, </span>
-<span>                              long.df <span class="op">=</span> <span class="va">long.df</span>, verbose<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">fit_colclust_only</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">COLCLUST</span>,</span>
+<span>    model <span class="op">=</span> <span class="st">"POM"</span>, nclus.column <span class="op">=</span> <span class="fl">2</span>, long.df <span class="op">=</span> <span class="va">long.df</span>,</span>
+<span>    verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p>In column clustering, the mixing proportions are renamed
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><msub><mi>κ</mi><mi>c</mi></msub><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{\kappa_c\}</annotation></semantics></math>
 (to avoid confusion when performing biclustering with both sets of
@@ -1084,8 +1099,9 @@ the cluster memberships are named <code>ColumnClusters</code> not
 <span><span class="va">fit_colclust_only</span><span class="op">$</span><span class="va">EM.status</span><span class="op">$</span><span class="va">converged</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] TRUE</span></span></code></pre>
 <div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Column cluster membership probabilities</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_colclust_only</span><span class="op">$</span><span class="va">ppc</span>,<span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Column cluster membership</span></span>
+<span><span class="co"># probabilities</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_colclust_only</span><span class="op">$</span><span class="va">ppc</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##       [,1] [,2]</span></span>
 <span><span class="co">##  [1,]    1    0</span></span>
 <span><span class="co">##  [2,]    0    1</span></span>
@@ -1109,7 +1125,7 @@ the cluster memberships are named <code>ColumnClusters</code> not
 <span><span class="co">## [1]  2  3  4  5  7 11 12</span></span></code></pre>
 <div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Mixing proportions</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_colclust_only</span><span class="op">$</span><span class="va">kappa.out</span>,<span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_colclust_only</span><span class="op">$</span><span class="va">kappa.out</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 0.42 0.58</span></span></code></pre>
 <div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Parameters</span></span>
@@ -1134,15 +1150,17 @@ others.</p>
 <p>This uses the case-sensitive keyword <code>ROW</code>.</p>
 <div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">fit_colclust_rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">COLCLUST</span> <span class="op">+</span> <span class="va">ROW</span>, model <span class="op">=</span> <span class="st">"POM"</span>, nclus.column <span class="op">=</span> <span class="fl">2</span>, </span>
-<span>                              long.df <span class="op">=</span> <span class="va">long.df</span>, verbose<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">fit_colclust_rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">COLCLUST</span> <span class="op">+</span></span>
+<span>    <span class="va">ROW</span>, model <span class="op">=</span> <span class="st">"POM"</span>, nclus.column <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>    long.df <span class="op">=</span> <span class="va">long.df</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb81"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Convergence</span></span>
 <span><span class="va">fit_colclust_rows</span><span class="op">$</span><span class="va">EM.status</span><span class="op">$</span><span class="va">converged</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] TRUE</span></span></code></pre>
 <div class="sourceCode" id="cb83"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Column cluster membership probabilities</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_colclust_rows</span><span class="op">$</span><span class="va">ppc</span>,<span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Column cluster membership</span></span>
+<span><span class="co"># probabilities</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_colclust_rows</span><span class="op">$</span><span class="va">ppc</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##       [,1] [,2]</span></span>
 <span><span class="co">##  [1,]    1    0</span></span>
 <span><span class="co">##  [2,]    0    1</span></span>
@@ -1166,7 +1184,7 @@ others.</p>
 <span><span class="co">##  [1]  2  3  4  5  6  7  8  9 10 11 12</span></span></code></pre>
 <div class="sourceCode" id="cb87"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Mixing proportions</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_colclust_rows</span><span class="op">$</span><span class="va">kappa.out</span>,<span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_colclust_rows</span><span class="op">$</span><span class="va">kappa.out</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 0.08 0.92</span></span></code></pre>
 <div class="sourceCode" id="cb89"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Parameters</span></span>
@@ -1174,7 +1192,8 @@ others.</p>
 <pre><code><span><span class="co">##    colc_1    colc_2 </span></span>
 <span><span class="co">##  3.493738 -3.493738</span></span></code></pre>
 <div class="sourceCode" id="cb91"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_colclust_rows</span><span class="op">$</span><span class="va">parlist.out</span><span class="op">$</span><span class="va">row</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_colclust_rows</span><span class="op">$</span><span class="va">parlist.out</span><span class="op">$</span><span class="va">row</span>,</span>
+<span>    <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   ID1   ID2   ID3   ID4   ID5   ID6   ID7   ID8   ID9  ID10  ID11  ID12  ID13 </span></span>
 <span><span class="co">## -0.01  0.62  0.65  1.07  1.08  0.40  1.87  0.08 -0.20  0.92  0.28 -1.33  1.74 </span></span>
 <span><span class="co">##  ID14  ID15  ID16  ID17  ID18  ID19  ID20  ID21  ID22  ID23  ID24  ID25  ID26 </span></span>
@@ -1207,16 +1226,18 @@ effects and the individual row effects, using the usual R interaction
 formula notation.</p>
 <div class="sourceCode" id="cb93"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">fit_colclust_rows_interact</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">COLCLUST</span> <span class="op">*</span> <span class="va">ROW</span>, model <span class="op">=</span> <span class="st">"POM"</span>, nclus.column <span class="op">=</span> <span class="fl">2</span>, </span>
-<span>                                       long.df <span class="op">=</span> <span class="va">long.df</span>, verbose<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">fit_colclust_rows_interact</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span></span>
+<span>    <span class="va">COLCLUST</span> <span class="op">*</span> <span class="va">ROW</span>, model <span class="op">=</span> <span class="st">"POM"</span>, nclus.column <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>    long.df <span class="op">=</span> <span class="va">long.df</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p>The interaction terms added are named <code>colc_row</code>.</p>
 <div class="sourceCode" id="cb94"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Convergence</span></span>
 <span><span class="va">fit_colclust_rows_interact</span><span class="op">$</span><span class="va">EM.status</span><span class="op">$</span><span class="va">converged</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] TRUE</span></span></code></pre>
 <div class="sourceCode" id="cb96"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Column cluster membership probabilities</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_colclust_rows_interact</span><span class="op">$</span><span class="va">ppc</span>,<span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Column cluster membership</span></span>
+<span><span class="co"># probabilities</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_colclust_rows_interact</span><span class="op">$</span><span class="va">ppc</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##       [,1] [,2]</span></span>
 <span><span class="co">##  [1,]    1    0</span></span>
 <span><span class="co">##  [2,]    0    1</span></span>
@@ -1240,7 +1261,8 @@ formula notation.</p>
 <span><span class="co">##  [1]  2  3  4  5  6  7  8  9 10 11 12</span></span></code></pre>
 <div class="sourceCode" id="cb100"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Mixing proportions</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_colclust_rows_interact</span><span class="op">$</span><span class="va">kappa.out</span>,<span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_colclust_rows_interact</span><span class="op">$</span><span class="va">kappa.out</span>,</span>
+<span>    <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 0.08 0.92</span></span></code></pre>
 <div class="sourceCode" id="cb102"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Parameters</span></span>
@@ -1248,7 +1270,8 @@ formula notation.</p>
 <pre><code><span><span class="co">##    colc_1    colc_2 </span></span>
 <span><span class="co">##  10.49554 -10.49554</span></span></code></pre>
 <div class="sourceCode" id="cb104"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_colclust_rows_interact</span><span class="op">$</span><span class="va">parlist.out</span><span class="op">$</span><span class="va">row</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_colclust_rows_interact</span><span class="op">$</span><span class="va">parlist.out</span><span class="op">$</span><span class="va">row</span>,</span>
+<span>    <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##    ID1    ID2    ID3    ID4    ID5    ID6    ID7    ID8    ID9   ID10   ID11 </span></span>
 <span><span class="co">##  -3.89   3.58   3.63  -3.61   3.87  -3.76   4.30  -3.86  -3.92   3.78  -7.83 </span></span>
 <span><span class="co">##   ID12   ID13   ID14   ID15   ID16   ID17   ID18   ID19   ID20   ID21   ID22 </span></span>
@@ -1266,7 +1289,8 @@ formula notation.</p>
 <span><span class="co">##   ID78   ID79   ID80   ID81   ID82 </span></span>
 <span><span class="co">##  -3.86  -3.87   3.29   3.57  84.06</span></span></code></pre>
 <div class="sourceCode" id="cb106"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_colclust_rows_interact</span><span class="op">$</span><span class="va">parlist.out</span><span class="op">$</span><span class="va">colc_row</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_colclust_rows_interact</span><span class="op">$</span><span class="va">parlist.out</span><span class="op">$</span><span class="va">colc_row</span>,</span>
+<span>    <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##        ID1   ID2   ID3 ID4   ID5   ID6   ID7   ID8   ID9  ID10  ID11  ID12 ID13</span></span>
 <span><span class="co">## [1,] -4.09  3.01  2.96  -5  2.75 -4.51  2.33 -4.19 -3.91  2.83 -8.46  4.14  2.4</span></span>
 <span><span class="co">## [2,]  4.09 -3.01 -2.96   5 -2.75  4.51 -2.33  4.19  3.91 -2.83  8.46 -4.14 -2.4</span></span>
@@ -1297,12 +1321,16 @@ row effects much bigger.</p>
 interaction effects:</p>
 <div class="sourceCode" id="cb108"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">colc_row</span> <span class="op">&lt;-</span> <span class="va">fit_colclust_rows_interact</span><span class="op">$</span><span class="va">parlist.out</span><span class="op">$</span><span class="va">colc_row</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">colc_row</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span>, type<span class="op">=</span><span class="st">"b"</span>, col<span class="op">=</span><span class="st">"black"</span>, lwd<span class="op">=</span><span class="fl">2</span>, ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">85</span>,<span class="fl">85</span><span class="op">)</span>,</span>
-<span>     xlab<span class="op">=</span><span class="st">"Subject"</span>, ylab<span class="op">=</span><span class="st">"Cluster interaction effect"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">colc_row</span><span class="op">[</span><span class="fl">2</span>,<span class="op">]</span>, lty<span class="op">=</span><span class="fl">2</span>, col<span class="op">=</span><span class="st">"blue"</span>, lwd<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">colc_row</span><span class="op">[</span><span class="fl">2</span>,<span class="op">]</span>, lty<span class="op">=</span><span class="fl">3</span>, col<span class="op">=</span><span class="st">"blue"</span>, lwd<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topleft"</span>, legend<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cluster 1"</span>,<span class="st">"Cluster 2"</span><span class="op">)</span>, col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"black"</span>,<span class="st">"blue"</span><span class="op">)</span>,</span>
-<span>       lwd<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">2</span><span class="op">)</span>, lty<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">colc_row</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span>, type <span class="op">=</span> <span class="st">"b"</span>, col <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>    lwd <span class="op">=</span> <span class="fl">2</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">85</span>, <span class="fl">85</span><span class="op">)</span>, xlab <span class="op">=</span> <span class="st">"Subject"</span>,</span>
+<span>    ylab <span class="op">=</span> <span class="st">"Cluster interaction effect"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">colc_row</span><span class="op">[</span><span class="fl">2</span>, <span class="op">]</span>, lty <span class="op">=</span> <span class="fl">2</span>, col <span class="op">=</span> <span class="st">"blue"</span>,</span>
+<span>    lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">colc_row</span><span class="op">[</span><span class="fl">2</span>, <span class="op">]</span>, lty <span class="op">=</span> <span class="fl">3</span>, col <span class="op">=</span> <span class="st">"blue"</span>,</span>
+<span>    lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topleft"</span>, legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cluster 1"</span>,</span>
+<span>    <span class="st">"Cluster 2"</span><span class="op">)</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"black"</span>, <span class="st">"blue"</span><span class="op">)</span>,</span>
+<span>    lwd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>, lty <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="clustordTutorial_files/figure-html/unnamed-chunk-47-1.png" width="700"></p>
 <p>We can see that there is a huge difference between the response
 values for cluster 1 (Q1) and cluster 2 (the rest of the questions) for
@@ -1310,12 +1338,16 @@ the last subject, but other than that the cluster responses are broadly
 similar for most subjects. Zooming in on the rest of the plot:</p>
 <div class="sourceCode" id="cb109"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">colc_row</span> <span class="op">&lt;-</span> <span class="va">fit_colclust_rows_interact</span><span class="op">$</span><span class="va">parlist.out</span><span class="op">$</span><span class="va">colc_row</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">colc_row</span><span class="op">[</span><span class="fl">1</span>,<span class="op">]</span>, type<span class="op">=</span><span class="st">"b"</span>, col<span class="op">=</span><span class="st">"black"</span>, lwd<span class="op">=</span><span class="fl">2</span>, ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>,<span class="fl">10</span><span class="op">)</span>,</span>
-<span>     xlab<span class="op">=</span><span class="st">"Subject"</span>, ylab<span class="op">=</span><span class="st">"Cluster interaction effect"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">colc_row</span><span class="op">[</span><span class="fl">2</span>,<span class="op">]</span>, lty<span class="op">=</span><span class="fl">2</span>, col<span class="op">=</span><span class="st">"blue"</span>, lwd<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">colc_row</span><span class="op">[</span><span class="fl">2</span>,<span class="op">]</span>, lty<span class="op">=</span><span class="fl">3</span>, col<span class="op">=</span><span class="st">"blue"</span>, lwd<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topleft"</span>, legend<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cluster 1"</span>,<span class="st">"Cluster 2"</span><span class="op">)</span>, col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"black"</span>,<span class="st">"blue"</span><span class="op">)</span>,</span>
-<span>       lwd<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">2</span><span class="op">)</span>, lty<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">colc_row</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span>, type <span class="op">=</span> <span class="st">"b"</span>, col <span class="op">=</span> <span class="st">"black"</span>,</span>
+<span>    lwd <span class="op">=</span> <span class="fl">2</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>, <span class="fl">10</span><span class="op">)</span>, xlab <span class="op">=</span> <span class="st">"Subject"</span>,</span>
+<span>    ylab <span class="op">=</span> <span class="st">"Cluster interaction effect"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">colc_row</span><span class="op">[</span><span class="fl">2</span>, <span class="op">]</span>, lty <span class="op">=</span> <span class="fl">2</span>, col <span class="op">=</span> <span class="st">"blue"</span>,</span>
+<span>    lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">colc_row</span><span class="op">[</span><span class="fl">2</span>, <span class="op">]</span>, lty <span class="op">=</span> <span class="fl">3</span>, col <span class="op">=</span> <span class="st">"blue"</span>,</span>
+<span>    lwd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topleft"</span>, legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Cluster 1"</span>,</span>
+<span>    <span class="st">"Cluster 2"</span><span class="op">)</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"black"</span>, <span class="st">"blue"</span><span class="op">)</span>,</span>
+<span>    lwd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>, lty <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="clustordTutorial_files/figure-html/unnamed-chunk-48-1.png" width="700"></p>
 <p>There is no clear pattern to this, which often suggests that the
 model is not well-fitted.</p>
@@ -1399,9 +1431,9 @@ predictor. We have to define both <code>nclus.row</code> and
 <code>nclus.column</code>.</p>
 <div class="sourceCode" id="cb122"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span></span>
-<span><span class="va">fit_biclust</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">ROWCLUST</span> <span class="op">+</span> <span class="va">COLCLUST</span>, model <span class="op">=</span> <span class="st">"POM"</span>, </span>
-<span>                        nclus.row <span class="op">=</span> <span class="fl">2</span>, nclus.column <span class="op">=</span> <span class="fl">2</span>, </span>
-<span>                        long.df <span class="op">=</span> <span class="va">long.df</span>, verbose<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">fit_biclust</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">ROWCLUST</span> <span class="op">+</span> <span class="va">COLCLUST</span>,</span>
+<span>    model <span class="op">=</span> <span class="st">"POM"</span>, nclus.row <span class="op">=</span> <span class="fl">2</span>, nclus.column <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>    long.df <span class="op">=</span> <span class="va">long.df</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">converged</span> <span class="op">&lt;-</span> <span class="va">fit_biclust</span><span class="op">$</span><span class="va">EM.status</span><span class="op">$</span><span class="va">converged</span></span></code></pre></div>
 <p>By default, the biclustering model fits row clustering and column
 clustering models first in order to find good starting points for the
@@ -1429,7 +1461,7 @@ of cluster memberships are <code>RowClusterMembers</code> and
 <pre><code><span><span class="co">## [1] FALSE</span></span></code></pre>
 <div class="sourceCode" id="cb125"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Cluster membership probabilities</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_biclust</span><span class="op">$</span><span class="va">ppr</span>,<span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_biclust</span><span class="op">$</span><span class="va">ppr</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##       [,1] [,2]</span></span>
 <span><span class="co">##  [1,] 0.99 0.01</span></span>
 <span><span class="co">##  [2,] 0.97 0.03</span></span>
@@ -1514,7 +1546,7 @@ of cluster memberships are <code>RowClusterMembers</code> and
 <span><span class="co">## [81,] 0.98 0.02</span></span>
 <span><span class="co">## [82,] 1.00 0.00</span></span></code></pre>
 <div class="sourceCode" id="cb127"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_biclust</span><span class="op">$</span><span class="va">ppc</span>,<span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_biclust</span><span class="op">$</span><span class="va">ppc</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##       [,1] [,2]</span></span>
 <span><span class="co">##  [1,]    0    1</span></span>
 <span><span class="co">##  [2,]    1    0</span></span>
@@ -1547,10 +1579,10 @@ of cluster memberships are <code>RowClusterMembers</code> and
 <span><span class="co">## [1]  1  6  8  9 10</span></span></code></pre>
 <div class="sourceCode" id="cb133"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Mixing proportions</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_biclust</span><span class="op">$</span><span class="va">pi.out</span>,<span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_biclust</span><span class="op">$</span><span class="va">pi.out</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 0.75 0.25</span></span></code></pre>
 <div class="sourceCode" id="cb135"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_biclust</span><span class="op">$</span><span class="va">kappa.out</span>,<span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_biclust</span><span class="op">$</span><span class="va">kappa.out</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 0.58 0.42</span></span></code></pre>
 <div class="sourceCode" id="cb137"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Parameters</span></span>
@@ -1576,9 +1608,10 @@ clusters and interactions between them. This introduces the final
 element of the linear predictor, <code>rowc_colc</code>.</p>
 <div class="sourceCode" id="cb141"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span>
-<span><span class="va">fit_biclust_interact</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">ROWCLUST</span> <span class="op">*</span> <span class="va">COLCLUST</span>, model <span class="op">=</span> <span class="st">"POM"</span>, </span>
-<span>                        nclus.row <span class="op">=</span> <span class="fl">2</span>, nclus.column <span class="op">=</span> <span class="fl">2</span>, </span>
-<span>                        long.df <span class="op">=</span> <span class="va">long.df</span>, verbose<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">fit_biclust_interact</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">ROWCLUST</span> <span class="op">*</span></span>
+<span>    <span class="va">COLCLUST</span>, model <span class="op">=</span> <span class="st">"POM"</span>, nclus.row <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>    nclus.column <span class="op">=</span> <span class="fl">2</span>, long.df <span class="op">=</span> <span class="va">long.df</span>,</span>
+<span>    verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">converged</span> <span class="op">&lt;-</span> <span class="va">fit_biclust_interact</span><span class="op">$</span><span class="va">EM.status</span><span class="op">$</span><span class="va">converged</span></span></code></pre></div>
 <div class="sourceCode" id="cb142"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Convergence</span></span>
@@ -1586,7 +1619,7 @@ element of the linear predictor, <code>rowc_colc</code>.</p>
 <pre><code><span><span class="co">## [1] TRUE</span></span></code></pre>
 <div class="sourceCode" id="cb144"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Cluster membership probabilities</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_biclust_interact</span><span class="op">$</span><span class="va">ppr</span>,<span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_biclust_interact</span><span class="op">$</span><span class="va">ppr</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##       [,1] [,2]</span></span>
 <span><span class="co">##  [1,] 1.00 0.00</span></span>
 <span><span class="co">##  [2,] 1.00 0.00</span></span>
@@ -1671,7 +1704,7 @@ element of the linear predictor, <code>rowc_colc</code>.</p>
 <span><span class="co">## [81,] 1.00 0.00</span></span>
 <span><span class="co">## [82,] 1.00 0.00</span></span></code></pre>
 <div class="sourceCode" id="cb146"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_biclust_interact</span><span class="op">$</span><span class="va">ppc</span>,<span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_biclust_interact</span><span class="op">$</span><span class="va">ppc</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##       [,1] [,2]</span></span>
 <span><span class="co">##  [1,]    1    0</span></span>
 <span><span class="co">##  [2,]    0    1</span></span>
@@ -1705,10 +1738,10 @@ element of the linear predictor, <code>rowc_colc</code>.</p>
 <span><span class="co">## [1]  2  3  4 11</span></span></code></pre>
 <div class="sourceCode" id="cb152"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Mixing proportions</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_biclust_interact</span><span class="op">$</span><span class="va">pi.out</span>,<span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_biclust_interact</span><span class="op">$</span><span class="va">pi.out</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 0.95 0.05</span></span></code></pre>
 <div class="sourceCode" id="cb154"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_biclust_interact</span><span class="op">$</span><span class="va">kappa.out</span>,<span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_biclust_interact</span><span class="op">$</span><span class="va">kappa.out</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 0.67 0.33</span></span></code></pre>
 <div class="sourceCode" id="cb156"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Parameters</span></span>
@@ -1720,7 +1753,8 @@ element of the linear predictor, <code>rowc_colc</code>.</p>
 <pre><code><span><span class="co">##    colc_1    colc_2 </span></span>
 <span><span class="co">##  2.328658 -2.328658</span></span></code></pre>
 <div class="sourceCode" id="cb160"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_biclust_interact</span><span class="op">$</span><span class="va">parlist.out</span><span class="op">$</span><span class="va">rowc_colc</span>,<span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">fit_biclust_interact</span><span class="op">$</span><span class="va">parlist.out</span><span class="op">$</span><span class="va">rowc_colc</span>,</span>
+<span>    <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##       [,1]  [,2]</span></span>
 <span><span class="co">## [1,] -1.07  1.07</span></span>
 <span><span class="co">## [2,]  1.07 -1.07</span></span></code></pre>
@@ -1935,8 +1969,9 @@ can simply set the ones you want. This works the same way that the
 random starts and for fewer starting iterations and more main iterations
 than the defaults:</p>
 <div class="sourceCode" id="cb202"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">ROWCLUST</span> <span class="op">+</span> <span class="va">COL</span>, model<span class="op">=</span><span class="st">"POM"</span>, nclus.row<span class="op">=</span><span class="fl">2</span>, long.df<span class="op">=</span><span class="va">long.df</span>,</span>
-<span>                EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>startEMcycles<span class="op">=</span><span class="fl">2</span>, EMcycles<span class="op">=</span><span class="fl">100</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">10</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">ROWCLUST</span> <span class="op">+</span> <span class="va">COL</span>, model <span class="op">=</span> <span class="st">"POM"</span>,</span>
+<span>    nclus.row <span class="op">=</span> <span class="fl">2</span>, long.df <span class="op">=</span> <span class="va">long.df</span>, EM.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>startEMcycles <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>        EMcycles <span class="op">=</span> <span class="fl">100</span><span class="op">)</span>, nstarts <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <p>The rest of the settings are discussed in the <em>Advanced
 Settings</em> vignette.</p>
 </div>
@@ -1981,9 +2016,10 @@ you were setting up a data frame for regression analysis. The
 covariates to dummy variables, just as <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code> and
 <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm()</a></code> do.</p>
 <div class="sourceCode" id="cb203"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">age.df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>age<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span>, min<span class="op">=</span><span class="fl">20</span>, max<span class="op">=</span><span class="fl">60</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">age.df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>age <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span>,</span>
+<span>    min <span class="op">=</span> <span class="fl">20</span>, max <span class="op">=</span> <span class="fl">60</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">long.df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mat2df.html">mat2df</a></span><span class="op">(</span><span class="va">df</span>, xr.df<span class="op">=</span><span class="va">age.df</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">long.df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mat2df.html">mat2df</a></span><span class="op">(</span><span class="va">df</span>, xr.df <span class="op">=</span> <span class="va">age.df</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning in mat2df(df, xr.df = age.df): Removing 4 entries for which Y is NA.</span></span></code></pre>
 <p>If you are instead adding covariates for the <strong>columns</strong>
 of the data matrix, i.e. covariates that take different values for the
@@ -1994,9 +2030,10 @@ can add as many numerical or categorical covariates as you like.</p>
 dataset, and adds that and the age covariate to the long form data
 frame.</p>
 <div class="sourceCode" id="cb205"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">question.df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>question<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Group A"</span>,<span class="st">"Group B"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span>, replace<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">question.df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>question <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Group A"</span>,</span>
+<span>    <span class="st">"Group B"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">long.df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mat2df.html">mat2df</a></span><span class="op">(</span><span class="va">df</span>, xr.df<span class="op">=</span><span class="va">age.df</span>, xc.df<span class="op">=</span><span class="va">question.df</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">long.df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mat2df.html">mat2df</a></span><span class="op">(</span><span class="va">df</span>, xr.df <span class="op">=</span> <span class="va">age.df</span>, xc.df <span class="op">=</span> <span class="va">question.df</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning in mat2df(df, xr.df = age.df, xc.df = question.df): Removing 4 entries</span></span>
 <span><span class="co">## for which Y is NA.</span></span></code></pre>
 </div>
@@ -2011,8 +2048,9 @@ as logs or powers.</p>
 question covariates. The covariate names <strong>must match</strong> the
 names they had in their original data frames.</p>
 <div class="sourceCode" id="cb207"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit_with_covariates</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">ROWCLUST</span> <span class="op">+</span> <span class="va">age</span> <span class="op">+</span> <span class="va">question</span>, model<span class="op">=</span><span class="st">"POM"</span>,</span>
-<span>                                nclus.row<span class="op">=</span><span class="fl">2</span>, long.df<span class="op">=</span><span class="va">long.df</span>, verbose<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">fit_with_covariates</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">ROWCLUST</span> <span class="op">+</span></span>
+<span>    <span class="va">age</span> <span class="op">+</span> <span class="va">question</span>, model <span class="op">=</span> <span class="st">"POM"</span>, nclus.row <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>    long.df <span class="op">=</span> <span class="va">long.df</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb208"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_with_covariates</span><span class="op">$</span><span class="va">EM.status</span><span class="op">$</span><span class="va">converged</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] FALSE</span></span></code></pre>
