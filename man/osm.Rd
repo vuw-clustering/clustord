@@ -204,11 +204,10 @@ http://www.r-project.org/Licenses/
 }
 \references{
 Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John
-  Wiley & Sons.
-
-  Anderson, J. A. (1984). Regression and ordered categorical variables.
-  *Journal of the Royal Statistical Society: Series B (Methodological)*,
-  46(1), 1-22.
+Wiley & Sons.
+Anderson, J. A. (1984). Regression and ordered categorical variables.
+*Journal of the Royal Statistical Society: Series B (Methodological)*,
+46(1), 1-22.
 }
 \seealso{
 [MASS::polr()]
