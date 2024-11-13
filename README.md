@@ -10,13 +10,38 @@ The latest version of the package, version 1.1, is a major update from version 0
 
 Note that the input arguments and output components have changed from version 0.1. This version is not backwards compatible, i.e. you will not be able to run scripts for v0.1 using v1.1, but the changes that make it not backwards-compatible are mostly stylistic ones to avoid using "." notation. For example, the input argument `constraint.sum.zero` has now become `constraint_sum_zero`. This avoids potential confusion with S3 methods.
 
-There are five top-level functions. The main one is `clustord()`, which performs clustering, including row clustering, column clustering, and biclustering. There is also an auxiliary one, `mat2df()`, which may need to be run before `clustord()` to create the input data structure for `clustord()` (see the `clustord()` manual for details). The final two functions, `calc.SE.rowcluster()` and `calc.SE.bicluster()`, are designed to be run after `clustord()`, to calculate the standard errors of the clustering parameters, if needed. `calc.cluster.comparisons()` can be used to compare the clustering results from different runs or different models, avoiding the label-switching issue. All four of these top-level functions have have standard R-style manuals to explain their usage. 
+There are six top-level functions. The main one is `clustord()`, which performs
+clustering, including row clustering, column clustering, and biclustering. There
+is also an auxiliary one, `mat2df()`, which may need to be run before
+`clustord()` to create the input data structure for `clustord()` (see the
+`clustord()` manual for details). Two other functions, `calc.SE.rowcluster()`
+and `calc.SE.bicluster()`, are designed to be run after `clustord()`, to
+calculate the standard errors of the clustering parameters, if needed.
+`calc.cluster.comparisons()` can be used to compare the clustering results from
+different runs or different models, avoiding the label-switching issue.
+
+The package also contains a function `osm()` which performs regression for an 
+ordinal response using the Ordered Stereotype Model. This function has been
+included in this package because other R packages are able to fit the stereotype
+model for regression, but cannot fit the ordering constraint. The `osm()` 
+function is based on `MASS::polr()` and is intended to be used in a similar way,
+so if you wish to perform regression via proportional odds then use that, or if 
+you wish to perform regression using the more flexible ordered stereotype model
+then use `osm()` from this package. 
+
+The package has manuals for the functions and also vignettes. Clustering has 
+multiple vignettes, to explain different aspects of the options. The package
+documentation is online at 
+[vuw-clustering.github.io/clustord](vuw-clustering.github.io/clustord) 
+and the Articles section lists the vignettes.
 
 If you need any more help, please email louise.mcmillan@vuw.ac.nz.
 
 ## Citations
 
-When using the OSM methods, please cite:
+When using the clustering methods, please cite this package (you can fetch
+the citation in R using `cite("clustord")`) and also cite one of the following.
+For the OSM clustering methods, please cite:
 
 Fernández, D., Arnold, R., & Pledger, S. (2016). Mixture-based clustering for the ordered stereotype model. Computational Statistics & Data Analysis, 93, 46-75.
 
@@ -64,3 +89,7 @@ Pledger, S., & Arnold, R. (2014). Multivariate methods using mixtures: Correspon
   publisher={Elsevier}
 }
 ````
+
+For ordered stereotype regression, please cite this package and also cite
+Anderson (1984) as it was Anderson who first proposed the ordered stereotype
+model.
