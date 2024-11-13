@@ -925,10 +925,11 @@
 #'     assigned to a cluster based on maximum posterior probability of cluster
 #'     membership (\code{ppr} and \code{ppc})
 #'
-#' @references
-#' Fernandez, D., Arnold, R., & Pledger, S. (2016). Mixture-based clustering for the ordered stereotype model. *Computational Statistics & Data Analysis*, 93, 46-75.
-#' Anderson, J. A. (1984). Regression and ordered categorical variables. *Journal of the Royal Statistical Society: Series B (Methodological)*, 46(1), 1-22.
-#' Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wiley & Sons.
+#' @references Fernandez, D., Arnold, R., & Pledger, S. (2016). Mixture-based clustering for the ordered stereotype model. \emph{Computational Statistics & Data Analysis}, 93, 46-75.
+#'
+#' @references Anderson, J. A. (1984). Regression and ordered categorical variables. \emph{Journal of the Royal Statistical Society: Series B (Methodological)}, 46(1), 1-22.
+#'
+#' @references Agresti, A. (2010). \emph{Analysis of ordinal categorical data} (Vol. 656). John Wiley & Sons.
 #'
 #' @examples
 #' set.seed(1)

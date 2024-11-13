@@ -183,10 +183,9 @@
 #'
 #'   \code{xlevels} factor levels from any categorical predictors
 #'
-#' @references
-#' Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wiley & Sons.
-#' Anderson, J. A. (1984). Regression and ordered categorical variables. *Journal of the Royal Statistical Society: Series B (Methodological)*, 46(1), 1-22.
+#' @references Agresti, A. (2010). \emph{Analysis of ordinal categorical data} (Vol. 656). John Wiley & Sons.
 #'
+#' @references Anderson, J. A. (1984). Regression and ordered categorical variables. \emph{Journal of the Royal Statistical Society: Series B (Methodological)}, 46(1), 1-22.
 #'
 #' @seealso [MASS::polr()]
 #'
