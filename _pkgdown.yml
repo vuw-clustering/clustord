@@ -21,6 +21,12 @@ reference:
   - calc.SE.rowcluster
   - calc.SE.bicluster
 
+- subtitle: Regression
+  desc: >
+    Functions for performing regression on ordinal response data using the ordered stereotype model
+  contents:
+  - osm
+
 - subtitle: Utility functions
   desc: >
     Functions for setting up the long-form data frame for clustering and calculating measures to compare sets of clustering results
