@@ -1,8 +1,10 @@
 # clustord
 
-Please install clustord from GitHub using `remotes::install_github(dependencies = TRUE, build_vignettes = TRUE)`. 
+Please install clustord from GitHub using `remotes::install_github("vuw-clustering/clustord", dependencies = TRUE, build_vignettes = TRUE)`. 
 
 The `build_vignettes = TRUE` part ensures that you will install the vignettes as well, which are available to help you learn how to use the package.
+
+If you get an error when you try to install the package using this method, please also try installing the `pak` package and then use `pak::pkg_install("vuw-clustering/clustord", dependencies = TRUE)`.
 
 # Update
 
