@@ -5,7 +5,8 @@ articles:
   clustordOrdinalModels: clustordOrdinalModels.html
   clustordStructureSummary: clustordStructureSummary.html
   clustordTutorial: clustordTutorial.html
-last_built: 2024-11-18T16:38Z
+  RegressionwithOSM: RegressionwithOSM.html
+last_built: 2024-11-23T17:07Z
 urls:
   reference: https://vuw-clustering.github.io/clustord/reference
   article: https://vuw-clustering.github.io/clustord/articles
