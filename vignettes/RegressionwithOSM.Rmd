@@ -1,0 +1,177 @@
+---
+title: "Regression with the Ordered Stereotype Model (OSM)"
+author: "Louise McMillan"
+output: 
+  pdf_document:
+    toc: yes
+    toc_depth: 4
+vignette: >
+  %\VignetteIndexEntry{regressionWithOSM}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+header-includes:
+  - \usepackage{bm}
+  - \usepackage{palatino}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+The `clustord` package is primarily designed for clustering ordinal data, but you can also use it to carry out regression on ordinal response data using the Ordered Stereotype Model (OSM) using the `osm()` function.
+
+The proportional odds model (POM) is the other ordinal model available for clustering in `clustord`, but a regression function is not provided for that, because the `MASS` package already contains such a function, `polr()`. The `osm()` function in `clustord` is designed to be similar to the `polr()` function, with similar arguments and some of the same outputs.
+
+In order to demonstrate the use of the `osm()` function, we will first load the `arthritis` dataset from the `multgee` package. This dataset contains self-assessment scores from rheumatoid arthritis sufferers at an initial baseline assessment and at several follow-up times.
+
+```{r, warning=FALSE, message=FALSE}
+library(clustord)
+library(multgee)
+head(arthritis)
+```
+
+The `y` variable is the self-assessment score, which will be our ordinal response. We will convert it to a factor, which is necessary for the analysis. Since the response is already encoded as values 1 to 5, we do not need to change the default factor levels.
+
+```{r}
+arthritis$y <- factor(arthritis$y)
+```
+
+# Ordered Stereotype Model definition
+
+We will define the ordered stereotype model for an observation $i$ with response value $Y_i$ with $q$ levels indexed by $k = 1, \dots, q$. $Y_i$ depends on covariates $\bm{X}_i$. The ordered sterotype model takes the form
+\[
+\log\left(\dfrac{P(Y_i = k \,|\, \bm{x}_i)}{P(Y_i = 1 \,|\, \bm{x}_i)} \right) = \mu_k + \phi_k \bm{\beta}^T\bm{x}_i
+\]
+where $\mu_1$ is fixed at 0 for identifiability and $0 = \phi_1 \leq \ldots \leq \phi_k \leq \ldots \leq \phi_q = 1$. The restriction on the $\phi_k$ values is what makes this the **ordered** stereotype model.
+
+The $\bm{\beta}$ values are the coefficients of the covariates, as in a linear regression model, except here they change the probability of $Y_i$ taking different levels. If a single coefficient is positive, it increases the probability of $Y_i$ taking higher levels, and if it is negative it increases the probability of $Y_i$ taking lower levels.
+
+It is possible to have a more flexible model where there are separate $\bm{\beta}$ coefficients for each level of the response, but that is not available in this package.
+
+Note that this is **not** a cumulative model, nor is it a logistic model, because the $\log$ function on the left hand side of the model equation is not a logit. By contrast, the proportional odds model is a cumulative logit model:
+\[
+\log\left(\dfrac{P(Y_i \leq k \,|\, \bm{x}_i)}{P(Y_i > k \,|\, \bm{x}_i)} \right) = \mu_k - \bm{\beta}^T\bm{x}_i
+\]
+
+Note that the minus sign in this form of the proportional odds model ensures that the coefficients $\bm{\beta}$ have the same effect as in the ordered stereotype model, i.e. that positive values of the coefficients increase the probability of $Y_i$ taking higher levels. 
+
+The ordered stereotype model is more flexible than the proportional odds model partly because the $\phi_k$ score parameters change the effect of the coefficients for different levels of the response, so that the model is not proportional at every response level. It is also more flexible because it is not a cumulative model, in that the model is based on the separate relative probability of any of the upper levels compared with the baseline reference level. That is, the ratio in the $\log$ part is a ratio between level $k$ and level 1, without reference to any of the other levels. 
+
+Therefore, if you have data that do not fit the proportionality requirements of the proportional odds model, fitting the ordered stereotype model provides more flexibility and only increases the number of independent parameters by $q - 2$ (because $\phi_1$ and $\phi_q$ are already fixed at 0 and 1).
+
+
+# Ordered Stereotype Model fitting
+
+We can fit the ordered stereotype model using a standard regression call, specifying the required formula and the dataset to use. We will test a model in which the response, i.e. the self-assessment score, is dependent on the baseline self-assessment score and the patient's sex and age.
+
+Since the dataset has multiple rows for each patient, containing self-assessment scores at different follow-up time points (i.e. it is a longitudinal dataset), we will select only one of these time points for our analysis, using the `subset` argument of the `osm()` function.
+
+```{r}
+fit <- osm(y ~ baseline + sex + age, data=arthritis, subset = (time == 1))
+fit
+```
+
+Notice that the output of this initial fit includes a warning message: `Warning: did not converge as iteration limit reached`. This warning indicates that the `optim()` function inside `osm()`, which is used to fit the model, did not manage to converge to a solution.
+
+We therefore need to refit the model allowing `optim()` to run for more iterations, to ensure convergence. We can do this by passing in the `control` argument for `optim()`, which is a list of control parameters for `optim()`. The only control parameter we will change is the upper limit on the number of iterations, `maxit`. The default is 100, and we will increase it to 5000.
+
+```{r}
+fit <- osm(y ~ baseline + sex + age, data=arthritis, 
+           subset = (time == 1), control=list(maxit=5000))
+fit
+```
+
+Now we have got a converged solution, so we can now move on to interpreting the results.
+
+## Covariate coefficients
+
+The `beta` estimates are the estimated coefficients of the covariates baseline, sex and age. More positive values correspond to a higher probability of getting high response levels (i.e. in this case, you're more likely to get y = 4 or 5 than 1 or 2), and more negative values correspond to a higher probability of getting low response levels (i.e. you're more likely to get y = 1 or 2 than 4 or 5). 
+
+We see that the coefficient for baseline is 1.94, which indicates that the baseline score for an individual has a big impact on their follow-up self assessment score. If the baseline increases by one level, then that makes it more likely that the follow-up self-assessment score, y, will also be higher.
+
+We see that the coefficient for sex is 0.84. The reference level, 1, corresponds to female, and 2 corresponds to male. So male patients are more likely to have high self-assessment scores than female patients. But the effect of sex is not as dramatic as the effect of the baseline score.
+
+Finally, we see that the coefficient for age is -0.0090. This is much smaller than the effects of baseline or sex. It's also slightly negative. So this indicates that every additional year the patient had lived at the start of the trial reduced the chances of them having high follow up scores, but only by a tiny bit.
+
+Overall, the effect sizes suggest that baseline and sex are relevant, but that age is not particularly important.
+
+## `mu` parameters
+
+The `mu` estimates in the output are, roughly speaking, the intercept terms for each level of the response. This is why there is no intercept term amongst the covariate coefficients: it is already incorporated into the `mu` parameters. We do not need to interpret these estimates.
+
+## `phi` parameters
+
+The `phi` estimates in the output are the "score" parameters that are unique to the Ordered Stereotype Model. The first and the last values are fixed as 0 and 1.
+
+The values of the remaining coefficients are $\phi_2 = 0.13$, $\phi_3 = 0.18$, $\phi_4 = 0.60$.
+
+Note firstly that $\phi_2$ and $\phi_3$ have very similar estimated values. The $\phi_k$ values modify the effects of the covariates so that they have slightly different effects for each level. 
+Since $\phi_2$ and $\phi_3$ are very similar, covariates have similar effects on both of those levels. Roughly speaking, this means that if the baseline pushes up the chances of getting level 2 scores compared to the reference level 1, the baseline will also push up the chances of getting level 3 scores compared to the reference level 1. There's very little difference in the pattern of the results for response level 2 compared to response level 3. 
+
+That tells us that if we want to simplify the scores we could merge levels 2 and 3 without changing the information in the results much. Let's try that.
+
+### Merging response levels
+
+We start by constructing a new version of the response with both of those levels converted to level "2.5" and defining that as a new factor:
+
+```{r}
+arthritis$y_merged <- as.numeric(as.character(arthritis$y))
+arthritis$y_merged[arthritis$y_merged %in% c(2,3)] <- 2.5
+arthritis$y_merged <- factor(arthritis$y_merged)
+
+fit_merged <- osm(y_merged ~ baseline + sex + age, data=arthritis, 
+                  subset = (time == 1), control = list(maxit = 5000))
+fit_merged
+```
+
+As you can see, the coefficient estimates for the covariates have changed a little, but the general pattern is the same, because levels 2 and 3 were not giving us much different information about the covariates anyway.
+
+If we wanted to simplify the data even further we could consider merging response levels 1 and 2.5, which are still fairly close together, but that's probably unnecessary. $\phi_4$ is very different to both $\phi_{2.5}$ and $\phi_5$, so that suggests those three levels are all useful for understanding the effects of the covariates, so we should not merge them.
+
+Generally speaking, we would consider any difference between consecutive $\phi_k$ values that's smaller than 0.1 to be a small difference, any difference between 0.1 and 0.2 to be a fairly small difference and any difference above 0.2 to be a large difference. Levels with $\phi_k$ values more than 0.2 apart should not be merged.
+
+If we merged levels 4 and 5 we'd expect the results to change a lot:
+
+```{r}
+arthritis$y_merged2 <- as.numeric(as.character(arthritis$y_merged))
+arthritis$y_merged2[arthritis$y_merged2 %in% c(4,5)] <- 4.5
+arthritis$y_merged2 <- factor(arthritis$y_merged2)
+
+fit_merged2 <- osm(y_merged2 ~ baseline + sex + age, data=arthritis, 
+                   subset = (time == 1), control = list(maxit = 5000))
+fit_merged2
+```
+
+
+### Recoding the response levels using the score parameters
+
+The other useful aspect of the $\phi_k$ parameters, apart from an indication of which levels of the response could be merged without much loss of information, is that they can be used to recode the ordinal levels in an empirical way.
+
+That is, if you want to apply numerical methods to the ordinal response variable, then instead of numbering the levels 1, 2, etc. you can number them using the $\phi_k$ values, which are empirically selected based on the data. If you wish, you can rescale the $\phi_k$ values so that the levels range between 1 and $q$, where $q$ is the total number of levels in the response. You simply calculate $v_k = 1 + \phi_k (q-1)$ and then the values $v_k$ will be your new codings for the response levels.
+
+Fernández, et al. (2021) demonstrates a similar approach where the ordered stereotype scores are used as codings for the response levels before applying a numerical method, archetypoid analysis, to the recoded responses. However, as that is a multivariate analysis method, in that particular case the clustering form of the ordered stereotype model was fitted, instead of the regression model.
+
+
+# Odds ratios
+
+In the Ordered Stereotype Model, it is not possible to calculate a single odds ratio estimate for each covariate coefficient. This is because the model is purposely constructed so that the covariates can have slightly different effects on the different levels of the response variable. The overall effect of a covariate depends not only on its coefficient but also on the $\phi_k$ parameter for each level $k$ of the response.
+
+The implication of that is that there is no single number, akin to an odds ratio, that would summarize how the covariate changes the response. We can say which effect sizes are bigger and smaller, and which are positive and negative, but there is no convenient way to summarize the differences caused by a covariate using one single number.
+
+
+# Stereotype Model functions in other packages
+
+Note that the `ordinalgmifs` package also provides a fitting function for the Stereotype Model. However, this package fits the Stereotype Model rather than the Ordered Stereotype Model. 
+
+The Ordered Stereotype Model has a restriction $0 = \phi_1 \leq \phi_2 \leq \dots \leq \phi_q = 1$, where $q$ is the number of levels in the response variable, and this restriction enforces the ordinal nature of the response.
+
+The Stereotype Model, i.e. the model fitted in `ordinalgmifs`, does not have this restriction on the $\phi_k$ values.
+
+# References
+
+Fernández, D., Epifanio, I. and McMillan, L. F. (2021) Archetypal analysis for ordinal data. *Information Sciences*, 579, pp. 281--292, https://doi.org/10.1016/j.ins.2021.07.095.

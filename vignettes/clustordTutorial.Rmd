@@ -995,7 +995,7 @@ Note also that, although it is theoretically possible in this model structure to
 
 Agresti, A. (2010). *Analysis of ordinal categorical data*. Vol. 656, John Wiley & Sons.
 
-Akaike, H. (1973). Maximum likelihood identification of Gaussian autoregressive moving average models. Biometrika, 60(2), 255-265.
+Akaike, H. (1973). Maximum likelihood identification of Gaussian autoregressive moving average models. *Biometrika*, 60(2), 255-265.
 
 Anderson, J. A. (1984). Regression and ordered categorical variables. *Journal of the Royal Statistical Society -- Series B (Methodological)*, pp. 1--30.
 
