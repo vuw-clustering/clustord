@@ -1153,7 +1153,7 @@ clustord <- function(formula,
     results$formula <- formula
     results$terms <- terms(formula)
 
-    class(results) <- "clustord"
+    class(results) <- c(class(results), "clustord")
 
     return(results)
 }
