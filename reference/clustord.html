@@ -73,6 +73,7 @@ Proportional Odds Model (POM) and a dedicated Binary Model for binary data.</p>
 <span>  optim.control <span class="op">=</span> <span class="fu">default.optim.control</span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  constraint_sum_zero <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  start_from_simple_model <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  parallel_starts <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  nstarts <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -231,6 +232,14 @@ row/column effects. If the full model has covariates, then simpler models
 are ones without the covariates (to get starting values for the cluster
 parameters), and ones with the covariates but no clustering (to get
 starting values for the covariates).</p></dd>
+
+
+<dt id="arg-parallel-starts">parallel_starts<a class="anchor" aria-label="anchor" href="#arg-parallel-starts"></a></dt>
+<dd><p>(default FALSE) if TRUE, by generating multiple random
+starts, those random starts will be parallelised over as many cores as are
+available. For example, on a personal computer this will be one fewer than
+the number of cores in the machine, to make sure one is left for system
+tasks external to R.</p></dd>
 
 
 <dt id="arg-nstarts">nstarts<a class="anchor" aria-label="anchor" href="#arg-nstarts"></a></dt>
