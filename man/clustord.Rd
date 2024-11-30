@@ -20,6 +20,7 @@ clustord(
   optim.control = default.optim.control(),
   constraint_sum_zero = TRUE,
   start_from_simple_model = TRUE,
+  parallel_starts = FALSE,
   nstarts = 5,
   verbose = FALSE
 )
@@ -181,6 +182,12 @@ are ones without the covariates (to get starting values for the cluster
 parameters), and ones with the covariates but no clustering (to get
 starting values for the covariates).}
 
+\item{parallel_starts}{(default FALSE) if TRUE, by generating multiple random
+starts, those random starts will be parallelised over as many cores as are
+available. For example, on a personal computer this will be one fewer than
+the number of cores in the machine, to make sure one is left for system
+tasks external to R.}
+
 \item{nstarts}{(default 5) number of random starts to generate, if generating
 random starting points for the EM algorithm.
 \strong{Ignored} if using \code{start.type = "clusters"}.}
@@ -200,7 +207,7 @@ to find starting values for the parameters vs fitting the final, more
 complex model.}
 }
 \value{
-A list with components:
+A \code{clustord} object, i.e. a list with components:
 
     \code{info}: Basic info n, p, q, the number of parameters, the number of
     row clusters and the number of column clusters, where relevant.
@@ -1022,7 +1029,9 @@ clustord(Y~ROWCLUST*COLCLUST, model="POM", nclus.row=2, nclus.column=4,
 }
 }
 \references{
-Fernandez, D., Arnold, R., & Pledger, S. (2016). Mixture-based clustering for the ordered stereotype model. *Computational Statistics & Data Analysis*, 93, 46-75.
-Anderson, J. A. (1984). Regression and ordered categorical variables. *Journal of the Royal Statistical Society: Series B (Methodological)*, 46(1), 1-22.
-Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wiley & Sons.
+Fernandez, D., Arnold, R., & Pledger, S. (2016). Mixture-based clustering for the ordered stereotype model. \emph{Computational Statistics & Data Analysis}, 93, 46-75.
+
+Anderson, J. A. (1984). Regression and ordered categorical variables. \emph{Journal of the Royal Statistical Society: Series B (Methodological)}, 46(1), 1-22.
+
+Agresti, A. (2010). \emph{Analysis of ordinal categorical data} (Vol. 656). John Wiley & Sons.
 }

@@ -846,6 +846,11 @@
 #'     are ones without the covariates (to get starting values for the cluster
 #'     parameters), and ones with the covariates but no clustering (to get
 #'     starting values for the covariates).
+#' @param parallel_starts (default FALSE) if TRUE, by generating multiple random
+#'   starts, those random starts will be parallelised over as many cores as are
+#'   available. For example, on a personal computer this will be one fewer than
+#'   the number of cores in the machine, to make sure one is left for system
+#'   tasks external to R.
 #' @param nstarts (default 5) number of random starts to generate, if generating
 #'     random starting points for the EM algorithm.
 #'     \strong{Ignored} if using \code{start.type = "clusters"}.
@@ -862,8 +867,8 @@
 #'     previous starts, and it also reports when it is fitting simpler models
 #'     to find starting values for the parameters vs fitting the final, more
 #'     complex model.
-#' @return
-#' A list with components:
+#' @returns
+#' A \code{clustord} object, i.e. a list with components:
 #'
 #'     \code{info}: Basic info n, p, q, the number of parameters, the number of
 #'     row clusters and the number of column clusters, where relevant.
@@ -944,10 +949,11 @@
 #'     assigned to a cluster based on maximum posterior probability of cluster
 #'     membership (\code{ppr} and \code{ppc})
 #'
-#' @references
-#' Fernandez, D., Arnold, R., & Pledger, S. (2016). Mixture-based clustering for the ordered stereotype model. *Computational Statistics & Data Analysis*, 93, 46-75.
-#' Anderson, J. A. (1984). Regression and ordered categorical variables. *Journal of the Royal Statistical Society: Series B (Methodological)*, 46(1), 1-22.
-#' Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656). John Wiley & Sons.
+#' @references Fernandez, D., Arnold, R., & Pledger, S. (2016). Mixture-based clustering for the ordered stereotype model. \emph{Computational Statistics & Data Analysis}, 93, 46-75.
+#'
+#' @references Anderson, J. A. (1984). Regression and ordered categorical variables. \emph{Journal of the Royal Statistical Society: Series B (Methodological)}, 46(1), 1-22.
+#'
+#' @references Agresti, A. (2010). \emph{Analysis of ordinal categorical data} (Vol. 656). John Wiley & Sons.
 #'
 #' @examples
 #' set.seed(1)
@@ -1002,6 +1008,7 @@ clustord <- function(formula,
                      optim.control=default.optim.control(),
                      constraint_sum_zero=TRUE,
                      start_from_simple_model=TRUE,
+                     parallel_starts=FALSE,
                      nstarts=5,
                      verbose=FALSE){
 
@@ -1012,6 +1019,7 @@ clustord <- function(formula,
                     EM.control=EM.control, optim.method=optim.method,
                     constraint_sum_zero=constraint_sum_zero,
                     start_from_simple_model=start_from_simple_model,
+                    parallel_starts=parallel_starts,
                     nstarts=nstarts, verbose=verbose)
 
     ## If ROW and COL are factors, convert them to their numeric values before
@@ -1032,8 +1040,8 @@ clustord <- function(formula,
 
     print(paste("EM algorithm for",model))
 
-    if (start.type == "parameters") {
 
+    if (start.type == "parameters") {
         if (!is.null(RG) && !is.null(CG)) {
             if (is.null(initvect) | is.null(pi.init) | is.null(kappa.init)) {
                 ## generate.start will keep using whichever of initvect and pi.init and
@@ -1047,6 +1055,7 @@ clustord <- function(formula,
                                                             optim.control=optim.control,
                                                             constraint_sum_zero=constraint_sum_zero,
                                                             start_from_simple_model=start_from_simple_model,
+                                                            parallel_starts=parallel_starts,
                                                             nstarts=nstarts,
                                                             verbose=verbose)
                 initvect <- start.par$initvect
@@ -1073,6 +1082,7 @@ clustord <- function(formula,
                                                              optim.control=optim.control,
                                                              constraint_sum_zero=constraint_sum_zero,
                                                              start_from_simple_model=start_from_simple_model,
+                                                             parallel_starts=parallel_starts,
                                                              nstarts=nstarts,
                                                              verbose=verbose)
                 initvect <- start.par$initvect
@@ -1107,6 +1117,7 @@ clustord <- function(formula,
                                                              optim.control=optim.control,
                                                              constraint_sum_zero=constraint_sum_zero,
                                                              start_from_simple_model=start_from_simple_model,
+                                                             parallel_starts=parallel_starts,
                                                              nstarts=nstarts,
                                                              verbose=verbose)
                 initvect <- start.par$initvect
@@ -1272,7 +1283,91 @@ clustord <- function(formula,
     if (results$EM.status$converged) print("EM algorithm has successfully converged.")
     else print("EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.")
 
-    class(results) <- "clustord"
+    results$call <- match.call()
+    results$formula <- formula
+    results$terms <- terms(formula)
+
+    class(results) <- c(class(results), "clustord")
 
     return(results)
+}
+
+#' @export
+print.clustord <- function(x, digits = max(3L, getOption("digits") - 3L), ...)
+{
+    cat("\nCall:\n",
+        paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
+
+    cat("Clustering mode:\n",
+        x$clustering_mode)
+
+    cat("\n\nConverged:\n",
+        x$EM.status$converged)
+
+    cat("\n\nCluster sizes:\n")
+    if ("RowClusterMembers" %in% names(x)) {
+        cat("Row clusters: ", sapply(x$RowClusterMembers, length), "\n")
+    }
+    if ("ColumnClusterMembers" %in% names(x)) {
+        cat("Column clusters: ", sapply(x$ColumnClusterMembers, length), "\n")
+    }
+
+    # cat("\nParameter estimates:\n")
+    # print.default(format(x$parlist.out), digits=digits, print.gap=1L, quote=FALSE)
+
+    invisible(x)
+}
+
+#' @export
+summary.clustord <- function (object, ...)
+{
+    z <- object
+
+    ans <- z[c("call", "terms", "formula", "model", "clustering_mode")]
+
+    ans$convergence <- z$EM.status$converged
+
+    ans$numiter <- z$EM.status$iter
+    ans$loglikelihood <- z$EM.status$best.lli
+    ans$loglikelihood_type <- ifelse(z$clustering_mode == "biclustering","approximate","exact")
+    ans$AIC <- z$criteria$AIC
+    ans$BIC <- z$criteria$BIC
+
+    ans$estimates <- z$parlist.out
+
+    if("RowClusterMembers" %in% names(z)) {
+        ans$rowclustersizes <- sapply(z$RowClusterMembers, length)
+    }
+    if ("ColumnClusterMembers" %in% names(z)) {
+        ans$colclustersizes <- sapply(z$ColumnClusterMembers, length)
+    }
+
+    class(ans) <- "summary.clustord"
+    ans
+}
+
+#' @export
+print.summary.clustord <- function (x, digits = max(3L, getOption("digits") - 3L), ...) {
+    cat("\nCall:\n", # S has ' ' instead of '\n'
+        paste(deparse(x$call), sep="\n", collapse = "\n"), "\n\n", sep = "")
+
+    cat("Clustering mode:\n",
+        x$clustering_mode)
+
+    cat("\n\nConverged:\n",
+        x$convergence)
+
+    cat("\n\nCluster sizes:\n")
+    if ("rowclustersizes" %in% names(x)) {
+        cat("Row clusters: ", x$rowclustersizes, "\n")
+    }
+    if ("colclustersizes" %in% names(x)) {
+        cat("Column clusters: ", x$colclustersizes, "\n")
+    }
+
+    cat("\nParameter estimates:\n")
+    print.default(x$estimates, digits=digits, print.gap=1L, quote=FALSE)
+
+    cat("\n")
+    invisible(x)
 }

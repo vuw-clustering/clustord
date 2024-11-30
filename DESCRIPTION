@@ -1,8 +1,8 @@
 Package: clustord
 Type: Package
 Title: Clustering Ordinal Data Using Proportional Odds Model, Ordered Stereotype Model or Binary Model
-Version: 1.1.2
-Date: 2024-07-28
+Version: 1.1.4
+Date: 2024-11-12
 Authors@R: c(
     person(given = "Louise", 
            family = "McMillan", 
@@ -32,8 +32,14 @@ Imports: Rcpp (>= 1.0.1),
          nnet,
          flexclust,
          methods
-LinkingTo: Rcpp, RcppArmadillo
+LinkingTo: Rcpp, RcppArmadillo, RcppClock
 Suggests: 
-    testthat (>= 2.1.0)
+    knitr,
+    formatR,
+    rmarkdown,
+    testthat (>= 2.1.0),
+    multgee,
+    parallel
 Encoding: UTF-8
 RoxygenNote: 7.3.2
+VignetteBuilder: knitr, formatR
