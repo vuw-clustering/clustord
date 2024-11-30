@@ -6,6 +6,10 @@ The `build_vignettes = TRUE` part ensures that you will install the vignettes as
 
 If you get an error when you try to install the package using this method, please also try installing the `pak` package and then use `pak::pkg_install("vuw-clustering/clustord", dependencies = TRUE)`.
 
+# Parallelization
+
+The clustering function `clustord()` now has a `parallel_starts` option that will distribute the random starts over any cores that are available (i.e. n-1 cores where n is the number available on your machine, so as to leave 1 core for non-R system tasks). Set `parallel_starts = TRUE` in `clustord()` to use it.
+
 # Update
 
 The latest version of the package, version 1.1, is a major update from version 0.1. It now has the capacity to fit models including a variety of covariates, to make it consistent with the models that can be fitted with [clustglm](https://github.com/vuw-clustering/clustglm).
