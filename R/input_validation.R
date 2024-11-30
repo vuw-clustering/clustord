@@ -8,6 +8,7 @@ validate.inputs <- function(formula, model,
                             optim.method="L-BFGS-B",
                             constraint_sum_zero=TRUE,
                             start_from_simple_model=TRUE,
+                            parallel_starts=FALSE,
                             nstarts=5,
                             verbose=TRUE) {
 
@@ -103,6 +104,10 @@ validate.inputs <- function(formula, model,
     if (!is.null(nstarts)) {
         if (!is.vector(nstarts) || !is.numeric(nstarts) || length(nstarts) != 1 ||
             nstarts < 0 || nstarts %% 1 != 0) stop("If supplied, nstarts must be a positive integer.")
+    }
+
+    if (!(parallel_starts %in% c(TRUE,FALSE))) {
+        stop("parallel_starts must be TRUE or FALSE.")
     }
 
     if (!is.list(EM.control) || length(EM.control) == 0 || length(EM.control) > 7 ||

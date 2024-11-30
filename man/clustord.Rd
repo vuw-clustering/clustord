@@ -19,6 +19,7 @@ clustord(
   optim.control = default.optim.control(),
   constraint_sum_zero = TRUE,
   start_from_simple_model = TRUE,
+  parallel_starts = FALSE,
   nstarts = 5,
   verbose = FALSE
 )
@@ -163,6 +164,12 @@ row/column effects. If the full model has covariates, then simpler models
 are ones without the covariates (to get starting values for the cluster
 parameters), and ones with the covariates but no clustering (to get
 starting values for the covariates).}
+
+\item{parallel_starts}{(default FALSE) if TRUE, by generating multiple random
+starts, those random starts will be parallelised over as many cores as are
+available. For example, on a personal computer this will be one fewer than
+the number of cores in the machine, to make sure one is left for system
+tasks external to R.}
 
 \item{nstarts}{(default 5) number of random starts to generate, if generating
 random starting points for the EM algorithm.}

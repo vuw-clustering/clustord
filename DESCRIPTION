@@ -32,13 +32,14 @@ Imports: Rcpp (>= 1.0.1),
          nnet,
          flexclust,
          methods
-LinkingTo: Rcpp, RcppArmadillo
+LinkingTo: Rcpp, RcppArmadillo, RcppClock
 Suggests: 
     knitr,
     formatR,
     rmarkdown,
     testthat (>= 2.1.0),
-    multgee
+    multgee,
+    parallel
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 VignetteBuilder: knitr, formatR

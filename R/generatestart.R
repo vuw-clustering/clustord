@@ -470,6 +470,7 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
                                       optim.control=default.optim.control(),
                                       constraint_sum_zero=TRUE,
                                       start_from_simple_model=TRUE,
+                                      parallel_starts=FALSE,
                                       nstarts=5, verbose=TRUE) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
@@ -479,40 +480,90 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
     ## Generate initvect -------------------------------------------------------
     if (is.null(initvect)) {
 
-        best.lli <- -Inf
-        for (s in 1:nstarts) {
-            cat(paste0("Randomly generated start #",s,"\n"))
-            initvect.pi.init <- generate.initvect(long.df, model=model,
-                                                  model_structure=model_structure,
-                                                  RG=RG, constraint_sum_zero=constraint_sum_zero,
-                                                  start_from_simple_model=start_from_simple_model,
-                                                  use_random=(s>1),
-                                                  EM.control=startEM.control(EM.control),
-                                                  verbose=verbose)
+        if (!parallel_starts) {
 
-            # print(initvect.pi.init$initvect)
+            best.lli <- -Inf
+            for (s in 1:nstarts) {
+                cat(paste0("Randomly generated start #",s,"\n"))
+                initvect.pi.init <- generate.initvect(long.df, model=model,
+                                                      model_structure=model_structure,
+                                                      RG=RG, constraint_sum_zero=constraint_sum_zero,
+                                                      start_from_simple_model=start_from_simple_model,
+                                                      use_random=(s>1),
+                                                      EM.control=startEM.control(EM.control),
+                                                      verbose=verbose)
 
-            init.out <- run.EM.rowcluster(invect=initvect.pi.init$initvect,
-                                          model=model, long.df=long.df,
-                                          rowc_mm=model_structure$rowc_mm,
-                                          colc_mm=model_structure$colc_mm,
-                                          cov_mm=model_structure$cov_mm,
-                                          pi_v=initvect.pi.init$pi.init,
-                                          param_lengths=model_structure$param_lengths,
-                                          constraint_sum_zero=constraint_sum_zero,
-                                          model_label="Random starts",
-                                          EM.control=startEM.control(EM.control),
-                                          optim.method=optim.method,
-                                          optim.control=optim.control,
-                                          verbose=verbose)
+                # print(initvect.pi.init$initvect)
 
-            new.lli <- init.out$EM.status$best.lli
-            if (new.lli > best.lli) {
-                cat(paste("Found better incomplete log-like:",new.lli,"\n"))
-                best.lli <- new.lli
-                best.initvect.pi.init <- list(initvect=init.out$outvect,pi.init=init.out$pi.out)
-                initvect <- init.out$outvect
+                init.out <- run.EM.rowcluster(invect=initvect.pi.init$initvect,
+                                              model=model, long.df=long.df,
+                                              rowc_mm=model_structure$rowc_mm,
+                                              colc_mm=model_structure$colc_mm,
+                                              cov_mm=model_structure$cov_mm,
+                                              pi_v=initvect.pi.init$pi.init,
+                                              param_lengths=model_structure$param_lengths,
+                                              constraint_sum_zero=constraint_sum_zero,
+                                              model_label="Random starts",
+                                              EM.control=startEM.control(EM.control),
+                                              optim.method=optim.method,
+                                              optim.control=optim.control,
+                                              verbose=verbose)
+
+                new.lli <- init.out$EM.status$best.lli
+                if (new.lli > best.lli) {
+                    cat(paste("Found better incomplete log-like:",new.lli,"\n"))
+                    best.lli <- new.lli
+                    best.initvect.pi.init <- list(initvect=init.out$outvect,pi.init=init.out$pi.out)
+                    initvect <- init.out$outvect
+                }
             }
+        } else {
+
+            start_control <- startEM.control(EM.control)
+
+            ncores <- parallel::detectCores()
+            cl <- parallel::makeCluster(ncores)
+            parallel::clusterExport(cl, c("long.df","model","model_structure","RG",
+                                          "constraint_sum_zero","start_from_simple_model",
+                                          "start_control","optim.method","optim.control"),
+                                    envir=environment())
+
+            start_results <- parallel::parLapply(cl, 1:nstarts, function(s) {
+
+                initvect.pi.init <- generate.initvect(long.df, model=model,
+                                                      model_structure=model_structure,
+                                                      RG=RG, constraint_sum_zero=constraint_sum_zero,
+                                                      start_from_simple_model=start_from_simple_model,
+                                                      use_random=(s>1),
+                                                      EM.control=start_control,
+                                                      verbose=FALSE)
+
+                init.out <- run.EM.rowcluster(invect=initvect.pi.init$initvect,
+                                              model=model, long.df=long.df,
+                                              rowc_mm=model_structure$rowc_mm,
+                                              colc_mm=model_structure$colc_mm,
+                                              cov_mm=model_structure$cov_mm,
+                                              pi_v=initvect.pi.init$pi.init,
+                                              param_lengths=model_structure$param_lengths,
+                                              constraint_sum_zero=constraint_sum_zero,
+                                              model_label="Random starts",
+                                              EM.control=start_control,
+                                              optim.method=optim.method,
+                                              optim.control=optim.control,
+                                              verbose=FALSE)
+
+            })
+
+            best_lli_vec <- sapply(start_results, function(res) res$EM.status$best.lli)
+            best_lli <- max(best_lli_vec)
+            best_start_idx <- which.max(best_lli_vec)
+            cat(paste("Best incomplete log-like:",best_lli," from start ",best_start_idx,"\n"))
+
+            best.initvect.pi.init <- list(initvect=start_results[[best_start_idx]]$outvect,
+                                          pi.init=start_results[[best_start_idx]]$pi.out)
+            initvect <- start_results[[best_start_idx]]$outvect
+
+            parallel::stopCluster(cl)
         }
     }
     ## Generate pi.init --------------------------------------------------------
@@ -532,7 +583,8 @@ generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
                                      EM.control=default.EM.control(),
                                      optim.method="L-BFGS-B", optim.control=default.optim.control(),
                                      constraint_sum_zero=TRUE,
-                                     start_from_simple_model=TRUE, nstarts=5,
+                                     start_from_simple_model=TRUE,
+                                     parallel_starts=FALSE, nstarts=5,
                                      verbose=TRUE) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
@@ -542,44 +594,96 @@ generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
     ## Generate initvect -------------------------------------------------------
     if (is.null(initvect)) {
 
-        best.lli <- -Inf
-        for (s in 1:nstarts) {
-            cat(paste0("Randomly generated start #",s,"\n"))
-            initvect.pi.kappa.init <- generate.initvect(long.df=long.df, model=model,
-                                                        model_structure=model_structure,
-                                                        RG=RG, CG=CG,
-                                                        constraint_sum_zero=constraint_sum_zero,
-                                                        start_from_simple_model=start_from_simple_model,
-                                                        use_random=(s>1),
-                                                        EM.control=startEM.control(EM.control),
-                                                        verbose=verbose)
+        if (!parallel_starts) {
 
-            # print(initvect.pi.kappa.init$initvect)
+            best.lli <- -Inf
+            for (s in 1:nstarts) {
+                cat(paste0("Randomly generated start #",s,"\n"))
+                initvect.pi.kappa.init <- generate.initvect(long.df=long.df, model=model,
+                                                            model_structure=model_structure,
+                                                            RG=RG, CG=CG,
+                                                            constraint_sum_zero=constraint_sum_zero,
+                                                            start_from_simple_model=start_from_simple_model,
+                                                            use_random=(s>1),
+                                                            EM.control=startEM.control(EM.control),
+                                                            verbose=verbose)
 
-            init.out <- run.EM.bicluster(invect=initvect.pi.kappa.init$initvect,
-                                         model=model, long.df=long.df,
-                                         rowc_mm=model_structure$rowc_mm,
-                                         colc_mm=model_structure$colc_mm,
-                                         cov_mm=model_structure$cov_mm,
-                                         pi_v=initvect.pi.kappa.init$pi.init,
-                                         kappa_v=initvect.pi.kappa.init$kappa.init,
-                                         param_lengths=model_structure$param_lengths,
-                                         constraint_sum_zero=constraint_sum_zero,
-                                         model_label="Random starts",
-                                         EM.control=startEM.control(EM.control),
-                                         optim.method=optim.method,
-                                         optim.control=optim.control,
-                                         verbose=verbose)
+                # print(initvect.pi.kappa.init$initvect)
 
-            new.lli <- init.out$EM.status$best.lli
-            if (new.lli > best.lli) {
-                cat(paste("Found better incomplete log-like:",new.lli,"\n"))
-                best.lli <- new.lli
-                best.initvect.pi.kappa.init <- list(initvect=init.out$outvect,
-                                                    pi.init=init.out$pi.out,
-                                                    kappa.init=init.out$kappa.out)
-                initvect <- init.out$outvect
+                init.out <- run.EM.bicluster(invect=initvect.pi.kappa.init$initvect,
+                                             model=model, long.df=long.df,
+                                             rowc_mm=model_structure$rowc_mm,
+                                             colc_mm=model_structure$colc_mm,
+                                             cov_mm=model_structure$cov_mm,
+                                             pi_v=initvect.pi.kappa.init$pi.init,
+                                             kappa_v=initvect.pi.kappa.init$kappa.init,
+                                             param_lengths=model_structure$param_lengths,
+                                             constraint_sum_zero=constraint_sum_zero,
+                                             model_label="Random starts",
+                                             EM.control=startEM.control(EM.control),
+                                             optim.method=optim.method,
+                                             optim.control=optim.control,
+                                             verbose=verbose)
+
+                new.lli <- init.out$EM.status$best.lli
+                if (new.lli > best.lli) {
+                    cat(paste("Found better incomplete log-like:",new.lli,"\n"))
+                    best.lli <- new.lli
+                    best.initvect.pi.kappa.init <- list(initvect=init.out$outvect,
+                                                        pi.init=init.out$pi.out,
+                                                        kappa.init=init.out$kappa.out)
+                    initvect <- init.out$outvect
+                }
             }
+
+        } else {
+            start_control <- startEM.control(EM.control)
+
+            ncores <- parallel::detectCores()
+            cl <- parallel::makeCluster(ncores)
+            parallel::clusterExport(cl, c("long.df","model","model_structure","RG","CG",
+                                          "constraint_sum_zero","start_from_simple_model",
+                                          "start_control","optim.method","optim.control"),
+                                    envir=environment())
+
+            start_results <- parallel::parLapply(cl, 1:nstarts, function(s) {
+
+                initvect.pi.kappa.init <- generate.initvect(long.df=long.df, model=model,
+                                                            model_structure=model_structure,
+                                                            RG=RG, CG=CG,
+                                                            constraint_sum_zero=constraint_sum_zero,
+                                                            start_from_simple_model=start_from_simple_model,
+                                                            use_random=(s>1),
+                                                            EM.control=start_control,
+                                                            verbose=FALSE)
+
+                init.out <- run.EM.bicluster(invect=initvect.pi.kappa.init$initvect,
+                                             model=model, long.df=long.df,
+                                             rowc_mm=model_structure$rowc_mm,
+                                             colc_mm=model_structure$colc_mm,
+                                             cov_mm=model_structure$cov_mm,
+                                             pi_v=initvect.pi.kappa.init$pi.init,
+                                             kappa_v=initvect.pi.kappa.init$kappa.init,
+                                             param_lengths=model_structure$param_lengths,
+                                             constraint_sum_zero=constraint_sum_zero,
+                                             model_label="Random starts",
+                                             EM.control=start_control,
+                                             optim.method=optim.method,
+                                             optim.control=optim.control,
+                                             verbose=FALSE)
+            })
+
+            best_lli_vec <- sapply(start_results, function(res) res$EM.status$best.lli)
+            best_lli <- max(best_lli_vec)
+            best_start_idx <- which.max(best_lli_vec)
+            cat(paste("Best incomplete log-like:",best_lli," from start ",best_start_idx,"\n"))
+
+            best.initvect.pi.kappa.init <- list(initvect=start_results[[best_start_idx]]$outvect,
+                                                pi.init=start_results[[best_start_idx]]$pi.out,
+                                                kappa.init=start_results[[best_start_idx]]$kappa.out)
+            initvect <- start_results[[best_start_idx]]$outvect
+
+            parallel::stopCluster(cl)
         }
     }
 

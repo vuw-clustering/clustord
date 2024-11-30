@@ -830,6 +830,11 @@
 #'     are ones without the covariates (to get starting values for the cluster
 #'     parameters), and ones with the covariates but no clustering (to get
 #'     starting values for the covariates).
+#' @param parallel_starts (default FALSE) if TRUE, by generating multiple random
+#'   starts, those random starts will be parallelised over as many cores as are
+#'   available. For example, on a personal computer this will be one fewer than
+#'   the number of cores in the machine, to make sure one is left for system
+#'   tasks external to R.
 #' @param nstarts (default 5) number of random starts to generate, if generating
 #'     random starting points for the EM algorithm.
 #' @param verbose (default \code{FALSE}) changes how much is reported to the console
@@ -983,6 +988,7 @@ clustord <- function(formula,
                      optim.control=default.optim.control(),
                      constraint_sum_zero=TRUE,
                      start_from_simple_model=TRUE,
+                     parallel_starts=FALSE,
                      nstarts=5,
                      verbose=FALSE){
 
@@ -993,6 +999,7 @@ clustord <- function(formula,
                     EM.control=EM.control, optim.method=optim.method,
                     constraint_sum_zero=constraint_sum_zero,
                     start_from_simple_model=start_from_simple_model,
+                    parallel_starts=parallel_starts,
                     nstarts=nstarts, verbose=verbose)
 
     ## If ROW and COL are factors, convert them to their numeric values before
@@ -1026,6 +1033,7 @@ clustord <- function(formula,
                                                   optim.control=optim.control,
                                                   constraint_sum_zero=constraint_sum_zero,
                                                   start_from_simple_model=start_from_simple_model,
+                                                  parallel_starts=parallel_starts,
                                                   nstarts=nstarts,
                                                   verbose=verbose)
             initvect <- start.par$initvect
@@ -1052,6 +1060,7 @@ clustord <- function(formula,
                                                    optim.control=optim.control,
                                                    constraint_sum_zero=constraint_sum_zero,
                                                    start_from_simple_model=start_from_simple_model,
+                                                   parallel_starts=parallel_starts,
                                                    nstarts=nstarts,
                                                    verbose=verbose)
             initvect <- start.par$initvect
@@ -1085,6 +1094,7 @@ clustord <- function(formula,
                                                    optim.control=optim.control,
                                                    constraint_sum_zero=constraint_sum_zero,
                                                    start_from_simple_model=start_from_simple_model,
+                                                   parallel_starts=parallel_starts,
                                                    nstarts=nstarts,
                                                    verbose=verbose)
             initvect <- start.par$initvect
