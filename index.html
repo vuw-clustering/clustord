@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">clustord</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -61,14 +61,19 @@
 <p>If you get an error when you try to install the package using this method, please also try installing the <code>pak</code> package and then use <code>pak::pkg_install("vuw-clustering/clustord", dependencies = TRUE)</code>.</p>
 </div>
 <div class="section level1">
-<h1 id="parallelization">Parallelization<a class="anchor" aria-label="anchor" href="#parallelization"></a>
+<h1 id="update-2024-12-speed-improvement">Update 2024-12 Speed Improvement<a class="anchor" aria-label="anchor" href="#update-2024-12-speed-improvement"></a>
+</h1>
+<p>The latest version, version 1.2, is an update that improves the speed of the algorithm. This latest version has been unit tested to ensure consistency with the original.</p>
+</div>
+<div class="section level1">
+<h1 id="update-2024-11-parallelization">Update 2024-11 Parallelization<a class="anchor" aria-label="anchor" href="#update-2024-11-parallelization"></a>
 </h1>
 <p>The clustering function <code><a href="reference/clustord.html">clustord()</a></code> now has a <code>parallel_starts</code> option that will distribute the random starts over any cores that are available (i.e. n-1 cores where n is the number available on your machine, so as to leave 1 core for non-R system tasks). Set <code>parallel_starts = TRUE</code> in <code><a href="reference/clustord.html">clustord()</a></code> to use it.</p>
 </div>
 <div class="section level1">
-<h1 id="update">Update<a class="anchor" aria-label="anchor" href="#update"></a>
+<h1 id="update-2022-03-covariates">Update 2022-03 Covariates<a class="anchor" aria-label="anchor" href="#update-2022-03-covariates"></a>
 </h1>
-<p>The latest version of the package, version 1.1, is a major update from version 0.1. It now has the capacity to fit models including a variety of covariates, to make it consistent with the models that can be fitted with <a href="https://github.com/vuw-clustering/clustglm" class="external-link">clustglm</a>.</p>
+<p>Version 1.1 of the package was a major update from version 0.1. It now has the capacity to fit models including a variety of covariates, to make it consistent with the models that can be fitted with <a href="https://github.com/vuw-clustering/clustglm" class="external-link">clustglm</a>.</p>
 <p>Note that the input arguments and output components have changed from version 0.1. This version is not backwards compatible, i.e. you will not be able to run scripts for v0.1 using v1.1, but the changes that make it not backwards-compatible are mostly stylistic ones to avoid using “.” notation. For example, the input argument <code>constraint.sum.zero</code> has now become <code>constraint_sum_zero</code>. This avoids potential confusion with S3 methods.</p>
 <p>There are six top-level functions. The main one is <code><a href="reference/clustord.html">clustord()</a></code>, which performs clustering, including row clustering, column clustering, and biclustering. There is also an auxiliary one, <code><a href="reference/mat2df.html">mat2df()</a></code>, which may need to be run before <code><a href="reference/clustord.html">clustord()</a></code> to create the input data structure for <code><a href="reference/clustord.html">clustord()</a></code> (see the <code><a href="reference/clustord.html">clustord()</a></code> manual for details). Two other functions, <code><a href="reference/calc.SE.bicluster.html">calc.SE.rowcluster()</a></code> and <code><a href="reference/calc.SE.bicluster.html">calc.SE.bicluster()</a></code>, are designed to be run after <code><a href="reference/clustord.html">clustord()</a></code>, to calculate the standard errors of the clustering parameters, if needed. <code><a href="reference/calc.cluster.comparisons.html">calc.cluster.comparisons()</a></code> can be used to compare the clustering results from different runs or different models, avoiding the label-switching issue.</p>
 <p>The package also contains a function <code><a href="reference/osm.html">osm()</a></code> which performs regression for an ordinal response using the Ordered Stereotype Model. This function has been included in this package because other R packages are able to fit the stereotype model for regression, but cannot fit the ordering constraint. The <code><a href="reference/osm.html">osm()</a></code> function is based on <code><a href="https://rdrr.io/pkg/MASS/man/polr.html" class="external-link">MASS::polr()</a></code> and is intended to be used in a similar way, so if you wish to perform regression via proportional odds then use that, or if you wish to perform regression using the more flexible ordered stereotype model then use <code><a href="reference/osm.html">osm()</a></code> from this package.</p>
