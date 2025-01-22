@@ -4,7 +4,7 @@ default.EM.control <- function() {
 }
 
 default.optim.control <- function() {
-    list(maxit=100,trace=0)
+    list(maxit=100,trace=0,pgtol=1e-4,factr=1e11)
 }
 
 new.EM.status <- function() {

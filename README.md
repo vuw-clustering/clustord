@@ -6,9 +6,13 @@ The `build_vignettes = TRUE` part ensures that you will install the vignettes as
 
 If you get an error when you try to install the package using this method, please also try installing the `pak` package and then use `pak::pkg_install("vuw-clustering/clustord", dependencies = TRUE)`.
 
+# Update 2025-01 Rerunning For Convergence
+
+Version 1.2.1 adds a utility function `rerun()`. If your original `clustord()` run did not converge, you can use this function to rerun from that finishing point i.e. skip the stage of finding random starts etc. You supply the previous results object and the data frame, and `rerun()` will feed the details of the original run back into the new run so that it continues from where the previous run finished. This can also be used to rerun from the endpoint of the original results if you have slightly changed the dataset.
+
 # Update 2024-12 Speed Improvement
 
-The latest version, version 1.2, is an update that improves the speed of the algorithm. This latest version has been unit tested to ensure consistency with the original.
+Version 1.2, is an update that improves the speed of the algorithm. This latest version has been unit tested to ensure consistency with the original.
 
 # Update 2024-11 Parallelization
 

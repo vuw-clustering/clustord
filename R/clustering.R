@@ -808,6 +808,27 @@
 #' @param optim.control control list for the \code{optim} call within the M step
 #'     of the EM algorithm. See the control list Details in the \code{optim}
 #'     manual for more info.
+#'     Please note that although \code{optim}, by default, uses \code{pgtol=0}
+#'     and \code{factr=1e7} in the L-BFGS-B method, \code{clustord}, by default,
+#'     alters these to \code{pgtol=1e-4} and \code{factr=1e11}, but you can use
+#'     this \code{optim.control} argument in \code{clustord} to revert them to
+#'     the defaults if you want. The reason for the change is that the chosen
+#'     values in \code{clustord} reduce the tolerance on the log-likelihood
+#'     function optimization in order to speed up the algorithm, and because the
+#'     log-likelihood is on the scale of 1e4 for <100 rows in the data matrix
+#'     and 1e6 for 5000 rows in the data matrix, tolerance at the default
+#'     \code{optim} scale is not as important as the choice of model type and
+#'     structure or the number of starting points. If one model is better than
+#'     another, it will probably have a likelihood that is better by about the
+#'     size of the data matrix, which is far larger than the tolerance in the
+#'     optimization. If one starting point is better than another, it will
+#'     probably have a likelihood that is better on about 1/10th or 1/100th the
+#'     size of the data matrix, which is still far larger than the tolerance in
+#'     the optimization.
+#'     If you need accurate parameter estimates, firstly make sure to try more
+#'     starting points, then perform model selection first, and then finally
+#'     rerun the chosen model with finer tolerance, e.g. the \code{optim}
+#'     defaults, \code{pgtol=0} and \code{factr=1e7}.
 #' @param constraint_sum_zero (default \code{TRUE}) if \code{TRUE}, use constraints
 #'     that cluster effects sum to zero; if \code{FALSE}, use constraints that
 #'     the cluster effect for the first cluster will be 0.
@@ -837,19 +858,20 @@
 #'   tasks external to R.
 #' @param nstarts (default 5) number of random starts to generate, if generating
 #'     random starting points for the EM algorithm.
-#' @param verbose (default \code{FALSE}) changes how much is reported to the console
-#'     during the algorithm's progress. If \code{TRUE}, maximal reporting, which
-#'     includes reporting the incomplete-data log-likelihood at every EM algorithm
-#'     iteration and including the trace information from nnet::multinom() during
-#'     the process of fitting initial values for the \code{mu} parameters.
-#'     If \code{FALSE}, the incomplete log-likelihood is only reported every 10
-#'     iterations of the EM algorithm and the initial fitting reporting is
-#'     suppressed.
-#'     Regardless of the verbosity setting the algorithm reports each of the
-#'     random starts and whenever it finds a better log-likelihood than all
-#'     previous starts, and it also reports when it is fitting simpler models
-#'     to find starting values for the parameters vs fitting the final, more
-#'     complex model.
+#' @param verbose (default \code{FALSE}) changes how much is reported to the
+#'   console during the algorithm's progress. If \code{TRUE}, reports the
+#'   incomplete-data log-likelihood at every EM algorithm iteration and the
+#'   trace information from nnet::multinom() during the process of fitting
+#'   initial values for the \code{mu} parameters. If \code{FALSE}, the
+#'   incomplete log-likelihood is only reported every 10 iterations of the EM
+#'   algorithm and the initial fitting reporting is suppressed. Regardless of
+#'   the verbosity setting the algorithm reports each of the random starts and
+#'   whenever it finds a better log-likelihood than all previous starts, and it
+#'   also reports when it is fitting simpler models to find starting values for
+#'   the parameters vs fitting the final, more complex model.
+#'   If wanting the detailed output from \code{optim()}, use
+#'   \code{optim.control=list(trace=X)}, where X is 1 to 6, with 6 being the
+#'   highest level of verbosity for the L-BFGS-B algorithm.
 #' @returns
 #' A \code{clustord} object, i.e. a list with components:
 #'
@@ -1246,4 +1268,94 @@ print.summary.clustord <- function (x, digits = max(3L, getOption("digits") - 3L
 
     cat("\n")
     invisible(x)
+}
+
+#' Rerun clustord using the results of a previous run as the starting point.
+#'
+#' This function is designed for two purposes.
+#' (1) You tried to run clustord and the results did not converge. You can supply
+#' this function with the previous results and the previous data object, and it
+#' will carry on running clustord from the endpoint of the previous run, which
+#' is quicker than starting the run again from scratch with more iterations.
+#'
+#' (2) The previous result converged, but you have changed the dataset slightly,
+#' and want to rerun from the previous endpoint to save time.
+#'
+#' Either way, you call the function in the same way, supplying the previous
+#' results object and a dataset, and optionally a new number of iterations
+#' (`EM.control=list(EMcycles=XXX)`, where `XXX` is the new number of iterations.)
+#'
+#' The output parameters of the old result will be used as the new initial
+#' parameters.
+#'
+#' @param results.original The results of the previous run that you want to use
+#'    as a starting point. The model, number of clusters, and final parameter
+#'    values will be used, and the cluster controls such as EMcycles will be
+#'    reused unless the user specifies new values. But the row cluster and/or
+#'    column cluster memberships will NOT be reused, and nor will the dataset,
+#'    so you can change the dataset slightly and the rest of the details will
+#'    be applied to this new dataset.
+#' @param long.df The dataset to use for this run, which may be slightly
+#'    different to the original. Please note that the only compatibility check
+#'    performed is comparing the sizes of the original and new datasets, and it
+#'    is up to the user to check that the new dataset is sufficiently similar
+#'    to the old one.
+#' @param EM.control Options to use for this run such as EMcycles (number of EM
+#'    iterations). Note that "startEMcycles" will not be relevant as this run
+#'    will not generate random starts, it will run from the end parameters of
+#'    the other run. See \link{clustord} documentation for more info.
+#' @param optim.control Options to use for this run within \code{optim()}, which
+#'    is used to estimate the parameters during each M-step. See \link{clustord}
+#'    documentation for more info.
+#' @param verbose (default \code{FALSE}) changes how much is reported to the
+#'    console during the algorithm's progress. See \link{clustord}
+#'    documentation for more info.
+#' @returns An object of class \code{clustord}. See \link{clustord} for more info.
+#' @examples
+#'\dontrun{
+#' results.original <- clustord(Y ~ ROWCLUST, model="OSM", nclus.row=4,
+#'                              long.df=long.df, EM.control=list(EMcycles=50))
+#' results.original$EM.status$converged
+#' # FALSE
+#'
+#' ## Since original run did not converge, rerun from that finishing point and
+#' ## allow more iterations this time
+#' results.new <- rerun(results.original, long.df, EM.control=list(EMcycles=200))
+#'
+#' ## Alternatively, if dataset has changed slightly then rerun from the
+#' ## previous finishing point to give the new results a helping hand
+#' long.df.new <- long.df[-c(4,25,140),]
+#' results.new <- rerun(results.original, long.df.new)
+#' }
+#' @export
+rerun <- function(results.original, long.df, EM.control=NULL, verbose=FALSE, optim.control=NULL) {
+    if (!("clustord" %in% class(results.original))) stop("results.original must be a clustord results object.")
+
+    model <- results.original$model
+    formula <- results.original$formula
+
+    if ("R" %in% names(results.original$info)) nclus.row <- results.original$info['R']
+    else nclus.row <- NULL
+    if ("C" %in% names(results.original$info)) nclus.column <- results.original$info['C']
+    else nclus.column <- NULL
+
+    # Normalise pi/kappa before resupplying, just in case the outputs don't quite
+    # add up to 1.
+    if ("pi.out" %in% names(results.original)) pi.init <- results.original$pi.out/sum(results.original$pi.out)
+    else pi.init <- NULL
+    if ("kappa.out" %in% names(results.original)) kappa.init <- results.original$kappa.out/sum(results.original$kappa.out)
+    else kappa.init <- NULL
+
+    if ("outvect" %in% names(results.original)) initvect <- results.original$outvect
+    else if ("rowc_format_outvect" %in% names(results.original)) initvect <- results.original$rowc_format_outvect
+    else initvect <- NULL
+
+    if (abs(length(unique(long.df$ROW)) - results.original$info['n'])/results.original$info['n'] > 0.01) warning("The number of rows in the data matrix has changed by more than 1%. This run may not be compatible with the original run.")
+    if (abs(length(unique(long.df$COL)) - results.original$info['p'])/results.original$info['p'] > 0.01) warning("The number of columns in the data matrix has changed by more than 1%. This run may not be compatible with the original run.")
+
+    results.new <- clustord(formula=formula, model=model, nclus.row=nclus.row,
+                            nclus.column=nclus.column, long.df=long.df,
+                            initvect=initvect, pi.init=pi.init, kappa.init=kappa.init,
+                            EM.control=EM.control, verbose=verbose,
+                            optim.control=optim.control)
 }
