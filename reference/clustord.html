@@ -17,7 +17,7 @@ Proportional Odds Model (POM) and a dedicated Binary Model for binary data."></h
 
     <a class="navbar-brand me-2" href="../index.html">clustord</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -203,7 +203,28 @@ step of the EM algorithm. Must be one of 'L-BFGS-B', 'BFGS', 'CG' or
 <dt id="arg-optim-control">optim.control<a class="anchor" aria-label="anchor" href="#arg-optim-control"></a></dt>
 <dd><p>control list for the <code>optim</code> call within the M step
 of the EM algorithm. See the control list Details in the <code>optim</code>
-manual for more info.</p></dd>
+manual for more info.
+Please note that although <code>optim</code>, by default, uses <code>pgtol=0</code>
+and <code>factr=1e7</code> in the L-BFGS-B method, <code>clustord</code>, by default,
+alters these to <code>pgtol=1e-4</code> and <code>factr=1e11</code>, but you can use
+this <code>optim.control</code> argument in <code>clustord</code> to revert them to
+the defaults if you want. The reason for the change is that the chosen
+values in <code>clustord</code> reduce the tolerance on the log-likelihood
+function optimization in order to speed up the algorithm, and because the
+log-likelihood is on the scale of 1e4 for &lt;100 rows in the data matrix
+and 1e6 for 5000 rows in the data matrix, tolerance at the default
+<code>optim</code> scale is not as important as the choice of model type and
+structure or the number of starting points. If one model is better than
+another, it will probably have a likelihood that is better by about the
+size of the data matrix, which is far larger than the tolerance in the
+optimization. If one starting point is better than another, it will
+probably have a likelihood that is better on about 1/10th or 1/100th the
+size of the data matrix, which is still far larger than the tolerance in
+the optimization.
+If you need accurate parameter estimates, firstly make sure to try more
+starting points, then perform model selection first, and then finally
+rerun the chosen model with finer tolerance, e.g. the <code>optim</code>
+defaults, <code>pgtol=0</code> and <code>factr=1e7</code>.</p></dd>
 
 
 <dt id="arg-constraint-sum-zero">constraint_sum_zero<a class="anchor" aria-label="anchor" href="#arg-constraint-sum-zero"></a></dt>
@@ -248,19 +269,20 @@ random starting points for the EM algorithm.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>(default <code>FALSE</code>) changes how much is reported to the console
-during the algorithm's progress. If <code>TRUE</code>, maximal reporting, which
-includes reporting the incomplete-data log-likelihood at every EM algorithm
-iteration and including the trace information from nnet::multinom() during
-the process of fitting initial values for the <code>mu</code> parameters.
-If <code>FALSE</code>, the incomplete log-likelihood is only reported every 10
-iterations of the EM algorithm and the initial fitting reporting is
-suppressed.
-Regardless of the verbosity setting the algorithm reports each of the
-random starts and whenever it finds a better log-likelihood than all
-previous starts, and it also reports when it is fitting simpler models
-to find starting values for the parameters vs fitting the final, more
-complex model.</p></dd>
+<dd><p>(default <code>FALSE</code>) changes how much is reported to the
+console during the algorithm's progress. If <code>TRUE</code>, reports the
+incomplete-data log-likelihood at every EM algorithm iteration and the
+trace information from nnet::multinom() during the process of fitting
+initial values for the <code>mu</code> parameters. If <code>FALSE</code>, the
+incomplete log-likelihood is only reported every 10 iterations of the EM
+algorithm and the initial fitting reporting is suppressed. Regardless of
+the verbosity setting the algorithm reports each of the random starts and
+whenever it finds a better log-likelihood than all previous starts, and it
+also reports when it is fitting simpler models to find starting values for
+the parameters vs fitting the final, more complex model.
+If wanting the detailed output from <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim()</a></code>, use
+<code>optim.control=list(trace=X)</code>, where X is 1 to 6, with 6 being the
+highest level of verbosity for the L-BFGS-B algorithm.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -857,9 +879,9 @@ index and c being the column cluster index.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Converting factor ROW to numeric."</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm for OSM"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -110.298338942843 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -110.223835125182 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -109.501997036794 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -109.564729537795 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
@@ -874,7 +896,7 @@ index and c being the column cluster index.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Cluster sizes:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Row clusters:  3 17 0 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Row clusters:  2 18 0 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + col_coef_j) with 3 row clustering groups:</span></span></span>
 <span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">ROWCLUST</span><span class="op">+</span><span class="va">COL</span>,model<span class="op">=</span><span class="st">"OSM"</span>,<span class="fl">3</span>,long.df<span class="op">=</span><span class="va">long.df</span>,</span></span>
@@ -884,11 +906,11 @@ index and c being the column cluster index.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of simpler model as initial values for full model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> === End of initial row-cluster-only model fitting ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -108.269318811702 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -108.357375627435 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of simpler model as initial values for full model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> === End of initial row-cluster-only model fitting ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -108.25736731008 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -108.296822888244 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
@@ -915,13 +937,13 @@ index and c being the column cluster index.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> === End of initial row-cluster-only model fitting ===</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of intermediate model as initial values for full model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> === End of intermediate rowcluster-column model fitting ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -108.739159769383 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -108.74422639491 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of simpler model as initial values for full model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> === End of initial row-cluster-only model fitting ===</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of intermediate model as initial values for full model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> === End of intermediate rowcluster-column model fitting ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -108.732812616331 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -108.734320154894 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
@@ -944,9 +966,9 @@ index and c being the column cluster index.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Converting factor ROW to numeric."</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm for OSM"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -109.521309322145 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -109.524420500131 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -109.492584417224 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -109.492519156351 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
@@ -971,11 +993,11 @@ index and c being the column cluster index.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of simpler model as initial values for full model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> === End of initial row-cluster-only model fitting ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -167.00051093442 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -167.029916889152 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of simpler model as initial values for full model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> === End of initial row-cluster-only model fitting ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -104.662039616002 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -104.673049751169 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>

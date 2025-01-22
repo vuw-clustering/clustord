@@ -11,7 +11,7 @@ categorical data."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">clustord</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,13 +51,13 @@ categorical data.</p>
 
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The clustord package provides five functions: <code><a href="clustord.html">clustord()</a></code>,
+    <p>The clustord package provides six functions: <code><a href="clustord.html">clustord()</a></code>, <code><a href="rerun.html">rerun()</a></code>,
 <code><a href="mat2df.html">mat2df()</a></code>, <code><a href="calc.SE.bicluster.html">calc.SE.rowcluster()</a></code>, <code><a href="calc.SE.bicluster.html">calc.SE.bicluster()</a></code>, and
 <code><a href="calc.cluster.comparisons.html">calc.cluster.comparisons()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="clustering-function">Clustering function<a class="anchor" aria-label="anchor" href="#clustering-function"></a></h2>
-    <p>The main function is <code>clustord</code>, which
+    <p>The main function is <code><a href="clustord.html">clustord()</a></code>, which
   fits a clustering model to the data. The model is fitted using
   likelihood-based clustering via the EM algorithm. The package assumes that
   you started with a data matrix of responses, though you will need to
@@ -70,6 +70,12 @@ categorical data.</p>
   for rows and covariates for columns. Ordinal models used in the package are
   Ordered Stereotype Model (OSM), Proportional Odds Model (POM) and a
   dedicated Binary Model for binary data.</p>
+<p>The <code><a href="rerun.html">rerun()</a></code> function is useful for continuing clustering runs that did
+not converge on the first attempt, and for running new clustering runs using
+the estimated parameters of a previous run as a starting point. The main
+input for this function is a <code>clustord</code> object output by <code>clustord</code>,
+and internally the <code>rerun</code> function runs <code>clustord</code>, after setting
+up all the input parameters based on the original model fitting run.#'</p>
     </div>
     <div class="section level2">
     <h2 id="utility-function">Utility function<a class="anchor" aria-label="anchor" href="#utility-function"></a></h2>

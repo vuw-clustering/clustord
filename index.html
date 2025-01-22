@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">clustord</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -61,9 +61,14 @@
 <p>If you get an error when you try to install the package using this method, please also try installing the <code>pak</code> package and then use <code>pak::pkg_install("vuw-clustering/clustord", dependencies = TRUE)</code>.</p>
 </div>
 <div class="section level1">
+<h1 id="update-2025-01-rerunning-for-convergence">Update 2025-01 Rerunning For Convergence<a class="anchor" aria-label="anchor" href="#update-2025-01-rerunning-for-convergence"></a>
+</h1>
+<p>Version 1.2.1 adds a utility function <code><a href="reference/rerun.html">rerun()</a></code>. If your original <code><a href="reference/clustord.html">clustord()</a></code> run did not converge, you can use this function to rerun from that finishing point i.e. skip the stage of finding random starts etc. You supply the previous results object and the data frame, and <code><a href="reference/rerun.html">rerun()</a></code> will feed the details of the original run back into the new run so that it continues from where the previous run finished. This can also be used to rerun from the endpoint of the original results if you have slightly changed the dataset.</p>
+</div>
+<div class="section level1">
 <h1 id="update-2024-12-speed-improvement">Update 2024-12 Speed Improvement<a class="anchor" aria-label="anchor" href="#update-2024-12-speed-improvement"></a>
 </h1>
-<p>The latest version, version 1.2, is an update that improves the speed of the algorithm. This latest version has been unit tested to ensure consistency with the original.</p>
+<p>Version 1.2, is an update that improves the speed of the algorithm. This latest version has been unit tested to ensure consistency with the original.</p>
 </div>
 <div class="section level1">
 <h1 id="update-2024-11-parallelization">Update 2024-11 Parallelization<a class="anchor" aria-label="anchor" href="#update-2024-11-parallelization"></a>
