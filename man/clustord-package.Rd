@@ -10,12 +10,12 @@ odds model (POM), ordered stereotype model (OSM) or binary model for ordinal
 categorical data.
 }
 \details{
-The clustord package provides five functions: \code{clustord()},
+The clustord package provides six functions: \code{clustord()}, \code{rerun()},
 \code{mat2df()}, \code{calc.SE.rowcluster()}, \code{calc.SE.bicluster()}, and
 \code{calc.cluster.comparisons()}.
 }
 \section{Clustering function}{
- The main function is \code{clustord}, which
+ The main function is \code{clustord()}, which
   fits a clustering model to the data. The model is fitted using
   likelihood-based clustering via the EM algorithm. The package assumes that
   you started with a data matrix of responses, though you will need to
@@ -28,6 +28,13 @@ The clustord package provides five functions: \code{clustord()},
   for rows and covariates for columns. Ordinal models used in the package are
   Ordered Stereotype Model (OSM), Proportional Odds Model (POM) and a
   dedicated Binary Model for binary data.
+
+The \code{rerun()} function is useful for continuing clustering runs that did
+not converge on the first attempt, and for running new clustering runs using
+the estimated parameters of a previous run as a starting point. The main
+input for this function is a \code{clustord} object output by \code{clustord},
+and internally the \code{rerun} function runs \code{clustord}, after setting
+up all the input parameters based on the original model fitting run.#'
 }
 
 \section{Utility function}{
