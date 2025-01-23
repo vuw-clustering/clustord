@@ -32,6 +32,7 @@ The clustering algorithm in `clustord` is based on the EM algorithm. This is an 
 Let's use a simulated dataset to demonstrate how to check for convergence using the simplest row clustering model.
 
 ```{r}
+library(clustord)
 set.seed(30)
 long.df.sim <- data.frame(Y=factor(sample(1:3,5*30,replace=TRUE)),
                           ROW=factor(rep(1:30,times=5)),COL=rep(1:5,each=30))
