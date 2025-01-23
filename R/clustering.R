@@ -1137,8 +1137,8 @@ clustord <- function(formula,
 
         ## Now convert the results back to row clustering ----
         column.info <- results$info
-        column.info[c('C','n','p')] <- column.info[c('R','p','n')]
-        column.info <- column.info[-which(names(column.info) == "R")]
+        column.info[c('nclus.column','n','p')] <- column.info[c('nclus.row','p','n')]
+        column.info <- column.info[-which(names(column.info) == "nclus.row")]
 
         column.parlist <- convert.output.row.to.column(results$parlist.out)
 
@@ -1336,9 +1336,9 @@ rerun <- function(results.original, long.df, EM.control=NULL, verbose=FALSE, opt
     model <- results.original$model
     formula <- results.original$formula
 
-    if ("R" %in% names(results.original$info)) nclus.row <- results.original$info['R']
+    if ("nclus.row" %in% names(results.original$info)) nclus.row <- results.original$info['nclus.row']
     else nclus.row <- NULL
-    if ("C" %in% names(results.original$info)) nclus.column <- results.original$info['C']
+    if ("nclus.column" %in% names(results.original$info)) nclus.column <- results.original$info['nclus.column']
     else nclus.column <- NULL
 
     # Normalise pi/kappa before resupplying, just in case the outputs don't quite

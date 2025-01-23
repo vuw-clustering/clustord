@@ -217,7 +217,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
     ninitvect <- length(invect)
     criteria <- calc.criteria(EM.status$best.lli, EM.status$llc.for.best.lli, npar, n, p)
     info <- c(n, p, q, npar, ninitvect, RG)
-    names(info) <- c("n","p","q","npar","ninitvect","R")
+    names(info) <- c("n","p","q","npar","ninitvect","nclus.row")
     list("info"=info,
          "model"=model,
          "clustering_mode"="row clustering",
@@ -399,7 +399,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
     ninitvect <- length(initvect)
     criteria <- calc.criteria(EM.status$best.lli, EM.status$llc.for.best.lli, npar, n, p)
     info <- c(n, p, q, npar, ninitvect, RG, CG)
-    names(info) <- c("n","p","q","npar","ninitvect","R","C")
+    names(info) <- c("n","p","q","npar","ninitvect","nclus.row","nclus.column")
     list("info"=info,
          "model"=model,
          "clustering_mode"="biclustering",
@@ -461,7 +461,7 @@ calc.SE.rowcluster <- function(long.df, clust.out,
                                 ppr_m=clust.out$ppr,
                                 pi_v=clust.out$pi.out,
                                 param_lengths=param_lengths_num,
-                                RG=clust.out$info["R"], p=clust.out$info["p"],
+                                RG=clust.out$info["nclus.row"], p=clust.out$info["p"],
                                 n=clust.out$info["n"], q=clust.out$info["q"],
                                 epsilon=clust.out$numerical.correction.epsilon,
                                 constraint_sum_zero=clust.out$constraint_sum_zero,
@@ -472,7 +472,7 @@ calc.SE.rowcluster <- function(long.df, clust.out,
         SE <- sqrt(diag(solve(-optim.hess)))
 
         named_SE <- name_invect(SE, clust.out$model, clust.out$param_lengths,
-                                RG=clust.out$info["R"], p=clust.out$info["p"],
+                                RG=clust.out$info["nclus.row"], p=clust.out$info["p"],
                                 n=clust.out$info["n"], q=clust.out$info["q"],
                                 constraint_sum_zero = clust.out$constraint_sum_zero)
 
@@ -500,7 +500,7 @@ calc.SE.rowcluster <- function(long.df, clust.out,
                                 ppr_m=clust.out$ppc,
                                 pi_v=clust.out$kappa.out,
                                 param_lengths=param_lengths_num,
-                                RG=clust.out$info["C"], p=clust.out$info["n"],
+                                RG=clust.out$info["nclus.column"], p=clust.out$info["n"],
                                 n=clust.out$info["p"], q=clust.out$info["q"],
                                 epsilon=clust.out$numerical.correction.epsilon,
                                 constraint_sum_zero=clust.out$constraint_sum_zero,
@@ -511,7 +511,7 @@ calc.SE.rowcluster <- function(long.df, clust.out,
         SE <- sqrt(diag(solve(-optim.hess)))
 
         named_SE <- name_invect(SE, clust.out$model, clust.out$param_lengths,
-                                RG=NULL, CG=clust.out$info["C"],
+                                RG=NULL, CG=clust.out$info["nclus.column"],
                                 p=clust.out$info["p"], n=clust.out$info["n"], q=clust.out$info["q"],
                                 constraint_sum_zero = clust.out$constraint_sum_zero)
     }
@@ -587,7 +587,7 @@ calc.SE.bicluster <- function(long.df, clust.out,
                             pi_v=clust.out$pi.out,
                             kappa_v=clust.out$kappa.out,
                             param_lengths=param_lengths_num,
-                            RG=clust.out$info["R"], CG=clust.out$info["C"],
+                            RG=clust.out$info["nclus.row"], CG=clust.out$info["nclus.column"],
                             p=clust.out$info["p"], n=clust.out$info["n"],
                             q=clust.out$info["q"],
                             epsilon=clust.out$numerical.correction.epsilon,
@@ -599,7 +599,7 @@ calc.SE.bicluster <- function(long.df, clust.out,
     SE <- sqrt(diag(solve(-optim.hess)))
 
     named_SE <- name_invect(SE, clust.out$model, clust.out$param_lengths,
-                            RG=clust.out$info["R"], CG=clust.out$info["C"],
+                            RG=clust.out$info["nclus.row"], CG=clust.out$info["nclus.column"],
                             p=clust.out$info["p"], n=clust.out$info["n"],
                             q=clust.out$info["q"],
                             constraint_sum_zero = clust.out$constraint_sum_zero)
