@@ -33,7 +33,8 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/clustordOrdinalModels.html">`clustord` Ordinal Models</a></li>
+<li><a class="dropdown-item" href="../articles/clustordConvergence.html">`clustord Convergence Tutorial</a></li>
+    <li><a class="dropdown-item" href="../articles/clustordOrdinalModels.html">`clustord` Ordinal Models</a></li>
     <li><a class="dropdown-item" href="../articles/clustordStructureSummary.html">`clustord` Structure Summary</a></li>
     <li><a class="dropdown-item" href="../articles/clustordTutorial.html">`clustord` Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/RegressionwithOSM.html">Regression with the Ordered Stereotype Model (OSM)</a></li>
@@ -101,9 +102,9 @@ clustering. Use the covariate names in the formula like in
 <p>Check the algorithm has converged using
 <code>EM.status$converged</code> in the output object, and if it has
 not, try increasing the number of random starting points using
-<code>nstarts</code> or increase the number of EM iterations using the
-<code>EM.control = list(EMcycles = X)</code> input, where X is the
-number of iterations you want.</p>
+<code>nstarts</code> or increase the maximum number of EM iterations
+using the <code>EM.control = list(EMcycles = X)</code> input, where X is
+the number of iterations you want.</p>
 <p><code>clustord</code> can fit two kinds of ordinal models. “POM”, the
 proportional-odds model, is the simplest, and the most widely used
 ordinal model. “OSM”, the ordered stereotype model, is more flexible and
@@ -1933,12 +1934,12 @@ idea to increase the number of random starts to 10 or 20.</p>
 <code>EMcycles</code> and <code>startEMcycles</code><a class="anchor" aria-label="anchor" href="#emcycles-and-startemcycles"></a>
 </h3>
 <p><code>EMcycles</code>, one of the entries in the
-<code>EM.control</code> argument, is the number of EM iterations. In the
-examples above, we checked each time whether the EM algorithm had
-converged <strong>before</strong> looking at the rest of the output. If
-the algorithm has not converged, try running it with more random starts,
-or running it again to use different random starts, or if you’ve used a
-random seed rerun it with a different seed.</p>
+<code>EM.control</code> argument, is the maximum number of EM
+iterations. In the examples above, we checked each time whether the EM
+algorithm had converged <strong>before</strong> looking at the rest of
+the output. If the algorithm has not converged, try running it with more
+random starts, or running it again to use different random starts, or if
+you’ve used a random seed rerun it with a different seed.</p>
 <p>But if you’ve already tried quite a few different random starts
 and/or different random seeds and you still can’t get it to converge,
 then try increasing the number of iterations, because lack of
