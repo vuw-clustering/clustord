@@ -1254,6 +1254,8 @@ print.summary.clustord <- function (x, digits = max(3L, getOption("digits") - 3L
 
     cat("\n\nConverged:\n",
         x$convergence)
+    cat("\nAIC:", x$AIC, "\n")
+    cat("\nBIC:", x$BIC, "\n")
 
     cat("\n\nCluster sizes:\n")
     if ("rowclustersizes" %in% names(x)) {
