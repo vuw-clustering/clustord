@@ -207,20 +207,20 @@ our analysis, using the <code>subset</code> argument of the
 <span><span class="co">#&gt;     1))</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients beta:</span></span>
-<span><span class="co">#&gt;    baseline         sex         age </span></span>
-<span><span class="co">#&gt;  2.64417662  0.57117223 -0.04976695 </span></span>
+<span><span class="co">#&gt;   baseline        sex        age </span></span>
+<span><span class="co">#&gt;  2.2405222 -0.4876093 -0.0748720 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Intercepts mu:</span></span>
-<span><span class="co">#&gt;                   1|2        1|3        1|4        1|5 </span></span>
-<span><span class="co">#&gt;  0.0000000  1.1060667  1.7175986 -0.2041696 -5.7546484 </span></span>
+<span><span class="co">#&gt;       mu1       mu2       mu3       mu4       mu5 </span></span>
+<span><span class="co">#&gt;  0.000000  1.826286  2.663686  1.918819 -1.812439 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Score parameters phi:</span></span>
-<span><span class="co">#&gt;         1         2         3         4         5 </span></span>
-<span><span class="co">#&gt; 0.0000000 0.2483075 0.3010923 0.5657090 1.0000000 </span></span>
+<span><span class="co">#&gt;      phi1      phi2      phi3      phi4      phi5 </span></span>
+<span><span class="co">#&gt; 0.0000000 0.2362019 0.2919803 0.5367646 1.0000000 </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Residual Deviance: 729.4885 </span></span>
-<span><span class="co">#&gt; AIC: 749.4885 </span></span>
-<span><span class="co">#&gt; BIC: 786.493 </span></span>
+<span><span class="co">#&gt; Residual Deviance: 732.5564 </span></span>
+<span><span class="co">#&gt; AIC: 752.5564 </span></span>
+<span><span class="co">#&gt; BIC: 789.5609 </span></span>
 <span><span class="co">#&gt; (3 observations deleted due to missingness)</span></span>
 <span><span class="co">#&gt; Warning: did not converge as iteration limit reached</span></span></code></pre></div>
 <p>Notice that the output of this initial fit includes a warning
@@ -245,20 +245,20 @@ it to 5000.</p>
 <span><span class="co">#&gt;     subset = (time == 1))</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients beta:</span></span>
-<span><span class="co">#&gt;    baseline         sex         age </span></span>
-<span><span class="co">#&gt;  1.86343731  0.81055028 -0.00908089 </span></span>
+<span><span class="co">#&gt;     baseline          sex          age </span></span>
+<span><span class="co">#&gt;  1.860974404  0.811523676 -0.009104044 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Intercepts mu:</span></span>
-<span><span class="co">#&gt;                 1|2       1|3       1|4       1|5 </span></span>
-<span><span class="co">#&gt;  0.000000  1.419893  1.098219 -1.892299 -6.396478 </span></span>
+<span><span class="co">#&gt;       mu1       mu2       mu3       mu4       mu5 </span></span>
+<span><span class="co">#&gt;  0.000000  1.474043  1.141984 -1.841170 -6.408926 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Score parameters phi:</span></span>
-<span><span class="co">#&gt;          1          2          3          4          5 </span></span>
-<span><span class="co">#&gt; 0.00000000 0.02112644 0.23847328 0.65444374 1.00000000 </span></span>
+<span><span class="co">#&gt;       phi1       phi2       phi3       phi4       phi5 </span></span>
+<span><span class="co">#&gt; 0.00000000 0.01118914 0.23064920 0.64609192 1.00000000 </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Residual Deviance: 719.6567 </span></span>
-<span><span class="co">#&gt; AIC: 739.6567 </span></span>
-<span><span class="co">#&gt; BIC: 776.6611 </span></span>
+<span><span class="co">#&gt; Residual Deviance: 719.6392 </span></span>
+<span><span class="co">#&gt; AIC: 739.6392 </span></span>
+<span><span class="co">#&gt; BIC: 776.6436 </span></span>
 <span><span class="co">#&gt; (3 observations deleted due to missingness)</span></span></code></pre></div>
 <p>Now we have got a converged solution, so we can now move on to
 interpreting the results.</p>
@@ -350,20 +350,20 @@ factor:</p>
 <span><span class="co">#&gt;     control = list(maxit = 5000), subset = (time == 1))</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients beta:</span></span>
-<span><span class="co">#&gt;   baseline        sex        age </span></span>
-<span><span class="co">#&gt;  1.5711713  0.7145544 -0.0218884 </span></span>
+<span><span class="co">#&gt;    baseline         sex         age </span></span>
+<span><span class="co">#&gt;  1.84434169  0.79653858 -0.02462713 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Intercepts mu:</span></span>
-<span><span class="co">#&gt;                 1|2.5        1|4        1|5 </span></span>
-<span><span class="co">#&gt;  0.0000000  2.7789813 -0.4433891 -4.9167416 </span></span>
+<span><span class="co">#&gt;       mu1     mu2.5       mu4       mu5 </span></span>
+<span><span class="co">#&gt;  0.000000  2.095391 -1.106147 -5.627979 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Score parameters phi:</span></span>
-<span><span class="co">#&gt;           1         2.5           4           5 </span></span>
-<span><span class="co">#&gt; 0.000000000 0.002477747 0.550989350 1.000000000 </span></span>
+<span><span class="co">#&gt;      phi1    phi2.5      phi4      phi5 </span></span>
+<span><span class="co">#&gt; 0.0000000 0.1457573 0.6098663 1.0000000 </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Residual Deviance: 511.3156 </span></span>
-<span><span class="co">#&gt; AIC: 527.3156 </span></span>
-<span><span class="co">#&gt; BIC: 556.9191 </span></span>
+<span><span class="co">#&gt; Residual Deviance: 510.7324 </span></span>
+<span><span class="co">#&gt; AIC: 526.7324 </span></span>
+<span><span class="co">#&gt; BIC: 556.336 </span></span>
 <span><span class="co">#&gt; (3 observations deleted due to missingness)</span></span></code></pre></div>
 <p>As you can see, the coefficient estimates for the covariates have
 changed a little, but the general pattern is the same, because levels 2
@@ -402,20 +402,20 @@ lot:</p>
 <span><span class="co">#&gt;     control = list(maxit = 5000), subset = (time == 1))</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients beta:</span></span>
-<span><span class="co">#&gt;     baseline          sex          age </span></span>
-<span><span class="co">#&gt;  1.186768036  0.601354090 -0.009104307 </span></span>
+<span><span class="co">#&gt;    baseline         sex         age </span></span>
+<span><span class="co">#&gt;  1.19341708  0.60296382 -0.00908178 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Intercepts mu:</span></span>
-<span><span class="co">#&gt;               1|2.5     1|4.5 </span></span>
-<span><span class="co">#&gt;  0.000000  2.037605 -1.695699 </span></span>
+<span><span class="co">#&gt;       mu1     mu2.5     mu4.5 </span></span>
+<span><span class="co">#&gt;  0.000000  2.031736 -1.714161 </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Score parameters phi:</span></span>
-<span><span class="co">#&gt;        1      2.5      4.5 </span></span>
-<span><span class="co">#&gt; 0.000000 0.208971 1.000000 </span></span>
+<span><span class="co">#&gt;      phi1    phi2.5    phi4.5 </span></span>
+<span><span class="co">#&gt; 0.0000000 0.2106618 1.0000000 </span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Residual Deviance: 430.9078 </span></span>
-<span><span class="co">#&gt; AIC: 442.9078 </span></span>
-<span><span class="co">#&gt; BIC: 465.1104 </span></span>
+<span><span class="co">#&gt; Residual Deviance: 430.9072 </span></span>
+<span><span class="co">#&gt; AIC: 442.9072 </span></span>
+<span><span class="co">#&gt; BIC: 465.1099 </span></span>
 <span><span class="co">#&gt; (3 observations deleted due to missingness)</span></span></code></pre></div>
 </div>
 <div class="section level4">
