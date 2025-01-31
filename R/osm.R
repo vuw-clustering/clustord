@@ -453,6 +453,7 @@ logLik.osm <- function(object, ...)
     structure(object$logLik, df = object$edf,
               nobs = object[["nobs"]], class = "logLik")
 
+#' @importFrom stats nobs
 #' @export
 nobs.osm <- function(object, ...) object[["nobs"]]
 
