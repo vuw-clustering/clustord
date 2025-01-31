@@ -255,7 +255,6 @@ osm <- function(formula, data, weights, start, ..., subset,
     lev <- levels(y); llev <- length(lev)
     if(llev <= 2L) stop("response must have 3 or more levels")
     y <- unclass(y)
-    qminus <- llev - 1L
 
     ## Generate starting values for optimization
     if(missing(start)) {
@@ -292,20 +291,20 @@ osm <- function(formula, data, weights, start, ..., subset,
         ## regression fitting produced an intercept term coefs[1L] for the
         ## q1 level
         logit <- function(p) log(p/(1 - p))
-        spacing <- logit((1L:(qminus))/(qminus+1)) # just a guess
+        spacing <- logit((1L:(llev-1))/(llev)) # just a guess
         gammas <- -coefs[1L] + spacing - spacing[q1]
 
         ## Also generate starting values for phi, assuming equal spacing in
         ## the space of phi and converting using the logit link to the space
         ## of the auxiliary variable u
-        startingphi <- (1:(qminus-1))/(qminus)
+        startingphi <- (1:(llev-1))/(llev)
         u2 <- logit(startingphi)[1]
         us <- log(diff(logit(startingphi)))
 
         ## Construct the full starting values vector, using the fact that
         ## coefs[1L] has already been incorporated into the gammas object
         start <- c(coefs[-1L], gammas, u2, us)
-    } else if(length(start) != num_beta + (qminus-1) + (qminus-2))
+    } else if(length(start) != num_beta + (llev-1) + (llev-2))
         stop("'start' is not of the correct length")
 
     ## Now run the fitting
@@ -316,10 +315,12 @@ osm <- function(formula, data, weights, start, ..., subset,
     ## "res" is the output object from optim(), which contains the hessian
     ## object if requested
     beta <- ans$beta
-    mu <- c(0,ans$mu)
+    mu <- ans$mu
     phi <- ans$phi
+    u <- ans$u
     res <- ans$res
     deviance <- ans$deviance
+    logLik <- ans$logLik
 
     ## Calculate the fitted values of each observation, which are the probabilities
     ## of getting each of the levels of the response
@@ -336,14 +337,15 @@ osm <- function(formula, data, weights, start, ..., subset,
     niter <- c(f.evals = res$counts[1L], g.evals = res$counts[2L])
 
     ## Construct the output object
-    fit <- list(beta = beta, mu = mu, phi = phi, deviance = deviance,
+    fit <- list(beta = beta, coefficients = beta, mu = mu, phi = phi, u = u,
+                deviance = deviance, logLik = logLik,
                 fitted.values = fitted, lev = lev, terms = Terms,
-                df.residual = sum(wt) - num_beta - qminus - (qminus-1),
-                edf = num_beta + qminus + (qminus-1), n = sum(wt),
+                df.residual = sum(wt) - num_beta - (llev-1) - (llev-2),
+                edf = num_beta + (llev-1) + (llev-2), n = sum(wt),
                 nobs = sum(wt), call = match.call(),
                 convergence = res$convergence, niter = niter, eta = eta)
     if(Hess) {
-        dn <- c(names(beta), names(ans$mu), names(ans$u))
+        dn <- c(names(beta), names(ans$mu[-1L]), names(ans$u))
         H <- res$hessian
         dimnames(H) <- list(dn, dn)
         fit$Hessian <- H
@@ -407,15 +409,16 @@ osm.fit <- function(x, y, wt, start, offset, ...)
     ## Run optim, and extract the results
     res <- optim(start, fmin, method="L-BFGS-B", ...)
     beta <- res$par[seq_len(num_beta)]
-    mu <- res$par[num_beta + ind_mu_k]
+    mu <- c(0,res$par[num_beta + ind_mu_k])
     u <- res$par[num_beta + num_mu_k + ind_phi_k]
     phi <- c(0,expit(cumsum(c(u[1L], exp(u[-1L])))),1)
     deviance <- 2 * res$value
-    names(mu) <- paste(lev[1L], lev[-1L], sep="|")
-    names(phi) <- lev
+    logLik <- -res$value ## Negative because fmin is the NEGATIVE loglikelihood that gets MINIMIZED
+    names(mu) <- paste0("mu",lev) ## Includes mu1 = 0 as first value
+    names(phi) <- paste0("phi",lev) ## Includes phi1 = 0 as first value and phiq = 1 as last value
     names(u) <- paste0("phiAux",lev[-c(1L,length(lev))])
     if(num_beta) names(beta) <- colnames(x)
-    list(beta = beta, mu = mu, phi = phi, u=u, deviance = deviance, res = res)
+    list(beta = beta, mu = mu, phi = phi, u = u, deviance = deviance, logLik = logLik, res = res)
 }
 
 #' @importFrom stats naprint
@@ -442,5 +445,126 @@ print.osm <- function(x, ...)
     if(nzchar(mess <- naprint(x$na.action))) cat("(", mess, ")\n", sep="")
     if(x$convergence > 0)
         cat("Warning: did not converge as iteration limit reached\n")
+    invisible(x)
+}
+
+#' @export
+logLik.osm <- function(object, ...)
+    structure(object$logLik, df = object$edf,
+              nobs = object[["nobs"]], class = "logLik")
+
+#' @export
+nobs.osm <- function(object, ...) object[["nobs"]]
+
+#' @export
+vcov.osm <- function(object, ...)
+{
+    ## jacobian of phi differentiated with respect to u, for delta method for
+    ## phi which are reparametrized from u so that u were able to be
+    ## unconstrainedly optimized
+    ## Note that this is the Jacobian for phi_2, ..., phi_(q-1) i.e. the
+    ## INDEPENDENT values of phi ONLY, not phi_1=0 or phi_q=1
+    jacobian <- function(u) {
+        m <- length(u)
+        eu <- exp(u)
+        csum <- cumsum(c(u[1L], eu[-1L]))
+        ecsum <- exp(-csum)
+        denom <- (1+ecsum)^2
+        mat <- matrix(0, m, m)
+        for (i in 1L:m) {
+            for (j in 1:i) {
+                if (j == 1) mat[i,j] <- ecsum[i]/denom[i]
+                else mat[i,j] <- ecsum[i]*eu[i]/denom[i]
+            }
+        }
+        mat
+    }
+
+    if(is.null(object$Hessian)) {
+        message("\nRe-fitting to get Hessian\n")
+        utils::flush.console()
+        object <- update(object, Hess = TRUE,
+                         start = c(object$beta, object$mu[-1], object$u))
+    }
+    # vc <- MASS::ginv(object$Hessian)
+
+    vc <- solve(object$Hessian)
+    u <- object$u
+    u.ind <- length(object$beta) + length(object$mu[-1]) + seq_along(u)
+    J <- jacobian(u)
+    A <- diag(tail(u.ind,1))
+
+    ## Apply delta method to get correct SE for phi
+    A[u.ind, u.ind] <- J
+    V <- A %*% vc %*% t(A)
+
+    cat("Variance-covariance matrix for beta coefficients, mu intercepts and the independent elements of phi.\n")
+
+    ## Change the names of the phi elements of the matrix
+    vcov_dimnames <- dimnames(object$Hessian)
+    vcov_dimnames[[1]][u.ind] <- paste0("phi",2:(length(u)+1))
+    vcov_dimnames[[2]][u.ind] <- paste0("phi",2:(length(u)+1))
+    structure(V,  dimnames = vcov_dimnames)
+}
+
+#' @export
+summary.osm <- function(object, digits = max(3, .Options$digits - 3),
+                        correlation = FALSE, ...)
+{
+    llev <- length(object$lev)
+    cc <- c(coef(object), object$mu[-1L], object$phi[-c(1,llev)])
+    pc <- length(coef(object))
+    coef <- matrix(0, pc+llev-1+llev-2, 4L, dimnames=list(names(cc),
+                                                          c("Value", "Std. Error", "t value", "p value")))
+    coef[, 1L] <- cc
+    vc <- vcov(object)
+    coef[, 2L] <- sd <- sqrt(diag(vc))
+    coef[, 3L] <- coef[, 1L]/coef[, 2L]
+    coef[, 4L] <- pnorm(abs(coef[, 3L]), lower.tail = FALSE) * 2
+    object$coefficients <- coef
+    object$pc <- pc
+    object$digits <- digits
+    if(correlation)
+        object$correlation <- (vc[1:pc,1:pc]/sd[1:pc])/rep(sd[1:pc], rep(pc, pc))
+    class(object) <- "summary.osm"
+    object
+}
+
+#' @importFrom stats naprint
+#' @export
+print.summary.osm <- function(x, digits = x$digits, ...)
+{
+    if(!is.null(cl <- x$call)) {
+        cat("Call:\n")
+        dput(cl, control=NULL)
+    }
+    coef <- format(round(x$coefficients, digits=digits))
+    pc <- x$pc
+    llev <- length(x$lev)
+    if(pc > 0) {
+        cat("\nCoefficients:\n")
+        print(x$coefficients[seq_len(pc), , drop=FALSE], quote = FALSE,
+              digits = digits, ...)
+    } else {
+        cat("\nNo coefficients\n")
+    }
+    cat("\nIntercepts mu:\n")
+    print(coef[(pc+1L):(pc+llev-1), , drop=FALSE], quote = FALSE,
+          digits = digits, ...)
+    cat("\nScore parameters phi:\n")
+    print(coef[(pc+llev):(pc+llev*2-3), , drop=FALSE], quote = FALSE,
+          digits = digits, ...)
+    cat("\nResidual Deviance:", format(x$deviance, nsmall=2L), "\n")
+    cat("AIC:", format(x$deviance + 2*x$edf, nsmall=2L), "\n")
+    cat("BIC:", format(x$deviance + x$edf*log(x$n), nsmall=2L), "\n")
+
+    if(nzchar(mess <- naprint(x$na.action))) cat("(", mess, ")\n", sep="")
+    if(!is.null(correl <- x$correlation)) {
+        cat("\nCorrelation of Coefficients:\n")
+        ll <- lower.tri(correl)
+        correl[ll] <- format(round(correl[ll], digits))
+        correl[!ll] <- ""
+        print(correl[-1L, -ncol(correl)], quote = FALSE, ...)
+    }
     invisible(x)
 }
