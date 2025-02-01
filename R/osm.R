@@ -518,13 +518,21 @@ summary.osm <- function(object, digits = max(3, .Options$digits - 3),
     llev <- length(object$lev)
     cc <- c(coef(object), object$mu[-1L], object$phi[-c(1,llev)])
     pc <- length(coef(object))
-    coef <- matrix(0, pc+llev-1+llev-2, 4L, dimnames=list(names(cc),
-                                                          c("Value", "Std. Error", "t value", "p value")))
+    coef <- matrix(0, pc+llev-1+llev-2, 6L, dimnames=list(names(cc),
+                                                          c("Value", "Std. Error", "t value", "p value", "t value", "p value")))
     coef[, 1L] <- cc
     vc <- vcov(object)
     coef[, 2L] <- sd <- sqrt(diag(vc))
-    coef[, 3L] <- coef[, 1L]/coef[, 2L]
+    coef[1:(pc+llev-1), 3L] <- coef[1:(pc+llev-1), 1L]/coef[1:(pc+llev-1), 2L]
+    # For phi values, test whether they are significantly different to the phi
+    # value just below and adjacent to them, rather than whether they are
+    # significantly different to zero
+    coef[(pc+llev):(pc+2*llev-3), 3L] <- (object$phi[-c(1,llev)] - object$phi[-c(llev,llev-1)])/sd[(pc+llev):(pc+2*llev-3)]
+    # Second set of t-values for phi test whether they are significantly
+    # different to the value just above and adjacent to them
+    coef[(pc+llev):(pc+2*llev-3), 5L] <- (object$phi[-c(1,2)] - object$phi[-c(1,llev)])/sd[(pc+llev):(pc+2*llev-3)]
     coef[, 4L] <- pnorm(abs(coef[, 3L]), lower.tail = FALSE) * 2
+    coef[(pc+llev):(pc+2*llev-3), 6L] <- pnorm(abs(coef[(pc+llev):(pc+2*llev-3), 5L]), lower.tail = FALSE) * 2
     object$coefficients <- coef
     object$pc <- pc
     object$digits <- digits
@@ -547,17 +555,18 @@ print.summary.osm <- function(x, digits = x$digits, ...)
     llev <- length(x$lev)
     if(pc > 0) {
         cat("\nCoefficients:\n")
-        print(x$coefficients[seq_len(pc), , drop=FALSE], quote = FALSE,
+        print(x$coefficients[seq_len(pc), 1:4 , drop=FALSE], quote = FALSE,
               digits = digits, ...)
     } else {
         cat("\nNo coefficients\n")
     }
     cat("\nIntercepts mu:\n")
-    print(coef[(pc+1L):(pc+llev-1), , drop=FALSE], quote = FALSE,
+    print(coef[(pc+1L):(pc+llev-1), 1:4 , drop=FALSE], quote = FALSE,
           digits = digits, ...)
     cat("\nScore parameters phi:\n")
     print(coef[(pc+llev):(pc+llev*2-3), , drop=FALSE], quote = FALSE,
           digits = digits, ...)
+    cat("\nThe first set of t-values and p-values for phi test whether each phi coefficient is significantly different to the one before it (e.g. whether phi2 is significantly different than phi1). The second set test whether each phi coefficient is significantly different to the one after it (e.g. whether phi2 is significantly different from phi3).\n")
     cat("\nResidual Deviance:", format(x$deviance, nsmall=2L), "\n")
     cat("AIC:", format(x$deviance + 2*x$edf, nsmall=2L), "\n")
     cat("BIC:", format(x$deviance + x$edf*log(x$n), nsmall=2L), "\n")
