@@ -457,6 +457,8 @@ logLik.osm <- function(object, ...)
 #' @export
 nobs.osm <- function(object, ...) object[["nobs"]]
 
+#' @importFrom stats vcov update
+#' @importFrom utils tail
 #' @export
 vcov.osm <- function(object, ...)
 {
@@ -508,6 +510,7 @@ vcov.osm <- function(object, ...)
     structure(V,  dimnames = vcov_dimnames)
 }
 
+#' @importFrom stats vcov pnorm
 #' @export
 summary.osm <- function(object, digits = max(3, .Options$digits - 3),
                         correlation = FALSE, ...)

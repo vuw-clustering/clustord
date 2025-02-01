@@ -27,7 +27,8 @@ Maintainer: Louise McMillan <louise.mcmillan@vuw.ac.nz>
 Description: Biclustering, row clustering and column clustering using the proportional odds model (POM), ordered stereotype model (OSM) or binary model for ordinal categorical data. Fernández, D., Arnold, R., Pledger, S., Liu, I., & Costilla, R. (2019) <doi:10.1007/s11634-018-0324-3>.
 License: GPL-3
 URL: https://vuw-clustering.github.io/clustord/
-Depends: stats
+Depends: stats,
+         utils
 Imports: Rcpp (>= 1.0.1), 
          MASS,
          nnet,
