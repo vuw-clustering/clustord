@@ -1,6 +1,8 @@
 default.EM.control <- function() {
     list(EMcycles=50, EMlikelihoodtol=1e-4, EMparamtol=1e-2,
-         paramstopping=TRUE, startEMcycles=5, keepallparams=FALSE, epsilon=1e-6)
+         paramstopping=TRUE, startEMcycles=5, keepallparams=FALSE,
+         rerunestepbeforelli=FALSE, uselatestlli=TRUE,
+         epsilon=1e-6)
 }
 
 default.optim.control <- function() {
@@ -22,7 +24,15 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
     finished <- FALSE
     converged <- FALSE
 
-    if (new.lli > EM.status$best.lli) {
+    if (new.lli > EM.status$best.lli | EM.control$uselatestlli) {
+        ## For the biclustering algorithm, LLI is an approximation because the
+        ## exact version is computationally infeasible to calculate. And the
+        ## approximation gets more accurate as you get closer to the MLE, but
+        ## before then you may *appear* to have a better LLI that is actually
+        ## less accurate than the values you get when closer to convergence.
+        ## For the rowclustering algorithm, the exact LLI should always increase
+        ## from one timestep to the next (the EM algorithm creators proved this
+        ## mathematically) so you should take the latest LLI.
         best.lli <- new.lli
         llc.for.best.lli <- new.llc
         params.for.best.lli <- parlist.out
@@ -31,6 +41,8 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
         params.for.best.lli$pi <- pi_v
         if (!is.null(kappa_v)) params.for.best.lli$kappa <- kappa_v
     } else {
+        ## This version is kept for backwards compatibility with the original
+        ## clustord algorithm
         best.lli <- EM.status$best.lli
         llc.for.best.lli <- EM.status$llc.for.best.lli
         params.for.best.lli <- EM.status$params.for.best.lli
@@ -48,10 +60,6 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
     if (is.infinite(new.lli)) likelihood.stopping.criterion <- Inf
 
     if (any(is.infinite(param.exp.out))) param.stopping.criterion <- Inf
-
-    # if (!((likelihood.stopping.criterion < EM.control$EMlikelihoodtol) %in% c(TRUE,FALSE)) |
-    #     !(EM.control$paramstopping %in% c(TRUE,FALSE)) |
-    #     !((param.stopping.criterion < EM.control$EMparamtol) %in% c(TRUE,FALSE))) browser()
 
     if (likelihood.stopping.criterion < EM.control$EMlikelihoodtol &
         (!EM.control$paramstopping || param.stopping.criterion < EM.control$EMparamtol)) converged <- TRUE
@@ -350,6 +358,37 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                 partial=FALSE,
                                 incomplete=FALSE, llc=NA)
 
+        if (EM.control$biclustering && EM.control$rerunestepbeforelli) {
+            ppr_m_latest <- rcpp_Bicluster_Estep(invect, model_num,
+                                          ydf, rowc_mm, colc_mm, cov_mm,
+                                          pi_v, kappa_v, param_lengths_num,
+                                          RG, CG, p, n, q, epsilon, constraint_sum_zero,
+                                          row_clusters=TRUE)
+
+            ## Now set any NA values in the posterior probabilities matrix to 0
+            ppr_m_latest[is.na(ppr_m_latest)] <- 0
+            ppc_m_latest <- rcpp_Bicluster_Estep(invect, model_num,
+                                          ydf, rowc_mm, colc_mm, cov_mm,
+                                          pi_v, kappa_v, param_lengths_num,
+                                          RG, CG, p, n, q, epsilon, constraint_sum_zero,
+                                          row_clusters=FALSE)
+            ppc_m_latest[is.na(ppc_m_latest)] <- 0
+            lli <- rcpp_Biclusterll(outvect,
+                                    model_num=model_num,
+                                    ydf=ydf,
+                                    rowc_mm=rowc_mm,
+                                    colc_mm=colc_mm,
+                                    cov_mm=cov_mm,
+                                    ppr_m=ppr_m_latest,
+                                    ppc_m=ppc_m_latest,
+                                    pi_v=pi_v,
+                                    kappa_v=kappa_v,
+                                    param_lengths=param_lengths_num,
+                                    RG=RG, CG=CG, p=p, n=n, q=q, epsilon=epsilon,
+                                    constraint_sum_zero=constraint_sum_zero,
+                                    partial=FALSE,
+                                    incomplete=TRUE, llc=llc)
+        } else {
         lli <- rcpp_Biclusterll(outvect,
                                 model_num=model_num,
                                 ydf=ydf,
@@ -365,6 +404,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                 constraint_sum_zero=constraint_sum_zero,
                                 partial=FALSE,
                                 incomplete=TRUE, llc=llc)
+        }
         if (is.na(lli)) browser()
 
         EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
@@ -434,7 +474,7 @@ calc.SE.rowcluster <- function(long.df, clust.out,
                                optim.control=default.optim.control()) {
     optim.control$fnscale=-1
 
-    if (all(c('R','C') %in% names(clust.out$info))) stop("Use calc.SE.bicluster for biclustering results.")
+    if (all(c('nclus.row','nclus.column') %in% names(clust.out$info))) stop("Use calc.SE.bicluster for biclustering results.")
 
     # param_lengths indicates use of row clustering, rowc_format_param_lengths
     # indicates use of column clustering
@@ -469,7 +509,21 @@ calc.SE.rowcluster <- function(long.df, clust.out,
                                 incomplete=TRUE,
                                 control=optim.control)
 
-        SE <- sqrt(diag(solve(-optim.hess)))
+        vc <- solve(-optim.hess)
+
+        if (model == "OSM") {
+            outvect <- clust.out$outvect
+            q <- clust.out$info["q"]
+            u.ind <- (q-1+1):(q-1+q-2)
+            u <- outvect[u.ind]
+            J <- jacobian.phi(u)
+            A <- diag(length(outvect))
+
+            ## Apply delta method to get correct SE for phi
+            A[u.ind, u.ind] <- J
+            vc <- A %*% vc %*% t(A)
+        }
+        SE <- sqrt(diag(vc))
 
         named_SE <- name_invect(SE, clust.out$model, clust.out$param_lengths,
                                 RG=clust.out$info["nclus.row"], p=clust.out$info["p"],
@@ -508,7 +562,21 @@ calc.SE.rowcluster <- function(long.df, clust.out,
                                 incomplete=TRUE,
                                 control=optim.control)
 
-        SE <- sqrt(diag(solve(-optim.hess)))
+        vc <- solve(-optim.hess)
+
+        if (model == "OSM") {
+            outvect <- clust.out$row_format_outvect
+            q <- clust.out$info["q"]
+            u.ind <- (q-1+1):(q-1+q-2)
+            u <- outvect[u.ind]
+            J <- jacobian.phi(u)
+            A <- diag(length(outvect))
+
+            ## Apply delta method to get correct SE for phi
+            A[u.ind, u.ind] <- J
+            vc <- A %*% vc %*% t(A)
+        }
+        SE <- sqrt(diag(vc))
 
         named_SE <- name_invect(SE, clust.out$model, clust.out$param_lengths,
                                 RG=NULL, CG=clust.out$info["nclus.column"],
@@ -562,7 +630,7 @@ calc.SE.bicluster <- function(long.df, clust.out,
 
     optim.control$fnscale=-1
 
-    if (!all(c('R','C') %in% names(clust.out$info))) stop("Use calc.SE.rowcluster for row or column clustering results.")
+    if (!all(c('nclus.row','nclus.column') %in% names(clust.out$info))) stop("Use calc.SE.rowcluster for row or column clustering results.")
 
     ## Important: do NOT change the order of the three columns in this call,
     ## because the C++ code relies on having this order for Y, ROW and COL
@@ -604,4 +672,16 @@ calc.SE.bicluster <- function(long.df, clust.out,
                             q=clust.out$info["q"],
                             constraint_sum_zero = clust.out$constraint_sum_zero)
     named_SE
+}
+
+jacobian.phi <- function(u) {
+    m <- length(u)
+    eu <- exp(u)
+    csum <- csum(u[1L], eu[-1L])
+    ecsum <- exp(-csum)
+    denom <- (1+ecsum)^2
+    mat <- matrix(0, m, m)
+    mat[, 1L] <- rep(ecsum[1L]/denom[1L], m)
+    for (i in 2L:m) mat[i:m, i] <- ecsum[i]*eu[i]/denom[i]
+    mat
 }

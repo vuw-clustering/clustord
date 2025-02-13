@@ -789,8 +789,32 @@
 #'     fitting the simpler submodels to get starting values for fitting models
 #'     with interaction.
 #'
-#'     \code{keepallparams}: if true, keep a record of parameter values
+#'     \code{keepallparams}: if \code{TRUE}, keep a record of parameter values
 #'     (including pi_r and kappa_c) for every EM iteration.
+#'
+#'     \code{rerunestepbeforelli}: if \code{TRUE}, and only when using biclustering,
+#'     rerun the E-step before calculating the incomplete-data log-likelihood.
+#'     The EM algorithm runs the E-step to estimate the cluster membership
+#'     probabilities and then runs the M-step to estimate the parameters by
+#'     maximising the complete-data log-likelihood (LLC), and then recalculates
+#'     the estimated incomplete-data log-likelihood (LLI) to check for
+#'     convergence. The biclustering LLI approximation uses the cluster
+#'     membership probabilities so will be slightly more accurate if these
+#'     cluster membership probabilities are recalculated using the very latest
+#'     parameter estimates. So the \code{TRUE} setting for this control
+#'     recalculates the cluster memberships before calculating the LLI approx.
+#'
+#'     \code{uselatestlli}: Kept for backwards compatibility with original
+#'     version of clustord algorithm. Original version of the algorithm had this
+#'     set to \code{FALSE}, which keeps the best LLI from any previous iteration
+#'     rather than the latest LLI. The default, \code{TRUE}, instead keeps the
+#'     latest LLI even if there was a better LLI in a previous iteration. This
+#'     is appropriat: In row clustering the exact LLI is used and the EM
+#'     algorithm creators proved the LLI should always not decrease with each
+#'     iteration. In biclustering the approximation to the LLI may be very
+#'     inaccurate when the algorithm is a long way from convergence, so even
+#'     when the value of LLI appears to be very high in early iterations this
+#'     may not be accurate, so it is better to take the latest value.
 #'
 #'     For \code{columnclustering}, the parameters saved from each iteration
 #'     will NOT be converted to column clustering format, and will be in the row
@@ -1042,7 +1066,10 @@ clustord <- function(formula,
 
     print(paste("EM algorithm for",model))
 
+    start.par <- NULL
+
     if (!is.null(RG) && !is.null(CG)) {
+        EM.control$biclustering <- TRUE
         if (is.null(initvect) | is.null(pi.init) | is.null(kappa.init)) {
             ## generate.start will keep using whichever of initvect and pi.init and
             ## kappa.init are not null
@@ -1072,6 +1099,7 @@ clustord <- function(formula,
                                     optim.method=optim.method, optim.control=optim.control,
                                     verbose=verbose)
     } else if (!is.null(RG)) {
+        EM.control$biclustering <- FALSE
         if (is.null(initvect) | is.null(pi.init)) {
             ## generate.start will keep using whichever of initvect and pi.init is not null
             start.par <- generate.start.rowcluster(long.df, model=model,
@@ -1097,6 +1125,7 @@ clustord <- function(formula,
                                      optim.method=optim.method, optim.control=optim.control,
                                      verbose=verbose)
     } else if (!is.null(CG)) {
+        EM.control$biclustering <- FALSE
         RG <- nclus.column
         pi.init <- kappa.init
         long.df.transp <- long.df
@@ -1181,6 +1210,7 @@ clustord <- function(formula,
     if (results$EM.status$converged) print("EM algorithm has successfully converged.")
     else print("EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.")
 
+    results$start.par <- start.par
     results$call <- match.call()
     results$formula <- formula
     results$terms <- terms(formula)

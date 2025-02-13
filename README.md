@@ -6,6 +6,14 @@ The `build_vignettes = TRUE` part ensures that you will install the vignettes as
 
 If you get an error when you try to install the package using this method, please also try installing the `pak` package and then use `pak::pkg_install("vuw-clustering/clustord", dependencies = TRUE)`.
 
+# Update 2025-02 Likelihood Reporting Change and OSM Regression Functionality
+
+Version 1.3.0 changes how the log-likelihood of the model is reported for biclustering results. This also slightly changes which random start is chosen from multiple random starts. Biclustering reports an approximate incomplete-data log-likelihood for the model fit, because it is computationally infeasible to calculate the exact incomplete-data log-likelihood. The accuracy of this approximation improves as the algorithm converges towards the maximum log-likelihood. As a result, the biclustering approximation to the log-likelihood may appear to decrease as the algorithm converges, but the initial high values are likely to be inaccurate and thus should be disregarded. (By contrast, the row clustering and column clustering methods calculate the exact log-likelihood and do not display this behaviour.)
+
+This version also adds functionality for outputs of the `osm()` regression fitting function. `vcov(fit)` can now be used to calculate the variance-covariance matrix for the parameter estimates of `osm()` and `summary(osm)` displays the estimates, their estimated standard errors and their t-values and p-values.
+
+The SE calculations for phi in `calc.SE.rowcluster()` and `calc.SE.bicluster()` are now more accurately calculated based on the reparametrization of that part of the Ordered Stereotype Model (OSM).
+
 # Update 2025-01 Rerunning For Convergence
 
 Version 1.2.1 adds a utility function `rerun()`. If your original `clustord()` run did not converge, you can use this function to rerun from that finishing point i.e. skip the stage of finding random starts etc. You supply the previous results object and the data frame, and `rerun()` will feed the details of the original run back into the new run so that it continues from where the previous run finished. This can also be used to rerun from the endpoint of the original results if you have slightly changed the dataset.

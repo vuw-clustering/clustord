@@ -1,7 +1,6 @@
 startEM.control <- function(EM.control) {
     startEM <- EM.control
     startEM$EMcycles <- EM.control$startEMcycles
-    startEM$keepallparams <- FALSE
 
     startEM
 }
@@ -477,6 +476,8 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
 
     q <- length(levels(long.df$Y))
 
+    start.params.every.iteration=list()
+
     ## Generate initvect -------------------------------------------------------
     if (is.null(initvect)) {
 
@@ -516,6 +517,8 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
                     best.initvect.pi.init <- list(initvect=init.out$outvect,pi.init=init.out$pi.out)
                     initvect <- init.out$outvect
                 }
+
+                if (EM.control$keepallparams) start.params.every.iteration[[s]] <- init.out$EM.status$params.every.iteration
             }
         } else {
 
@@ -563,6 +566,8 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
                                           pi.init=start_results[[best_start_idx]]$pi.out)
             initvect <- start_results[[best_start_idx]]$outvect
 
+            start.params.every.iteration <- lapply(start_results, function(res) res$EM.status$params.every.iteration)
+
             parallel::stopCluster(cl)
         }
     }
@@ -575,7 +580,8 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
         }
     }
 
-    list(initvect=initvect, pi.init=pi.init)
+    list(initvect=initvect, pi.init=pi.init,
+         start.params.every.iteration=start.params.every.iteration)
 }
 
 generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
@@ -590,6 +596,8 @@ generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
     p <- max(long.df$COL)
 
     q <- length(levels(long.df$Y))
+
+    start.params.every.iteration=list()
 
     ## Generate initvect -------------------------------------------------------
     if (is.null(initvect)) {
@@ -634,6 +642,8 @@ generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
                                                         kappa.init=init.out$kappa.out)
                     initvect <- init.out$outvect
                 }
+
+                if (EM.control$keepallparams) start.params.every.iteration[[s]] <- init.out$EM.status$params.every.iteration
             }
 
         } else {
@@ -683,6 +693,8 @@ generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
                                                 kappa.init=start_results[[best_start_idx]]$kappa.out)
             initvect <- start_results[[best_start_idx]]$outvect
 
+            start.params.every.iteration <- lapply(start_results, function(res) res$EM.status$params.every.iteration)
+
             parallel::stopCluster(cl)
         }
     }
@@ -705,5 +717,6 @@ generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
         }
     }
 
-    list(initvect=initvect, pi.init=pi.init, kappa.init=kappa.init)
+    list(initvect=initvect, pi.init=pi.init, kappa.init=kappa.init,
+         start.params.every.iteration=start.params.every.iteration)
 }

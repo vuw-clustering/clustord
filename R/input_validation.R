@@ -110,10 +110,11 @@ validate.inputs <- function(formula, model,
         stop("parallel_starts must be TRUE or FALSE.")
     }
 
-    if (!is.null(EM.control) & (!is.list(EM.control) || length(EM.control) == 0 || length(EM.control) > 7 ||
+    if (!is.null(EM.control) & (!is.list(EM.control) || length(EM.control) == 0 || length(EM.control) > 9 ||
         !all(names(EM.control) %in% c("EMcycles","EMlikelihoodtol","EMparamtol",
                                       "paramstopping","startEMcycles","keepallparams",
-                                      "epsilon")))) {
+                                      "epsilon", "rerunestepbeforelli",
+                                      "uselatestlli")))) {
         stop("If supplied, EM.control must be a list of control parameters for the EM algorithm. Please see the manual for more info.")
     }
 

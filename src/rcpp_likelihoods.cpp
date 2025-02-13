@@ -686,11 +686,12 @@ double rcpp_Rclusterll(const NumericVector & invect,
                         }
                         theta = theta_all[ymatij_idx]/theta_sum;
                     } else if (model_num == 2) {
-                        theta_all[0] = rcpp_expit(mu[0] - linear_part);
+                        // theta_all[0] = rcpp_expit(mu[0] - linear_part);
+                        theta_all[0] = 1/(1 + exp(linear_part - mu[0]));
                         theta_sum = theta_all[0];
                         for (kk=1; kk < q-1; kk++) {
-                            theta_all[kk] = rcpp_expit(mu[kk] - linear_part) -
-                                rcpp_expit(mu[kk-1] - linear_part);
+                            theta_all[kk] = 1/(1+exp(linear_part - mu[kk])) -
+                                1/(1+exp(linear_part - mu[kk-1]));
                             theta_sum += theta_all[kk];
                         }
                         theta_all[q-1] = 1-theta_sum;
