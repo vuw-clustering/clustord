@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">clustord</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,6 +60,13 @@
 <p>Please install clustord from GitHub using <code>remotes::install_github("vuw-clustering/clustord", dependencies = TRUE, build_vignettes = TRUE)</code>.</p>
 <p>The <code>build_vignettes = TRUE</code> part ensures that you will install the vignettes as well, which are available to help you learn how to use the package.</p>
 <p>If you get an error when you try to install the package using this method, please also try installing the <code>pak</code> package and then use <code>pak::pkg_install("vuw-clustering/clustord", dependencies = TRUE)</code>.</p>
+</div>
+<div class="section level1">
+<h1 id="update-2025-02-likelihood-reporting-change-and-osm-regression-functionality">Update 2025-02 Likelihood Reporting Change and OSM Regression Functionality<a class="anchor" aria-label="anchor" href="#update-2025-02-likelihood-reporting-change-and-osm-regression-functionality"></a>
+</h1>
+<p>Version 1.3.0 changes how the log-likelihood of the model is reported for biclustering results. This also slightly changes which random start is chosen from multiple random starts. Biclustering reports an approximate incomplete-data log-likelihood for the model fit, because it is computationally infeasible to calculate the exact incomplete-data log-likelihood. The accuracy of this approximation improves as the algorithm converges towards the maximum log-likelihood. As a result, the biclustering approximation to the log-likelihood may appear to decrease as the algorithm converges, but the initial high values are likely to be inaccurate and thus should be disregarded. (By contrast, the row clustering and column clustering methods calculate the exact log-likelihood and do not display this behaviour.)</p>
+<p>This version also adds functionality for outputs of the <code><a href="reference/osm.html">osm()</a></code> regression fitting function. <code>vcov(fit)</code> can now be used to calculate the variance-covariance matrix for the parameter estimates of <code><a href="reference/osm.html">osm()</a></code> and <code>summary(osm)</code> displays the estimates, their estimated standard errors and their t-values and p-values.</p>
+<p>The SE calculations for phi in <code><a href="reference/calc.SE.bicluster.html">calc.SE.rowcluster()</a></code> and <code><a href="reference/calc.SE.bicluster.html">calc.SE.bicluster()</a></code> are now more accurately calculated based on the reparametrization of that part of the Ordered Stereotype Model (OSM).</p>
 </div>
 <div class="section level1">
 <h1 id="update-2025-01-rerunning-for-convergence">Update 2025-01 Rerunning For Convergence<a class="anchor" aria-label="anchor" href="#update-2025-01-rerunning-for-convergence"></a>
