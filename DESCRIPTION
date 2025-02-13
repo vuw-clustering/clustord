@@ -1,7 +1,7 @@
 Package: clustord
 Type: Package
 Title: Clustering Ordinal Data Using Proportional Odds Model, Ordered Stereotype Model or Binary Model
-Version: 1.2.0
+Version: 1.3.0
 Date: 2024-11-12
 Authors@R: c(
     person(given = "Louise", 
@@ -27,6 +27,8 @@ Maintainer: Louise McMillan <louise.mcmillan@vuw.ac.nz>
 Description: Biclustering, row clustering and column clustering using the proportional odds model (POM), ordered stereotype model (OSM) or binary model for ordinal categorical data. Fernández, D., Arnold, R., Pledger, S., Liu, I., & Costilla, R. (2019) <doi:10.1007/s11634-018-0324-3>.
 License: GPL-3
 URL: https://vuw-clustering.github.io/clustord/
+Depends: stats,
+         utils
 Imports: Rcpp (>= 1.0.1), 
          MASS,
          nnet,

@@ -120,8 +120,32 @@ column covariates which will be incorporated into \code{long.df}.}
     fitting the simpler submodels to get starting values for fitting models
     with interaction.
 
-    \code{keepallparams}: if true, keep a record of parameter values
+    \code{keepallparams}: if \code{TRUE}, keep a record of parameter values
     (including pi_r and kappa_c) for every EM iteration.
+
+    \code{rerunestepbeforelli}: if \code{TRUE}, and only when using biclustering,
+    rerun the E-step before calculating the incomplete-data log-likelihood.
+    The EM algorithm runs the E-step to estimate the cluster membership
+    probabilities and then runs the M-step to estimate the parameters by
+    maximising the complete-data log-likelihood (LLC), and then recalculates
+    the estimated incomplete-data log-likelihood (LLI) to check for
+    convergence. The biclustering LLI approximation uses the cluster
+    membership probabilities so will be slightly more accurate if these
+    cluster membership probabilities are recalculated using the very latest
+    parameter estimates. So the \code{TRUE} setting for this control
+    recalculates the cluster memberships before calculating the LLI approx.
+
+    \code{uselatestlli}: Kept for backwards compatibility with original
+    version of clustord algorithm. Original version of the algorithm had this
+    set to \code{FALSE}, which keeps the best LLI from any previous iteration
+    rather than the latest LLI. The default, \code{TRUE}, instead keeps the
+    latest LLI even if there was a better LLI in a previous iteration. This
+    is appropriat: In row clustering the exact LLI is used and the EM
+    algorithm creators proved the LLI should always not decrease with each
+    iteration. In biclustering the approximation to the LLI may be very
+    inaccurate when the algorithm is a long way from convergence, so even
+    when the value of LLI appears to be very high in early iterations this
+    may not be accurate, so it is better to take the latest value.
 
     For \code{columnclustering}, the parameters saved from each iteration
     will NOT be converted to column clustering format, and will be in the row
@@ -139,7 +163,28 @@ step of the EM algorithm. Must be one of 'L-BFGS-B', 'BFGS', 'CG' or
 
 \item{optim.control}{control list for the \code{optim} call within the M step
 of the EM algorithm. See the control list Details in the \code{optim}
-manual for more info.}
+manual for more info.
+Please note that although \code{optim}, by default, uses \code{pgtol=0}
+and \code{factr=1e7} in the L-BFGS-B method, \code{clustord}, by default,
+alters these to \code{pgtol=1e-4} and \code{factr=1e11}, but you can use
+this \code{optim.control} argument in \code{clustord} to revert them to
+the defaults if you want. The reason for the change is that the chosen
+values in \code{clustord} reduce the tolerance on the log-likelihood
+function optimization in order to speed up the algorithm, and because the
+log-likelihood is on the scale of 1e4 for <100 rows in the data matrix
+and 1e6 for 5000 rows in the data matrix, tolerance at the default
+\code{optim} scale is not as important as the choice of model type and
+structure or the number of starting points. If one model is better than
+another, it will probably have a likelihood that is better by about the
+size of the data matrix, which is far larger than the tolerance in the
+optimization. If one starting point is better than another, it will
+probably have a likelihood that is better on about 1/10th or 1/100th the
+size of the data matrix, which is still far larger than the tolerance in
+the optimization.
+If you need accurate parameter estimates, firstly make sure to try more
+starting points, then perform model selection first, and then finally
+rerun the chosen model with finer tolerance, e.g. the \code{optim}
+defaults, \code{pgtol=0} and \code{factr=1e7}.}
 
 \item{constraint_sum_zero}{(default \code{TRUE}) if \code{TRUE}, use constraints
 that cluster effects sum to zero; if \code{FALSE}, use constraints that
@@ -174,19 +219,20 @@ tasks external to R.}
 \item{nstarts}{(default 5) number of random starts to generate, if generating
 random starting points for the EM algorithm.}
 
-\item{verbose}{(default \code{FALSE}) changes how much is reported to the console
-during the algorithm's progress. If \code{TRUE}, maximal reporting, which
-includes reporting the incomplete-data log-likelihood at every EM algorithm
-iteration and including the trace information from nnet::multinom() during
-the process of fitting initial values for the \code{mu} parameters.
-If \code{FALSE}, the incomplete log-likelihood is only reported every 10
-iterations of the EM algorithm and the initial fitting reporting is
-suppressed.
-Regardless of the verbosity setting the algorithm reports each of the
-random starts and whenever it finds a better log-likelihood than all
-previous starts, and it also reports when it is fitting simpler models
-to find starting values for the parameters vs fitting the final, more
-complex model.}
+\item{verbose}{(default \code{FALSE}) changes how much is reported to the
+console during the algorithm's progress. If \code{TRUE}, reports the
+incomplete-data log-likelihood at every EM algorithm iteration and the
+trace information from nnet::multinom() during the process of fitting
+initial values for the \code{mu} parameters. If \code{FALSE}, the
+incomplete log-likelihood is only reported every 10 iterations of the EM
+algorithm and the initial fitting reporting is suppressed. Regardless of
+the verbosity setting the algorithm reports each of the random starts and
+whenever it finds a better log-likelihood than all previous starts, and it
+also reports when it is fitting simpler models to find starting values for
+the parameters vs fitting the final, more complex model.
+If wanting the detailed output from \code{optim()}, use
+\code{optim.control=list(trace=X)}, where X is 1 to 6, with 6 being the
+highest level of verbosity for the L-BFGS-B algorithm.}
 }
 \value{
 A \code{clustord} object, i.e. a list with components:

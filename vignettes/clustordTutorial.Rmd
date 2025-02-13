@@ -32,7 +32,7 @@ You have to convert the data matrix to long-format **before clustering**, using 
 
 You can include covariates in the clustering, and they can be numerical or categorical, just like predictors in a regression model. Add these as inputs to `mat2df()` to make the object for clustering. Use the covariate names in the formula like in `lm()` or `glm()`.
 
-Check the algorithm has converged using `EM.status$converged` in the output object, and if it has not, try increasing the number of random starting points using `nstarts` or increase the number of EM iterations using the `EM.control = list(EMcycles = X)` input, where X is the number of iterations you want.
+Check the algorithm has converged using `EM.status$converged` in the output object, and if it has not, try increasing the number of random starting points using `nstarts` or increase the maximum number of EM iterations using the `EM.control = list(EMcycles = X)` input, where X is the number of iterations you want.
 
 `clustord` can fit two kinds of ordinal models. "POM", the proportional-odds model, is the simplest, and the most widely used ordinal model. "OSM", the ordered stereotype model, is more flexible and its `phi` parameters can be used as a more informed way of recoding the ordinal data numerically. These two models are discussed in a **separate vignette**, *"Ordinal Models"*.
 
@@ -844,7 +844,7 @@ The default number of starting points is 5. If you have only 2 or 3 clusters, an
 
 ## `EMcycles` and `startEMcycles`
 
-`EMcycles`, one of the entries in the `EM.control` argument, is the number of EM iterations. In the examples above, we checked each time whether the EM algorithm had converged **before** looking at the rest of the output. If the algorithm has not converged, try running it with more random starts, or running it again to use different random starts, or if you've used a random seed rerun it with a different seed.
+`EMcycles`, one of the entries in the `EM.control` argument, is the maximum number of EM iterations. In the examples above, we checked each time whether the EM algorithm had converged **before** looking at the rest of the output. If the algorithm has not converged, try running it with more random starts, or running it again to use different random starts, or if you've used a random seed rerun it with a different seed.
 
 But if you've already tried quite a few different random starts and/or different random seeds and you still can't get it to converge, then try increasing the number of iterations, because lack of convergence means that it hit the upper limit on the number of iterations before it reached convergence.
 

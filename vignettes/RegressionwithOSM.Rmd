@@ -156,6 +156,8 @@ That is, if you want to apply numerical methods to the ordinal response variable
 
 Fernández, et al. (2021) demonstrates a similar approach where the ordered stereotype scores are used as codings for the response levels before applying a numerical method, archetypoid analysis, to the recoded responses. However, as that is a multivariate analysis method, in that particular case the clustering form of the ordered stereotype model was fitted, instead of the regression model.
 
+Note that this recoding is merely a suggestion from the data, not a requirement. If there are good *a priori* reasons for keeping the response levels unmerged, such as wanting to retain consistency with an analysis on another related dataset, then there is no need to merge the levels. The results simply indicate which levels could be safely merged if merging is desirable.
+
 
 # Odds ratios
 
