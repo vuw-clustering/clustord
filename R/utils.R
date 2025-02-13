@@ -152,10 +152,10 @@ mat2df <- function(mat, xr.df = NULL, xc.df = NULL) {
     if (is.null(rownames(y))) rownames(y) <- as.character(1:nrow(y))
     if (is.null(colnames(y))) colnames(y) <- as.character(1:ncol(y))
     my.df <- data.frame(Y = as.factor(c(y)),
-                        ROW = gl(nrow(y),1,nrow(y)*ncol(y),
-                                 labels = rownames(y)),
-                        COL = gl(ncol(y),nrow(y),nrow(y)*ncol(y),
-                                 labels = colnames(y)))
+                        ROW = as.numeric(gl(nrow(y),1,nrow(y)*ncol(y),
+                                 labels = rownames(y))),
+                        COL = as.numeric(gl(ncol(y),nrow(y),nrow(y)*ncol(y),
+                                 labels = colnames(y))))
 
     if(is.data.frame(xr.df))
         my.df <- cbind(my.df,xr.df2)

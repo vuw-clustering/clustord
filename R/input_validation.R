@@ -92,12 +92,12 @@ validate.inputs <- function(formula, model,
         if (!is.null(pi.init)) {
             if (!is.vector(pi.init) || !is.numeric(pi.init) || any(is.na(pi.init)) ||
                 any(pi.init < 0) || any(pi.init > 1)) stop("If supplied, pi.init must be a vector of numbers between 0 and 1.")
-            if (length(pi.init) != nclus.row || sum(pi.init) != 1) stop("pi.init must be the same length as the number of row clusters, and must add up to 1")
+            if (length(pi.init) != nclus.row || abs(sum(pi.init) - 1) > 1e-12) stop("pi.init must be the same length as the number of row clusters, and must add up to 1")
         }
         if (!is.null(kappa.init)) {
             if (!is.vector(kappa.init) || !is.numeric(kappa.init) || any(is.na(kappa.init)) ||
                 any(kappa.init < 0) | any(kappa.init > 1)) stop("If supplied, kappa.init must be a vector of numbers between 0 and 1.")
-            if (length(kappa.init) != nclus.column || sum(kappa.init) != 1) stop("kappa.init must be the same length as the number of column clusters, and must add up to 1")
+            if (length(kappa.init) != nclus.column || abs(sum(kappa.init) - 1) > 1e-12) stop("kappa.init must be the same length as the number of column clusters, and must add up to 1")
         }
 
         if (!is.null(nstarts)) {
@@ -120,10 +120,11 @@ validate.inputs <- function(formula, model,
         stop("parallel_starts must be TRUE or FALSE.")
     }
 
-    if (!is.list(EM.control) || length(EM.control) == 0 || length(EM.control) > 7 ||
+    if (!is.null(EM.control) & (!is.list(EM.control) || length(EM.control) == 0 || length(EM.control) > 9 ||
         !all(names(EM.control) %in% c("EMcycles","EMlikelihoodtol","EMparamtol",
                                       "paramstopping","startEMcycles","keepallparams",
-                                      "epsilon"))) {
+                                      "epsilon", "rerunestepbeforelli",
+                                      "uselatestlli")))) {
         stop("If supplied, EM.control must be a list of control parameters for the EM algorithm. Please see the manual for more info.")
     }
 

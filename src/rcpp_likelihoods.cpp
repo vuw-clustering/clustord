@@ -373,8 +373,6 @@ double rcpp_linear_part(const NumericMatrix ydf,
     double linear_part = 0;
     int ll;
 
-    double temp;
-
     // param_lengths entries: c('mu','phi','rowc','colc','rowc_colc','row','col','rowc_col','colc_row','rowc_cov','colc_cov','cov')]
     // Rcout << "The R-based value of ii : " << ii+1 << "\n";
     // Rcout << "The R-based value of jj : " << jj+1 << "\n";
@@ -427,12 +425,12 @@ double rcpp_linear_part(const NumericMatrix ydf,
 
         for (ll=0; ll < ncolccov; ll++) {
             linear_part += colc_mm(ij,ll)*colc_cov_coef(cc,ll);
-            if (std::isnan(linear_part)) {
-                temp = colc_mm(ij,ll);
-                Rcout << "The value of colc_mm element: " << temp << "\n";
-                temp = colc_cov_coef(cc,ll);
-                Rcout << "The value of colc_cov_coef element: " << temp << "\n";
-            }
+            //if (std::isnan(linear_part)) {
+            //    temp = colc_mm(ij,ll);
+            //    Rcout << "The value of colc_mm element: " << temp << "\n";
+            //    temp = colc_cov_coef(cc,ll);
+            //    Rcout << "The value of colc_cov_coef element: " << temp << "\n";
+            //}
         }
         // Rcout << "The value of linear_part with colc_cov: " << linear_part << "\n";
     }
@@ -569,14 +567,15 @@ double rcpp_Rclusterll(const NumericVector & invect,
     // Rcout << "The value of colc_cov_coef : " << colc_cov_coef << "\n";
     // Rcout << "The value of rowc_colc_coef : " << rowc_colc_coef << "\n";
 
-    int rr, ij, ii, jj;
+    int rr, ij, ii, jj, kk, ll;
     int cc = 0;
 
     NumericVector yval;
     int ymatij_idx = 0;
     double linear_part = 0;
-    double theta = 0;
+    double theta, theta_sum;
     double log_thetaymat = 0;
+    NumericVector theta_all;
 
     double logl;
 
@@ -598,21 +597,119 @@ double rcpp_Rclusterll(const NumericVector & invect,
                 // Rcout << "The R-based value of jj : " << jj+1 << "\n";
                 yval = ydf(ij,0);
                 if (is_true(all(is_finite(yval))) && is_true(all(!is_nan(yval)))) {
-                    linear_part = rcpp_linear_part(ydf, rowc_mm, colc_mm, cov_mm,
-                                                   param_lengths,
-                                                   rowc_coef, colc_coef,
-                                                   rowc_colc_coef,
-                                                   row_coef, col_coef,
-                                                   rowc_col_coef, colc_row_coef,
-                                                   rowc_cov_coef, colc_cov_coef,
-                                                   cov_coef,
-                                                   RG, CG, p, n, q,
-                                                   nrowccov, ncolccov,
-                                                   rr, cc, ij, ii, jj);
+
+                    // IMPORTANT NOTE 2024-12: The following code is duplicated
+                    // in the incomplete likelihood Rcluster calculation and the
+                    // complete likelihood Bicluster calculation. Replicating
+                    // the code reduces the function-calling overhead of the
+                    // previous version that broke out the common code into a
+                    // separate function.
+                    // Do NOT split out this common code again without carrying
+                    // out extensive speed testing.
+
+                    linear_part = 0;
+
+                    if (param_lengths[2] > 0) {
+                        linear_part += rowc_coef[rr];
+                        // Rcout << "The value of linear_part with rowc: " << linear_part << "\n";
+                    }
+                    if (param_lengths[3] > 0) {
+                        linear_part += colc_coef[cc];
+                        // Rcout << "The value of linear_part with colc: " << linear_part << "\n";
+                    }
+                    if (param_lengths[4] > 0) {
+                        linear_part += rowc_colc_coef(rr,cc);
+                        // Rcout << "The value of linear_part with rowc_colc: " << linear_part << "\n";
+                    }
+
+                    if (param_lengths[5] > 0) {
+                        linear_part += row_coef[ii];
+                        // Rcout << "The value of linear_part with row: " << linear_part << "\n";
+                    }
+                    if (param_lengths[6] > 0) {
+                        linear_part += col_coef[jj];
+                        // Rcout << "The value of linear_part with col: " << linear_part << "\n";
+                    }
+                    if (param_lengths[7] > 0) {
+                        linear_part += rowc_col_coef(rr,jj);
+                        // Rcout << "The value of linear_part with rowc_col: " << linear_part << "\n";
+                    }
+                    if (param_lengths[8] > 0) {
+                        linear_part += colc_row_coef(cc,ii);
+                        // Rcout << "The value of linear_part with colc_row: " << linear_part << "\n";
+                    }
+
+                    if (param_lengths[9] > 0) {
+                        // NumericVector temp = rowc_mm.row(ij);
+                        // Rcout << "The value of rowc_mm: " << temp << "\n";
+
+                        for (ll=0; ll < nrowccov; ll++) {
+                            linear_part += rowc_mm(ij,ll)*rowc_cov_coef(rr,ll);
+                        }
+                        // Rcout << "The value of linear_part with rowc_cov: " << linear_part << "\n";
+                    }
+                    if (param_lengths[10] > 0) {
+                        // NumericVector temp = colc_mm.row(ij);
+                        // Rcout << "The value of colc_mm: " << temp << "\n";
+
+                        for (ll=0; ll < ncolccov; ll++) {
+                            linear_part += colc_mm(ij,ll)*colc_cov_coef(cc,ll);
+                        }
+                        // Rcout << "The value of linear_part with colc_cov: " << linear_part << "\n";
+                    }
+                    if (param_lengths[11] > 0) {
+                        for (ll=0; ll < param_lengths[11]; ll++) {
+                            linear_part += cov_mm(ij,ll)*cov_coef[ll];
+                        }
+                        // Rcout << "The value of linear_part with cov: " << linear_part << "\n";
+                    }
 
                     ymatij_idx = ydf(ij,0)-1;
 
-                    theta = rcpp_theta_from_linear(model_num, linear_part, ymatij_idx, mu, phi, q, epsilon);
+                    theta = 0;
+                    theta_all = NumericVector(q);
+                    theta_sum = 0;
+
+                    kk = 0;
+
+                    theta_sum = 0;
+                    if (model_num == 1) {
+                        theta_all[0] = 1;
+                        theta_sum += 1;
+                        for (kk=1; kk < q; kk++) {
+                            theta_all[kk] = exp(mu[kk] + phi[kk]*linear_part);
+                            if (!std::isfinite(theta_all[kk])) {
+                                theta_all[kk] = 1;
+                            }
+
+                            theta_sum += theta_all[kk];
+                        }
+                        theta = theta_all[ymatij_idx]/theta_sum;
+                    } else if (model_num == 2) {
+                        // theta_all[0] = rcpp_expit(mu[0] - linear_part);
+                        theta_all[0] = 1/(1 + exp(linear_part - mu[0]));
+                        theta_sum = theta_all[0];
+                        for (kk=1; kk < q-1; kk++) {
+                            theta_all[kk] = 1/(1+exp(linear_part - mu[kk])) -
+                                1/(1+exp(linear_part - mu[kk-1]));
+                            theta_sum += theta_all[kk];
+                        }
+                        theta_all[q-1] = 1-theta_sum;
+                        theta = theta_all[ymatij_idx];
+                    } else if (model_num == 3) {
+                        theta_all[0] = 1;
+                        theta_all[1] = exp(mu[0] + linear_part);
+                        theta_sum = 1 + theta_all[1];
+                        theta = theta_all[ymatij_idx]/theta_sum;
+                    }
+
+                    if (theta <= epsilon) {
+                        theta = epsilon;
+                    }
+
+                    if (std::isnan(theta)) {
+                        Rcout << "theta nan - The value of linear_part : " << linear_part << "\n";
+                    }
 
                     log_thetaymat = log(theta);
                 } else {
@@ -657,20 +754,111 @@ double rcpp_Rclusterll(const NumericVector & invect,
                         // Rcout << "The R-based value of jj : " << jj+1 << "\n";
                         yval = ydf(ij,0);
                         if (is_true(all(is_finite(yval))) && is_true(all(!is_nan(yval)))) {
-                            linear_part = rcpp_linear_part(ydf, rowc_mm, colc_mm, cov_mm,
-                                                           param_lengths,
-                                                           rowc_coef, colc_coef,
-                                                           rowc_colc_coef,
-                                                           row_coef, col_coef,
-                                                           rowc_col_coef, colc_row_coef,
-                                                           rowc_cov_coef, colc_cov_coef,
-                                                           cov_coef,
-                                                           RG, CG, p, n, q,
-                                                           nrowccov, ncolccov,
-                                                           rr, cc, ij, ii, jj);
+
+                            linear_part = 0;
+
+                            if (param_lengths[2] > 0) {
+                                linear_part += rowc_coef[rr];
+                                // Rcout << "The value of linear_part with rowc: " << linear_part << "\n";
+                            }
+                            if (param_lengths[3] > 0) {
+                                linear_part += colc_coef[cc];
+                                // Rcout << "The value of linear_part with colc: " << linear_part << "\n";
+                            }
+                            if (param_lengths[4] > 0) {
+                                linear_part += rowc_colc_coef(rr,cc);
+                                // Rcout << "The value of linear_part with rowc_colc: " << linear_part << "\n";
+                            }
+
+                            if (param_lengths[5] > 0) {
+                                linear_part += row_coef[ii];
+                                // Rcout << "The value of linear_part with row: " << linear_part << "\n";
+                            }
+                            if (param_lengths[6] > 0) {
+                                linear_part += col_coef[jj];
+                                // Rcout << "The value of linear_part with col: " << linear_part << "\n";
+                            }
+                            if (param_lengths[7] > 0) {
+                                linear_part += rowc_col_coef(rr,jj);
+                                // Rcout << "The value of linear_part with rowc_col: " << linear_part << "\n";
+                            }
+                            if (param_lengths[8] > 0) {
+                                linear_part += colc_row_coef(cc,ii);
+                                // Rcout << "The value of linear_part with colc_row: " << linear_part << "\n";
+                            }
+
+                            if (param_lengths[9] > 0) {
+                                // NumericVector temp = rowc_mm.row(ij);
+                                // Rcout << "The value of rowc_mm: " << temp << "\n";
+
+                                for (ll=0; ll < nrowccov; ll++) {
+                                    linear_part += rowc_mm(ij,ll)*rowc_cov_coef(rr,ll);
+                                }
+                                // Rcout << "The value of linear_part with rowc_cov: " << linear_part << "\n";
+                            }
+                            if (param_lengths[10] > 0) {
+                                // NumericVector temp = colc_mm.row(ij);
+                                // Rcout << "The value of colc_mm: " << temp << "\n";
+
+                                for (ll=0; ll < ncolccov; ll++) {
+                                    linear_part += colc_mm(ij,ll)*colc_cov_coef(cc,ll);
+                                }
+                                // Rcout << "The value of linear_part with colc_cov: " << linear_part << "\n";
+                            }
+                            if (param_lengths[11] > 0) {
+                                for (ll=0; ll < param_lengths[11]; ll++) {
+                                    linear_part += cov_mm(ij,ll)*cov_coef[ll];
+                                }
+                                // Rcout << "The value of linear_part with cov: " << linear_part << "\n";
+                            }
+
                             ymatij_idx = ydf(ij,0)-1;
 
-                            theta = rcpp_theta_from_linear(model_num, linear_part, ymatij_idx, mu, phi, q, epsilon);
+                            theta = 0;
+                            theta_all = NumericVector(q);
+                            theta_sum = 0;
+
+                            kk = 0;
+
+                            theta_sum = 0;
+                            if (model_num == 1) {
+                                theta_all[0] = 1;
+                                theta_sum += 1;
+                                for (kk=1; kk < q; kk++) {
+                                    theta_all[kk] = exp(mu[kk] + phi[kk]*linear_part);
+                                    if (!std::isfinite(theta_all[kk])) {
+                                        theta_all[kk] = 1;
+                                    }
+
+                                    theta_sum += theta_all[kk];
+                                }
+                                theta = theta_all[ymatij_idx]/theta_sum;
+                            } else if (model_num == 2) {
+                                theta_all[0] = rcpp_expit(mu[0] - linear_part);
+                                theta_sum = theta_all[0];
+                                for (kk=1; kk < q-1; kk++) {
+                                    theta_all[kk] = rcpp_expit(mu[kk] - linear_part) -
+                                        rcpp_expit(mu[kk-1] - linear_part);
+                                    theta_sum += theta_all[kk];
+                                }
+                                theta_all[q-1] = 1-theta_sum;
+                                theta = theta_all[ymatij_idx];
+                            } else if (model_num == 3) {
+                                theta_all[0] = 1;
+                                theta_all[1] = exp(mu[0] + linear_part);
+                                theta_sum = 1 + theta_all[1];
+                                theta = theta_all[ymatij_idx]/theta_sum;
+                            }
+
+                            if (theta <= epsilon) {
+                                theta = epsilon;
+                            }
+
+                            if (std::isnan(theta)) {
+                                Rcout << "theta nan - The value of linear_part : " << linear_part << "\n";
+                            }
+
+
                             log_theta = log(theta);
                             if (!NumericVector::is_na(log_theta) &&
                                 !std::isnan(log_theta) &&
@@ -772,12 +960,13 @@ double rcpp_Biclusterll(const NumericVector & invect,
     // Rcout << "The value of colc_cov_coef : " << colc_cov_coef << "\n";
     // Rcout << "The value of rowc_colc_coef : " << rowc_colc_coef << "\n";
 
-    int rr, cc, ij, ii, jj;
+    int rr, cc, ij, ii, jj, kk, ll;
 
     NumericVector yval;
     int ymatij_idx = 0;
     double linear_part = 0;
-    double theta = 0;
+    double theta, theta_sum;
+    NumericVector theta_all;
     double log_thetaymat;
 
     double logl = 0;
@@ -807,24 +996,109 @@ double rcpp_Biclusterll(const NumericVector & invect,
 
                     yval = ydf(ij,0);
                     if (is_true(all(is_finite(yval))) && is_true(all(!is_nan(yval)))) {
+                        linear_part = 0;
+
+                        if (param_lengths[2] > 0) {
+                            linear_part += rowc_coef[rr];
+                            // Rcout << "The value of linear_part with rowc: " << linear_part << "\n";
+                        }
+                        if (param_lengths[3] > 0) {
+                            linear_part += colc_coef[cc];
+                            // Rcout << "The value of linear_part with colc: " << linear_part << "\n";
+                        }
+                        if (param_lengths[4] > 0) {
+                            linear_part += rowc_colc_coef(rr,cc);
+                            // Rcout << "The value of linear_part with rowc_colc: " << linear_part << "\n";
+                        }
+
+                        if (param_lengths[5] > 0) {
+                            linear_part += row_coef[ii];
+                            // Rcout << "The value of linear_part with row: " << linear_part << "\n";
+                        }
+                        if (param_lengths[6] > 0) {
+                            linear_part += col_coef[jj];
+                            // Rcout << "The value of linear_part with col: " << linear_part << "\n";
+                        }
+                        if (param_lengths[7] > 0) {
+                            linear_part += rowc_col_coef(rr,jj);
+                            // Rcout << "The value of linear_part with rowc_col: " << linear_part << "\n";
+                        }
+                        if (param_lengths[8] > 0) {
+                            linear_part += colc_row_coef(cc,ii);
+                            // Rcout << "The value of linear_part with colc_row: " << linear_part << "\n";
+                        }
+
+                        if (param_lengths[9] > 0) {
+                            // NumericVector temp = rowc_mm.row(ij);
+                            // Rcout << "The value of rowc_mm: " << temp << "\n";
+
+                            for (ll=0; ll < nrowccov; ll++) {
+                                linear_part += rowc_mm(ij,ll)*rowc_cov_coef(rr,ll);
+                            }
+                            // Rcout << "The value of linear_part with rowc_cov: " << linear_part << "\n";
+                        }
+                        if (param_lengths[10] > 0) {
+                            // NumericVector temp = colc_mm.row(ij);
+                            // Rcout << "The value of colc_mm: " << temp << "\n";
+
+                            for (ll=0; ll < ncolccov; ll++) {
+                                linear_part += colc_mm(ij,ll)*colc_cov_coef(cc,ll);
+                            }
+                            // Rcout << "The value of linear_part with colc_cov: " << linear_part << "\n";
+                        }
+                        if (param_lengths[11] > 0) {
+                            for (ll=0; ll < param_lengths[11]; ll++) {
+                                linear_part += cov_mm(ij,ll)*cov_coef[ll];
+                            }
+                            // Rcout << "The value of linear_part with cov: " << linear_part << "\n";
+                        }
+
                         ymatij_idx = ydf(ij,0)-1;
 
-                        // Rcout << "The value of ymatij_idx : " << ymatij_idx << "\n";
+                        theta = 0;
+                        theta_all = NumericVector(q);
+                        theta_sum = 0;
 
-                        linear_part = rcpp_linear_part(ydf, rowc_mm, colc_mm, cov_mm,
-                                                       param_lengths,
-                                                       rowc_coef, colc_coef,
-                                                       rowc_colc_coef,
-                                                       row_coef, col_coef,
-                                                       rowc_col_coef, colc_row_coef,
-                                                       rowc_cov_coef, colc_cov_coef,
-                                                       cov_coef,
-                                                       RG, CG, p, n, q,
-                                                       nrowccov, ncolccov,
-                                                       rr, cc, ij, ii, jj);
+                        kk = 0;
 
-                        theta = rcpp_theta_from_linear(model_num, linear_part, ymatij_idx, mu, phi, q, epsilon);
-                        // Rcout << "The value of theta : " << theta << " " << temp << "\n";
+                        theta_sum = 0;
+                        if (model_num == 1) {
+                            theta_all[0] = 1;
+                            theta_sum += 1;
+                            for (kk=1; kk < q; kk++) {
+                                theta_all[kk] = exp(mu[kk] + phi[kk]*linear_part);
+                                if (!std::isfinite(theta_all[kk])) {
+                                    theta_all[kk] = 1;
+                                }
+
+                                theta_sum += theta_all[kk];
+                            }
+                            theta = theta_all[ymatij_idx]/theta_sum;
+                        } else if (model_num == 2) {
+                            theta_all[0] = 1/(1 + exp(linear_part - mu[0]));
+                            theta_sum = theta_all[0];
+                            for (kk=1; kk < q-1; kk++) {
+                                theta_all[kk] = 1/(1+exp(linear_part - mu[kk])) -
+                                    1/(1+exp(linear_part - mu[kk-1]));
+                                theta_sum += theta_all[kk];
+                            }
+                            theta_all[q-1] = 1-theta_sum;
+                            theta = theta_all[ymatij_idx];
+                        } else if (model_num == 3) {
+                            theta_all[0] = 1;
+                            theta_all[1] = exp(mu[0] + linear_part);
+                            theta_sum = 1 + theta_all[1];
+                            theta = theta_all[ymatij_idx]/theta_sum;
+                        }
+
+                        if (theta <= epsilon) {
+                            theta = epsilon;
+                        }
+
+                        if (std::isnan(theta)) {
+                            Rcout << "theta nan - The value of linear_part : " << linear_part << "\n";
+                        }
+
 
                         log_thetaymat = log(theta);
                     } else {
