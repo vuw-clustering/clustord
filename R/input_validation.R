@@ -2,7 +2,6 @@
 validate.inputs <- function(formula, model,
                             nclus.row=NULL,nclus.column=NULL,
                             long.df,
-                            start.type="parameters",
                             initvect=NULL,
                             pi.init=NULL, kappa.init=NULL,
                             EM.control=default.EM.control(),
@@ -81,29 +80,20 @@ validate.inputs <- function(formula, model,
     if (!is.null(nclus.row) && nclus.row >= max(as.numeric(long.df$ROW))) stop("nclus.row must be smaller than the maximum value of long.df$ROW.")
     if (!is.null(nclus.column) && nclus.column >= max(as.numeric(long.df$COL))) stop("nclus.column must be smaller than the maximum value of long.df$COL.")
 
-    if (!is.vector(start.type) || !is.character(start.type) || !(start.type %in% c("parameters","clusters"))) stop("start.type must be either 'parameters' or 'clusters'.")
+    if (!is.null(initvect)) {
+        if (!is.vector(initvect) || !is.numeric(initvect) || any(is.na(initvect)) ||
+            any(is.infinite(initvect))) stop("If supplied, initvect must be a numeric vector with finite values.")
+    }
 
-    if (start.type == "parameters") {
-        if (!is.null(initvect)) {
-            if (!is.vector(initvect) || !is.numeric(initvect) || any(is.na(initvect)) ||
-                any(is.infinite(initvect))) stop("If supplied, initvect must be a numeric vector with finite values.")
-        }
-
-        if (!is.null(pi.init)) {
-            if (!is.vector(pi.init) || !is.numeric(pi.init) || any(is.na(pi.init)) ||
-                any(pi.init < 0) || any(pi.init > 1)) stop("If supplied, pi.init must be a vector of numbers between 0 and 1.")
-            if (length(pi.init) != nclus.row || abs(sum(pi.init) - 1) > 1e-12) stop("pi.init must be the same length as the number of row clusters, and must add up to 1")
-        }
-        if (!is.null(kappa.init)) {
-            if (!is.vector(kappa.init) || !is.numeric(kappa.init) || any(is.na(kappa.init)) ||
-                any(kappa.init < 0) | any(kappa.init > 1)) stop("If supplied, kappa.init must be a vector of numbers between 0 and 1.")
-            if (length(kappa.init) != nclus.column || abs(sum(kappa.init) - 1) > 1e-12) stop("kappa.init must be the same length as the number of column clusters, and must add up to 1")
-        }
-
-        if (!is.null(nstarts)) {
-            if (!is.vector(nstarts) || !is.numeric(nstarts) || length(nstarts) != 1 ||
-                nstarts < 0 || nstarts %% 1 != 0) stop("If supplied, nstarts must be a positive integer.")
-        }
+    if (!is.null(pi.init)) {
+        if (!is.vector(pi.init) || !is.numeric(pi.init) || any(is.na(pi.init)) ||
+            any(pi.init < 0) || any(pi.init > 1)) stop("If supplied, pi.init must be a vector of numbers between 0 and 1.")
+        if (length(pi.init) != nclus.row || abs(sum(pi.init) - 1) > 1e-12) stop("pi.init must be the same length as the number of row clusters, and must add up to 1")
+    }
+    if (!is.null(kappa.init)) {
+        if (!is.vector(kappa.init) || !is.numeric(kappa.init) || any(is.na(kappa.init)) ||
+            any(kappa.init < 0) | any(kappa.init > 1)) stop("If supplied, kappa.init must be a vector of numbers between 0 and 1.")
+        if (length(kappa.init) != nclus.column || abs(sum(kappa.init) - 1) > 1e-12) stop("kappa.init must be the same length as the number of column clusters, and must add up to 1")
     }
 
     if (!is.logical(constraint_sum_zero) || !is.vector(constraint_sum_zero) ||
@@ -136,12 +126,12 @@ validate.inputs <- function(formula, model,
 
 check.factors <- function(long.df) {
     if (is.factor(long.df$ROW)) {
-        print("Converting factor ROW to numeric.")
+        message("Converting factor ROW to numeric.")
         attributes(long.df)$ROWlevels <- levels(long.df$ROW)
         long.df$ROW <- as.numeric(long.df$ROW)
     }
     if (is.factor(long.df$COL)) {
-        print("Converting factor COL to numeric.")
+        message("Converting factor COL to numeric.")
         attributes(long.df)$COLlevels <- levels(long.df$COL)
         long.df$COL <- as.numeric(long.df$COL)
     }

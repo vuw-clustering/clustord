@@ -155,7 +155,7 @@ generate.rowc_coef.pi.init <- function(long.df, RG, constraint_sum_zero=TRUE,
             rowc_coef.init <- rowc_coef.kmeans[-1]
         }
     } else {
-        if (all(table(long.df[,c("ROW","COL")]) != 1)) print("Some data is missing, so generating random start instead of using kmeans.")
+        if (all(table(long.df[,c("ROW","COL")]) != 1)) message("Some data is missing, so generating random start instead of using kmeans.")
 
         rowc_coef.init <- runif(RG-1, min=-5, max=5)
         pi.init <- generate.mixing.proportions(RG)
@@ -462,15 +462,15 @@ generate.initvect <- function(long.df, model, model_structure,
     list(initvect=initvect, pi.init=pi.init, kappa.init=kappa.init)
 }
 
-generate.estep.start.rowcluster <- function(long.df, model, model_structure, RG,
-                                            initvect=NULL, pi.init=NULL,
-                                            EM.control=default.EM.control(),
-                                            optim.method="L-BFGS-B",
-                                            optim.control=default.optim.control(),
-                                            constraint_sum_zero=TRUE,
-                                            start_from_simple_model=TRUE,
-                                            parallel_starts=FALSE,
-                                            nstarts=5, verbose=TRUE) {
+generate.start.rowcluster <- function(long.df, model, model_structure, RG,
+                                      initvect=NULL, pi.init=NULL,
+                                      EM.control=default.EM.control(),
+                                      optim.method="L-BFGS-B",
+                                      optim.control=default.optim.control(),
+                                      constraint_sum_zero=TRUE,
+                                      start_from_simple_model=TRUE,
+                                      parallel_starts=FALSE,
+                                      nstarts=5, verbose=TRUE) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
 
@@ -493,8 +493,6 @@ generate.estep.start.rowcluster <- function(long.df, model, model_structure, RG,
                                                       use_random=(s>1),
                                                       EM.control=startEM.control(EM.control),
                                                       verbose=verbose)
-
-                # print(initvect.pi.init$initvect)
 
                 init.out <- run.EM.rowcluster(invect=initvect.pi.init$initvect,
                                               model=model, long.df=long.df,
@@ -584,14 +582,14 @@ generate.estep.start.rowcluster <- function(long.df, model, model_structure, RG,
          start.params.every.iteration=start.params.every.iteration)
 }
 
-generate.estep.start.bicluster <- function(long.df, model, model_structure, RG, CG,
-                                           initvect=NULL, pi.init=NULL, kappa.init=NULL,
-                                           EM.control=default.EM.control(),
-                                           optim.method="L-BFGS-B", optim.control=default.optim.control(),
-                                           constraint_sum_zero=TRUE,
-                                           start_from_simple_model=TRUE,
-                                           parallel_starts=FALSE, nstarts=5,
-                                           verbose=TRUE) {
+generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
+                                     initvect=NULL, pi.init=NULL, kappa.init=NULL,
+                                     EM.control=default.EM.control(),
+                                     optim.method="L-BFGS-B", optim.control=default.optim.control(),
+                                     constraint_sum_zero=TRUE,
+                                     start_from_simple_model=TRUE,
+                                     parallel_starts=FALSE, nstarts=5,
+                                     verbose=TRUE) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
 
@@ -615,8 +613,6 @@ generate.estep.start.bicluster <- function(long.df, model, model_structure, RG, 
                                                             use_random=(s>1),
                                                             EM.control=startEM.control(EM.control),
                                                             verbose=verbose)
-
-                # print(initvect.pi.kappa.init$initvect)
 
                 init.out <- run.EM.bicluster(invect=initvect.pi.kappa.init$initvect,
                                              model=model, long.df=long.df,
@@ -719,67 +715,4 @@ generate.estep.start.bicluster <- function(long.df, model, model_structure, RG, 
 
     list(initvect=initvect, pi.init=pi.init, kappa.init=kappa.init,
          start.params.every.iteration=start.params.every.iteration)
-}
-
-impute.missing <- function(mat) {
-    ## Handle missing values by imputing values randomly from the distribution
-    ## for the non-missing values in that column
-    num_missing <- 0
-    for (j in 1:ncol(mat)) {
-        na_idxs <- which(is.na(mat[,j]))
-        if (length(na_idxs) > 0) {
-            if (num_missing == 0) warning("Using random imputation for missing values for the purposes of finding starting cluster memberships. Impputed values will NOT be used in the core clustering algorithm.")
-            num_missing <- num_missing + length(na_idxs)
-            non_missing_freqs <- table(mat[-na_idxs,j])
-            mat[na_idxs,j] <- sample(names(non_missing_freqs),length(na_idxs),
-                                     replace=TRUE, prob=non_missing_freqs)
-        }
-    }
-
-    if (num_missing/nrow(mat)/ncol(mat) > 0.1) warning("More than 10% of the data is missing. It is recommended that you use start.type = 'parameters' instead, because it copes better with missing data.")
-
-    mat
-}
-
-generate.mstep.start <- function(long.df, model, model_structure, RG, CG=NULL,
-                                 EM.control=default.EM.control(),
-                                 optim.method="L-BFGS-B",
-                                 optim.control=default.optim.control(),
-                                 constraint_sum_zero=TRUE,
-                                 verbose=TRUE) {
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
-
-    q <- length(levels(long.df$Y))
-
-    if ("mat" %in% names(attributes(long.df))) mat <- attributes(long.df)$mat
-    else mat <- df2mat(long.df)
-
-    mat <- impute.missing(mat)
-
-    eps <- 1e-6
-
-    ## Run k-means to find starting cluster memberships
-    clusters <- kmeans(mat, centers = RG, iter.max=100, nstart=1000)
-
-    ppr_m <- matrix(0,nrow=n,ncol=RG)
-    for (r in 1:RG) {
-        members <- which(clusters$cluster == r)
-        ppr_m[members,r] <- 1
-    }
-
-    if (is.null(CG)) {
-        return(list(ppr_m = ppr_m))
-    } else {
-        ## Run k-means to find starting cluster memberships
-        clusters <- kmeans(t(mat), centers = CG, iter.max=100, nstart=1000)
-
-        ppc_m <- matrix(eps/CG,nrow=p,ncol=CG)
-        for (g in 1:CG) {
-            members <- which(clusters$cluster == g)
-            ppc_m[members,g] <- 1-eps
-        }
-
-        return(list(ppr_m=ppr_m, ppc_m=ppc_m))
-    }
 }

@@ -9,12 +9,12 @@ default.optim.control <- function() {
     list(maxit=100,trace=0,pgtol=1e-4,factr=1e11)
 }
 
-new.EM.status <- function(start) {
+new.EM.status <- function() {
     list(iter=0,finished=FALSE,converged=FALSE, paramstopping=FALSE,
          llc.for.best.lli=-.Machine$double.xmax,
          params.for.best.lli=list(),best.lli=-.Machine$double.xmax,
          new.lli=-.Machine$double.xmax, previous.lli=-.Machine$double.xmax,
-         params.every.iteration=vector(), start.type=start)
+         params.every.iteration=vector())
 }
 
 #' @keywords internal
@@ -68,8 +68,7 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
     EM.status.out <- list(iter=iter,finished=finished,converged=converged,
                           new.llc=new.llc, new.lli=new.lli, previous.lli=EM.status$new.lli,
                           llc.for.best.lli=llc.for.best.lli, params.for.best.lli=params.for.best.lli,
-                          best.lli=best.lli, paramstopping=EM.control$paramstopping,
-                          start.type=EM.status$start.type)
+                          best.lli=best.lli, paramstopping=EM.control$paramstopping)
     if (EM.control$keepallparams) {
         names(new.lli) <- "lli"
         names(new.llc) <- "llc"
@@ -90,9 +89,8 @@ update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
 }
 
 #' @importFrom stats optim
-run.EM.rowcluster <- function(model, long.df, rowc_mm, colc_mm, cov_mm,
-                              invect=NULL, pi_v=NULL, ppr_m=NULL,
-                              param_lengths, start.type="parameters",
+run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
+                              pi_v, param_lengths,
                               constraint_sum_zero=TRUE,
                               model_label="Full", EM.control=default.EM.control(),
                               optim.method="L-BFGS-B", optim.control=default.optim.control(),
@@ -100,8 +98,14 @@ run.EM.rowcluster <- function(model, long.df, rowc_mm, colc_mm, cov_mm,
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
     q <- length(levels(long.df$Y))
-    if (!is.null(pi_v)) RG <- length(pi_v)
-    else RG <- ncol(ppr_m)
+    RG <- length(pi_v)
+
+    ## Extract parameters in R in order to check that invect is the correct length
+    parlist.in <- unpack_parvec(invect, model=model, param_lengths=param_lengths,
+                                n, p, q, RG, CG = NULL,
+                                constraint_sum_zero = constraint_sum_zero)
+    if (any(sapply(parlist.in,function(elt) any(is.na(elt))))) stop("Error unpacking parameters for model.")
+    if (any(sapply(parlist.in,function(elt) is.null(elt)))) stop("Error unpacking parameters for model.")
 
     ## Important: do NOT change the order of the three columns in this call,
     ## because the C++ code relies on having this order for Y, ROW and COL
@@ -119,45 +123,26 @@ run.EM.rowcluster <- function(model, long.df, rowc_mm, colc_mm, cov_mm,
     param_lengths_num <- param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
                                          'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
 
-    if (!is.null(invect) && !is.null(pi_v)) {
-        start = "Estep"
-
-        ## Extract parameters in R in order to check that invect is the correct length
-        parlist.in <- unpack_parvec(invect, model=model, param_lengths=param_lengths,
-                                    n, p, q, RG, CG = NULL,
-                                    constraint_sum_zero = constraint_sum_zero)
-        if (any(sapply(parlist.in,function(elt) any(is.na(elt))))) stop("Error unpacking parameters for model.")
-        if (any(sapply(parlist.in,function(elt) is.null(elt)))) stop("Error unpacking parameters for model.")
-
-        parlist.init <- parlist.in
-        pi.init <- pi_v
-        initvect <- invect
-        outvect <- invect
-    } else {
-        start <- "Mstep"
-        outvect_length <- calc_length_invect(param_lengths_num)
-        outvect <- runif(outvect_length)
-    }
-
+    parlist.init <- parlist.in
+    pi.init <- pi_v
+    initvect <- invect
+    outvect <- invect
     # Run the EM cycle:
-    EM.status <- new.EM.status(start)
+    EM.status <- new.EM.status()
 
     while(!EM.status$finished)
     {
-        if (EM.status$iter > 0 || start == "Estep") {
-            ppr_m <- rcpp_Rcluster_Estep(invect, model_num,
-                                         ydf, rowc_mm, colc_mm, cov_mm,
-                                         pi_v, param_lengths_num,
-                                         RG, p, n, q, epsilon, constraint_sum_zero)
+        ppr_m <- rcpp_Rcluster_Estep(invect, model_num,
+                                     ydf, rowc_mm, colc_mm, cov_mm,
+                                     pi_v, param_lengths_num,
+                                     RG, p, n, q, epsilon, constraint_sum_zero)
 
-            ## Now set any NA values in the posterior probabilities matrix to 0
-            ppr_m[is.na(ppr_m)] <- 0
-        }
-
-        invect <- outvect
+        ## Now set any NA values in the posterior probabilities matrix to 0
+        ppr_m[is.na(ppr_m)] <- 0
 
         pi_v <- colMeans(ppr_m)
 
+        invect <- outvect
         # M-step:
         #use numerical maximisation
         optim.fit <- optim(par=invect,
@@ -176,8 +161,6 @@ run.EM.rowcluster <- function(model, long.df, rowc_mm, colc_mm, cov_mm,
                            incomplete=FALSE,
                            method=optim.method,
                            hessian=F,control=optim.control)
-
-        # print(optim.fit$counts)
 
         outvect <- optim.fit$par
 
@@ -218,15 +201,7 @@ run.EM.rowcluster <- function(model, long.df, rowc_mm, colc_mm, cov_mm,
                                       invect=invect,outvect=outvect, n=n, p=p,
                                       pi_v=pi_v,EM.control=EM.control)
 
-        ## Report the current incomplete-data log-likelihood, which is the
-        ## NEGATIVE of the latest value of Rcluster.ll i.e. the NEGATIVE
-        ## of the output of optim
-        # cat(paste(model_label,'model iter=',EM.status$iter, ' partial complete-data log-like=', -optim.fit$value ,'\n'))
-        # cat(paste(model_label,'model iter=',EM.status$iter, ' complete-data log-like=', llc ,'\n'))
         if (verbose | (!verbose & EM.status$iter %% 10 == 0)) cat(paste(model_label,'model iter=',EM.status$iter, ' incomplete-data log-like=', lli ,'\n'))
-        # cat("parlist.out\n")
-        # print(parlist.out)
-        # cat("pi",pi_v,"\n")
     }
 
     # Find cluster groupings:
@@ -234,19 +209,13 @@ run.EM.rowcluster <- function(model, long.df, rowc_mm, colc_mm, cov_mm,
     Rclusters <- apply(ppr_m, 1, which.max)
 
     # Save results:
-    if (start == "Estep") initvect <- name_invect(initvect, model, param_lengths, n, p, q, RG, constraint_sum_zero=constraint_sum_zero)
-    else {
-        initvect <- NULL
-        pi.init <- NULL
-        parlist.init <- NULL
-    }
-
+    initvect <- name_invect(initvect, model, param_lengths, n, p, q, RG, constraint_sum_zero=constraint_sum_zero)
     outvect <- name_invect(outvect, model, param_lengths, n, p, q, RG, constraint_sum_zero=constraint_sum_zero)
-    noutvect <- length(outvect)
-    npar <- length(outvect) + length(pi_v)-1
+    npar <- length(invect) + length(pi_v)-1
+    ninitvect <- length(invect)
     criteria <- calc.criteria(EM.status$best.lli, EM.status$llc.for.best.lli, npar, n, p)
-    info <- c(n, p, q, npar, noutvect, RG)
-    names(info) <- c("n","p","q","npar","noutvect","nclus.row")
+    info <- c(n, p, q, npar, ninitvect, RG)
+    names(info) <- c("n","p","q","npar","ninitvect","nclus.row")
     list("info"=info,
          "model"=model,
          "clustering_mode"="row clustering",
@@ -268,20 +237,24 @@ run.EM.rowcluster <- function(model, long.df, rowc_mm, colc_mm, cov_mm,
          "RowClusters"=Rclusters)
 }
 
-run.EM.bicluster <- function(model, long.df, rowc_mm, colc_mm, cov_mm,
-                             invect=NULL, pi_v=NULL, kappa_v=NULL,
-                             ppr_m=NULL, ppc_m=NULL,
-                             param_lengths, constraint_sum_zero=TRUE,
+run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
+                             pi_v, kappa_v, param_lengths,
+                             constraint_sum_zero=TRUE,
                              model_label="Full", EM.control=default.EM.control(),
                              optim.method="L-BFGS-B", optim.control=default.optim.control(),
                              verbose=TRUE) {
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
     q <- length(levels(long.df$Y))
-    if (!is.null(pi_v)) RG <- length(pi_v)
-    else RG <- ncol(ppr_m)
-    if (!is.null(kappa_v)) CG <- length(kappa_v)
-    else CG <- ncol(ppc_m)
+    RG <- length(pi_v)
+    CG <- length(kappa_v)
+
+    ## Extract parameters in R in order to check that invect is the correct length
+    parlist.in <- unpack_parvec(invect, model=model, param_lengths=param_lengths,
+                                n, p, q, RG, CG,
+                                constraint_sum_zero = constraint_sum_zero)
+    if (any(sapply(parlist.in,function(elt) any(is.na(elt))))) stop("Error unpacking parameters for model.")
+    if (any(sapply(parlist.in,function(elt) is.null(elt)))) stop("Error unpacking parameters for model.")
 
     ## Important: do NOT change the order of the three columns in this call,
     ## because the C++ code relies on having this order for Y, ROW and COL
@@ -299,57 +272,39 @@ run.EM.bicluster <- function(model, long.df, rowc_mm, colc_mm, cov_mm,
     param_lengths_num <- param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
                                          'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
 
-    if (!is.null(invect) && !is.null(pi_v) && !is.null(kappa_v)) {
-        start <- "Estep"
-
-        ## Extract parameters in R in order to check that invect is the correct length
-        parlist.in <- unpack_parvec(invect, model=model, param_lengths=param_lengths,
-                                    n, p, q, RG, CG,
-                                    constraint_sum_zero = constraint_sum_zero)
-        if (any(sapply(parlist.in,function(elt) any(is.na(elt))))) stop("Error unpacking parameters for model.")
-        if (any(sapply(parlist.in,function(elt) is.null(elt)))) stop("Error unpacking parameters for model.")
-
-        parlist.init <- parlist.in
-        pi.init <- pi_v
-        kappa.init <- kappa_v
-        initvect <- invect
-        outvect <- invect
-    } else {
-        start <- "Mstep"
-        outvect_length <- calc_length_invect(param_lengths_num)
-        outvect <- runif(outvect_length)
-    }
-
+    parlist.init <- parlist.in
+    pi.init <- pi_v
+    kappa.init <- kappa_v
+    initvect <- invect
+    outvect <- invect
     # Run the EM cycle:
-    EM.status <- new.EM.status(start)
+    EM.status <- new.EM.status()
 
     while(!EM.status$finished)
     {
-        if (EM.status$iter > 0 || start == "Estep") {
-            ppr_m <- rcpp_Bicluster_Estep(invect, model_num,
-                                          ydf, rowc_mm, colc_mm, cov_mm,
-                                          pi_v, kappa_v, param_lengths_num,
-                                          RG, CG, p, n, q, epsilon, constraint_sum_zero,
-                                          row_clusters=TRUE)
+        ppr_m <- rcpp_Bicluster_Estep(invect, model_num,
+                                      ydf, rowc_mm, colc_mm, cov_mm,
+                                      pi_v, kappa_v, param_lengths_num,
+                                      RG, CG, p, n, q, epsilon, constraint_sum_zero,
+                                      row_clusters=TRUE)
 
-            ## Now set any NA values in the posterior probabilities matrix to 0
-            ppr_m[is.na(ppr_m)] <- 0
-
-            ppc_m <- rcpp_Bicluster_Estep(invect, model_num,
-                                          ydf, rowc_mm, colc_mm, cov_mm,
-                                          pi_v, kappa_v, param_lengths_num,
-                                          RG, CG, p, n, q, epsilon, constraint_sum_zero,
-                                          row_clusters=FALSE)
-
-            ## Now set any NA values in the posterior probabilities matrix to 0
-            ppc_m[is.na(ppc_m)] <- 0
-        }
-        invect <- outvect
+        ## Now set any NA values in the posterior probabilities matrix to 0
+        ppr_m[is.na(ppr_m)] <- 0
 
         pi_v <- colMeans(ppr_m)
 
+        ppc_m <- rcpp_Bicluster_Estep(invect, model_num,
+                                      ydf, rowc_mm, colc_mm, cov_mm,
+                                      pi_v, kappa_v, param_lengths_num,
+                                      RG, CG, p, n, q, epsilon, constraint_sum_zero,
+                                      row_clusters=FALSE)
+
+        ## Now set any NA values in the posterior probabilities matrix to 0
+        ppc_m[is.na(ppc_m)] <- 0
+
         kappa_v <- colMeans(ppc_m)
 
+        invect <- outvect
         # M-step:
         #use numerical maximisation
         optim.fit <- optim(par=invect,
@@ -447,18 +402,11 @@ run.EM.bicluster <- function(model, long.df, rowc_mm, colc_mm, cov_mm,
                                       invect=invect,outvect=outvect, n=n, p=p,
                                       pi_v=pi_v, kappa_v=kappa_v, EM.control=EM.control)
 
-        ## Report the current incomplete-data log-likelihood, which is the
-        ## NEGATIVE of the latest value of Bicluster.ll i.e. the NEGATIVE
-        ## of the output of optim
         if (verbose | (!verbose & EM.status$iter %% 10 == 0)) {
             cat(paste(model_label,'model iter=',EM.status$iter, ' partial complete-data log-like=', -optim.fit$value ,'\n'))
             cat(paste(model_label,'model iter=',EM.status$iter, ' complete-data log-like=', llc ,'\n'))
             cat(paste(model_label,'model iter=',EM.status$iter, ' APPROXIMATE incomplete-data log-like=', lli ,'\n'))
         }
-        # cat("parlist.out\n")
-        # print(parlist.out)
-        # cat("pi",pi_v,"\n")
-        # cat("kappa",kappa_v,"\n")
     }
 
     # Find cluster groupings:
@@ -468,19 +416,13 @@ run.EM.bicluster <- function(model, long.df, rowc_mm, colc_mm, cov_mm,
     Cclusters <- apply(ppc_m, 1, which.max)
 
     # Save results:
+    initvect <- name_invect(initvect, model, param_lengths, n, p, q, RG, CG, constraint_sum_zero=constraint_sum_zero)
     outvect <- name_invect(outvect, model, param_lengths, n, p, q, RG, CG, constraint_sum_zero=constraint_sum_zero)
-    noutvect <- length(outvect)
-    npar <- length(outvect) + length(pi_v)-1 + length(kappa_v)-1
-    if (start == "Estep") initvect <- name_invect(initvect, model, param_lengths, n, p, q, RG, CG, constraint_sum_zero=constraint_sum_zero)
-    else {
-        initvect <- NULL
-        pi.init <- NULL
-        kappa.init <- NULL
-        parlist.init <- NULL
-    }
+    npar <- length(invect) + length(pi_v)-1 + length(kappa_v)-1
+    ninitvect <- length(initvect)
     criteria <- calc.criteria(EM.status$best.lli, EM.status$llc.for.best.lli, npar, n, p)
-    info <- c(n, p, q, npar, noutvect, RG, CG)
-    names(info) <- c("n","p","q","npar","noutvect","nclus.row","nclus.column")
+    info <- c(n, p, q, npar, ninitvect, RG, CG)
+    names(info) <- c("n","p","q","npar","ninitvect","nclus.row","nclus.column")
     list("info"=info,
          "model"=model,
          "clustering_mode"="biclustering",

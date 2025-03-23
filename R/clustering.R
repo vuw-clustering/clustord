@@ -714,19 +714,7 @@
 #'     \code{\link{mat2df}} also allows you to supply data frames of row or
 #'     column covariates which will be incorporated into \code{long.df}.
 #'
-#' @param start.type (default \code{"parameters"}) indicates whether to start by
-#'     estimating the parameters, or estimating the cluster memberships.
-#'     If \code{"parameters"}, the algorithm begins with multiple random starting
-#'     sets of parameters, running the EM algorithm for a few iterations from
-#'     each one before deciding on the best and continuing from there, or the
-#'     user can set initial values using \code{initvect} argument.
-#'     If \code{"clusters"}, the algorithm begins by using multiple runs of
-#'     k-means to allocate elements to clusters. For row or column clustering,
-#'     it will run k-means for the dimension of the data being clustered; for
-#'     biclustering, it will run k-means for both dimensions being clustered.
-#'
 #' @param initvect (default NULL) vector of starting parameter values for the model.
-#'     \strong{Ignored} if using \code{start.type = "clusters"}.
 #'     Note: if the user enters an initial vector of parameter values, it is
 #'     \strong{strongly recommend} that the user also check the values of
 #'     \code{parlist.init} in the output object, to \strong{make sure that the
@@ -738,7 +726,6 @@
 #'
 #' @param pi.init (default \code{NULL}) starting parameter values for the proportions
 #'     of observations in the different row clusters.
-#'     \strong{Ignored} if using \code{start.type = "clusters"}.
 #'
 #'     If \code{NULL}, starting values will be generated automatically.
 #'
@@ -747,7 +734,6 @@
 #'     values of \code{pi} sum to 1.
 #' @param kappa.init (default \code{NULL}) starting parameter values for the
 #'     proportions of observations in the different column clusters.
-#'     \strong{Ignored} if using \code{start.type = "clusters"}.
 #'
 #'     If \code{NULL}, starting values will be generated automatically.
 #'
@@ -802,7 +788,6 @@
 #'     \code{startEMcycles} controls how many EM iterations are used when
 #'     fitting the simpler submodels to get starting values for fitting models
 #'     with interaction.
-#'     \strong{Ignored} if using \code{start.type = "clusters"}.
 #'
 #'     \code{keepallparams}: if \code{TRUE}, keep a record of parameter values
 #'     (including pi_r and kappa_c) for every EM iteration.
@@ -878,12 +863,11 @@
 #'     other columns (so \code{gamma} columns sum to zero) and first row of
 #'     gamma_rc is equal to the negative sum of the other rows (so \code{gamma}
 #'     rows sum to zero).
-#' @param start_from_simple_model (default \code{TRUE})
-#'     \strong{Ignored} if using \code{start.type = "clusters"}.
-#'     If \code{TRUE}, fit a simpler clustering model first and use that to
-#'     provide starting values for all parameters for the model with
-#'     interactions; if \code{FALSE}, use the more basic models to provide
-#'     starting values only for \code{pi.init} and \code{kappa.init}.
+#' @param start_from_simple_model (default \code{TRUE}) if \code{TRUE}, fit a
+#'     simpler clustering model first and use that to provide starting values for
+#'     all parameters for the model with interactions;
+#'     if \code{FALSE}, use the more basic models to provide starting values only
+#'     for \code{pi.init} and \code{kappa.init}.
 #'     If the full model has interaction terms, then simpler models are ones
 #'     without the interactions. If the model has individual row/column effects
 #'     alongside the clusters, then simpler models are ones without the individual
@@ -898,7 +882,6 @@
 #'   tasks external to R.
 #' @param nstarts (default 5) number of random starts to generate, if generating
 #'     random starting points for the EM algorithm.
-#'     \strong{Ignored} if using \code{start.type = "clusters"}.
 #' @param verbose (default \code{FALSE}) changes how much is reported to the
 #'   console during the algorithm's progress. If \code{TRUE}, reports the
 #'   incomplete-data log-likelihood at every EM algorithm iteration and the
@@ -961,7 +944,6 @@
 #'     \code{initvect}: the initial \emph{vector} of parameter values, either
 #'     specified by the user or generated automatically. This vector has only
 #'     the \strong{independent} values of the parameters, not the full set.
-#'     \strong{Not available} if using \code{start.type = "clusters"}.
 #'
 #'     \code{outvect}: the final \emph{vector} of parameter values, containing
 #'     only the independent parameter values from \code{parlist.out}.
@@ -970,7 +952,6 @@
 #'     the initial parameter vector \code{initvect}. Note that if the initial
 #'     vector has been incorrectly specified, the values of \code{parlist.init}
 #'     may not be as expected, and they should be checked by the user.
-#'     \strong{Not available} if using \code{start.type = "clusters"}.
 #'
 #'     \code{parlist.out}: fitted values of parameters.
 #'
@@ -1045,7 +1026,6 @@ clustord <- function(formula,
                      nclus.row=NULL,
                      nclus.column=NULL,
                      long.df,
-                     start.type="parameters",
                      initvect=NULL,
                      pi.init=NULL,
                      kappa.init=NULL,
@@ -1060,8 +1040,8 @@ clustord <- function(formula,
 
     validate.inputs(formula=formula, model=model,
                     nclus.row=nclus.row, nclus.column=nclus.column,
-                    long.df=long.df, start.type=start.type,
-                    initvect=initvect, pi.init=pi.init, kappa.init=kappa.init,
+                    long.df=long.df, initvect=initvect,
+                    pi.init=pi.init, kappa.init=kappa.init,
                     EM.control=EM.control, optim.method=optim.method,
                     constraint_sum_zero=constraint_sum_zero,
                     start_from_simple_model=start_from_simple_model,
@@ -1084,257 +1064,151 @@ clustord <- function(formula,
     default.EM.control <- default.EM.control()
     EM.control <- replacedefaults(default.EM.control, EM.control)
 
-    print(paste("EM algorithm for",model))
+    if (verbose) cat(paste("EM algorithm for",model))
 
-    start.par <- list(initvect=initvect, pi.init=pi.init, kappa.init=kappa.init)
-    if (start.type == "parameters") {
-        if (!is.null(RG) && !is.null(CG)) {
-            EM.control$biclustering <- TRUE
-            if (is.null(initvect) | is.null(pi.init) | is.null(kappa.init)) {
-                ## generate.start will keep using whichever of initvect and pi.init and
-                ## kappa.init are not null
-                start.par <- generate.estep.start.bicluster(long.df, model=model,
-                                                            model_structure=model_structure,
-                                                            RG=RG, CG=CG, initvect=initvect,
-                                                            pi.init=pi.init, kappa.init=kappa.init,
-                                                            EM.control=EM.control,
-                                                            optim.method=optim.method,
-                                                            optim.control=optim.control,
-                                                            constraint_sum_zero=constraint_sum_zero,
-                                                            start_from_simple_model=start_from_simple_model,
-                                                            parallel_starts=parallel_starts,
-                                                            nstarts=nstarts,
-                                                            verbose=verbose)
-                initvect <- start.par$initvect
-                pi.init <- start.par$pi.init
-                kappa.init <- start.par$kappa.init
-            }
-            results <- run.EM.bicluster(model=model, long.df=long.df,
-                                        rowc_mm=model_structure$rowc_mm, colc_mm=model_structure$colc_mm,
-                                        cov_mm=model_structure$cov_mm,
-                                        invect=initvect, pi_v=pi.init, kappa_v=kappa.init,
-                                        param_lengths=model_structure$param_lengths,
-                                        constraint_sum_zero=constraint_sum_zero,
-                                        EM.control=EM.control,
-                                        optim.method=optim.method, optim.control=optim.control,
-                                        verbose=verbose)
-        } else if (!is.null(RG)) {
-            EM.control$biclustering <- FALSE
-            if (is.null(initvect) | is.null(pi.init)) {
-                ## generate.start will keep using whichever of initvect and pi.init is not null
-                start.par <- generate.estep.start.rowcluster(long.df, model=model,
-                                                             model_structure=model_structure, RG=RG,
-                                                             initvect=initvect, pi.init=pi.init,
-                                                             EM.control=EM.control,
-                                                             optim.method=optim.method,
-                                                             optim.control=optim.control,
-                                                             constraint_sum_zero=constraint_sum_zero,
-                                                             start_from_simple_model=start_from_simple_model,
-                                                             parallel_starts=parallel_starts,
-                                                             nstarts=nstarts,
-                                                             verbose=verbose)
-                initvect <- start.par$initvect
-                pi.init <- start.par$pi.init
-            }
-            results <- run.EM.rowcluster(model=model, long.df=long.df,
-                                         rowc_mm=model_structure$rowc_mm, colc_mm=model_structure$colc_mm,
-                                         cov_mm=model_structure$cov_mm,
-                                         invect=initvect, pi_v=pi.init,
-                                         param_lengths=model_structure$param_lengths,
-                                         constraint_sum_zero=constraint_sum_zero,
-                                         EM.control=EM.control,
-                                         optim.method=optim.method, optim.control=optim.control,
-                                         verbose=verbose)
-        } else if (!is.null(CG)) {
-            EM.control$biclustering <- FALSE
-            RG <- nclus.column
-            pi.init <- kappa.init
-            long.df.transp <- long.df
-            long.df.transp$ROW <- long.df$COL
-            long.df.transp$COL <- long.df$ROW
+    start.par <- NULL
 
-            # Convert the model structure to row clustering instead of column clustering
-            model_structure.transp <- convert.model.row.to.column(model_structure)
-
-            if (is.null(initvect) | is.null(pi.init)) {
-                ## generate.start will keep using whichever of initvect and kappa.init is not null
-                start.par <- generate.estep.start.rowcluster(long.df.transp, model=model,
-                                                             model_structure=model_structure.transp, RG=RG,
-                                                             initvect=initvect, pi.init=kappa.init,
-                                                             EM.control=EM.control,
-                                                             optim.method=optim.method,
-                                                             optim.control=optim.control,
-                                                             constraint_sum_zero=constraint_sum_zero,
-                                                             start_from_simple_model=start_from_simple_model,
-                                                             parallel_starts=parallel_starts,
-                                                             nstarts=nstarts,
-                                                             verbose=verbose)
-                initvect <- start.par$initvect
-                pi.init <- start.par$pi.init
-            }
-
-            results <- run.EM.rowcluster(long.df=long.df.transp,
-                                         model=model,
-                                         rowc_mm=model_structure.transp$rowc_mm,
-                                         colc_mm=model_structure.transp$colc_mm,
-                                         cov_mm=model_structure.transp$cov_mm,
-                                         invect=initvect, pi_v=pi.init,
-                                         param_lengths=model_structure.transp$param_lengths,
-                                         constraint_sum_zero=constraint_sum_zero,
-                                         EM.control=EM.control,
-                                         optim.method=optim.method, optim.control=optim.control,
-                                         verbose=verbose)
-
-            ## Now convert the results back to row clustering ----
-            column.info <- results$info
-            column.info[c('nclus.column','n','p')] <- column.info[c('nclus.row','p','n')]
-            column.info <- column.info[-which(names(column.info) == "nclus.row")]
-
-            column.parlist <- convert.output.row.to.column(results$parlist.out)
-
-            column.best.parlist <- convert.output.row.to.column(results$EM.status$params.for.best.lli)
-
-            column.EM.status <- results$EM.status
-            column.EM.status$params.for.best.lli <- column.best.parlist
-
-            # Note: keep row-clustering-format param_lengths for
-            column.results <- list(info=column.info,
-                                   model=results$model,
-                                   EM.status=column.EM.status,
-                                   criteria=results$criteria,
-                                   numerical.correction.epsilon=results$numerical.correction.epsilon,
-                                   constraint_sum_zero=results$constraint_sum_zero,
-                                   param_lengths=model_structure$param_lengths,
-                                   initvect=initvect,
-                                   parlist.out=column.parlist,
-                                   kappa.init=results$pi.init,
-                                   kappa.out=results$pi.out,
-                                   ppc=results$ppr,
-                                   colc_mm=model_structure$colc_mm,
-                                   cov_mm=model_structure$cov_mm,
-                                   ColumnClusters=results$RowClusters,
-                                   ColumnClusterMembers=results$RowClusterMembers,
-                                   rowc_format_param_lengths=results$param_lengths,
-                                   rowc_format_outvect=results$outvect,
-                                   rowc_format_parlist.init=results$parlist.init,
-                                   rowc_format_rowc_mm=model_structure.transp$rowc_mm)
-
-            results <- column.results
+    if (!is.null(RG) && !is.null(CG)) {
+        EM.control$biclustering <- TRUE
+        if (is.null(initvect) | is.null(pi.init) | is.null(kappa.init)) {
+            ## generate.start will keep using whichever of initvect and pi.init and
+            ## kappa.init are not null
+            start.par <- generate.start.bicluster(long.df, model=model,
+                                                  model_structure=model_structure,
+                                                  RG=RG, CG=CG, initvect=initvect,
+                                                  pi.init=pi.init, kappa.init=kappa.init,
+                                                  EM.control=EM.control,
+                                                  optim.method=optim.method,
+                                                  optim.control=optim.control,
+                                                  constraint_sum_zero=constraint_sum_zero,
+                                                  start_from_simple_model=start_from_simple_model,
+                                                  parallel_starts=parallel_starts,
+                                                  nstarts=nstarts,
+                                                  verbose=verbose)
+            initvect <- start.par$initvect
+            pi.init <- start.par$pi.init
+            kappa.init <- start.par$kappa.init
         }
+        results <- run.EM.bicluster(invect=initvect, model=model, long.df=long.df,
+                                    rowc_mm=model_structure$rowc_mm, colc_mm=model_structure$colc_mm,
+                                    cov_mm=model_structure$cov_mm,
+                                    pi_v=pi.init, kappa_v=kappa.init,
+                                    param_lengths=model_structure$param_lengths,
+                                    constraint_sum_zero=constraint_sum_zero,
+                                    EM.control=EM.control,
+                                    optim.method=optim.method, optim.control=optim.control,
+                                    verbose=verbose)
+    } else if (!is.null(RG)) {
+        EM.control$biclustering <- FALSE
+        if (is.null(initvect) | is.null(pi.init)) {
+            ## generate.start will keep using whichever of initvect and pi.init is not null
+            start.par <- generate.start.rowcluster(long.df, model=model,
+                                                   model_structure=model_structure, RG=RG,
+                                                   initvect=initvect, pi.init=pi.init,
+                                                   EM.control=EM.control,
+                                                   optim.method=optim.method,
+                                                   optim.control=optim.control,
+                                                   constraint_sum_zero=constraint_sum_zero,
+                                                   start_from_simple_model=start_from_simple_model,
+                                                   parallel_starts=parallel_starts,
+                                                   nstarts=nstarts,
+                                                   verbose=verbose)
+            initvect <- start.par$initvect
+            pi.init <- start.par$pi.init
+        }
+        results <- run.EM.rowcluster(invect=initvect, model=model, long.df=long.df,
+                                     rowc_mm=model_structure$rowc_mm, colc_mm=model_structure$colc_mm,
+                                     cov_mm=model_structure$cov_mm,
+                                     pi_v=pi.init, param_lengths=model_structure$param_lengths,
+                                     constraint_sum_zero=constraint_sum_zero,
+                                     EM.control=EM.control,
+                                     optim.method=optim.method, optim.control=optim.control,
+                                     verbose=verbose)
+    } else if (!is.null(CG)) {
+        EM.control$biclustering <- FALSE
+        RG <- nclus.column
+        pi.init <- kappa.init
+        long.df.transp <- long.df
+        long.df.transp$ROW <- long.df$COL
+        long.df.transp$COL <- long.df$ROW
+
+        # Convert the model structure to row clustering instead of column clustering
+        model_structure.transp <- convert.model.row.to.column(model_structure)
+
+        if (is.null(initvect) | is.null(pi.init)) {
+            ## generate.start will keep using whichever of initvect and kappa.init is not null
+            start.par <- generate.start.rowcluster(long.df.transp, model=model,
+                                                   model_structure=model_structure.transp, RG=RG,
+                                                   initvect=initvect, pi.init=kappa.init,
+                                                   EM.control=EM.control,
+                                                   optim.method=optim.method,
+                                                   optim.control=optim.control,
+                                                   constraint_sum_zero=constraint_sum_zero,
+                                                   start_from_simple_model=start_from_simple_model,
+                                                   parallel_starts=parallel_starts,
+                                                   nstarts=nstarts,
+                                                   verbose=verbose)
+            initvect <- start.par$initvect
+            pi.init <- start.par$pi.init
+        }
+
+        results <- run.EM.rowcluster(invect=initvect, long.df=long.df.transp,
+                                     model=model,
+                                     rowc_mm=model_structure.transp$rowc_mm,
+                                     colc_mm=model_structure.transp$colc_mm,
+                                     cov_mm=model_structure.transp$cov_mm,
+                                     pi_v=pi.init,
+                                     param_lengths=model_structure.transp$param_lengths,
+                                     constraint_sum_zero=constraint_sum_zero,
+                                     EM.control=EM.control,
+                                     optim.method=optim.method, optim.control=optim.control,
+                                     verbose=verbose)
+
+        ## Now convert the results back to row clustering ----
+        column.info <- results$info
+        column.info[c('nclus.column','n','p')] <- column.info[c('nclus.row','p','n')]
+        column.info <- column.info[-which(names(column.info) == "nclus.row")]
+
+        column.parlist <- convert.output.row.to.column(results$parlist.out)
+
+        column.best.parlist <- convert.output.row.to.column(results$EM.status$params.for.best.lli)
+
+        column.EM.status <- results$EM.status
+        column.EM.status$params.for.best.lli <- column.best.parlist
+
+        # Note: keep row-clustering-format param_lengths for
+        column.results <- list(info=column.info,
+                               model=results$model,
+                               clustering_mode="column clustering",
+                               EM.status=column.EM.status,
+                               criteria=results$criteria,
+                               numerical.correction.epsilon=results$numerical.correction.epsilon,
+                               constraint_sum_zero=results$constraint_sum_zero,
+                               param_lengths=model_structure$param_lengths,
+                               initvect=initvect,
+                               parlist.out=column.parlist,
+                               kappa.init=results$pi.init,
+                               kappa.out=results$pi.out,
+                               ppc=results$ppr,
+                               colc_mm=model_structure$colc_mm,
+                               cov_mm=model_structure$cov_mm,
+                               ColumnClusters=results$RowClusters,
+                               ColumnClusterMembers=results$RowClusterMembers,
+                               rowc_format_param_lengths=results$param_lengths,
+                               rowc_format_outvect=results$outvect,
+                               rowc_format_parlist.init=results$parlist.init,
+                               rowc_format_rowc_mm=model_structure.transp$rowc_mm)
+
+        results <- column.results
     } else {
-        start.par <- NULL
-        if (!is.null(RG) && !is.null(CG)) {
-            EM.control$biclustering <- TRUE
-            start_memberships <- generate.mstep.start(long.df, model=model,
-                                                      model_structure=model_structure,
-                                                      RG=RG, CG=CG,
-                                                      EM.control=EM.control,
-                                                      optim.method=optim.method,
-                                                      optim.control=optim.control,
-                                                      constraint_sum_zero=constraint_sum_zero,
-                                                      verbose=verbose)
-
-            results <- run.EM.bicluster(model=model, long.df=long.df,
-                                        rowc_mm=model_structure$rowc_mm,
-                                        colc_mm=model_structure$colc_mm,
-                                        cov_mm=model_structure$cov_mm,
-                                        ppr_m=start_memberships$ppr_m,
-                                        ppc_m=start_memberships$ppc_m,
-                                        param_lengths=model_structure$param_lengths,
-                                        constraint_sum_zero=constraint_sum_zero,
-                                        EM.control=EM.control,
-                                        optim.method=optim.method,
-                                        optim.control=optim.control,
-                                        verbose=verbose)
-        } else if (!is.null(RG)) {
-            EM.control$biclustering <- FALSE
-            start_memberships <- generate.mstep.start(long.df, model=model,
-                                                      model_structure=model_structure, RG=RG,
-                                                      EM.control=EM.control,
-                                                      optim.method=optim.method,
-                                                      optim.control=optim.control,
-                                                      constraint_sum_zero=constraint_sum_zero,
-                                                      verbose=verbose)
-
-            results <- run.EM.rowcluster(ppr_m=start_memberships$ppr_m,
-                                         model=model, long.df=long.df,
-                                         rowc_mm=model_structure$rowc_mm, colc_mm=model_structure$colc_mm,
-                                         cov_mm=model_structure$cov_mm,
-                                         param_lengths=model_structure$param_lengths,
-                                         constraint_sum_zero=constraint_sum_zero,
-                                         EM.control=EM.control,
-                                         optim.method=optim.method, optim.control=optim.control,
-                                         verbose=verbose)
-        } else if (!is.null(CG)) {
-            EM.control$biclustering <- FALSE
-            RG <- nclus.column
-            long.df.transp <- long.df
-            long.df.transp$ROW <- long.df$COL
-            long.df.transp$COL <- long.df$ROW
-
-            # Convert the model structure to row clustering instead of column clustering
-            model_structure.transp <- convert.model.row.to.column(model_structure)
-
-            start_memberships <- generate.mstep.start(long.df.transp, model=model,
-                                                      model_structure=model_structure.transp, RG=RG,
-                                                      EM.control=EM.control,
-                                                      optim.method=optim.method,
-                                                      optim.control=optim.control,
-                                                      constraint_sum_zero=constraint_sum_zero,
-                                                      verbose=verbose)
-
-            results <- run.EM.rowcluster(long.df=long.df.transp,
-                                         model=model,
-                                         rowc_mm=model_structure.transp$rowc_mm,
-                                         colc_mm=model_structure.transp$colc_mm,
-                                         cov_mm=model_structure.transp$cov_mm,
-                                         ppr_m=start_memberships$ppr_m,
-                                         param_lengths=model_structure.transp$param_lengths,
-                                         constraint_sum_zero=constraint_sum_zero,
-                                         EM.control=EM.control,
-                                         optim.method=optim.method, optim.control=optim.control,
-                                         verbose=verbose)
-
-            ## Now convert the results back to row clustering ----
-            column.info <- results$info
-            column.info[c('C','n','p')] <- column.info[c('R','p','n')]
-            column.info <- column.info[-which(names(column.info) == "R")]
-
-            column.parlist <- convert.output.row.to.column(results$parlist.out)
-
-            column.best.parlist <- convert.output.row.to.column(results$EM.status$params.for.best.lli)
-
-            column.EM.status <- results$EM.status
-            column.EM.status$params.for.best.lli <- column.best.parlist
-
-            # Note: keep row-clustering-format param_lengths for
-            column.results <- list(info=column.info,
-                                   model=results$model,
-                                   EM.status=column.EM.status,
-                                   criteria=results$criteria,
-                                   numerical.correction.epsilon=results$numerical.correction.epsilon,
-                                   constraint_sum_zero=results$constraint_sum_zero,
-                                   param_lengths=model_structure$param_lengths,
-                                   parlist.out=column.parlist,
-                                   kappa.out=results$pi.out,
-                                   ppc=results$ppr,
-                                   colc_mm=model_structure$colc_mm,
-                                   cov_mm=model_structure$cov_mm,
-                                   ColumnClusters=results$RowClusters,
-                                   ColumnClusterMembers=results$RowClusterMembers,
-                                   rowc_format_param_lengths=results$param_lengths,
-                                   rowc_format_outvect=results$outvect,
-                                   rowc_format_rowc_mm=model_structure.transp$rowc_mm)
-
-            results <- column.results
-        }
+        stop("Both nclus.row and nclus.col are NULL. Please set one or both to integers and try again.")
     }
 
     ## If the model contains individual row or column effects, rename them accordingly
     results <- tidy.output(results, long.df)
 
-    if (results$EM.status$converged) print("EM algorithm has successfully converged.")
-    else print("EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.")
+    if (results$EM.status$converged) message("EM algorithm has successfully converged.")
+    else message("EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.")
 
     results$start.par <- start.par
     results$call <- match.call()
@@ -1365,9 +1239,6 @@ print.clustord <- function(x, digits = max(3L, getOption("digits") - 3L), ...)
     if ("ColumnClusterMembers" %in% names(x)) {
         cat("Column clusters: ", sapply(x$ColumnClusterMembers, length), "\n")
     }
-
-    # cat("\nParameter estimates:\n")
-    # print.default(format(x$parlist.out), digits=digits, print.gap=1L, quote=FALSE)
 
     invisible(x)
 }
