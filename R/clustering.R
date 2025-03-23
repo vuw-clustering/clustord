@@ -1007,7 +1007,6 @@
 #' clustord(Y~COLCLUST+ROW,model="OSM",nclus.column=3,long.df=long.df,
 #'              EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
 #'
-#'\dontrun{
 #' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + colc_coef_c)
 #' #    with 3 row clustering groups and 2 column clustering groups:
 #' clustord(Y~ROWCLUST+COLCLUST,model="OSM",nclus.row=3,nclus.column=2,long.df=long.df,
@@ -1019,7 +1018,6 @@
 #' clustord(Y~ROWCLUST*COLCLUST, model="POM", nclus.row=2, nclus.column=4,
 #'              long.df=long.df,EM.control=list(EMcycles=2), nstarts=1,
 #'              start_from_simple_model=FALSE)
-#' }
 #' @export
 clustord <- function(formula,
                      model,
