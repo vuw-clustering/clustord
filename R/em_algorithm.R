@@ -494,7 +494,7 @@ calc.SE.rowcluster <- function(long.df, clust.out,
 
         vc <- solve(-optim.hess)
 
-        if (model == "OSM") {
+        if (clust.out$model == "OSM") {
             outvect <- clust.out$outvect
             q <- clust.out$info["q"]
             u.ind <- (q-1+1):(q-1+q-2)
@@ -547,7 +547,7 @@ calc.SE.rowcluster <- function(long.df, clust.out,
 
         vc <- solve(-optim.hess)
 
-        if (model == "OSM") {
+        if (clust.out$model == "OSM") {
             outvect <- clust.out$row_format_outvect
             q <- clust.out$info["q"]
             u.ind <- (q-1+1):(q-1+q-2)
