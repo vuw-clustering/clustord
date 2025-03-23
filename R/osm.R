@@ -510,6 +510,27 @@ vcov.osm <- function(object, ...)
     structure(V,  dimnames = vcov_dimnames)
 }
 
+#' @export
+model.frame.osm <- function(formula, ...)
+{
+    dots <- list(...)
+    nargs <- dots[match(c("data", "na.action", "subset"), names(dots), 0)]
+    if(length(nargs) || is.null(formula$model)) {
+        m <- formula$call
+        m$start <- m$Hess <- m$... <- NULL
+        m[[1L]] <- quote(stats::model.frame)
+        m[names(nargs)] <- nargs
+        if (is.null(env <- environment(formula$terms))) env <- parent.frame()
+        data <- eval(m, env)
+        if(!is.null(mw <- m$weights)) {
+            nm <- names(data)
+            nm[match("(weights)", nm)] <- as.character(mw)
+            names(data) <- nm
+        }
+        data
+    } else formula$model
+}
+
 #' @importFrom stats vcov pnorm
 #' @export
 summary.osm <- function(object, digits = max(3, .Options$digits - 3),
