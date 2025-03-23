@@ -95,13 +95,12 @@ convergence using the simplest row clustering model.</p>
 <span>                          ROW<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">30</span>,times<span class="op">=</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span>,COL<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>,each<span class="op">=</span><span class="fl">30</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">ROWCLUST</span>, model<span class="op">=</span><span class="st">"POM"</span>, nclus.row<span class="op">=</span><span class="fl">2</span>, long.df<span class="op">=</span><span class="va">long.df.sim</span>, </span>
 <span>                nstarts<span class="op">=</span><span class="fl">2</span>, EM.control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Converting factor ROW to numeric."</span></span>
-<span><span class="co">#&gt; [1] "EM algorithm for POM"</span></span>
+<span><span class="co">#&gt; Converting factor ROW to numeric.</span></span>
 <span><span class="co">#&gt; Randomly generated start #1</span></span>
 <span><span class="co">#&gt; Found better incomplete log-like: -164.97238416875 </span></span>
 <span><span class="co">#&gt; Randomly generated start #2</span></span>
-<span><span class="co">#&gt; Found better incomplete log-like: -164.81282792906 </span></span>
-<span><span class="co">#&gt; [1] "EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points."</span></span></code></pre></div>
+<span><span class="co">#&gt; Found better incomplete log-like: -164.81282792906</span></span>
+<span><span class="co">#&gt; EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.</span></span></code></pre></div>
 <p>You can check the convergence in three ways.</p>
 <ol style="list-style-type: decimal">
 <li>Display the results object:</li>
@@ -192,9 +191,8 @@ this functionality.</p>
 <code>EM.control</code> since the previous run only used 5.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_continued</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rerun.html">rerun</a></span><span class="op">(</span><span class="va">fit</span>, long.df<span class="op">=</span><span class="va">long.df.sim</span>, EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">20</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Converting factor ROW to numeric."</span></span>
-<span><span class="co">#&gt; [1] "EM algorithm for POM"</span></span>
-<span><span class="co">#&gt; [1] "EM algorithm has successfully converged."</span></span>
+<span><span class="co">#&gt; Converting factor ROW to numeric.</span></span>
+<span><span class="co">#&gt; EM algorithm has successfully converged.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_continued</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Call:</span></span>
