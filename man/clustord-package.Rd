@@ -76,5 +76,11 @@ Authors:
   \item Eleni Matechou \email{e.matechou@kent.ac.uk} (\href{https://orcid.org/0000-0003-3626-844X}{ORCID})
 }
 
+Other contributors:
+\itemize{
+  \item W. N. Venables (clustord osm regression functions and S3 methods derived by Louise McMillan from MASS package polr function by Venables and Ripley) [contributor, copyright holder]
+  \item B. D. Ripley (clustord osm regression functions and S3 methods derived by Louise McMillan from MASS package polr function by Venables and Ripley) [contributor, copyright holder]
+}
+
 }
 \keyword{internal}

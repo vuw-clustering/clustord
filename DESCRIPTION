@@ -22,7 +22,15 @@ Authors@R: c(
            family = "Matechou", 
            email = "e.matechou@kent.ac.uk", 
            role = c("aut"),
-           comment = c(ORCID = "0000-0003-3626-844X")))
+           comment = c(ORCID = "0000-0003-3626-844X")),
+    person(given = "W. N.",
+           family = "Venables",
+           role = c("ctb","cph"),
+           comment = "clustord osm regression functions and S3 methods derived by Louise McMillan from MASS package polr function by Venables and Ripley"),
+    person(given = "B. D.",
+           family = "Ripley",
+           role = c("ctb","cph"),
+           comment = "clustord osm regression functions and S3 methods derived by Louise McMillan from MASS package polr function by Venables and Ripley"))
 Maintainer: Louise McMillan <louise.mcmillan@vuw.ac.nz>
 Description: Biclustering, row clustering and column clustering using the proportional odds model (POM), ordered stereotype model (OSM) or binary model for ordinal categorical data. Fernández, D., Arnold, R., Pledger, S., Liu, I., & Costilla, R. (2019) <doi:10.1007/s11634-018-0324-3>.
 License: GPL-3
