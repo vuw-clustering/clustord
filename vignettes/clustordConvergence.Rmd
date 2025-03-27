@@ -81,4 +81,4 @@ summary(fit_continued)
 
 # What if it still doesn't converge?
 
-If you still find that the algorithm does not converge within e.g. 200 iterations, then it would be worth running the algorithm from scratch (i.e. without supplying `initvect`) and increasing the number of starts in order to improve the chances of finding a better starting point that might allow the algorithm to converge faster. You should use at least 20 starting points for any clsutering structure more complex than `Y ~ ROWCLUST` (the simplest model).
+If you still find that the algorithm does not converge within e.g. 500 iterations, then it would be worth running the algorithm from scratch (i.e. without supplying `initvect`) and increasing the number of starts in order to improve the chances of finding a better starting point that might allow the algorithm to converge faster. You should use at least 20 starting points for any clustering structure more complex than `Y ~ ROWCLUST` (the simplest model).

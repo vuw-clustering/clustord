@@ -523,6 +523,7 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
             start_control <- startEM.control(EM.control)
 
             ncores <- parallel::detectCores()
+            message(paste("Using parallel starts on",ncores,"nodes."))
             cl <- parallel::makeCluster(ncores)
             parallel::clusterExport(cl, c("long.df","model","model_structure","RG",
                                           "constraint_sum_zero","start_from_simple_model",

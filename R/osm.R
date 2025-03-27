@@ -489,9 +489,10 @@ vcov.osm <- function(object, ...)
         object <- update(object, Hess = TRUE,
                          start = c(object$beta, object$mu[-1], object$u))
     }
-    # vc <- MASS::ginv(object$Hessian)
-
     vc <- solve(object$Hessian)
+    # In cases where solve() produces negative variances, use ginv() which finds
+    # the generalized inverse
+    if (any(diag(vc) < 0)) vc <- MASS::ginv(object$Hessian)
     u <- object$u
     u.ind <- length(object$beta) + length(object$mu[-1]) + seq_along(u)
     J <- jacobian(u)
@@ -543,17 +544,33 @@ summary.osm <- function(object, digits = max(3, .Options$digits - 3),
                                                           c("Value", "Std. Error", "t value", "p value", "t value", "p value")))
     coef[, 1L] <- cc
     vc <- vcov(object)
-    coef[, 2L] <- sd <- sqrt(diag(vc))
+    vars <- diag(vc)
+    coef[, 2L] <- sd <- sqrt(vars)
     coef[1:(pc+llev-1), 3L] <- coef[1:(pc+llev-1), 1L]/coef[1:(pc+llev-1), 2L]
     # For phi values, test whether they are significantly different to the phi
     # value just below and adjacent to them, rather than whether they are
     # significantly different to zero
-    coef[(pc+llev):(pc+2*llev-3), 3L] <- (object$phi[-c(1,llev)] - object$phi[-c(llev,llev-1)])/sd[(pc+llev):(pc+2*llev-3)]
-    # Second set of t-values for phi test whether they are significantly
-    # different to the value just above and adjacent to them
-    coef[(pc+llev):(pc+2*llev-3), 5L] <- (object$phi[-c(1,2)] - object$phi[-c(1,llev)])/sd[(pc+llev):(pc+2*llev-3)]
+    for (k in 2:(llev-1)) {
+        ind_k <- pc+llev+k-2
+        if (k == 2) {
+            # For phi_2 vs. phi_1, phi_1 is fixed at 0 so use a different
+            # calculation
+            coef[ind_k, 3L] <- (object$phi[k])/sd[ind_k]
+        } else {
+            coef[ind_k, 3L] <- (object$phi[k] - object$phi[k-1])/sqrt(vars[ind_k] + vars[ind_k-1] - 2*vc[ind_k,ind_k-1])
+        }
+        if (k == (llev-1)) {
+            # For phi_{q-1} vs. phi_q, phi_q is fixed at 1 so use a different
+            # calculation
+            coef[ind_k, 5L] <- (object$phi[k] - 1)/sd[ind_k]
+        } else {
+            coef[ind_k, 5L] <- (object$phi[k] - object$phi[k+1])/sqrt(vars[ind_k] + vars[ind_k+1] - 2*vc[ind_k,ind_k+1])
+        }
+    }
+
     coef[, 4L] <- pnorm(abs(coef[, 3L]), lower.tail = FALSE) * 2
     coef[(pc+llev):(pc+2*llev-3), 6L] <- pnorm(abs(coef[(pc+llev):(pc+2*llev-3), 5L]), lower.tail = FALSE) * 2
+
     object$coefficients <- coef
     object$pc <- pc
     object$digits <- digits

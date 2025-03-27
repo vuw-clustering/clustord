@@ -88,9 +88,15 @@ fit
 
 Now we have got a converged solution, so we can now move on to interpreting the results.
 
+We can show a summary using the standard `summary()` function:
+
+```{r}
+summary(fit)
+```
+
 ## Covariate coefficients
 
-The `beta` estimates are the estimated coefficients of the covariates baseline, sex and age. More positive values correspond to a higher probability of getting high response levels (i.e. in this case, you're more likely to get y = 4 or 5 than 1 or 2), and more negative values correspond to a higher probability of getting low response levels (i.e. you're more likely to get y = 1 or 2 than 4 or 5). 
+The `beta` estimates are the estimated coefficients of the covariates `baseline`, `sex` and `age`. More positive values correspond to a higher probability of getting high response levels (i.e. in this case, you're more likely to get y = 4 or 5 than 1 or 2), and more negative values correspond to a higher probability of getting low response levels (i.e. you're more likely to get y = 1 or 2 than 4 or 5). 
 
 We see that the coefficient for baseline is 1.94, which indicates that the baseline score for an individual has a big impact on their follow-up self assessment score. If the baseline increases by one level, then that makes it more likely that the follow-up self-assessment score, y, will also be higher.
 
@@ -100,9 +106,14 @@ Finally, we see that the coefficient for age is -0.0090. This is much smaller th
 
 Overall, the effect sizes suggest that baseline and sex are relevant, but that age is not particularly important.
 
+We can confirm this using the `summary` output. The summary shows approximate p-values for whether each coefficient is significantly different from 0. Any that are not significantly different from 0 indicate that those effects are too small to be detected for this dataset, so if we want to drop those effects from the model, that would not affect the output much (though there is no requirement to drop them).
+
+In this case, age has a p-value above 0.05, which confirms that there is little evidence it is significant, but also the p-value for sex is fairly high, so there is not much evidence of that being significant either. Baseline, however, has strong evidence that it's significant.
+
 ## `mu` parameters
 
 The `mu` estimates in the output are, roughly speaking, the intercept terms for each level of the response. This is why there is no intercept term amongst the covariate coefficients: it is already incorporated into the `mu` parameters. We do not need to interpret these estimates.
+
 
 ## `phi` parameters
 
@@ -113,7 +124,14 @@ The values of the remaining coefficients are $\phi_2 = 0.13$, $\phi_3 = 0.18$, $
 Note firstly that $\phi_2$ and $\phi_3$ have very similar estimated values. The $\phi_k$ values modify the effects of the covariates so that they have slightly different effects for each level. 
 Since $\phi_2$ and $\phi_3$ are very similar, covariates have similar effects on both of those levels. Roughly speaking, this means that if the baseline pushes up the chances of getting level 2 scores compared to the reference level 1, the baseline will also push up the chances of getting level 3 scores compared to the reference level 1. There's very little difference in the pattern of the results for response level 2 compared to response level 3. 
 
-That tells us that if we want to simplify the scores we could merge levels 2 and 3 without changing the information in the results much. Let's try that.
+That tells us that if we want to simplify the scores we could merge levels 2 and 3 without changing the information in the results much.
+
+If we're considering merging levels 2 and 3, we can also check the summary output to see whether the merge would be appropriate. The `summary()` output for $\phi_k$ parameters shows **two** p-values for each independent value of $\phi_k$ ($\phi_1$ is always 0 and $\phi_q$ is always 1). Whereas other coefficients are tested to assess whether they are significantly different from 0, $\phi_k$ values are tested to see whether they are significantly different from the values above or below them. So $\phi_2$ has p-values that indicates whether it is significantly different from $\phi_1$ or $\phi_3$, respectively.
+
+If one of these p-values is above 0.05, that does not mean that those two levels must be merged, it just suggests that there would not be problems in the model if those levels were merged. 
+
+But if one of the p-values is very low, and especially if it is below 0.005, then it would be a bad idea to merge that pair of levels because there's strong evidence that they're exhibiting different patterns in the data. In this case the p-value for the comparison between $\phi_2$ and $\phi_3$ is 0.370 (as seen in the rows for `phi2` and `phi3` in the summary), so there's only fairly weak evidence that they're different. We probably wouldn't merge them in this situation, but let's try it now to illustrate what effect that would have on the results.
+
 
 ### Merging response levels
 
@@ -126,16 +144,18 @@ arthritis$y_merged <- factor(arthritis$y_merged)
 
 fit_merged <- osm(y_merged ~ baseline + sex + age, data=arthritis, 
                   subset = (time == 1), control = list(maxit = 5000))
-fit_merged
+summary(fit_merged)
 ```
 
 As you can see, the coefficient estimates for the covariates have changed a little, but the general pattern is the same, because levels 2 and 3 were not giving us much different information about the covariates anyway.
 
 If we wanted to simplify the data even further we could consider merging response levels 1 and 2.5, which are still fairly close together, but that's probably unnecessary. $\phi_4$ is very different to both $\phi_{2.5}$ and $\phi_5$, so that suggests those three levels are all useful for understanding the effects of the covariates, so we should not merge them.
 
-Generally speaking, we would consider any difference between consecutive $\phi_k$ values that's smaller than 0.1 to be a small difference, any difference between 0.1 and 0.2 to be a fairly small difference and any difference above 0.2 to be a large difference. Levels with $\phi_k$ values more than 0.2 apart should not be merged.
+Generally speaking, we would consider any difference between consecutive $\phi_k$ values that's smaller than 0.1 to be a small difference, any difference between 0.1 and 0.2 to be a fairly small difference and any difference above 0.2 to be a large difference. Levels with $\phi_k$ values more than 0.2 apart should not be merged. 
 
-If we merged levels 4 and 5 we'd expect the results to change a lot:
+The p-values in the summary should be taken as guidance, but not definitive, since if we have a very large dataset even small changes can appear significant. For a dataset bigger than 5000 observations it would not be surprising to find every level of $\phi_k$ is significantly different than every other, because that quantity of data would make it easier to spot subtle differences, even if those subtle differences are not of practical significance.
+
+In the small arthritis dataset, f we merged levels 4 and 5 we'd expect the results to change a lot:
 
 ```{r}
 arthritis$y_merged2 <- as.numeric(as.character(arthritis$y_merged))
@@ -173,6 +193,59 @@ Note that the `ordinalgmifs` package also provides a fitting function for the St
 The Ordered Stereotype Model has a restriction $0 = \phi_1 \leq \phi_2 \leq \dots \leq \phi_q = 1$, where $q$ is the number of levels in the response variable, and this restriction enforces the ordinal nature of the response.
 
 The Stereotype Model, i.e. the model fitted in `ordinalgmifs`, does not have this restriction on the $\phi_k$ values.
+
+# Plotting effects
+
+The `effects` package in R can be used to plot the effects of different covariates. Read the package documentation for detailed information about it:
+
+https://cran.r-project.org/web/packages/effects/index.html
+
+The package has been forked to provide a version modified to work with `clustord`. It still has all the existing functionality of `effects`, so can be used to plot effects for other types of models supported by `effects` (such as `lm`, `glm` and `polr`). 
+
+In order to install my version of effects and use it for plotting OSM regression predictor effects, you can use the `remotes` package that provides a function allowing you to install packages directly from GitHub:
+
+```{r, eval=FALSE}
+remotes::install_github("lfmcmillan/effects")
+```
+
+If you have tried that, and when you run the model fitting and plot commands e.g.
+
+```{r, eval=FALSE}
+fit1 <- osm(y ~ x + z, data=df)
+plot(Effect(focal.predictors = c("x"), fit1))
+```
+
+and you still get the following error message, or something similar:
+
+```
+Error in glm.fit(x = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  : 
+  NA/NaN/Inf in 'y'
+In addition: Warning messages:
+1: In Ops.ordered(y, mu) : '-' is not meaningful for ordered factors
+2: In Ops.ordered(eta, offset) : '-' is not meaningful for ordered factors
+3: In Ops.ordered(y, mu) : '-' is not meaningful for ordered factors
+```
+
+this means that my version of the effects package has not been installed successfully. In this situation, try running the following code, which will detach the existing version of `effects` from your working R session before trying to install the forked verison:
+
+```{r, eval=FALSE}
+detach("package:effects")
+remotes::install_github("lfmcmillan/effects")
+```
+
+Then repeat the model fitting and plot Effects commands as before.
+
+The following code would produce an effects plot of the `baseline` predictor:
+
+```{r, eval=FALSE}
+library(effects)
+plot(Effect(focal.predictors = c("baseline"), fit))
+```
+
+The plot shows the probabilities of getting each level of the response variable, and how those probabilities change across the different values of the `baseline` predictor.
+
+If you have further issues with `clustord` or the forked version of `effects`, please contact me at louise.mcmillan@vuw.ac.nz
+
 
 # References
 
