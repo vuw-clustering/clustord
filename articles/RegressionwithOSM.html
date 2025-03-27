@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">clustord</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -262,15 +262,52 @@ it to 5000.</p>
 <span><span class="co">#&gt; (3 observations deleted due to missingness)</span></span></code></pre></div>
 <p>Now we have got a converged solution, so we can now move on to
 interpreting the results.</p>
+<p>We can show a summary using the standard <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>
+function:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Re-fitting to get Hessian</span></span>
+<span><span class="co">#&gt; Variance-covariance matrix for beta coefficients, mu intercepts and the independent elements of phi.</span></span>
+<span><span class="co">#&gt; Call:</span></span>
+<span><span class="co">#&gt; osm(formula = y ~ baseline + sex + age, data = arthritis, control = list(maxit = 5000), </span></span>
+<span><span class="co">#&gt;     subset = (time == 1))</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Coefficients:</span></span>
+<span><span class="co">#&gt;              Value Std. Error t value   p value</span></span>
+<span><span class="co">#&gt; baseline  1.860974    0.43373  4.2906 1.782e-05</span></span>
+<span><span class="co">#&gt; sex       0.811524    0.52760  1.5381 1.240e-01</span></span>
+<span><span class="co">#&gt; age      -0.009104    0.02281 -0.3991 6.898e-01</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Intercepts mu:</span></span>
+<span><span class="co">#&gt;     Value   Std. Error t value p value</span></span>
+<span><span class="co">#&gt; mu2  1.4740  0.6791     2.1706  0.0300</span></span>
+<span><span class="co">#&gt; mu3  1.1420  0.9052     1.2615  0.2071</span></span>
+<span><span class="co">#&gt; mu4 -1.8412  1.3701    -1.3439  0.1790</span></span>
+<span><span class="co">#&gt; mu5 -6.4089  1.9927    -3.2161  0.0013</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Score parameters phi:</span></span>
+<span><span class="co">#&gt;      Value   Std. Error t value p value t value p value</span></span>
+<span><span class="co">#&gt; phi2  0.0112  0.1099     0.1018  0.9189 -2.0399  0.0414</span></span>
+<span><span class="co">#&gt; phi3  0.2306  0.1202     2.0399  0.0414 -0.4364  0.6625</span></span>
+<span><span class="co">#&gt; phi4  0.6461  1.0169     0.4364  0.6625 -0.3480  0.7278</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; The first set of t-values and p-values for phi test whether each phi coefficient is significantly different to the one before it (e.g. whether phi2 is significantly different than phi1). The second set test whether each phi coefficient is significantly different to the one after it (e.g. whether phi2 is significantly different from phi3).</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Residual Deviance: 719.6392 </span></span>
+<span><span class="co">#&gt; AIC: 739.6392 </span></span>
+<span><span class="co">#&gt; BIC: 776.6436 </span></span>
+<span><span class="co">#&gt; (3 observations deleted due to missingness)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="covariate-coefficients">Covariate coefficients<a class="anchor" aria-label="anchor" href="#covariate-coefficients"></a>
 </h3>
 <p>The <code>beta</code> estimates are the estimated coefficients of the
-covariates baseline, sex and age. More positive values correspond to a
-higher probability of getting high response levels (i.e. in this case,
-you’re more likely to get y = 4 or 5 than 1 or 2), and more negative
-values correspond to a higher probability of getting low response levels
-(i.e. you’re more likely to get y = 1 or 2 than 4 or 5).</p>
+covariates <code>baseline</code>, <code>sex</code> and <code>age</code>.
+More positive values correspond to a higher probability of getting high
+response levels (i.e. in this case, you’re more likely to get y = 4 or 5
+than 1 or 2), and more negative values correspond to a higher
+probability of getting low response levels (i.e. you’re more likely to
+get y = 1 or 2 than 4 or 5).</p>
 <p>We see that the coefficient for baseline is 1.94, which indicates
 that the baseline score for an individual has a big impact on their
 follow-up self assessment score. If the baseline increases by one level,
@@ -288,6 +325,18 @@ lived at the start of the trial reduced the chances of them having high
 follow up scores, but only by a tiny bit.</p>
 <p>Overall, the effect sizes suggest that baseline and sex are relevant,
 but that age is not particularly important.</p>
+<p>We can confirm this using the <code>summary</code> output. The
+summary shows approximate p-values for whether each coefficient is
+significantly different from 0. Any that are not significantly different
+from 0 indicate that those effects are too small to be detected for this
+dataset, so if we want to drop those effects from the model, that would
+not affect the output much (though there is no requirement to drop
+them).</p>
+<p>In this case, age has a p-value above 0.05, which confirms that there
+is little evidence it is significant, but also the p-value for sex is
+fairly high, so there is not much evidence of that being significant
+either. Baseline, however, has strong evidence that it’s
+significant.</p>
 </div>
 <div class="section level3">
 <h3 id="mu-parameters">
@@ -329,37 +378,82 @@ compared to the reference level 1. There’s very little difference in the
 pattern of the results for response level 2 compared to response level
 3.</p>
 <p>That tells us that if we want to simplify the scores we could merge
-levels 2 and 3 without changing the information in the results much.
-Let’s try that.</p>
+levels 2 and 3 without changing the information in the results much.</p>
+<p>If we’re considering merging levels 2 and 3, we can also check the
+summary output to see whether the merge would be appropriate. The
+<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> output for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϕ</mi><mi>k</mi></msub><annotation encoding="application/x-tex">\phi_k</annotation></semantics></math>
+parameters shows <strong>two</strong> p-values for each independent
+value of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϕ</mi><mi>k</mi></msub><annotation encoding="application/x-tex">\phi_k</annotation></semantics></math>
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϕ</mi><mn>1</mn></msub><annotation encoding="application/x-tex">\phi_1</annotation></semantics></math>
+is always 0 and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϕ</mi><mi>q</mi></msub><annotation encoding="application/x-tex">\phi_q</annotation></semantics></math>
+is always 1). Whereas other coefficients are tested to assess whether
+they are significantly different from 0,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϕ</mi><mi>k</mi></msub><annotation encoding="application/x-tex">\phi_k</annotation></semantics></math>
+values are tested to see whether they are significantly different from
+the values above or below them. So
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϕ</mi><mn>2</mn></msub><annotation encoding="application/x-tex">\phi_2</annotation></semantics></math>
+has p-values that indicates whether it is significantly different from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϕ</mi><mn>1</mn></msub><annotation encoding="application/x-tex">\phi_1</annotation></semantics></math>
+or
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϕ</mi><mn>3</mn></msub><annotation encoding="application/x-tex">\phi_3</annotation></semantics></math>,
+respectively.</p>
+<p>If one of these p-values is above 0.05, that does not mean that those
+two levels must be merged, it just suggests that there would not be
+problems in the model if those levels were merged.</p>
+<p>But if one of the p-values is very low, and especially if it is below
+0.005, then it would be a bad idea to merge that pair of levels because
+there’s strong evidence that they’re exhibiting different patterns in
+the data. In this case the p-value for the comparison between
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϕ</mi><mn>2</mn></msub><annotation encoding="application/x-tex">\phi_2</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϕ</mi><mn>3</mn></msub><annotation encoding="application/x-tex">\phi_3</annotation></semantics></math>
+is 0.370 (as seen in the rows for <code>phi2</code> and
+<code>phi3</code> in the summary), so there’s only fairly weak evidence
+that they’re different. We probably wouldn’t merge them in this
+situation, but let’s try it now to illustrate what effect that would
+have on the results.</p>
 <div class="section level4">
 <h4 id="merging-response-levels">Merging response levels<a class="anchor" aria-label="anchor" href="#merging-response-levels"></a>
 </h4>
 <p>We start by constructing a new version of the response with both of
 those levels converted to level “2.5” and defining that as a new
 factor:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">arthritis</span><span class="op">$</span><span class="va">y_merged</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">arthritis</span><span class="op">$</span><span class="va">y</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">arthritis</span><span class="op">$</span><span class="va">y_merged</span><span class="op">[</span><span class="va">arthritis</span><span class="op">$</span><span class="va">y_merged</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>,<span class="fl">3</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">2.5</span></span>
 <span><span class="va">arthritis</span><span class="op">$</span><span class="va">y_merged</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">arthritis</span><span class="op">$</span><span class="va">y_merged</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">fit_merged</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/osm.html">osm</a></span><span class="op">(</span><span class="va">y_merged</span> <span class="op">~</span> <span class="va">baseline</span> <span class="op">+</span> <span class="va">sex</span> <span class="op">+</span> <span class="va">age</span>, data<span class="op">=</span><span class="va">arthritis</span>, </span>
 <span>                  subset <span class="op">=</span> <span class="op">(</span><span class="va">time</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span>, control <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxit <span class="op">=</span> <span class="fl">5000</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">fit_merged</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_merged</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Re-fitting to get Hessian</span></span>
+<span><span class="co">#&gt; Variance-covariance matrix for beta coefficients, mu intercepts and the independent elements of phi.</span></span>
 <span><span class="co">#&gt; Call:</span></span>
 <span><span class="co">#&gt; osm(formula = y_merged ~ baseline + sex + age, data = arthritis, </span></span>
 <span><span class="co">#&gt;     control = list(maxit = 5000), subset = (time == 1))</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Coefficients beta:</span></span>
-<span><span class="co">#&gt;    baseline         sex         age </span></span>
-<span><span class="co">#&gt;  1.84434169  0.79653858 -0.02462713 </span></span>
+<span><span class="co">#&gt; Coefficients:</span></span>
+<span><span class="co">#&gt;             Value Std. Error t value   p value</span></span>
+<span><span class="co">#&gt; baseline  1.84434    0.50364   3.662 0.0002502</span></span>
+<span><span class="co">#&gt; sex       0.79654    0.55684   1.430 0.1525835</span></span>
+<span><span class="co">#&gt; age      -0.02463    0.02356  -1.045 0.2959670</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Intercepts mu:</span></span>
-<span><span class="co">#&gt;       mu1     mu2.5       mu4       mu5 </span></span>
-<span><span class="co">#&gt;  0.000000  2.095391 -1.106147 -5.627979 </span></span>
+<span><span class="co">#&gt;       Value   Std. Error t value p value</span></span>
+<span><span class="co">#&gt; mu2.5  2.0954  0.9097     2.3033  0.0213</span></span>
+<span><span class="co">#&gt; mu4   -1.1061  1.3665    -0.8095  0.4182</span></span>
+<span><span class="co">#&gt; mu5   -5.6280  2.0072    -2.8038  0.0050</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Score parameters phi:</span></span>
-<span><span class="co">#&gt;      phi1    phi2.5      phi4      phi5 </span></span>
-<span><span class="co">#&gt; 0.0000000 0.1457573 0.6098663 1.0000000 </span></span>
+<span><span class="co">#&gt;        Value   Std. Error t value p value t value p value</span></span>
+<span><span class="co">#&gt; phi2.5  0.1458  0.1624     0.8975  0.3694 -3.1571  0.0016</span></span>
+<span><span class="co">#&gt; phi4    0.6099  0.1504     3.1571  0.0016 -2.5943  0.0095</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; The first set of t-values and p-values for phi test whether each phi coefficient is significantly different to the one before it (e.g. whether phi2 is significantly different than phi1). The second set test whether each phi coefficient is significantly different to the one after it (e.g. whether phi2 is significantly different from phi3).</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Residual Deviance: 510.7324 </span></span>
 <span><span class="co">#&gt; AIC: 526.7324 </span></span>
@@ -387,9 +481,17 @@ between 0.1 and 0.2 to be a fairly small difference and any difference
 above 0.2 to be a large difference. Levels with
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϕ</mi><mi>k</mi></msub><annotation encoding="application/x-tex">\phi_k</annotation></semantics></math>
 values more than 0.2 apart should not be merged.</p>
-<p>If we merged levels 4 and 5 we’d expect the results to change a
-lot:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<p>The p-values in the summary should be taken as guidance, but not
+definitive, since if we have a very large dataset even small changes can
+appear significant. For a dataset bigger than 5000 observations it would
+not be surprising to find every level of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϕ</mi><mi>k</mi></msub><annotation encoding="application/x-tex">\phi_k</annotation></semantics></math>
+is significantly different than every other, because that quantity of
+data would make it easier to spot subtle differences, even if those
+subtle differences are not of practical significance.</p>
+<p>In the small arthritis dataset, f we merged levels 4 and 5 we’d
+expect the results to change a lot:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">arthritis</span><span class="op">$</span><span class="va">y_merged2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">arthritis</span><span class="op">$</span><span class="va">y_merged</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">arthritis</span><span class="op">$</span><span class="va">y_merged2</span><span class="op">[</span><span class="va">arthritis</span><span class="op">$</span><span class="va">y_merged2</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>,<span class="fl">5</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">4.5</span></span>
 <span><span class="va">arthritis</span><span class="op">$</span><span class="va">y_merged2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">arthritis</span><span class="op">$</span><span class="va">y_merged2</span><span class="op">)</span></span>
@@ -492,6 +594,58 @@ enforces the ordinal nature of the response.</p>
 <code>ordinalgmifs</code>, does not have this restriction on the
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϕ</mi><mi>k</mi></msub><annotation encoding="application/x-tex">\phi_k</annotation></semantics></math>
 values.</p>
+</div>
+<div class="section level2">
+<h2 id="plotting-effects">Plotting effects<a class="anchor" aria-label="anchor" href="#plotting-effects"></a>
+</h2>
+<p>The <code>effects</code> package in R can be used to plot the effects
+of different covariates. Read the package documentation for detailed
+information about it:</p>
+<p><a href="https://cran.r-project.org/web/packages/effects/index.html" class="external-link uri">https://cran.r-project.org/web/packages/effects/index.html</a></p>
+<p>The package has been forked to provide a version modified to work
+with <code>clustord</code>. It still has all the existing functionality
+of <code>effects</code>, so can be used to plot effects for other types
+of models supported by <code>effects</code> (such as <code>lm</code>,
+<code>glm</code> and <code>polr</code>).</p>
+<p>In order to install my version of effects and use it for plotting OSM
+regression predictor effects, you can use the <code>remotes</code>
+package that provides a function allowing you to install packages
+directly from GitHub:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"lfmcmillan/effects"</span><span class="op">)</span></span></code></pre></div>
+<p>If you have tried that, and when you run the model fitting and plot
+commands e.g.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/osm.html">osm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span> <span class="op">+</span> <span class="va">z</span>, data<span class="op">=</span><span class="va">df</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">Effect</span><span class="op">(</span>focal.predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span>, <span class="va">fit1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>and you still get the following error message, or something
+similar:</p>
+<pre><code>Error in glm.fit(x = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  : 
+  NA/NaN/Inf in 'y'
+In addition: Warning messages:
+1: In Ops.ordered(y, mu) : '-' is not meaningful for ordered factors
+2: In Ops.ordered(eta, offset) : '-' is not meaningful for ordered factors
+3: In Ops.ordered(y, mu) : '-' is not meaningful for ordered factors</code></pre>
+<p>this means that my version of the effects package has not been
+installed successfully. In this situation, try running the following
+code, which will detach the existing version of <code>effects</code>
+from your working R session before trying to install the forked
+verison:</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/detach.html" class="external-link">detach</a></span><span class="op">(</span><span class="st">"package:effects"</span><span class="op">)</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"lfmcmillan/effects"</span><span class="op">)</span></span></code></pre></div>
+<p>Then repeat the model fitting and plot Effects commands as
+before.</p>
+<p>The following code would produce an effects plot of the
+<code>baseline</code> predictor:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.r-project.org" class="external-link">effects</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">Effect</span><span class="op">(</span>focal.predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"baseline"</span><span class="op">)</span>, <span class="va">fit</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The plot shows the probabilities of getting each level of the
+response variable, and how those probabilities change across the
+different values of the <code>baseline</code> predictor.</p>
+<p>If you have further issues with <code>clustord</code> or the forked
+version of <code>effects</code>, please contact me at <a href="mailto:louise.mcmillan@vuw.ac.nz" class="email">louise.mcmillan@vuw.ac.nz</a></p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
