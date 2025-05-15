@@ -18,7 +18,7 @@ new.EM.status <- function() {
 }
 
 #' @keywords internal
-update.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
+check.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
                              parlist.out, n, p, pi_v=NULL, kappa_v=NULL, EM.control) {
     iter <- EM.status$iter+1
     finished <- FALSE
@@ -196,7 +196,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                partial=FALSE,
                                incomplete=TRUE)
 
-        EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
+        EM.status <- check.EM.status(EM.status,new.llc=llc,new.lli=lli,
                                       parlist.out=parlist.out,
                                       invect=invect,outvect=outvect, n=n, p=p,
                                       pi_v=pi_v,EM.control=EM.control)
@@ -397,7 +397,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
         }
         if (is.na(lli)) browser()
 
-        EM.status <- update.EM.status(EM.status,new.llc=llc,new.lli=lli,
+        EM.status <- check.EM.status(EM.status,new.llc=llc,new.lli=lli,
                                       parlist.out=parlist.out,
                                       invect=invect,outvect=outvect, n=n, p=p,
                                       pi_v=pi_v, kappa_v=kappa_v, EM.control=EM.control)
