@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">clustord</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,7 +62,7 @@
                         <h4 data-toc-skip class="author">Louise
 McMillan</h4>
             
-            <h4 data-toc-skip class="date">2025-03-27</h4>
+            <h4 data-toc-skip class="date">2025-05-15</h4>
       
 
       <div class="d-none name"><code>clustordTutorial.Rmd</code></div>
@@ -128,14 +128,14 @@ The most common form of this is survey data, such as you might get by
 asking participants to ask a series of questions with Likert-scale
 answers (for example, ranking from 1 = “Strongly Disagree” to 5 =
 “Strongly Agree”).</p>
-<p><img src="vignette_fig%2Fsurvey_table1.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table1.png" width="70%" style="display: block; margin: auto;"></p>
 <p>The <code>clustord</code> package can cluster the
 <strong>rows</strong> of this data matrix, which often correspond to the
 subjects or the observations:</p>
-<p><img src="vignette_fig%2Fsurvey_table2_rowclustering.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table2_rowclustering.png" width="70%" style="display: block; margin: auto;"></p>
 <p>Or the package can cluster the <strong>columns</strong> of this data
 matrix, which often correspond to the survey questions:</p>
-<p><img src="vignette_fig%2Fsurvey_table3_columnclustering.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table3_columnclustering.png" width="70%" style="display: block; margin: auto;"></p>
 <p>Mathematically, these two forms of clustering are equivalent, so you
 can orient your data matrix either way round, and just choose the
 appropriate clustering direction.</p>
@@ -143,7 +143,7 @@ appropriate clustering direction.</p>
 <strong>simultaneously</strong>, which we call
 <strong>biclustering</strong>. This finds the combinations of subjects
 and questions that exhibit similar response patterns:</p>
-<p><img src="vignette_fig%2Fsurvey_table4_biclustering.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table4_biclustering.png" width="70%" style="display: block; margin: auto;"></p>
 <div class="section level3">
 <h3 id="model-based-clustering">Model-based clustering<a class="anchor" aria-label="anchor" href="#model-based-clustering"></a>
 </h3>
@@ -151,11 +151,11 @@ and questions that exhibit similar response patterns:</p>
 clustering</strong> methods. The models are finite-mixture models, in
 which each cluster is assumed to correspond to a particular statistical
 distribution.</p>
-<p><img src="vignette_fig%2Fmodel-based.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/model-based.png" width="70%" style="display: block; margin: auto;"></p>
 <p>Many common clustering methods, such as k-means (Lloyd, 1982 and
 MacQueen, 1967) are <strong>distance-based</strong> instead of
 model-based.</p>
-<p><img src="vignette_fig%2Fdistance-based.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/distance-based.png" width="70%" style="display: block; margin: auto;"></p>
 <p>Model-based clustering methods often take a little longer to set up
 and run, but they have one major advantage. All clustering methods
 estimate which cluster each item is a member of. This package, like
@@ -177,7 +177,7 @@ McLachlan &amp; Peel (2000).</p>
 <div class="section level3">
 <h3 id="ordinal-data">Ordinal data<a class="anchor" aria-label="anchor" href="#ordinal-data"></a>
 </h3>
-<p><img src="vignette_fig%2Fsurvey_table_categorical.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table_categorical.png" width="70%" style="display: block; margin: auto;"></p>
 <p>A very common approach to clustering ordinal data is to number the
 categories of each ordinal variable and then treat the data as
 continuous. This allows the use of numerical clustering methods like
@@ -186,16 +186,16 @@ encodes assumptions about the relative spacings of the ordinal
 categories.</p>
 <p>The most common approach is to number the categories from 1 to
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>q</mi><annotation encoding="application/x-tex">q</annotation></semantics></math>:</p>
-<p><img src="vignette_fig%2Fsurvey_table_categorical_numbered.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table_categorical_numbered.png" width="70%" style="display: block; margin: auto;"></p>
 <p>and then often the category labels are dropped:</p>
-<p><img src="vignette_fig%2Fsurvey_table_numbered_only.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table_numbered_only.png" width="70%" style="display: block; margin: auto;"></p>
 <p>This encoding assumes that the levels 1 and 2 are as close together
 as levels 2 and 3. But that assumption is not necessarily accurate. For
 example, if people are asked a question about how much pain they are
 feeling, there may be a bigger difference in perception between pain
 levels Moderate and Severe (2 and 3) than between pain levels Mild and
 Moderate (1 and 2):</p>
-<p><img src="vignette_fig%2Fordinal_scales.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/ordinal_scales.png" width="70%" style="display: block; margin: auto;"></p>
 <p>The top scale assumes the levels are equally spaced, but the bottom
 scale could be a more accurate representation.</p>
 <p>Rather than treating the ordinal data as numerical and applying
@@ -209,7 +209,7 @@ parameters,
 can be treated as scores for the category levels. The fitted values of
 the parameters can be used as a scoring system that more accurately
 reflects the spacings between the levels according to the data:</p>
-<p><img src="vignette_fig%2Fordinal_scale_phi.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/ordinal_scale_phi.png" width="70%" style="display: block; margin: auto;"></p>
 <p>If you start with five categories, but the fitted
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><msub><mi>ϕ</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{\phi_k\}</annotation></semantics></math>
 values for levels 1 and 2 are very close together (e.g. 0 and 0.09),
@@ -259,7 +259,7 @@ and the columns of the data matrix with
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>,
 so an individual response value is defined as
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Y</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">Y_{ij}</annotation></semantics></math>.</p>
-<p><img src="vignette_fig%2Fsurvey_table_single_cell.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table_single_cell.png" width="70%" style="display: block; margin: auto;"></p>
 <p>Before we can carry out any model-fitting with <code>clustord</code>,
 we need to convert the data into a long-form data frame instead of a
 data matrix. This long form, which is used to simplify the inner
@@ -267,7 +267,7 @@ implementation of the clustering process, has one row per cell in the
 original data frame. Two of its columns are labelled <code>ROW</code>
 and <code>COL</code> and these indicate which row and column in the
 original data frame the response value came from:</p>
-<p><img src="vignette_fig%2Flong_form_data_frame.png" width="40%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/long_form_data_frame.png" width="40%" style="display: block; margin: auto;"></p>
 <p>If a cell in the data matrix has missing data, that entry is not
 included in the long-form data frame (so if 1 cell in a 10x10 data
 matrix is missing, the long-form data frame will have 99 rows).</p>
@@ -342,7 +342,7 @@ has the same probabilities for different categories.</p>
 cluster effect”, that differs from cluster to cluster. The row cluster
 effect parameters are labelled as <code>rowc</code> in the
 <code><a href="../reference/clustord.html">clustord()</a></code> output.</p>
-<p><img src="vignette_fig%2Fsurvey_table2_rowclustering.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table2_rowclustering.png" width="70%" style="display: block; margin: auto;"></p>
 <p>In the console output, this basic model is described as the
 <code>row-cluster-only model</code>. By default, this model is used as
 the starting point for the other models: the starting points for the row
@@ -552,7 +552,7 @@ selection.</p>
 <p>A second, slightly more complex row clustering model is one that
 incorporates both the row cluster effects and also individual effects of
 the columns.</p>
-<p><img src="vignette_fig%2Fsurvey_table2c_rowclustering_columns.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table2c_rowclustering_columns.png" width="70%" style="display: block; margin: auto;"></p>
 <p>We can see by looking at the actual data that this is necessary,
 because we can see that the responses to Q1 tend to have much higher
 values than the responses for the other questions. The row-cluster-only
@@ -1992,7 +1992,7 @@ questions, you can include the demographics as covariates for the rows.
 Or if you have some <em>a priori</em> information about how people are
 likely to answer a particular question in the survey, then you can
 include that as a covariate for the columns.</p>
-<p><img src="vignette_fig%2Fsurvey_table5_covariates.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table5_covariates.png" width="70%" style="display: block; margin: auto;"></p>
 <p>The above example shows row covariates, i.e. additions to the model
 that will be indexed by
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>.
@@ -2255,7 +2255,7 @@ pp. 241–261.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
 </div>
 
     </footer>

@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">clustord</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,7 +62,7 @@
                         <h4 data-toc-skip class="author">Louise
 McMillan</h4>
             
-            <h4 data-toc-skip class="date">2025-03-27</h4>
+            <h4 data-toc-skip class="date">2025-05-15</h4>
       
 
       <div class="d-none name"><code>clustordStructureSummary.Rmd</code></div>
@@ -75,7 +75,7 @@ The most common form of this is survey data, such as you might get by
 asking participants to ask a series of questions with Likert-scale
 answers (for example, ranking from 1 = “Strongly Disagree” to 5 =
 “Strongly Agree”).</p>
-<p><img src="vignette_fig%2Fsurvey_table1.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table1.png" width="70%" style="display: block; margin: auto;"></p>
 <p>There are three broad types of clustering: row clustering, column
 clustering and biclustering. Within each of these, there are multiple
 possible clustering structures.</p>
@@ -93,7 +93,7 @@ subjects or the observations.</p>
 </h3>
 <p>If there are no additional patterns or data we want to incorporate,
 then this is the simplest form of row clustering.</p>
-<p><img src="vignette_fig%2Fsurvey_table2_rowclustering.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table2_rowclustering.png" width="70%" style="display: block; margin: auto;"></p>
 <p>The formula will be:</p>
 <p><code>Y ~ ROWCLUST</code></p>
 <p>Parameters: <code>rowc</code></p>
@@ -104,7 +104,7 @@ then this is the simplest form of row clustering.</p>
 <p>If you think each individual column (e.g. survey question) has
 slightly different patterns, then we can incorporate those into the
 clustering structure.</p>
-<p><img src="vignette_fig%2Fsurvey_table2c_rowclustering_columns.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table2c_rowclustering_columns.png" width="70%" style="display: block; margin: auto;"></p>
 <p>The formula without interaction:</p>
 <p><code>Y ~ ROWCLUST + COL</code></p>
 <p>or the formula with interaction:</p>
@@ -123,7 +123,7 @@ interaction <code>rowc_col</code>.</p>
 demographic information about each survey respondent, that you think
 will influence how they answered the survey, then you can incorporate
 that into the clustering structure:</p>
-<p><img src="vignette_fig%2Fsurvey_table5_covariates.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table5_covariates.png" width="70%" style="display: block; margin: auto;"></p>
 <p>There are many possible formulae for this, but they all follow a
 similar style to formulae in <code>lm</code> or <code>glm</code>.</p>
 <p>Example formulae without interaction between row clustering and row
@@ -151,7 +151,7 @@ interaction <code>rowc_cov</code>, and possible column effects
 probability that a particular question will not be answered honestly,
 that you think will influence the response data, then you can
 incorporate that into the clustering structure:</p>
-<p><img src="vignette_fig%2Fsurvey_table5_covariates_column.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table5_covariates_column.png" width="70%" style="display: block; margin: auto;"></p>
 <p>The formula works the same as for other covariates:</p>
 <p><code>Y + ROWCLUST + honesty</code></p>
 <p>but you need to supply these column covariates as <code>xc.df</code>
@@ -170,7 +170,7 @@ the survey questions.</p>
 </h3>
 <p>If there are no additional patterns or data we want to incorporate,
 then this is the simplest form of column clustering.</p>
-<p><img src="vignette_fig%2Fsurvey_table3_columnclustering.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table3_columnclustering.png" width="70%" style="display: block; margin: auto;"></p>
 <p>The formula will be</p>
 <p><code>Y ~ COLCLUST</code></p>
 <p>Parameters: <code>colc</code></p>
@@ -181,7 +181,7 @@ then this is the simplest form of column clustering.</p>
 <p>If you think each individual row (e.g. survey respondent) has
 slightly different patterns, then we can incorporate those into the
 clustering structure.</p>
-<p><img src="vignette_fig%2Fsurvey_table3b_columnclustering_rows.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table3b_columnclustering_rows.png" width="70%" style="display: block; margin: auto;"></p>
 <p>The formula without interaction:</p>
 <p><code>Y ~ COLCLUST + ROW</code></p>
 <p>or the formula with interaction:</p>
@@ -206,7 +206,7 @@ interaction <code>colc_row</code>.</p>
 probability that a particular question will not be answered honestly,
 that you think will influence the response data, then you can
 incorporate that into the clustering structure:</p>
-<p><img src="vignette_fig%2Fsurvey_table5_covariates_column_only.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table5_covariates_column_only.png" width="70%" style="display: block; margin: auto;"></p>
 <p>The formula works the same as for other covariates. Column clustering
 with covariates without interaction:</p>
 <p><code>Y + COLCLUST + honesty</code></p>
@@ -223,7 +223,7 @@ interaction <code>colc_cov</code>.</p>
 <p>As before, if there is additional information about the rows
 (e.g. survey respondents) that you think will affect the response
 values, you can incorporate that when clustering the columns:</p>
-<p><img src="vignette_fig%2Fsurvey_table5_covariates_column.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table5_covariates_column.png" width="70%" style="display: block; margin: auto;"></p>
 <p>The formula works the same as for other covariates. Column clustering
 with row covariates without interaction:</p>
 <p><code>Y + COLCLUST + age</code></p>
@@ -242,7 +242,7 @@ interaction <code>colc_cov</code>.</p>
 <strong>simultaneously</strong>, which we call
 <strong>biclustering</strong>. This finds the combinations of subjects
 and questions that exhibit similar response patterns:</p>
-<p><img src="vignette_fig%2Fsurvey_table4_biclustering.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table4_biclustering.png" width="70%" style="display: block; margin: auto;"></p>
 <p>The model can include just the main row and column clustering
 effects:</p>
 <p><code>Y ~ ROWCLUST + COLCLUST</code></p>
@@ -254,7 +254,7 @@ interaction <code>rowc_colc</code>.</p>
 <h3 id="biclustering-with-covariates">Biclustering with covariates<a class="anchor" aria-label="anchor" href="#biclustering-with-covariates"></a>
 </h3>
 <p>You can include covariates when performing biclustering:</p>
-<p><img src="vignette_fig%2Fsurvey_table5_covariates_column.png" width="70%" style="display: block; margin: auto;"></p>
+<p><img src="vignette_fig/survey_table5_covariates_column.png" width="70%" style="display: block; margin: auto;"></p>
 <p>Biclustering with row and column covariates without any
 interaction:</p>
 <p><code>Y + ROWCLUST + COLCLUST + age + honesty</code></p>
@@ -294,7 +294,7 @@ effects <code>cov</code>, possible cluster interaction
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
 </div>
 
     </footer>
