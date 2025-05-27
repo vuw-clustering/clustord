@@ -1213,7 +1213,7 @@ clustord <- function(formula,
     results$formula <- formula
     results$terms <- terms(formula)
 
-    class(results) <- c(class(results), "clustord")
+    class(results) <- "clustord"
 
     return(results)
 }
@@ -1339,21 +1339,22 @@ print.summary.clustord <- function (x, digits = max(3L, getOption("digits") - 3L
 #'    documentation for more info.
 #' @returns An object of class \code{clustord}. See \link{clustord} for more info.
 #' @examples
-#'\dontrun{
+#' set.seed(1)
+#' long.df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),
+#'                ROW=factor(rep(1:20,times=5)),COL=rep(1:5,each=20))
 #' results.original <- clustord(Y ~ ROWCLUST, model="OSM", nclus.row=4,
-#'                              long.df=long.df, EM.control=list(EMcycles=50))
+#'                              long.df=long.df, EM.control=list(EMcycles=2))
 #' results.original$EM.status$converged
 #' # FALSE
 #'
 #' ## Since original run did not converge, rerun from that finishing point and
 #' ## allow more iterations this time
-#' results.new <- rerun(results.original, long.df, EM.control=list(EMcycles=200))
+#' results.new <- rerun(results.original, long.df, EM.control=list(EMcycles=10))
 #'
 #' ## Alternatively, if dataset has changed slightly then rerun from the
 #' ## previous finishing point to give the new results a helping hand
 #' long.df.new <- long.df[-c(4,25,140),]
 #' results.new <- rerun(results.original, long.df.new)
-#' }
 #' @export
 rerun <- function(results.original, long.df, EM.control=NULL, verbose=FALSE, optim.control=NULL) {
     if (!("clustord" %in% class(results.original))) stop("results.original must be a clustord results object.")

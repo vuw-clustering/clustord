@@ -54,7 +54,7 @@ then use `osm()` from this package.
 The package has manuals for the functions and also vignettes. Clustering has 
 multiple vignettes, to explain different aspects of the options. The package
 documentation is online at 
-[vuw-clustering.github.io/clustord](vuw-clustering.github.io/clustord) 
+[https://vuw-clustering.github.io/clustord/](https://vuw-clustering.github.io/clustord/) 
 and the Articles section lists the vignettes.
 
 If you need any more help, please email louise.mcmillan@vuw.ac.nz.

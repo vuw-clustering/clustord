@@ -323,7 +323,7 @@ generate.initvect <- function(long.df, model, model_structure,
     if (param_lengths['rowc'] > 0 &&
         any(param_lengths[c('col','rowc_cov','colc')] > 0) &&
         start_from_simple_model) {
-        cat("Using the output of simpler model as initial values for full model\n")
+        if(verbose) cat("Using the output of simpler model as initial values for full model\n")
 
         model_specific.init <- switch(model,
                                       "OSM"=c(mu.init,u.init),
@@ -346,7 +346,7 @@ generate.initvect <- function(long.df, model, model_structure,
                                     optim.method=optim.method,
                                     optim.control=optim.control,
                                     verbose=verbose)
-        cat("=== End of initial row-cluster-only model fitting ===\n")
+        if (verbose) cat("=== End of initial row-cluster-only model fitting ===\n")
         if (all(rs.out$pi.out > 1E-20)) pi.init <- rs.out$pi.out
 
         ## If fitting a row clustering model with column effects, extract mu and
@@ -358,7 +358,7 @@ generate.initvect <- function(long.df, model, model_structure,
             if (param_lengths['col'] > 0 &&
                 (param_lengths['rowc_col'] || param_lengths['rowc_cov'] > 0) &&
                 start_from_simple_model) {
-                cat("Using the output of intermediate model as initial values for full model\n")
+                if (verbose) cat("Using the output of intermediate model as initial values for full model\n")
 
                 # Need to extract latest param values from the previous simpler model
                 mu.init <- rs.out$outvect[1:(q-1)]
@@ -386,7 +386,7 @@ generate.initvect <- function(long.df, model, model_structure,
                                             optim.method=optim.method,
                                             optim.control=optim.control,
                                             verbose=verbose)
-                cat("=== End of intermediate rowcluster-column model fitting ===\n")
+                if (verbose) cat("=== End of intermediate rowcluster-column model fitting ===\n")
                 if (all(rp.out$pi.out > 1E-20))
                     pi.init <- rp.out$pi.out
                 initvect[seq_along(rp.out$outvect)] <- rp.out$outvect
@@ -397,7 +397,7 @@ generate.initvect <- function(long.df, model, model_structure,
 
             ## Now fit simpler column clustering model to find starting values
             ## for column clustering
-            cat("Fitting column-cluster-only model (as row-cluster-only model applied to y with ROW and COL switched), to find starting values for colc_coef and kappa_v\n")
+            if (verbose) cat("Fitting column-cluster-only model (as row-cluster-only model applied to y with ROW and COL switched), to find starting values for colc_coef and kappa_v\n")
             sc.invect <- c(model_specific.init, colc_coef.init)
 
             temp_param_lengths <- param_lengths
@@ -419,7 +419,7 @@ generate.initvect <- function(long.df, model, model_structure,
                                         optim.control=optim.control,
                                         verbose=verbose)
 
-            cat("=== End of initial column-cluster-only model fitting ===\n")
+            if (verbose) cat("=== End of initial column-cluster-only model fitting ===\n")
             if (all(sc.out$pi.out > 1E-20)) {
                 kappa.init <- sc.out$pi.out
             }
@@ -431,7 +431,7 @@ generate.initvect <- function(long.df, model, model_structure,
             initvect[seq_along(simple_model_initvect)] <- simple_model_initvect
 
             if (param_lengths['rowc_colc'] > 0) {
-                cat("Using the output of biclustering model without interaction as initial values for biclustering model with interaction\n")
+                if (verbose) cat("Using the output of biclustering model without interaction as initial values for biclustering model with interaction\n")
 
                 rc.invect <- c(model_specific.init, rowc_coef.init, colc_coef.init)
                 temp_param_lengths <- param_lengths
@@ -450,7 +450,7 @@ generate.initvect <- function(long.df, model, model_structure,
                                            optim.method=optim.method,
                                            optim.control=optim.control,
                                            verbose=verbose)
-                cat("=== End of column-cluster-only model fitting ===\n")
+                if (verbose) cat("=== End of column-cluster-only model fitting ===\n")
 
                 pi.init <- rc.out$pi.out
                 kappa.init <- rc.out$kappa.out
@@ -485,7 +485,7 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
 
             best.lli <- -Inf
             for (s in 1:nstarts) {
-                cat(paste0("Randomly generated start #",s,"\n"))
+                if (verbose) cat(paste0("Randomly generated start #",s,"\n"))
                 initvect.pi.init <- generate.initvect(long.df, model=model,
                                                       model_structure=model_structure,
                                                       RG=RG, constraint_sum_zero=constraint_sum_zero,
@@ -510,7 +510,7 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
 
                 new.lli <- init.out$EM.status$best.lli
                 if (new.lli > best.lli) {
-                    cat(paste("Found better incomplete log-like:",new.lli,"\n"))
+                    if (verbose) cat(paste("Found better incomplete log-like:",new.lli,"\n"))
                     best.lli <- new.lli
                     best.initvect.pi.init <- list(initvect=init.out$outvect,pi.init=init.out$pi.out)
                     initvect <- init.out$outvect
@@ -559,7 +559,7 @@ generate.start.rowcluster <- function(long.df, model, model_structure, RG,
             best_lli_vec <- sapply(start_results, function(res) res$EM.status$best.lli)
             best_lli <- max(best_lli_vec)
             best_start_idx <- which.max(best_lli_vec)
-            cat(paste("Best incomplete log-like:",best_lli," from start ",best_start_idx,"\n"))
+            if (verbose) cat(paste("Best incomplete log-like:",best_lli," from start ",best_start_idx,"\n"))
 
             best.initvect.pi.init <- list(initvect=start_results[[best_start_idx]]$outvect,
                                           pi.init=start_results[[best_start_idx]]$pi.out)
@@ -605,7 +605,7 @@ generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
 
             best.lli <- -Inf
             for (s in 1:nstarts) {
-                cat(paste0("Randomly generated start #",s,"\n"))
+                if (verbose) cat(paste0("Randomly generated start #",s,"\n"))
                 initvect.pi.kappa.init <- generate.initvect(long.df=long.df, model=model,
                                                             model_structure=model_structure,
                                                             RG=RG, CG=CG,
@@ -632,7 +632,7 @@ generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
 
                 new.lli <- init.out$EM.status$best.lli
                 if (new.lli > best.lli) {
-                    cat(paste("Found better incomplete log-like:",new.lli,"\n"))
+                    if (verbose) cat(paste("Found better incomplete log-like:",new.lli,"\n"))
                     best.lli <- new.lli
                     best.initvect.pi.kappa.init <- list(initvect=init.out$outvect,
                                                         pi.init=init.out$pi.out,
@@ -683,7 +683,7 @@ generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
             best_lli_vec <- sapply(start_results, function(res) res$EM.status$best.lli)
             best_lli <- max(best_lli_vec)
             best_start_idx <- which.max(best_lli_vec)
-            cat(paste("Best incomplete log-like:",best_lli," from start ",best_start_idx,"\n"))
+            if (verbose) cat(paste("Best incomplete log-like:",best_lli," from start ",best_start_idx,"\n"))
 
             best.initvect.pi.kappa.init <- list(initvect=start_results[[best_start_idx]]$outvect,
                                                 pi.init=start_results[[best_start_idx]]$pi.out,

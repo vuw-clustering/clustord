@@ -62,19 +62,20 @@ The output parameters of the old result will be used as the new initial
 parameters.
 }
 \examples{
-\dontrun{
+set.seed(1)
+long.df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),
+               ROW=factor(rep(1:20,times=5)),COL=rep(1:5,each=20))
 results.original <- clustord(Y ~ ROWCLUST, model="OSM", nclus.row=4,
-                             long.df=long.df, EM.control=list(EMcycles=50))
+                             long.df=long.df, EM.control=list(EMcycles=2))
 results.original$EM.status$converged
 # FALSE
 
 ## Since original run did not converge, rerun from that finishing point and
 ## allow more iterations this time
-results.new <- rerun(results.original, long.df, EM.control=list(EMcycles=200))
+results.new <- rerun(results.original, long.df, EM.control=list(EMcycles=10))
 
 ## Alternatively, if dataset has changed slightly then rerun from the
 ## previous finishing point to give the new results a helping hand
 long.df.new <- long.df[-c(4,25,140),]
 results.new <- rerun(results.original, long.df.new)
-}
 }
