@@ -17,7 +17,7 @@ Proportional Odds Model (POM) and a dedicated Binary Model for binary data."></h
 
     <a class="navbar-brand me-2" href="../index.html">clustord</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -900,10 +900,6 @@ index and c being the column cluster index.</p>
 <span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">ROWCLUST</span>,model<span class="op">=</span><span class="st">"OSM"</span>,<span class="fl">3</span>,long.df<span class="op">=</span><span class="va">long.df</span>,</span></span>
 <span class="r-in"><span>             EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">2</span>,startEMcycles<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converting factor ROW to numeric.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -110.223835125182 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -109.564729537795 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
@@ -924,14 +920,6 @@ index and c being the column cluster index.</p>
 <span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">ROWCLUST</span><span class="op">+</span><span class="va">COL</span>,model<span class="op">=</span><span class="st">"OSM"</span>,<span class="fl">3</span>,long.df<span class="op">=</span><span class="va">long.df</span>,</span></span>
 <span class="r-in"><span>             EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">2</span>,startEMcycles<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converting factor ROW to numeric.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of simpler model as initial values for full model</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> === End of initial row-cluster-only model fitting ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -108.357375627435 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of simpler model as initial values for full model</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> === End of initial row-cluster-only model fitting ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -108.337761122701 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
@@ -952,18 +940,6 @@ index and c being the column cluster index.</p>
 <span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">ROWCLUST</span><span class="op">*</span><span class="va">COL</span>,model<span class="op">=</span><span class="st">"POM"</span>,nclus.row<span class="op">=</span><span class="fl">2</span>,long.df<span class="op">=</span><span class="va">long.df</span>,</span></span>
 <span class="r-in"><span>             EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">2</span>,startEMcycles<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converting factor ROW to numeric.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of simpler model as initial values for full model</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> === End of initial row-cluster-only model fitting ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of intermediate model as initial values for full model</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> === End of intermediate rowcluster-column model fitting ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -108.74422639491 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of simpler model as initial values for full model</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> === End of initial row-cluster-only model fitting ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of intermediate model as initial values for full model</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> === End of intermediate rowcluster-column model fitting ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -108.734320154894 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
@@ -984,10 +960,6 @@ index and c being the column cluster index.</p>
 <span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">COLCLUST</span>,model<span class="op">=</span><span class="st">"OSM"</span>,nclus.column<span class="op">=</span><span class="fl">3</span>,long.df<span class="op">=</span><span class="va">long.df</span>,</span></span>
 <span class="r-in"><span>             EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">2</span>,startEMcycles<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converting factor ROW to numeric.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -109.524420500131 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -109.492519156351 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
@@ -1008,14 +980,6 @@ index and c being the column cluster index.</p>
 <span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">COLCLUST</span><span class="op">+</span><span class="va">ROW</span>,model<span class="op">=</span><span class="st">"OSM"</span>,nclus.column<span class="op">=</span><span class="fl">3</span>,long.df<span class="op">=</span><span class="va">long.df</span>,</span></span>
 <span class="r-in"><span>             EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">2</span>,startEMcycles<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converting factor ROW to numeric.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of simpler model as initial values for full model</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> === End of initial row-cluster-only model fitting ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -167.029916889152 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of simpler model as initial values for full model</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> === End of initial row-cluster-only model fitting ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -104.673049751169 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
@@ -1037,12 +1001,6 @@ index and c being the column cluster index.</p>
 <span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">ROWCLUST</span><span class="op">+</span><span class="va">COLCLUST</span>,model<span class="op">=</span><span class="st">"OSM"</span>,nclus.row<span class="op">=</span><span class="fl">3</span>,nclus.column<span class="op">=</span><span class="fl">2</span>,long.df<span class="op">=</span><span class="va">long.df</span>,</span></span>
 <span class="r-in"><span>             EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converting factor ROW to numeric.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Using the output of simpler model as initial values for full model</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> === End of initial row-cluster-only model fitting ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Fitting column-cluster-only model (as row-cluster-only model applied to y with ROW and COL switched), to find starting values for colc_coef and kappa_v</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> === End of initial column-cluster-only model fitting ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: 27.6770593225066 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
@@ -1067,8 +1025,6 @@ index and c being the column cluster index.</p>
 <span class="r-in"><span>             long.df<span class="op">=</span><span class="va">long.df</span>,EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">1</span>,</span></span>
 <span class="r-in"><span>             start_from_simple_model<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converting factor ROW to numeric.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Randomly generated start #1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Found better incomplete log-like: -7.02961575657048 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
@@ -1096,7 +1052,7 @@ index and c being the column cluster index.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>
