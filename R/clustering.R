@@ -1386,4 +1386,11 @@ rerun <- function(results.original, long.df, EM.control=NULL, verbose=FALSE, opt
                             initvect=initvect, pi.init=pi.init, kappa.init=kappa.init,
                             EM.control=EM.control, verbose=verbose,
                             optim.control=optim.control)
+    results.new$call$formula <- formula
+    results.new$call$model <- model
+    names(nclus.row) <- NULL; names(nclus.column) <- NULL
+    results.new$call$nclus.row <- nclus.row
+    results.new$call$nclus.column <- nclus.column
+    results.new$call$verbose <- verbose
+    results.new
 }
