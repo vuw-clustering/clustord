@@ -1260,9 +1260,18 @@ summary.clustord <- function (object, ...)
 
     if("RowClusterMembers" %in% names(z)) {
         ans$rowclustersizes <- sapply(z$RowClusterMembers, length)
+        browser()
+        ans$rowclusterprobs <- sapply(1:z$info['nclus.row'], function(idx) {
+            if (length(z$RowClusterMembers[[idx]]) > 0) mean(z$ppr[z$RowClusterMembers[[idx]],idx])
+            else 0
+        })
     }
     if ("ColumnClusterMembers" %in% names(z)) {
         ans$colclustersizes <- sapply(z$ColumnClusterMembers, length)
+        ans$colclusterprobs <- sapply(1:z$info['nclus.column'], function(idx) {
+            if (length(z$ColumnClusterMembers[[idx]]) > 0) mean(z$ppr[z$ColumnClusterMembers[[idx]],idx])
+            else 0
+        })
     }
 
     class(ans) <- "summary.clustord"
@@ -1271,13 +1280,14 @@ summary.clustord <- function (object, ...)
 
 #' @export
 print.summary.clustord <- function (x, digits = max(3L, getOption("digits") - 3L), ...) {
-    cat("\nCall:\n", # S has ' ' instead of '\n'
+    cat("\nCall: ", # S has ' ' instead of '\n'
         paste(deparse(x$call), sep="\n", collapse = "\n"), "\n\n", sep = "")
 
-    cat("Clustering mode:\n",
-        x$clustering_mode)
+    cat("Clustering mode: ", x$clustering_mode, "\n")
 
-    cat("\n\nConverged:\n",
+    cat("Model: ", x$model, "\n")
+
+    cat("\nConverged: ",
         x$convergence)
     cat("\nAIC:", x$AIC, "\n")
     cat("\nBIC:", x$BIC, "\n")
@@ -1285,9 +1295,11 @@ print.summary.clustord <- function (x, digits = max(3L, getOption("digits") - 3L
     cat("\n\nCluster sizes:\n")
     if ("rowclustersizes" %in% names(x)) {
         cat("Row clusters: ", x$rowclustersizes, "\n")
+        cat("Average probabilities of membership: ", round(x$rowclusterprobs,2), "\n")
     }
     if ("colclustersizes" %in% names(x)) {
         cat("Column clusters: ", x$colclustersizes, "\n")
+        cat("Average probabilities of membership: ", round(x$colclusterprobs,2), "\n")
     }
 
     cat("\nParameter estimates:\n")
