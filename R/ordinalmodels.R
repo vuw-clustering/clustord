@@ -143,7 +143,6 @@ unpack_parvec <- function(invect, model, param_lengths, n, p, q, RG, CG = NULL,
         if (constraint_sum_zero) col_coef <- c(col_coef, -sum(col_coef))
         else col_coef <- c(0, col_coef)
 
-
         parlist[['col']] <- col_coef
         nelts <- nelts + p-1
 
@@ -270,6 +269,8 @@ unpack_parvec <- function(invect, model, param_lengths, n, p, q, RG, CG = NULL,
     } else parlist[['cov']] <- NULL
 
     if (length(invect) != nelts) warning("initvect is TOO LONG, the parameters may have been specified incorrectly. Please double-check initvect.")
+
+    parlist <- lapply(parlist, function(vec) {names(vec) <- NULL; return(vec)})
 
     parlist
 }
