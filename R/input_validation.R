@@ -59,6 +59,7 @@ validate.inputs <- function(formula, model,
     if (is.list(long.df$Y) || any(sapply(long.df$Y,is.list)) ||
         any(sapply(long.df$Y,is.infinite))) stop("long.df$Y is a list, or has list elements or infinite elements. long.df$Y should be a factor with q levels.")
     if (model == "Binary" && length(unique(long.df$Y)) > 2) stop("For the Binary model, long.df$Y should only have 2 possible values.")
+    if (model %in% c("OSM","POM") && length(unique(long.df$Y)) < 3) stop("For OSM or POM, long.df$Y should have more than 2 possible values. For data with only 2 values, please use the Binary model.")
     if (!is.factor(long.df$ROW) &&
         (is.list(long.df$ROW) || any(sapply(long.df$ROW,is.list)) || any(is.na(long.df$ROW)) ||
          any(sapply(long.df$ROW,is.infinite)) || any(long.df$ROW %% 1 != 0) ||
@@ -146,7 +147,7 @@ check.factors <- function(long.df) {
 }
 
 #' @importFrom stats model.matrix
-check.formula <- function(formula, model, long.df, RG, CG) {
+check.formula <- function(formula, model, long.df, RG=NULL, CG=NULL) {
 
     n <- max(long.df$ROW)
     p <- max(long.df$COL)
@@ -174,7 +175,9 @@ check.formula <- function(formula, model, long.df, RG, CG) {
         stop("You must include ROWCLUST or COLCLUST in the formula.")
     }
     if (rowc_grep > 0 && is.null(RG)) stop("If you include ROWCLUST in the formula, you must also supply an integer value for nclus.row.")
+    if (rowc_grep == 0 && !is.null(RG)) stop("If you do not include ROWCLUST in the formula, you must NOT supply an integer value for nclus.row.")
     if (colc_grep > 0 && is.null(CG)) stop("If you include COLCLUST in the formula, you must also supply an integer value for nclus.column.")
+    if (colc_grep == 0 && !is.null(CG)) stop("If you do not include COLCLUST in the formula, you must NOT supply an integer value for nclus.column.")
 
     if (any(fo_labels == "ROWCLUST")) {
         rowc_part <- "ROWCLUST"

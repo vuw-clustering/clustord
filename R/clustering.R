@@ -1260,7 +1260,6 @@ summary.clustord <- function (object, ...)
 
     if("RowClusterMembers" %in% names(z)) {
         ans$rowclustersizes <- sapply(z$RowClusterMembers, length)
-        browser()
         ans$rowclusterprobs <- sapply(1:z$info['nclus.row'], function(idx) {
             if (length(z$RowClusterMembers[[idx]]) > 0) mean(z$ppr[z$RowClusterMembers[[idx]],idx])
             else 0
@@ -1353,7 +1352,7 @@ print.summary.clustord <- function (x, digits = max(3L, getOption("digits") - 3L
 #' @examples
 #' set.seed(1)
 #' long.df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),
-#'                ROW=factor(rep(1:20,times=5)),COL=rep(1:5,each=20))
+#'                ROW=rep(1:20,times=5),COL=rep(1:5,each=20))
 #' results.original <- clustord(Y ~ ROWCLUST, model="OSM", nclus.row=4,
 #'                              long.df=long.df, EM.control=list(EMcycles=2))
 #' results.original$EM.status$converged

@@ -113,16 +113,19 @@ test_that("clustord fails for an invalid formula.", {
     expect_error(check.formula(Y ~ COLCLUST:x, model="OSM", long.df=long.df, CG=2),
                  "If you are including interactions between column clusters and covariates, you must include the main effect term for COLCLUST.")
 
-    expect_silent(check.formula(Y ~ ROWCLUST, model="OSM", long.df=long.df, RG=2, CG=2))
-    expect_silent(check.formula(Y ~ COLCLUST, model="OSM", long.df=long.df, RG=2, CG=2))
+    expect_error(check.formula(Y ~ ROWCLUST, model="OSM", long.df=long.df, RG=2, CG=2), "If you do not include COLCLUST in the formula, you must NOT supply an integer value for nclus.column.")
+    expect_error(check.formula(Y ~ COLCLUST, model="OSM", long.df=long.df, RG=2, CG=2), "If you do not include ROWCLUST in the formula, you must NOT supply an integer value for nclus.row.")
+
+    expect_silent(check.formula(Y ~ ROWCLUST, model="OSM", long.df=long.df, RG=2))
+    expect_silent(check.formula(Y ~ COLCLUST, model="OSM", long.df=long.df, CG=2))
     expect_silent(check.formula(Y ~ ROWCLUST + COLCLUST, model="OSM", long.df=long.df, RG=2, CG=2))
     expect_silent(check.formula(Y ~ ROWCLUST*COLCLUST, model="OSM", long.df=long.df, RG=2, CG=2))
     expect_silent(check.formula(Y ~ ROWCLUST:COLCLUST, model="OSM", long.df=long.df, RG=2, CG=2))
-    expect_silent(check.formula(Y ~ ROWCLUST + COL, model="OSM", long.df=long.df, RG=2, CG=2))
-    expect_silent(check.formula(Y ~ ROWCLUST:COL, model="OSM", long.df=long.df, RG=2, CG=2))
-    expect_silent(check.formula(Y ~ ROWCLUST*COL, model="OSM", long.df=long.df, RG=2, CG=2))
-    expect_silent(check.formula(Y ~ COLCLUST + ROW, model="OSM", long.df=long.df, RG=2, CG=2))
-    expect_silent(check.formula(Y ~ COLCLUST:ROW, model="OSM", long.df=long.df, RG=2, CG=2))
-    expect_silent(check.formula(Y ~ COLCLUST*ROW, model="OSM", long.df=long.df, RG=2, CG=2))
+    expect_silent(check.formula(Y ~ ROWCLUST + COL, model="OSM", long.df=long.df, RG=2))
+    expect_silent(check.formula(Y ~ ROWCLUST:COL, model="OSM", long.df=long.df, RG=2))
+    expect_silent(check.formula(Y ~ ROWCLUST*COL, model="OSM", long.df=long.df, RG=2))
+    expect_silent(check.formula(Y ~ COLCLUST + ROW, model="OSM", long.df=long.df, CG=2))
+    expect_silent(check.formula(Y ~ COLCLUST:ROW, model="OSM", long.df=long.df, CG=2))
+    expect_silent(check.formula(Y ~ COLCLUST*ROW, model="OSM", long.df=long.df, CG=2))
 })
 

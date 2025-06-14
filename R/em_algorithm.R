@@ -56,7 +56,6 @@ check.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
     ## strongly negatively correlated with the size of the dataset
     likelihood.stopping.criterion <- abs(EM.status$previous.lli - new.lli)/(n*p)
 
-    # if (is.na(likelihood.stopping.criterion)) browser()
     if (is.infinite(new.lli)) likelihood.stopping.criterion <- Inf
 
     if (any(is.infinite(param.exp.out))) param.stopping.criterion <- Inf

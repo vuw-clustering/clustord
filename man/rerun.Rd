@@ -64,7 +64,7 @@ parameters.
 \examples{
 set.seed(1)
 long.df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),
-               ROW=factor(rep(1:20,times=5)),COL=rep(1:5,each=20))
+               ROW=rep(1:20,times=5),COL=rep(1:5,each=20))
 results.original <- clustord(Y ~ ROWCLUST, model="OSM", nclus.row=4,
                              long.df=long.df, EM.control=list(EMcycles=2))
 results.original$EM.status$converged

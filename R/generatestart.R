@@ -80,10 +80,23 @@ generate.mu.col_coef.init <- function(long.df, model,
                            mu.init <- BL.coef[,1]
 
                            ## If not using constraint that col_coef sum to zero,
-                           ## col_coef1 will be 0 so need to correct other
-                           ## elements of col_coef accordingly
-                           if (constraint_sum_zero) col_coef.init <- colMeans(BL.coef)[2:p]
-                           else col_coef.init <- colMeans(BL.coef)[3:p]-colMeans(BL.coef)[2]
+                           ## col_coef1 will be 0 but that's already been dropped
+                           ## by nnet::multinom so whichever way the constraints
+                           ## are set, just need all but first element of fitted
+                           ## coefficients
+                           ## If using constraint that col_coef sum to zero, the
+                           ## inner workings of clustord construct the vector so
+                           ## that the LAST element is the negative sum of the
+                           ## rest. So here, as multinom fits all but the first
+                           ## element, need to do the reverse, i.e. calculate
+                           ## the first element as the sum of the rest and then
+                           ## drop the last one
+                           if (constraint_sum_zero) {
+                               raw_coef <- colMeans(BL.coef)[2:p]
+                               full_coef <- c(-sum(raw_coef), raw_coef)
+                               col_coef.init <- full_coef[1:(p-1)]
+                           }
+                           else col_coef.init <- colMeans(BL.coef)[2:p]
 
                            done.generating <- TRUE
 
@@ -110,10 +123,21 @@ generate.mu.col_coef.init <- function(long.df, model,
                    mu.init <- POM.sp.out$zeta
 
                    ## If not using constraint that col_coef sum to zero,
-                   ## col_coef1 will be 0 so need to correct other elements
-                   ## of col_coef accordingly
-                   if (constraint_sum_zero) col_coef.init <- POM.sp.out$coef[1:(p-1)]
-                   else col_coef.init <- POM.sp.out$coef[2:(p-1)] - POM.sp.out$coef[1]
+                   ## col_coef1 will be 0 but that's already been dropped by
+                   ## MASS::polr()
+                   ## If using constraint that col_coef sum to zero, the inner
+                   ## workings of clustord construct the vector so that the LAST
+                   ## element is the negative sum of the rest. So here, as
+                   ## multinom fits all but the first element, need to do the
+                   ## reverse, i.e. calculate the first element as the sum of
+                   ## the rest and then drop the last one
+                   if (constraint_sum_zero) {
+                       raw_coef <- POM.sp.out$coef ## This is already length p-1
+                       full_coef <- c(-sum(raw_coef), raw_coef)
+
+                       col_coef.init <- full_coef[1:(p-1)]
+                   }
+                   else col_coef.init <- POM.sp.out$coef
                },
                "Binary"={
                    mu.init <- mean(as.numeric(as.character(long.df$Y)))
@@ -121,12 +145,15 @@ generate.mu.col_coef.init <- function(long.df, model,
                    columnmeans <- sapply(1:p,function(col) {
                        mean(as.numeric(as.character(long.df$Y[long.df$COL==col])))
                    })
-                   col_coef <- columnmeans[1:(p-1)] - mu.init
+                   ## If using constraint that col_coef sum to zero, need to
+                   ## correct for the mean of the data
                    ## If not using constraint that col_coef sum to zero,
                    ## col_coef1 will be 0 so need to correct other elements
                    ## of col_coef accordingly
-                   if (constraint_sum_zero) col_coef.init <- col_coef[1:(p-1)]
-                   else col_coef.init <- col_coef[2:p] - col_coef[1]
+                   if (constraint_sum_zero) {
+                       col_coef.init <- columnmeans[1:(p-1)] - mu.init
+                   }
+                   else col_coef.init <- columnmeans[2:p] - columnmeans[1]
                })
     } else {
         q <- length(levels(long.df$Y))
@@ -140,21 +167,30 @@ generate.mu.col_coef.init <- function(long.df, model,
 #' @importFrom stats kmeans runif
 generate.rowc_coef.pi.init <- function(long.df, RG, constraint_sum_zero=TRUE,
                                        use_random=FALSE) {
+    found_init <- FALSE
     if (!use_random & all(table(long.df[,c("ROW","COL")]) == 1)) {
         ## convert to data matrix
         y.mat <- df2mat(long.df)
 
-        kmeans.data <- kmeans(y.mat,centers=RG,nstart=1000)
-        pi.init <- (kmeans.data$size)/sum(kmeans.data$size)
-        rowc_coef.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
-        ## By default, use rowc_coef sum to zero constraint, so DON'T set rowc_coef1 to zero here.
+        tryCatch({
+            kmeans.data <- kmeans(y.mat,centers=RG,nstart=1000)
+            pi.init <- (kmeans.data$size)/sum(kmeans.data$size)
+            rowc_coef.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
+            ## By default, use rowc_coef sum to zero constraint, so DON'T set rowc_coef1 to zero here.
 
-        if (constraint_sum_zero) rowc_coef.init <- rowc_coef.kmeans[-RG]
-        else {
-            rowc_coef.kmeans <- rowc_coef.kmeans-rowc_coef.kmeans[1]
-            rowc_coef.init <- rowc_coef.kmeans[-1]
-        }
-    } else {
+            if (constraint_sum_zero) rowc_coef.init <- rowc_coef.kmeans[-RG]
+            else {
+                rowc_coef.kmeans <- rowc_coef.kmeans-rowc_coef.kmeans[1]
+                rowc_coef.init <- rowc_coef.kmeans[-1]
+            }
+            found_init <- TRUE
+        }, warning = function(err) {
+
+            # error handler picks up where error was generated
+            message("kmeans did not converge. Switching to random start values.")
+        })
+    }
+    if (!found_init) {
         if (all(table(long.df[,c("ROW","COL")]) != 1)) message("Some data is missing, so generating random start instead of using kmeans.")
 
         rowc_coef.init <- runif(RG-1, min=-5, max=5)

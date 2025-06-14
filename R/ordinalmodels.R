@@ -104,7 +104,7 @@ unpack_parvec <- function(invect, model, param_lengths, n, p, q, RG, CG = NULL,
             } else sub_invect <- NULL
         } else {
             if (param_lengths['rowc'] > 0 || param_lengths['colc'] > 0) {
-                browser()
+                stop("clustord with interactions between row and column clusters must have both or neither of the row cluster and column cluster main effects.")
             }
 
             if (length(sub_invect) < RG*CG - 1) stop("invect not long enough for given formula.")
