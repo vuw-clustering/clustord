@@ -121,22 +121,6 @@ convergence using the simplest row clustering model.</p>
 </ol>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Called from: summary.clustord(fit)</span></span>
-<span><span class="co">#&gt; debug: ans$rowclusterprobs &lt;- sapply(1:z$info["nclus.row"], function(idx) {</span></span>
-<span><span class="co">#&gt;     if (length(z$RowClusterMembers[[idx]]) &gt; 0) </span></span>
-<span><span class="co">#&gt;         mean(z$ppr[z$RowClusterMembers[[idx]], idx])</span></span>
-<span><span class="co">#&gt;     else 0</span></span>
-<span><span class="co">#&gt; })</span></span>
-<span><span class="co">#&gt; debug: if ("ColumnClusterMembers" %in% names(z)) {</span></span>
-<span><span class="co">#&gt;     ans$colclustersizes &lt;- sapply(z$ColumnClusterMembers, length)</span></span>
-<span><span class="co">#&gt;     ans$colclusterprobs &lt;- sapply(1:z$info["nclus.column"], function(idx) {</span></span>
-<span><span class="co">#&gt;         if (length(z$ColumnClusterMembers[[idx]]) &gt; 0) </span></span>
-<span><span class="co">#&gt;             mean(z$ppr[z$ColumnClusterMembers[[idx]], idx])</span></span>
-<span><span class="co">#&gt;         else 0</span></span>
-<span><span class="co">#&gt;     })</span></span>
-<span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; debug: class(ans) &lt;- "summary.clustord"</span></span>
-<span><span class="co">#&gt; debug: ans</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Call: clustord(formula = Y ~ ROWCLUST, model = "POM", nclus.row = 2, </span></span>
 <span><span class="co">#&gt;     long.df = long.df.sim, EM.control = list(EMcycles = 2), nstarts = 2)</span></span>
@@ -205,22 +189,6 @@ this functionality.</p>
 <span><span class="co">#&gt; Converting factor ROW to numeric.</span></span>
 <span><span class="co">#&gt; EM algorithm has successfully converged.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit_continued</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Called from: summary.clustord(fit_continued)</span></span>
-<span><span class="co">#&gt; debug: ans$rowclusterprobs &lt;- sapply(1:z$info["nclus.row"], function(idx) {</span></span>
-<span><span class="co">#&gt;     if (length(z$RowClusterMembers[[idx]]) &gt; 0) </span></span>
-<span><span class="co">#&gt;         mean(z$ppr[z$RowClusterMembers[[idx]], idx])</span></span>
-<span><span class="co">#&gt;     else 0</span></span>
-<span><span class="co">#&gt; })</span></span>
-<span><span class="co">#&gt; debug: if ("ColumnClusterMembers" %in% names(z)) {</span></span>
-<span><span class="co">#&gt;     ans$colclustersizes &lt;- sapply(z$ColumnClusterMembers, length)</span></span>
-<span><span class="co">#&gt;     ans$colclusterprobs &lt;- sapply(1:z$info["nclus.column"], function(idx) {</span></span>
-<span><span class="co">#&gt;         if (length(z$ColumnClusterMembers[[idx]]) &gt; 0) </span></span>
-<span><span class="co">#&gt;             mean(z$ppr[z$ColumnClusterMembers[[idx]], idx])</span></span>
-<span><span class="co">#&gt;         else 0</span></span>
-<span><span class="co">#&gt;     })</span></span>
-<span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; debug: class(ans) &lt;- "summary.clustord"</span></span>
-<span><span class="co">#&gt; debug: ans</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Call: clustord(formula = Y ~ ROWCLUST, model = "POM", nclus.row = 2, </span></span>
 <span><span class="co">#&gt;     long.df = long.df, initvect = initvect, pi.init = pi.init, </span></span>
