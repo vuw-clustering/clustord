@@ -278,6 +278,15 @@ generate.initvect <- function(long.df, model, model_structure,
         col_coef.init <- mu.col_coef.init$col_coef.init
     }
 
+    ## VERY IMPORTANT: do NOT change the order in which initvect is constructed
+    ## from the different parts of the parameters. The Rcpp code relies on
+    ## having this order, because the elements of initvect are fetched by
+    ## NUMERIC INDEX in the Rcpp because comparing strings is MUCH SLOWER in C++
+    ## So if you put initvect together in the wrong order, then elements of it
+    ## will be used as the wrong parameter values in the model-fitting steps
+    ## The parameters MUST be in the following order, with some entries missing:
+    ## 'mu','phi','rowc','colc','rowc_colc','row','col','rowc_col','colc_row',
+    ## 'rowc_cov','colc_cov','cov'
     initvect <- mu.init
 
     if (model == "OSM") {
@@ -463,6 +472,10 @@ generate.initvect <- function(long.df, model, model_structure,
             if (constraint_sum_zero) colc_coef.init <- sc.out$parlist.out[['rowc']][1:CG-1]
             else colc_coef.init <- sc.out$parlist.out[['rowc']][2:CG]
 
+            ## Note that when you're constructing initvect from the outputs of
+            ## simpler models and it will contain rowc and colc elements, you
+            ## MUST reconstruct initvect to contain the rowc elements then the
+            ## colc elements, as the Rcpp code expects
             simple_model_initvect <- c(model_specific.init, rowc_coef.init, colc_coef.init)
             initvect[seq_along(simple_model_initvect)] <- simple_model_initvect
 

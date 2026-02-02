@@ -74,6 +74,9 @@ check.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
         names(pi_v) <- paste0("pi",seq_along(pi_v))
         if (!is.null(kappa_v)) {
             names(kappa_v) <- paste0("kappa",seq_along(kappa_v))
+
+            ## IMPORTANT: note that params.every.iteration unpacks matrices
+            ## such as rowc_colc effects BY COLUMN, not by row, unlike outvect
             newparams <- c(unlist(parlist.out),
                            pi_v,kappa_v,new.lli,new.llc)
         } else {
@@ -265,7 +268,9 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 
     ## Important: do NOT change the order of these model types or entries in
     ## param_lengths, because the Rcpp code relies on having this order for the
-    ## model numbers
+    ## model numbers and this order for the entries of the vector of independent
+    ## parameter values, so if you reorder it, the wrong elements get used as
+    ## some of the parameter values
     ## Numeric version is used because comparing strings is MUCH SLOWER in C++
     model_num <- switch(model,"OSM"=1,"POM"=2,"Binary"=3)
     param_lengths_num <- param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',

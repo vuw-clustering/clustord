@@ -921,6 +921,19 @@
 #'     to converging. So beware of using the incomplete log-likelihood and the
 #'     corresponding AIC value \strong{unless the EM algorithm has converged}.
 #'
+#'     Also note that \code{outvect} unpacks the dependent elements of matrices
+#'     of effects, such as the row cluster and column cluster interaction
+#'     effects \code{rowc_colc} and other interaction effects, by row: the first
+#'     elements of the matrix in \code{outvect} would be the first \emph{row} of
+#'     the matrix, etc. By contrast, \code{EM.status$params.every.iteration}
+#'     simply unlists \code{parlist.out}, which happens automatically by column,
+#'     so the first column of each matrix before the second column, etc. so if
+#'     it contains columns \code{rowc_colc1, rowc_colc2, rowc_colc3} etc. they
+#'     are the first \emph{column} of the \code{rowc_colc} matrix of parameters.
+#'     So if using \code{EM.status$params.every.iteration} to check specific
+#'     parameter values during each iteration of the algorithm, be careful which
+#'     ones you're looking at.
+#'
 #'     \code{criteria}: the calculated values of AIC, BIC,
 #'     etc. from the best incomplete-data log-likelihood.
 #'

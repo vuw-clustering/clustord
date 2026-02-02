@@ -349,9 +349,16 @@ check.formula <- function(formula, model, long.df, RG=NULL, CG=NULL) {
     #      terms (i.e. all the remaining params apart from model-specific params
     #      like mu or mu_k, and phi_k)
     #      OUTPUT: params
+    # It will not affect the manipulation of the numeric values in the code of
+    # the model-fitting algorithm, but to keep things consistent, we will
+    # construct the entries of param lengths in the same order as the ones in
+    # the Rcpp code
+    # This will change the order of the entries in EM.status$params.every.iteration
+    # to match the order of the entries in initvect/outvect
     param_lengths <- rep(0, 12)
-    names(param_lengths) <- c("mu","phi","rowc","col","rowc_col","rowc_cov","cov",
-                              "colc","rowc_colc","row","colc_row","colc_cov")
+    names(param_lengths) <- c("mu","phi","rowc","colc","rowc_colc",
+                              "row","col","rowc_col","colc_row",
+                              "rowc_cov","colc_cov","cov")
     param_lengths['mu'] <- q
     if (model == "OSM") param_lengths['phi'] <- q
     if (exists('rowc_part')) param_lengths['rowc'] <- RG
