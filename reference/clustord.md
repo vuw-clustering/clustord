@@ -1,0 +1,1251 @@
+# Likelihood-based clustering using Ordered Stereotype Models (OSM), Proportional Odds Models (POM) or Binary Models
+
+Likelihood-based clustering with parameters fitted using the EM
+algorithm. You can perform clustering on rows or columns of a data
+matrix, or biclustering on both rows and columns simultaneously. You can
+include any number of covariates for rows and covariates for columns.
+Ordinal models used in the package are Ordered Stereotype Model (OSM),
+Proportional Odds Model (POM) and a dedicated Binary Model for binary
+data.
+
+## Usage
+
+``` r
+clustord(
+  formula,
+  model,
+  nclus.row = NULL,
+  nclus.column = NULL,
+  long.df,
+  initvect = NULL,
+  pi.init = NULL,
+  kappa.init = NULL,
+  EM.control = default.EM.control(),
+  optim.method = "L-BFGS-B",
+  optim.control = default.optim.control(),
+  constraint_sum_zero = TRUE,
+  start_from_simple_model = TRUE,
+  parallel_starts = FALSE,
+  nstarts = 5,
+  verbose = FALSE
+)
+```
+
+## Arguments
+
+- formula:
+
+  model formula (see 'Details').
+
+- model:
+
+  `"OSM"` for Ordered Stereotype Model or `"POM"` for Proportional Odds
+  Model or `"Binary"` for binary data model.
+
+- nclus.row:
+
+  number of row clustering groups.
+
+- nclus.column:
+
+  number of column clustering groups.
+
+- long.df:
+
+  data frame with at least three columns, `Y` and `ROW` and `COL`. Each
+  row in the data frame corresponds to a single cell in the original
+  data matrix; the response value in that cell is given by `Y`, and the
+  row and column indices of that cell in the matrix are given by `ROW`
+  and `COL`. Use
+  [`mat2df`](https://vuw-clustering.github.io/clustord/reference/mat2df.md)
+  to create this data frame from your data matrix of responses.
+  [`mat2df`](https://vuw-clustering.github.io/clustord/reference/mat2df.md)
+  also allows you to supply data frames of row or column covariates
+  which will be incorporated into `long.df`.
+
+- initvect:
+
+  (default NULL) vector of starting parameter values for the model.
+  Note: if the user enters an initial vector of parameter values, it is
+  **strongly recommend** that the user also check the values of
+  `parlist.init` in the output object, to **make sure that the
+  constructed parameters are as expected**.
+
+  If `NULL`, starting parameter values will be generated automatically.
+
+  See 'Details' for definitions of the parameters used for different
+  models.
+
+- pi.init:
+
+  (default `NULL`) starting parameter values for the proportions of
+  observations in the different row clusters.
+
+  If `NULL`, starting values will be generated automatically.
+
+  User-specified values of `pi.init` must be of length `(nclus.row-1)`
+  because the final value will be automatically calculated so that the
+  values of `pi` sum to 1.
+
+- kappa.init:
+
+  (default `NULL`) starting parameter values for the proportions of
+  observations in the different column clusters.
+
+  If `NULL`, starting values will be generated automatically.
+
+  User-specified values of `kappa.init` must be of length
+  `(nclus.column-1)` because the final value will be automatically
+  calculated so that the values of `kappa` sum to 1.
+
+- EM.control:
+
+  (default =
+  `list(EMcycles=50, EMlikelihoodtol=1e-4, EMparamtol=1e-2, paramstopping=TRUE, startEMcycles=10, keepallparams=FALSE, epsilon=1e-6)`)
+  list of parameters controlling the EM algorithm.
+
+  `EMcycles` controls how many EM iterations of the main EM algorithm
+  are used to fit the chosen submodel.
+
+  `EMlikelihoodtol` is the tolerance for the stopping criterion for the
+  **log-likelihood** in the EM algorithm. The criterion is the absolute
+  change in the **incomplete** log-likelihood since the previous
+  iteration, scaled by the size of the dataset `n*p`, where `n` is the
+  number of rows in the data matrix and `p` is the number of columns in
+  the data matrix. The scaling is applied because the incomplete
+  log-likelihood is predominantly affected by the dataset size.
+
+  `EMparamtol` is the tolerance for the stopping criterion for the
+  **parameters** in the EM algorithm. This is a tolerance for the
+  **sum** of the scaled parameter changes from the last iteration, i.e.
+  the tolerance is not for any individual parameter but for the sum of
+  changes in all the parameters. Thus the default tolerance is 1e-2. The
+  individual parameter criteria are the absolute differences between the
+  exponentiated absolute parameter value at the current timestep and the
+  exponentiated absolute parameter value at the previous timestep, as a
+  proportion of the exponentiated absolute parameter value at the
+  current timestep. The exponentiation is to rescale parameter values
+  that are close to zero.
+
+  there are around 5 independent parameter values, then at the point of
+  convergence using default tolerances for the log-likelihood and the
+  parameters, each parameter will have a scaled absolute change since
+  the previous iteration of about 1e-4; if there are 20 or 30
+  independent parameters, then each will have a scaled aboslute change
+  of about 1e-6.
+
+  `paramstopping`: if `FALSE`, indicates that the EM algorithm should
+  only check convergence based on the change in incomplete-data
+  log-likelihood, relative to the current difference between the
+  complete-data and incomplete-data log-likelihoods, i.e.
+  `abs(delta_lli)/abs(llc[iter] - lli[iter])`; if `TRUE`, indicates that
+  as well as checking the likelihood criterion, the EM algorithm should
+  also check whether the relative change in the exponentials of the
+  absolute values of the current parameters is below the tolerance
+  `EMstoppingpar`, to see whether the parameters and the likelihood have
+  both converged.
+
+  `startEMcycles` controls how many EM iterations are used when fitting
+  the simpler submodels to get starting values for fitting models with
+  interaction.
+
+  `keepallparams`: if `TRUE`, keep a record of parameter values
+  (including pi_r and kappa_c) for every EM iteration.
+
+  `rerunestepbeforelli`: if `TRUE`, and only when using biclustering,
+  rerun the E-step before calculating the incomplete-data
+  log-likelihood. The EM algorithm runs the E-step to estimate the
+  cluster membership probabilities and then runs the M-step to estimate
+  the parameters by maximising the complete-data log-likelihood (LLC),
+  and then recalculates the estimated incomplete-data log-likelihood
+  (LLI) to check for convergence. The biclustering LLI approximation
+  uses the cluster membership probabilities so will be slightly more
+  accurate if these cluster membership probabilities are recalculated
+  using the very latest parameter estimates. So the `TRUE` setting for
+  this control recalculates the cluster memberships before calculating
+  the LLI approx.
+
+  `uselatestlli`: Kept for backwards compatibility with original version
+  of clustord algorithm. Original version of the algorithm had this set
+  to `FALSE`, which keeps the best LLI from any previous iteration
+  rather than the latest LLI. The default, `TRUE`, instead keeps the
+  latest LLI even if there was a better LLI in a previous iteration.
+  This is appropriat: In row clustering the exact LLI is used and the EM
+  algorithm creators proved the LLI should always not decrease with each
+  iteration. In biclustering the approximation to the LLI may be very
+  inaccurate when the algorithm is a long way from convergence, so even
+  when the value of LLI appears to be very high in early iterations this
+  may not be accurate, so it is better to take the latest value.
+
+  For `columnclustering`, the parameters saved from each iteration will
+  NOT be converted to column clustering format, and will be in the row
+  clustering format, so `alpha` in `EM.status$params.every.iteration`
+  will correspond to beta_c and `pi` will correspond to kappa.
+
+  `epsilon`: default 1e-6, small value used to adjust values of pi,
+  kappa and theta that are too close to zero so that taking logs of them
+  does not create infinite values.
+
+- optim.method:
+
+  (default "L-BFGS-B") method to use in optim within the M step of the
+  EM algorithm. Must be one of 'L-BFGS-B', 'BFGS', 'CG' or 'Nelder-Mead'
+  (i.e. not the SANN method).
+
+- optim.control:
+
+  control list for the `optim` call within the M step of the EM
+  algorithm. See the control list Details in the `optim` manual for more
+  info. Please note that although `optim`, by default, uses `pgtol=0`
+  and `factr=1e7` in the L-BFGS-B method, `clustord`, by default, alters
+  these to `pgtol=1e-4` and `factr=1e11`, but you can use this
+  `optim.control` argument in `clustord` to revert them to the defaults
+  if you want. The reason for the change is that the chosen values in
+  `clustord` reduce the tolerance on the log-likelihood function
+  optimization in order to speed up the algorithm, and because the
+  log-likelihood is on the scale of 1e4 for \<100 rows in the data
+  matrix and 1e6 for 5000 rows in the data matrix, tolerance at the
+  default `optim` scale is not as important as the choice of model type
+  and structure or the number of starting points. If one model is better
+  than another, it will probably have a likelihood that is better by
+  about the size of the data matrix, which is far larger than the
+  tolerance in the optimization. If one starting point is better than
+  another, it will probably have a likelihood that is better on about
+  1/10th or 1/100th the size of the data matrix, which is still far
+  larger than the tolerance in the optimization. If you need accurate
+  parameter estimates, firstly make sure to try more starting points,
+  then perform model selection first, and then finally rerun the chosen
+  model with finer tolerance, e.g. the `optim` defaults, `pgtol=0` and
+  `factr=1e7`.
+
+- constraint_sum_zero:
+
+  (default `TRUE`) if `TRUE`, use constraints that cluster effects sum
+  to zero; if `FALSE`, use constraints that the cluster effect for the
+  first cluster will be 0. Both versions have the same constraints for
+  joint row-column cluster effects: these effects are described by a
+  matrix of parameters gamma_rc, indexed by row cluster and column
+  cluster indices, and the constraints are that the final column of
+  gamma_rc is equal to the negative sum of the other columns (so `gamma`
+  columns sum to zero) and first row of gamma_rc is equal to the
+  negative sum of the other rows (so `gamma` rows sum to zero).
+
+- start_from_simple_model:
+
+  (default `TRUE`) if `TRUE`, fit a simpler clustering model first and
+  use that to provide starting values for all parameters for the model
+  with interactions; if `FALSE`, use the more basic models to provide
+  starting values only for `pi.init` and `kappa.init`. If the full model
+  has interaction terms, then simpler models are ones without the
+  interactions. If the model has individual row/column effects alongside
+  the clusters, then simpler models are ones without the individual
+  row/column effects. If the full model has covariates, then simpler
+  models are ones without the covariates (to get starting values for the
+  cluster parameters), and ones with the covariates but no clustering
+  (to get starting values for the covariates).
+
+- parallel_starts:
+
+  (default FALSE) if TRUE, by generating multiple random starts, those
+  random starts will be parallelised over as many cores as are
+  available. For example, on a personal computer this will be one fewer
+  than the number of cores in the machine, to make sure one is left for
+  system tasks external to R.
+
+- nstarts:
+
+  (default 5) number of random starts to generate, if generating random
+  starting points for the EM algorithm.
+
+- verbose:
+
+  (default `FALSE`) changes how much is reported to the console during
+  the algorithm's progress. If `TRUE`, reports the incomplete-data
+  log-likelihood at every EM algorithm iteration and the trace
+  information from nnet::multinom() during the process of fitting
+  initial values for the `mu` parameters. If `FALSE`, the incomplete
+  log-likelihood is only reported every 10 iterations of the EM
+  algorithm and the initial fitting reporting is suppressed. Regardless
+  of the verbosity setting the algorithm reports each of the random
+  starts and whenever it finds a better log-likelihood than all previous
+  starts, and it also reports when it is fitting simpler models to find
+  starting values for the parameters vs fitting the final, more complex
+  model. If wanting the detailed output from
+  [`optim()`](https://rdrr.io/r/stats/optim.html), use
+  `optim.control=list(trace=X)`, where X is 1 to 6, with 6 being the
+  highest level of verbosity for the L-BFGS-B algorithm.
+
+## Value
+
+A `clustord` object, i.e. a list with components:
+
+`info`: Basic info n, p, q, the number of parameters, the number of row
+clusters and the number of column clusters, where relevant.
+
+`model`: The model used for fitting, "OSM" for Ordered Stereotype Model,
+"POM" for Proportional Odds Model, or "Binary" for Binary model.
+
+`EM.status`: a list containing the latest iteration `iter`, latest
+incomplete-data and complete-data log-likelihoods `new.lli` and
+`new.llc`, the best incomplete-data log-likelihood `best.lli` and the
+corresponding complete-data log-likelihood, `llc.for.best.lli`, and the
+parameters for the best incomplete-data log-likelihood,
+`params.for.best.lli`, indicator of whether the algorithm converged
+`converged`, and if the user chose to keep all parameter values from
+every iteration, also `params.every.iteration`.
+
+Note that for **biclustering**, i.e. when `ROWCLUST` and `COLCLUST` are
+both included in the model, the **incomplete** log-likelihood is
+calculated using the entropy approximation, and this may be
+**inaccurate** unless the algorithm has converged or is close to
+converging. So beware of using the incomplete log-likelihood and the
+corresponding AIC value **unless the EM algorithm has converged**.
+
+Also note that `outvect` unpacks the dependent elements of matrices of
+effects, such as the row cluster and column cluster interaction effects
+`rowc_colc` and other interaction effects, by row: the first elements of
+the matrix in `outvect` would be the first *row* of the matrix, etc. By
+contrast, `EM.status$params.every.iteration` simply unlists
+`parlist.out`, which happens automatically by column, so the first
+column of each matrix before the second column, etc. so if it contains
+columns `rowc_colc1, rowc_colc2, rowc_colc3` etc. they are the first
+*column* of the `rowc_colc` matrix of parameters. So if using
+`EM.status$params.every.iteration` to check specific parameter values
+during each iteration of the algorithm, be careful which ones you're
+looking at.
+
+`criteria`: the calculated values of AIC, BIC, etc. from the best
+incomplete-data log-likelihood.
+
+`epsilon`: the very small value (default 1e-6) used to adjust values of
+pi and kappa and theta that are too close to zero, so that taking logs
+of them does not produce infinite values. Use the EM.control argument to
+adjust epsilon.
+
+`constraints_sum_zero`: the chosen value of constraints_sum_zero.
+
+`param_lengths`: vector of total number of parameters/coefficients for
+each part of the model, labelled with the names of the components. The
+value is 0 for each component that is not included in the model, e.g. if
+there are no covariates interacting with row clusters then the
+`rowc_cov_coef` value will be 0. If the component is included, then the
+value given will include any dependent parameter/coefficient values, so
+if column clusters are included then the `colc_coef` value will be
+`nclus.column`, whereas the number of independent values will be
+`nclus.column - 1`.
+
+`initvect`: the initial *vector* of parameter values, either specified
+by the user or generated automatically. This vector has only the
+**independent** values of the parameters, not the full set.
+
+`outvect`: the final *vector* of parameter values, containing only the
+independent parameter values from `parlist.out`.
+
+`parlist.init`: the initial list of parameters, constructed from the
+initial parameter vector `initvect`. Note that if the initial vector has
+been incorrectly specified, the values of `parlist.init` may not be as
+expected, and they should be checked by the user.
+
+`parlist.out`: fitted values of parameters.
+
+`pi`, `kappa`: fitted values of pi and kappa, where relevant.
+
+`ppr`, `ppc`: the posterior probabilities of membership of the row
+clusters and the column clusters, where relevant.
+
+`rowc_mm`, `colc_mm`, `cov_mm`: the model matrices for, respectively,
+the covariates interacting with row clusters, the covariates interacting
+with column clusters, and the covariates not interacting with row or
+column clusters (i.e. the covariates with constant coefficients). Note
+that one row of each model matrix corresponds to one row of long.df.
+
+`RowClusters`, `ColumnClusters`: the assigned row and column clusters,
+where relevant, where each row/column is assigned to a cluster based on
+maximum posterior probability of cluster membership (`ppr` and `ppc`).
+
+`RowClusterMembers`, `ColumnClusterMembers`: vectors of assigned members
+of each row or column cluster, where each row/column is assigned to a
+cluster based on maximum posterior probability of cluster membership
+(`ppr` and `ppc`)
+
+`reordered`: Boolean indicating whether or not the outputs have been
+reordered in order of row cluster and/or column cluster effects. FALSE
+for direct outputs of `clustord()`, will be changed to TRUE after
+running [`reorder()`](https://rdrr.io/r/stats/reorder.factor.html) on
+`clustord` output objects.
+
+## Details
+
+You can select your own input parameters, or starting values will be
+generated by running kmeans or by fitting simpler models and feeding the
+outputs into the final model as starting values.
+
+The starting point for clustering is a data matrix of response values
+that are binary or categorical. You may also have a data frame of
+covariates that are linked to the rows of the data matrix, and may also
+have a data frame of covariates that are linked to the columns of the
+data matrix.
+
+For example, if clustering data from fishing trawls, where the rows are
+trawl events and columns are species caught, then you could also supply
+a gear covariate linked to the rows, representing gear used on each
+trawl event, and could additionally supply species covariates linked to
+the columns, representing auxiliary information about each species.
+There is no requirement to provide any covariates, and you can provide
+only row covariates, or only column covariates.
+
+Before running `clustord`, you need to run
+[`mat2df`](https://vuw-clustering.github.io/clustord/reference/mat2df.md)
+to convert the data matrix into a long form data frame. The data frame
+needs to have at least three columns, `Y` and `ROW` and `COL`. Each row
+in the data frame corresponds to a single cell in the original data
+matrix; the response value in that cell is given by `Y`, and the row and
+column indices of that cell in the matrix are given by `ROW` and `COL`.
+
+[`mat2df`](https://vuw-clustering.github.io/clustord/reference/mat2df.md)
+also allows you to supply data frames of row or column covariates which
+will be incorporated into `long.df`.
+
+Then, to run the `clustord` function, you need to enter your chosen
+formula and model, and the number of clusters you want to fit. The
+formula model_structure is akin to that for `glm`, but with a few
+restrictions. You can include any number of covariates in the same way
+as for a multiple regression model, though unlike for `glm`, you can
+include both row and column covariates.
+
+Note that, unlike `glm`, you should not specify a `family` argument; the
+`model` argument is used instead.
+
+`formula` **argument details**
+
+In the following description of different models, the Binary model is
+used for simplicity when giving the mathematical descriptions of the
+models, but you can use any of the following models with the Ordered
+Stereotype or Proportional Odds Models as well.
+
+In the `formula` argument, the response must be exactly `Y`. You cannot
+use any functions of `Y` as the response, nor can you include `Y` in any
+terms on the right hand side of the formula. `Y` is the name in
+`clustord` of the response values in the original data matrix.
+
+The `formula` argument has 4 special variables: `ROWCLUST`, `COLCLUST`,
+`ROW` and `COL`. There are some restrictions on how these can be used in
+the formula, as they are not covariates, but instead act as indicators
+of the clustering model_structure you want to use.
+
+All other variables in the formula will be any covariates that you want
+to include in the model, and these are unrestricted, and can be used in
+the same way as in `glm`.
+
+`ROWCLUST` and `COLCLUST` are used to indicate what row clustering
+model_structure you want, and what column clustering model_structure you
+want, respectively. The inclusion of `ROWCLUST` as a single term
+indicates that you want to include a row clustering effect in the model.
+In the simplest row clustering model, for Binary data with **row
+clustering** effects only, the basic function call would be
+
+`clustord(Y ~ ROWCLUST, model="Binary", long.df=long.df)`
+
+and the model fitted would have the form:
+
+Logit(P(Y = 1)) = mu + rowc_coef_r
+
+where mu is the intercept term, and rowc_coef_r is the row cluster
+effect that will be applied to every row from the original data matrix
+that is a member of row cluster r. The inclusion of `ROWCLUST`
+corresponds to the inclusion of rowc_coef_r.
+
+Note that we are not using notation involving greek letters, because (a)
+we ran out of letters for all the different types of parameters in the
+model and (b) with this many parameters, it would be difficult to
+remember which ones are which.
+
+Similarly to row clustering, the formula `Y ~ COLCLUST` would perform
+**column clustering**, with model Logit(P(Y = 1)) = mu + colc_coef_c,
+where colc_coef_c is the column cluster effect that will be applied to
+every column from the original data matrix that is a member of column
+cluster c.
+
+Including both `ROWCLUST` and `COLCLUST` in the same formula indicates
+that you want to perform biclustering, i.e. you want to cluster the rows
+and the columns of the original data matrix simultaneously. If included
+without interaction, then the terms just correspond to including
+rowc_coef_r and colc_coef_c in the model:
+
+The formula
+
+`Y ~ ROWCLUST + COLCLUST`
+
+is the simplest possible **biclustering** model, Logit(P(Y = 1)) = mu +
+rowc_coef_r + colc_coef_c
+
+If you want to include interaction between the rows and columns, i.e.
+you want to perform block biclustering where each block corresponds to a
+row cluster r and a column cluster c, then that model has a matrix of
+parameters indexed by r and c.
+
+`clustord(Y ~ ROWCLUST*COLCLUST, model="Binary", ...)` has the model
+Logit(P(Y = 1)) = mu + rowc_colc_coef_rc
+
+This model can instead be called using the equivalent formula
+`Y ~ ROWCLUST + COLCLUST + ROWCLUST:COLCLUST`.
+
+You can instead use the formula `Y ~ ROWCLUST:COLCLUST`. Mathematically,
+this is equivalent to the previous two. In regression, the models would
+not be equivalent but in clustering, they are equivalent, and have the
+same number of independent parameters overall. If you include the main
+effects, then that reduces the number of independent parameters in the
+interaction term compared to if you just use the interaction term (see
+below section about `initvect`).
+
+You cannot include just one of the main effects alongside the
+interaction term, i.e. you cannot use `Y ~ ROWCLUST + ROWCLUST:COLCLUST`
+or `Y ~ COLCLUST + ROWCLUST:COLCLUST`. This is for simplicity in the
+code, and to avoid confusion when interpreting the results.
+
+However, `clustord` allows a lot more flexibility than this. The
+variables `ROW` and `COL` are used to indicate that you want to also
+include **individual row or column effects**, respectively.
+
+For example, if you are clustering binary data that indicates the
+presence/ absence of different species (columns) at different trawl
+events (rows), and you know that one particular species is incredibly
+common, then you can include column effects in the model, which will
+allow for the possibility that two columns may correspond to species
+with different probabilities of appearing in the trawl.
+
+You can add individual column effects along with row clustering, or you
+can add individual row effects along with column clustering. The formula
+for row clustering with individual column effects (without interaction)
+is
+
+`Y ~ ROWCLUST + COL`
+
+which corresponds to Binary model
+
+Logit(P(Y = 1)) = mu + rowc_coef_r + col_coef_j
+
+So if two cells from the data matrix are in the same row cluster, but in
+different columns, they will not have the same probability of Y = 1.
+
+You can also add interaction between the individual row/column effects
+and the clustering effects.
+
+If you still want to be able to see the row cluster and column effects
+separately, then you use `Y ~ ROWCLUST*COL` or
+`Y ~ ROWCLUST + COL + ROWCLUST:COL` (these are both the same), which
+have model
+
+Logit(P(Y = 1)) = mu + rowc_coef_r + col_coef_j + rowc_col_coef_rj
+
+As before, rowc_coef_r and col_coef_j are the row cluster effects and
+individual column effects, and rowc_col_coef_rj are the interaction
+terms.
+
+Alternatively, you can use the mathematically-equivalent formula
+
+`Y ~ ROWCLUST:COL` which has model
+
+Logit(P(Y = 1)) = mu + rowc_col_coef_rj
+
+where the row cluster effects and individual column effects are absorbed
+into the matrix rowc_col_coef_rj. These models are the same
+mathematically, the only differences between them are in how they are
+constrained (see below in the section about the `initvect` argument) and
+how they should be interpreted.
+
+Note that if you were using covariates, then it would not be equivalent
+to leave out the main effects and just use the interaction terms, but
+the clustering models don't work quite the same as regression models
+with covariates.
+
+Equivalently, if you want to cluster the columns, you can include
+individual row effects alongside the column clusters, i.e.
+
+`Y ~ COLCLUST + ROW` or `Y ~ COLCLUST + ROW + COLCLUST:ROW`,
+
+depending on whether you want the interaction terms or not.
+
+You are **not** able to include individual row effects with row
+clusters, or include individual column effects with column clusters,
+because there is not enough information in ordinal or binary data to fit
+these models. As a consequence, you cannot include individual row or
+column effects if you are doing biclustering, e.g.
+
+`Y ~ ROWCLUST + COLCLUST + ROW` or `Y ~ ROwCLUST + COLCLUST + COL`
+
+are not permitted.
+
+From version 1 of the package, you can now also include **covariates**
+alongside the clustering patterns. The basic way to do this is include
+them as additions to the clustering model_structure. For example,
+including one row covariate `xr` to a row clustering model would have
+the formula
+
+`Y ~ ROWCLUST + xr`
+
+with Binary model Logit(P(Y = 1)) = mu + rowc_coef_r + row_coef_1\*xr_i
+
+where row_coef_1 is the coefficient of xr_i, just as in a typical
+regression model.
+
+Additional row covariates can also be included, and you can include
+interactions between them, and functions of them, as in regression
+models, e.g.
+
+`Y ~ ROWCLUST + xr1*log(xr2)`
+
+which would have the Binary model
+
+Logit(P(Y = 1)) = mu + rowc_coef_r + row_coef1\*xr1_i +
+row_coef2\*log(xr2_i) + row_coef3\*xr1_i\*log(xr2_i)
+
+If instead you want to add column covariates to the model, they work in
+the same way after they've been added to the `long.df` data frame using
+[`mat2df`](https://vuw-clustering.github.io/clustord/reference/mat2df.md),
+but they are indexed by j instead of i. Simplest model, with one single
+column covariate xc, would have formula
+
+`Y ~ ROWCLUST + xc`
+
+with Binary model Logit(P(Y = 1)) = mu + rowc_coef_r + col_coef1\*xc_j
+
+You can use any functions of or interactions between column covariates,
+just as with row covariates. You can similarly add row or column
+covariates to column clustering or biclustering models.
+
+You can include **interactions between covariates** and `ROWCLUST` or
+`COLCLUST` in the formula. But these are **not quite** the same as
+interactions between covariates. The formula
+
+`Y ~ ROWCLUST*xr`
+
+where `xr` is some row covariate, corresponds to the Binary model
+
+Logit(P(Y = 1)) = mu + rowc_coef_r + cov_coef\*xr_i +
+rowc_row_coef_r1\*xr_i
+
+What this means is that there is a term in the linear predictor that
+involves the row covariate xr (which has the index i because it is a row
+covariate), and each cluster (indexed by r) has a different coefficient
+for that covariate (as distinct from the non-interaction covariate
+models above, which have the same coefficients for the covariates
+regardless of which cluster the row is in).
+
+This is different from interaction terms involving only covariates,
+where two or more covariates appear multiplied together in the model and
+then have a shared coefficient term attached to them. In a
+clustering/covariate interaction, the row or column clustering pattern
+controls the coefficients rather than adding a different type of
+covariate.
+
+Note that the pure cluster effect rowc_coef_r is also included in the
+model automatically, in the same way that a regression formula
+`Y ~ x1*x2` would include the individual x1 and x2 effects as well as
+the interaction between x1 and x2.
+
+The coefficients for row clusters interacting with row coefficients are
+named `row_cluster_row_coef` in the output of `clustord` because you can
+also have coefficients for interactions between row clustering and
+column covariates, or column clustering and row covariates, or column
+clustering and column covariates. Row clustering interacting with column
+covariates would look something like
+
+`Y ~ ROWCLUST*xc`
+
+with Binary model Logit(P(Y = 1)) = mu + rowc_coef_r +
+rowc_col_coef_r1\*xc_j
+
+The other combinations of clustering and covariates work similarly.
+`rowc_col_coef_rl` and the other similar coefficients have two indices.
+Their first index is the index of the cluster, and their second index is
+the index of the covariate among the list of covariates interacting with
+that direction of clustering. So if there are two row covariates `xr1`
+and `xr2` interacting with three row clusters, that gives you 6
+coefficients:
+
+`rowc_col_coef_11, rowc_col_coef_12, rowc_col_coef_21, rowc_col_coef_22, rowc_col_coef_31, rowc_col_coef_32`.
+
+and you can also have a three-way interaction between row cluster and
+those two covariates, which would add the coefficients
+`rowc_col_coef_r3` for the `xr1:xr2` term.
+
+You can instead add covariates that interact with column clusters, which
+will have parameters `colc_row_coef_cm`, where `m` here indexes just the
+covariates interacting with column cluster.
+
+If you have covariates interacting with row clusters and other
+covariates interacting with column clusters, then you will have
+parameters `rowc_cov_coef_rl` **and** `colc_cov_coef_cm`.
+
+An example of this is the model
+
+`Y ~ ROWCLUST + xr1 + ROWCLUST:xr1 + xc1 + COLCLUST + COLCLUST:log(xc1)`
+
+This has main effects for row clusters and column clusters, i.e.
+`ROWCLUST` and `COLCLUST`. It also has two covariate terms not
+interacting with clusters, `xr1` and `xc1`. It also has 1 covariate term
+interacting with row clusters, `xr1`, with coefficients
+`rowc_cov_coef_r1`, and 1 covariate term interacting with column
+clusters, `log(xc1)`, with coefficients `colc_cov_coef_c1`.
+
+**Restrictions on `formula`**
+
+The primary restriction on the `formula` argument is that that you
+**cannot** use functions of `ROW`, `COL`, `ROWCLUST` or `COLCLUST`, such
+as `log(ROW)` or I(COLCLUST^2). That is because they are not covariates,
+and cannot be manipulated like that; instead, they are indicators for
+particular elements of the clustering model_structure.
+
+If performing biclustering, i.e. if `ROWCLUST` and `COLCLUST` are both
+in the model, and you want to include the interaction between them, then
+you can use the interaction between them on its own, or you can include
+both main effects, but you are not allowed to use just one main effect
+alongside the interaction. That is, you can use
+
+`Y ~ ROWCLUST + COLCLUST + ROWCLUST:COLCLUST` or
+`Y ~ ROWCLUST*COLCLUST`,
+
+or you can use `Y ~ ROWCLUST:COLCLUST`, and these two types of
+biclustering model will have different parameter constraints (see below
+under `initvect` details), but you **cannot** use
+
+`Y ~ ROWCLUST + ROWCLUST:COLCLUST` or `Y ~ COLCLUST + ROWCLUST:COLCLUST`
+
+As stated above, you also cannot include individual row effects
+alongside row clustering, and you cannot use individual column effects
+alongside column clustering, i.e. if `ROWCLUST` is in the formula, then
+`ROW` **cannnot** be in the formula, and if `COLCLUST` is in the formula
+then `COL` **cannot** be in the formula.
+
+If you are including `COL` with `ROWCLUST`, then you can include the
+interaction between them but that is the **only** permitted interaction
+term that involves `COL`, and similarly the interaction between `ROW`
+and `COLCLUST` is the **only** permitted interaction term that involves
+`ROW`. But you can include those interactions in the form
+
+`Y ~ ROWCLUST + COL + ROWCLUST:COL` or as `Y ~ ROWCLUST*COL`, or as
+`Y ~ ROWCLUST:COL`.
+
+These are the only permitted uses of the `COL` term, and there are
+equivalent constraints on the inclusion of `ROW`.
+
+As stated above, you can include interactions between `ROWCLUST` or
+`COLCLUST` and covariates, but you **cannot** include three-way
+interactions between `ROWCLUST`, `COLCLUST` and one or more covariates
+are **not permitted** in `clustord`, mostly because of the prohibitive
+number of parameter values that would need to be fitted, and the
+difficulty of interpreting such a model. That is, you cannot use
+formulae such as `Y ~ ROWCLUST*COLCLUST*xr`, which would have Binary
+model Logit(P(Y = 1)) = mu + bi_cluster_row_coef_rc1\*xr_i.
+
+`model` **argument details**
+
+The three models available in `clustord` are the Binary model, which is
+a Bernoulli model equivalent to the binary model in the package
+`clustglm`, the Proportional Odds Model (POM) and the Ordered Stereotype
+Model (OSM).
+
+Many Binary model examples have been given above, which have the general
+form
+
+logit(P(Y = 1)) = mu + \<\<linear terms\>\>
+
+where the linear terms can include row or column clustering effects,
+individual row or column effects, and row or column covariates, with or
+without interactions with row or column clustering.
+
+The Proportional Odds Model and the Ordered Stereotype Model have the
+same model_structure for the linear terms, but the overall model
+equation is different.
+
+The Proportional Odds Model (`model = "POM"`) has the form
+
+logit(P(Y \<= k)) = log(P(Y \<= k)/P(Y \> k)) = mu_k - \<\<linear
+terms\>\>
+
+So the simplest POM for row clustering would be
+
+logit(P(Y \<= k)) = mu_k - rowc_coef_r
+
+and the model including individual column effects and no interactions
+would be
+
+logit(P(Y \<= k)) = mu_k - rowc_coef_r - col_coef_j
+
+Note that the linear-term coefficients have negative signs for the
+Proportional Odds Models. This is so that as the row cluster index
+increases, or as the column index increases, Y is more likely to fall at
+higher values (see Ch4 of Agresti, 2010).
+
+The Ordered Stereotype model (`model = "OSM"`) has the form
+
+log(P(Y = k)/P(Y = 1)) = mu_k + phi_k(\<\<linear terms\>\>)
+
+So the simplest OSM for row clustering would be
+
+log(P(Y = k)/P(Y = 1)) = mu_k + phi_k\*rowc_coef_r
+
+and the model including individual column effects and no interactions
+would be
+
+log(P(Y = k)/P(Y = 1)) = mu_k + phi_k(rowc_coef_r + col_coef_j)
+
+Note that the OSM is **not** a cumulative logit model, unlike the POM.
+The model describes the log of the kth level relative to the first
+level, which is the baseline category, but the patterns for k = 2 may be
+different than the patterns for k = 3. They are linked, because the
+linear terms will be the same, but they may not have the same shape. In
+this sense, the OSM is more flexible/less restrictive than the POM.
+
+See Anderson (1984) for the original definition of the ordered
+stereotype model, and see Fernández et al. (2016) for the application to
+clustering.
+
+The phi_k parameters may be treated as "score" parameters. After fitting
+the OSM, the fitted phi_k values can give some indication of what the
+true separation is between the categories. Even if the default labelling
+of the categories is from 1 to n, that doesn't mean that the categories
+are actually equally spaced in reality. But the fitted phi_k values from
+the OSM can be treated as data-derived numerical labels for the
+categories. Moreover, if two categories have very similar fitted phi_k
+values, e.g. if phi_2 = 0.11 and phi_3 = 0.13, that suggests that there
+is not enough information in the data to distinguish between categories
+2 and 3, and so you might as well merge them into a single category to
+simplify the model-fitting process and the interpretation of the
+results.
+
+`initvect` **argument details**
+
+Initvect is the vector of starting values for the parameters, made up of
+sections for each different type of parameter in the model. Note that
+the length of each section of initvect is the number of **independent**
+parameter values, not the overall number of parameter values of that
+type.
+
+If you want to supply a vector of starting values for the EM algorithm,
+you need to be careful how many values you supply, and the order in
+which you include them in `initvect`, and you should **CHECK** the
+output list of parameters (which is the full set of parameter values,
+including dependent ones, broken up into each type of parameter) to
+check that your initvect model_structure is correct for the formula you
+have specified.
+
+For example, the number of `mu` values will always be 1 fewer than the
+number of categories in the data, and the remaining value of mu is
+dependent on those q-1 values. In the OSM for data with 3 categories,
+the first value of mu for category 1 will be 0, and then the other 2
+values of mu for categories 2 and 3 will be the independent values of
+mu. For the POM for data with 5 categories, the first 4 values of mu
+will be the independent values and then the last value of mu is
+infinity, because the probability of Y being in category 5 is defined as
+1 minus the sum of the probabilities for the other 4 levels.
+
+`q` is the number of levels in the values of y, `n` is the number of
+rows in the original data matrix, and `p` is the number of columns in
+the original data matrix.
+
+For Binary, There is one independent value for `mu`, i.e. q = 2.
+
+Ignore `phi`, which is not used in the Binary model.
+
+For OSM, The starting values for `mu_k` are length `q-1`, and the model
+has `mu_1` = 0 always, so the initvect values for `mu` will become
+`mu_2`, `mu_3`, etc. up to `mu_q`.
+
+The starting values for `phi_k` are length `q-2`.
+
+Note that the starting values for `phi` do not correspond directly to
+`phi`, because `phi` is restricted to being increasing and between 0 and
+1, so instead the starting values are treated as elements `u[2:q-1]` of
+a vector `u` which can be between `-Inf` and `+Inf`, and then
+
+`phi[2] <- expit(u[2])` and
+
+`phi[k] <- expit(u[2] + sum(exp(u[3:k])))` for k between 3 and q-1
+
+`(phi[1] = 0 and phi[q] = 1)`.
+
+For POM, The starting values for `mu_k` are length `q-1`, but the
+starting values do not correspond directly to `mu_k`, because `mu_k` is
+restricted to being increasing, i.e. the model has to have `mu_1` \<=
+`mu_2` \<= ... `mu_q` = `+Inf`
+
+So instead of using the initvect values directly for `mu_k`, the 2nd to
+(q-1)th elements of initvect are used to construct `mu_k` as follows:
+
+`mu_1 <- initvect[1]`
+
+`mu_2 <- initvect[1] + exp(initvect[2])`
+
+`mu_3 <- initvect[1] + exp(initvect[2]) + exp(initvect[3])`
+
+... and so on up to `mu_{k-1}`, and `mu_k` is infinity, because it is
+not used directly to construct the probability of Y = q.
+
+Thus the values that are used to construct `mu_k` can be unconstrained,
+which makes it easier to specify initvect and easier to optimize the
+parameter values.
+
+Ignore `phi`, which is not used in POM.
+
+For **all three models**,
+
+The starting values for `rowc_coef_r` are length `nclus.row-1`, where
+`nclus.row` is the number of row clusters. The final row cluster
+parameter is dependent on the others (see the input parameter info for
+constraint_sum_zero), whereas if it were independent it would be
+colinear with the `mu_k` parameters and thus not identifiable.
+
+Similarly the starting values for `colc_coef_c` are length
+`nclus.column-1`, where `nclus.column` is the number of column clusters,
+to avoid problems of colinearity and nonidentifiability.
+
+If you have biclustering with an interaction term between row clusters
+and column clusters, then the number of independent values in the matrix
+of interaction terms depends on whether you include the main effects of
+row and column clusters separately. That is, if you use the biclustering
+model
+
+`Y ~ ROWCLUST + COLCLUST + ROWCLUST:COLCLUST`, or equivalently
+
+`Y ~ ROWCLUST*COLCLUST`,
+
+then the main effect term `ROWCLUST` has `nclus.row-1` independent
+parameters in `initvect`, and `COLCLUST` has `nclus.column-1`
+independent parameters in `initvect`, and `ROWCLUST:COLCLUST` will have
+`(nclus.row - 1)*(nclus.column - 1)` independent parameter values. The
+final matrix of interaction terms will be constrained to have its last
+row equal to the negative sum of the other rows, and the last column
+equal to the negative sum of the other columns.
+
+On the other hand, if you want to use only the interaction term and not
+the main effects (which for the clustering model is mathematically
+equivalent), i.e.
+
+`Y ~ ROWCLUST:COLCLUST`,
+
+then that matrix of interaction terms will have
+`nclus.row*nclus.column - 1` independent parameters, i.e. more
+independent parameters than if you included the main effects.
+
+If you have column effects alongside row clusters (they are not
+permitted alongside column clusters), without interactions, i.e. the
+formula `Y ~ ROWCLUST + COL` with Binary model Logit(P(Y = 1)) = mu +
+rowc_coef_r + col_coef_j then the row cluster coefficients have
+`nclus.row - 1` independent parameters, and the column effect
+coefficients have `p - 1` independent parameters, where p is the number
+of columns in the original data matrix, i.e. the maximum value of
+`long.df$COL`.
+
+If you include the interaction term, then the number of independent
+parameters again depends on whether you just use the interaction term,
+or include the main effects.
+
+In the formula `Y ~ ROWCLUST + COL + ROWCLUST:COL` or its equivalent
+with "\*", the interaction term will have `(nclus.row - 1)*(p-1)`
+independent parameters.
+
+If you instead use the formula `Y ~ ROWCLUST:COL`, then the interaction
+term will have `nclus.row*p - 1` independent parameters. Either way, the
+total number of independent parameters in the model will be
+`nclus.row*p`.
+
+Similarly, if you have row effects alongside column clusters, without
+interactions, i.e. the formula
+
+`Y ~ COLCLUST + ROW`,
+
+with Binary model Logit(P(Y = 1)) = mu + colc_coef_c + row_coef_i
+
+then the column cluster coefficients will have `nclus.column - 1`
+independent parameters, and the row coefficients will have `n-1`
+independent parameters, where n is the number of rows in the original
+data matrix, i.e. the maximum value of `long.df$ROW`.
+
+If you include the interaction term alongside the main effects, i.e.
+
+`Y ~ COLCLUST + ROW + COLCLUST:ROW`, or its equivalent with "\*", the
+interaction term will have `(nclus.column - 1)*(n-1)` independent
+parameters.
+
+If you instead use the formula `Y ~ COLCLUST:ROW`, that interaction
+coefficient matrix will have `nclus.column*n - 1` independent
+parameters.
+
+Any covariate terms included in the formula will be split up by
+`clustord` into the covariates that interact with row clusters, the
+covariates that interact with column clusters, and the covariates that
+do not interact with row or column clusters.
+
+The number of independent parameters for row-cluster-interacting
+covariates will be `nclus.row*L`, where `L` is the number of terms
+involving row clusters and covariates after any "\*" terms have been
+expanded.
+
+So in this formula, for example,
+
+`Y ~ ROWCLUST*xr1 + xr2 + ROWCLUST:log(xc1)`
+
+where xr1 and xr2 are row covariates, and xc1 is a column covariate, the
+fully expanded formula would be
+
+`Y ~ ROWCLUST + xr1 + xr2 + ROWCLUST:xr1 + ROWCLUST:log(xc1)`
+
+and the terms interacting with `ROWCLUST` would be `ROWCLUST:xr1` and
+`ROWCLUST:log(xc1)`, so there would be `nclus.row*2` independent
+coefficients for those covariates.
+
+The number of independent parameters for column-cluster-interacting
+covariates will be `nclus.column*M`, where `M` is the number of terms
+involving column clusters and covariates after any "\*" terms have been
+expanded.
+
+So this formula, for example,
+
+`Y ~ I(xr1^2) + COLCLUST*xc1 + COLCLUST:xc2:xc3 + COLCLUST*xr1`
+
+would be expanded as
+
+`Y ~ COLCLUST + xr1 + I(xr1^2) + xc1 + COLCLUST:xc1 + COLCLUST:xc2:xc3 + COLCLUST:xr1`
+
+and the terms interacting with `COLCLUST` would be `COLCLUST:xc1`,
+`COLCLUST:xc2:xc3` and `COLCLUST:xr1`, so there would be
+`nclus.column*3` independent coefficients for those covariates.
+
+The number of independent parameters for covariates that do not interact
+with row or column clusters will be the same as the number of those
+covariate terms, after any "\*" terms have been expanded.
+
+So this formula, for example,
+
+`Y ~ ROWCLUST*xr1 + xr2 + ROWCLUST:log(xc1) + COLCLUST*xc1`
+
+would be expanded as
+
+`Y ~ ROWCLUST +COLCLUST + xr1 + xr2 + xc1 + ROWCLUST:xr1 + ROWCLUST:log(xc1) + COLCLUST:xc1`,
+
+so there would be 3 independent coefficients for the terms
+`xr1, xr2, xc1`.
+
+Note that there are **no intercept** terms for the coefficients, because
+those are incorporated into the parameters `mu_k`.
+
+The **order of the** `initvect` **entries** is as follows, and any
+entries that are not included in the formula will be ignored and not
+included in `initvect`. That is, you should NOT provide values in
+`initvect` for components that are not included in the formula.
+
+1\) mu (or values used to construct mu, POM only) 2) values used to
+construct phi (OSM only) 3) row cluster coefficients 4) column cluster
+coefficients 5) \[matrix\] bicluster coefficients (i.e. interaction
+between row and column clusters) 6) individual row coefficients 7)
+individual column coefficients 8) \[matrix\] interactions between row
+clusters and individual column coefficients 9) \[matrix\] interactions
+between column clusters and individual row coefficients 10) \[matrix\]
+row-cluster-specific coefficients for covariates interacting with row
+clusters 11) \[matrix\] column-cluster-specific coefficients for
+covariates interacting with column clusters 12) coefficients for
+covariates that do not interact with row or column clusters
+
+Any entries marked as \[matrix\] will be constructed into matrices by
+filling those matrices row-wise, e.g. if you want starting values 1:6
+for a matrix of 2 row clusters and 3 covariates interacting with those
+row clusters, the matrix of coefficients will become
+
+`1 2 3 4 5 6`
+
+For the formula `Y ~ ROWCLUST*COLCLUST`, where the matrix of
+interactions between row and column clusters has
+`(nclus.row - 1)*(nclus.column - 1)` independent parameters, the last
+row and column of the matrix will be the negative sums of the rest, so
+e.g. if you have 2 row clusters and 3 column clusters, there will only
+be 2 independent values, so if you provide the starting values -0.5 and
+1.2, the final matrix of parameters will be:
+
+` column cluster 1 column cluster 2 column cluster 3 row cluster 1 -0.5 1.2 -0.7 row cluster 2 0.5 -1.2 0.7`
+
+If the matrix is a matrix relating to row clusters, then the row
+clusters are in the rows, and if it's a matrix relating to column
+clusters but not row clusters, then the column clusters are in the rows,
+i.e. the matrix of coefficients for column clusters interacting with
+individual row effects will have the rows of the matrix corresponding to
+the clusters, i.e. the matrix would be indexed colc_row_coef_ci, c being
+the column cluster index and i being the row index.
+
+Similarly, if the matrix is a matrix relating to column clusters and
+covariates, then the rows of the matrix will correspond to the column
+clusters, i.e. the matrix would be indexed colc_cov_coef_cl, c being the
+column cluster index and l being the covariate index.
+
+If using biclustering with interaction between row and column clusters,
+then the row clusters will be the rows and the column clusters will be
+the columns, i.e. the matrix would be indexed rowc_colc_coef_rc, r being
+the row cluster index and c being the column cluster index.
+
+## References
+
+Fernandez, D., Arnold, R., & Pledger, S. (2016). Mixture-based
+clustering for the ordered stereotype model. *Computational Statistics &
+Data Analysis*, 93, 46-75.
+
+Anderson, J. A. (1984). Regression and ordered categorical variables.
+*Journal of the Royal Statistical Society: Series B (Methodological)*,
+46(1), 1-22.
+
+Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656).
+John Wiley & Sons.
+
+## Examples
+
+``` r
+set.seed(1)
+long.df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),
+               ROW=factor(rep(1:20,times=5)),COL=rep(1:5,each=20))
+
+# Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*rowc_coef_r with 3 row clustering groups:
+clustord(Y~ROWCLUST,model="OSM",3,long.df=long.df,
+             EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
+#> Converting factor ROW to numeric.
+#> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.
+#> 
+#> Call:
+#> clustord(formula = Y ~ ROWCLUST, model = "OSM", nclus.row = 3, 
+#>     long.df = long.df, EM.control = list(EMcycles = 2, startEMcycles = 2), 
+#>     nstarts = 2)
+#> 
+#> Clustering mode:
+#>  row clustering
+#> 
+#> Converged:
+#>  FALSE
+#> 
+#> Cluster sizes:
+#> Row clusters:  2 18 0 
+
+# Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + col_coef_j) with 3 row clustering groups:
+clustord(Y~ROWCLUST+COL,model="OSM",3,long.df=long.df,
+             EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
+#> Converting factor ROW to numeric.
+#> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.
+#> 
+#> Call:
+#> clustord(formula = Y ~ ROWCLUST + COL, model = "OSM", nclus.row = 3, 
+#>     long.df = long.df, EM.control = list(EMcycles = 2, startEMcycles = 2), 
+#>     nstarts = 2)
+#> 
+#> Clustering mode:
+#>  row clustering
+#> 
+#> Converged:
+#>  FALSE
+#> 
+#> Cluster sizes:
+#> Row clusters:  0 3 17 
+
+# Model Logit(P(Y <= k))=mu_k-rowc_coef_r-col_coef_j-rowc_col_coef_rj with 2 row clustering groups:
+clustord(Y~ROWCLUST*COL,model="POM",nclus.row=2,long.df=long.df,
+             EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
+#> Converting factor ROW to numeric.
+#> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.
+#> 
+#> Call:
+#> clustord(formula = Y ~ ROWCLUST * COL, model = "POM", nclus.row = 2, 
+#>     long.df = long.df, EM.control = list(EMcycles = 2, startEMcycles = 2), 
+#>     nstarts = 2)
+#> 
+#> Clustering mode:
+#>  row clustering
+#> 
+#> Converged:
+#>  FALSE
+#> 
+#> Cluster sizes:
+#> Row clusters:  20 0 
+
+# Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c) with 3 column clustering groups:
+clustord(Y~COLCLUST,model="OSM",nclus.column=3,long.df=long.df,
+             EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
+#> Converting factor ROW to numeric.
+#> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.
+#> 
+#> Call:
+#> clustord(formula = Y ~ COLCLUST, model = "OSM", nclus.column = 3, 
+#>     long.df = long.df, EM.control = list(EMcycles = 2, startEMcycles = 2), 
+#>     nstarts = 2)
+#> 
+#> Clustering mode:
+#>  column clustering
+#> 
+#> Converged:
+#>  FALSE
+#> 
+#> Cluster sizes:
+#> Column clusters:  5 0 0 
+
+# Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c + row_coef_i) with 3 column clustering groups:
+clustord(Y~COLCLUST+ROW,model="OSM",nclus.column=3,long.df=long.df,
+             EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
+#> Converting factor ROW to numeric.
+#> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.
+#> 
+#> Call:
+#> clustord(formula = Y ~ COLCLUST + ROW, model = "OSM", nclus.column = 3, 
+#>     long.df = long.df, EM.control = list(EMcycles = 2, startEMcycles = 2), 
+#>     nstarts = 2)
+#> 
+#> Clustering mode:
+#>  column clustering
+#> 
+#> Converged:
+#>  FALSE
+#> 
+#> Cluster sizes:
+#> Column clusters:  5 0 0 
+
+# Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + colc_coef_c)
+#    with 3 row clustering groups and 2 column clustering groups:
+clustord(Y~ROWCLUST+COLCLUST,model="OSM",nclus.row=3,nclus.column=2,long.df=long.df,
+             EM.control=list(EMcycles=2), nstarts=1)
+#> Converting factor ROW to numeric.
+#> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.
+#> 
+#> Call:
+#> clustord(formula = Y ~ ROWCLUST + COLCLUST, model = "OSM", nclus.row = 3, 
+#>     nclus.column = 2, long.df = long.df, EM.control = list(EMcycles = 2), 
+#>     nstarts = 1)
+#> 
+#> Clustering mode:
+#>  biclustering
+#> 
+#> Converged:
+#>  FALSE
+#> 
+#> Cluster sizes:
+#> Row clusters:  0 20 0 
+#> Column clusters:  5 0 
+
+# Model Logit(P(Y<=k))=mu_k-rowc_coef_r-colc_coef_c-rowc_colc_coef_rc
+#    with 2 row clustering groups and 4 column clustering groups, and
+#    interactions between them:
+clustord(Y~ROWCLUST*COLCLUST, model="POM", nclus.row=2, nclus.column=4,
+             long.df=long.df,EM.control=list(EMcycles=2), nstarts=1,
+             start_from_simple_model=FALSE)
+#> Converting factor ROW to numeric.
+#> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.
+#> 
+#> Call:
+#> clustord(formula = Y ~ ROWCLUST * COLCLUST, model = "POM", nclus.row = 2, 
+#>     nclus.column = 4, long.df = long.df, EM.control = list(EMcycles = 2), 
+#>     start_from_simple_model = FALSE, nstarts = 1)
+#> 
+#> Clustering mode:
+#>  biclustering
+#> 
+#> Converged:
+#>  FALSE
+#> 
+#> Cluster sizes:
+#> Row clusters:  0 20 
+#> Column clusters:  0 0 5 0 
+```

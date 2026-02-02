@@ -1,0 +1,243 @@
+# Ordinal data regression using the Ordered Stereotype Model (OSM).
+
+Fit a regression model to an ordered factor response. The model is NOT a
+logistic or probit model because the link function is not the logit, but
+the link function is log-based.
+
+## Usage
+
+``` r
+osm(
+  formula,
+  data,
+  weights,
+  start,
+  ...,
+  subset,
+  na.action,
+  Hess = FALSE,
+  model = TRUE
+)
+```
+
+## Arguments
+
+- formula:
+
+  a formula expression as for regression models, of the form response ~
+  predictors. The response should be a factor (preferably an ordered
+  factor), which will be interpreted as an ordinal response, with levels
+  ordered as in the factor. The model must have an intercept: attempts
+  to remove one will lead to a warning and be ignored. An offset may be
+  used. See the documentation of formula for other details.
+
+- data:
+
+  a data frame, list or environment in which to interpret the variables
+  occurring in `formula`.
+
+- weights:
+
+  optional case weights in fitting. Default to 1.
+
+- start:
+
+  initial values for the parameters. See the Details section for
+  information about this argument.
+
+- ...:
+
+  additional arguments to be passed to optim, most often a control
+  argument.
+
+- subset:
+
+  expression saying which subset of the rows of the data should be used
+  in the fit. All observations are included by default.
+
+- na.action:
+
+  a function to filter missing data.
+
+- Hess:
+
+  logical for whether the Hessian (the observed information matrix)
+  should be returned.
+
+- model:
+
+  logical for whether the model matrix should be returned.
+
+## Value
+
+An object of class `"osm"`. This has components
+
+`beta` the coefficients of the covariates, with NO intercept.
+
+`mu` the intercepts for the categories.
+
+`phi` the score parameters for the categories (restricted to be
+ordered).
+
+`deviance` the residual deviance.
+
+`fitted.values` a matrix of fitted values, with a column for each level
+of the response.
+
+`lev` the names of the response levels.
+
+`terms` the `terms` structure describing the model.
+
+`df.residual` the number of residual degrees of freedom, calculated
+using the weights.
+
+`edf` the (effective) number of degrees of freedom used by the model
+
+`n, nobs` the (effective) number of observations, calculated using the
+weights.
+
+`call` the matched call.
+
+`convergence` the convergence code returned by `optim`.
+
+`niter` the number of function and gradient evaluations used by `optim`.
+
+`eta`
+
+`Hessian` (if `Hess` is true). Note that this is a numerical
+approximation derived from the optimization proces.
+
+`model` (if `model` is true), the model used in the fitting.
+
+`na.action` the NA function used
+
+`xlevels` factor levels from any categorical predictors
+
+## Details
+
+This function should be used in a very similar way to
+[`MASS::polr`](https://rdrr.io/pkg/MASS/man/polr.html), and some of the
+arguments are the same as `polr`, but the ordinal model used here is
+less restrictive in its assumptions than the proportional odds model.
+However, it is still parsimonious i.e. it uses only a small number of
+additional parameters compared with the proportional odds model.
+
+This model is the *ordered stereotype* model (Anderson 1984, Agresti
+2010)
+
+It is more flexible than the proportional odds model but only adds a
+handful of additional parameters. It is not a cumulative model, being
+instead defined in terms of the relationships between each of the higher
+categories and the lowest category that is treated as the reference
+category.
+
+Each of the higher categories has its own intercept term, mu_k, which is
+similar to the zeta parameters in `polr`, but in the OSM each higher
+category also has its own scaling parameter, phi_k, which adjusts the
+effect of the covariates on the response. This allows the effect of the
+covariates on the response to be slightly different for each category of
+the response, thus making the model more flexible than the proportional
+odds model.
+
+The final set of parameters are coefficients for each of the covariates,
+and these are equivalent to the coefs in `polr`. Higher or more positive
+values of the coefficients increases the probability of the response
+being in the higher categories, and lower or more negative values of the
+coefficients increase the probability of the response being in the lower
+categories.
+
+The overall model takes the following form:
+
+log(P(Y = k \| X)/P(Y = 1 \| X)) = mu_k + phi_k\*beta_vec^T x_vec
+
+for k = 2, ..., q, where x_vec is the vector of covariates for the
+observation Y.
+
+mu_1 is fixed at 0 for identifiability of the model, and the phi_k
+parameters are constrained to be ordered (giving the model its name) in
+the following way:
+
+0 = phi_1 \<= phi_2 \<= ... \<= phi_k \<= ... \<= phi_q = 1.
+
+(The unordered stereotype model restricts phi_1 and phi_q but allows the
+remaining phi_k to be in any order, and this is suitable for fitting the
+model for nominal data. However, this package does not provide that
+option, as it is already available in other packages which can fit the
+stereotype model.)
+
+After fitting the model, the estimated values of the intermediate phi_k
+values indicate a suitable numerical spacing of the ordinal response
+categories that is based on the data. The spacings indicate how much
+distinct information each of the corresponding levels provide. For
+example, if you have five response categories and the fitted phi values
+are `(0, 0.04, 0.6, 0.62, 1)` then this indicates that levels 1 and 2
+provide very similar information about the effect of the covariates on
+the response, and levels 3 and 4 provide very similar information as
+each other. The meaning of this is that you could simplify the response
+by combining levels 1 and 2 and combining levels 3 and 4 (i.e. reduce
+the levels to 1, 3 and 5) and you would still be able to estimate the
+beta coefficients with similar accuracy.
+
+Another use for the phi_k values is that if you want to carry out
+further analysis of the response, treating it as a numerical variable,
+then the phi values are a better choice of numerical values for the
+response categories than the default values 1 to q.
+
+**`start`** argument values: `start` is a vector of start values for
+estimating the model parameters.
+
+The first part of the `start` vector is starting values for the
+coefficients of the covariates, the second part is starting values for
+the mu values (per-category intercepts), and the third part is starting
+values for the raw parameters used to construct the phi values.
+
+The length of the vector is \[number of covariate terms\] + \[number of
+categories in response variable - 1\] + \[number of categories in
+response variable - 2\]. Every one of the values can take any real
+value.
+
+The second part is the starting values for the mu_k per-category
+intercept parameters, and since mu_1 is fixed at 0 for identifiability,
+the number of non-fixed mu_k parameters is one fewer than the number of
+categories.
+
+The third part of the starting vector is a re-parametrization used to
+construct starting values for the estimated phi parameters such that the
+phi parameters observe the ordering restriction of the ordered
+stereotype model, but the raw parameters are not restricted which makes
+it easier to optimise over them. phi_1 is always 0 and phi_q is always 1
+(where q is the number of response categories). If the raw parameters
+are u_2 up to u\_(q-1), then phi_2 is constructed as expit(u_2), phi_3
+is expit(u_2 + exp(u_3)), phi_4 is expit(exp(u_3) + exp(u_4)) etc. which
+ensures that the phi_k values are non-decreasing.
+
+This code was adapted from file MASS/R/polr.R copyright (C) 1994-2013 W.
+N. Venables and B. D. Ripley Use of transformed intercepts contributed
+by David Firth The osm and osm.fit functions were written by Louise
+McMillan, 2020.
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2 or 3 of the License (at your
+option).
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+Public License for more details.
+
+A copy of the GNU General Public License is available at
+http://www.r-project.org/Licenses/
+
+## References
+
+Agresti, A. (2010). *Analysis of ordinal categorical data* (Vol. 656).
+John Wiley & Sons.
+
+Anderson, J. A. (1984). Regression and ordered categorical variables.
+*Journal of the Royal Statistical Society: Series B (Methodological)*,
+46(1), 1-22.
+
+## See also
+
+\[MASS::polr()\]

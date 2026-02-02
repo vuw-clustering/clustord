@@ -17,7 +17,7 @@ Proportional Odds Model (POM) and a dedicated Binary Model for binary data."></h
 
     <a class="navbar-brand me-2" href="../index.html">clustord</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -329,6 +329,18 @@ highest level of verbosity for the L-BFGS-B algorithm.</p></dd>
     may be <strong>inaccurate</strong> unless the algorithm has converged or is close
     to converging. So beware of using the incomplete log-likelihood and the
     corresponding AIC value <strong>unless the EM algorithm has converged</strong>.</p>
+<p>Also note that <code>outvect</code> unpacks the dependent elements of matrices
+    of effects, such as the row cluster and column cluster interaction
+    effects <code>rowc_colc</code> and other interaction effects, by row: the first
+    elements of the matrix in <code>outvect</code> would be the first <em>row</em> of
+    the matrix, etc. By contrast, <code>EM.status$params.every.iteration</code>
+    simply unlists <code>parlist.out</code>, which happens automatically by column,
+    so the first column of each matrix before the second column, etc. so if
+    it contains columns <code>rowc_colc1, rowc_colc2, rowc_colc3</code> etc. they
+    are the first <em>column</em> of the <code>rowc_colc</code> matrix of parameters.
+    So if using <code>EM.status$params.every.iteration</code> to check specific
+    parameter values during each iteration of the algorithm, be careful which
+    ones you're looking at.</p>
 <p><code>criteria</code>: the calculated values of AIC, BIC,
     etc. from the best incomplete-data log-likelihood.</p>
 <p><code>epsilon</code>: the very small value (default 1e-6) used to adjust values
@@ -371,6 +383,10 @@ highest level of verbosity for the L-BFGS-B algorithm.</p></dd>
     assigned members of each row or column cluster, where each row/column is
     assigned to a cluster based on maximum posterior probability of cluster
     membership (<code>ppr</code> and <code>ppc</code>)</p>
+<p><code>reordered</code>: Boolean indicating whether or not the outputs have been
+    reordered in order of row cluster and/or column cluster effects. FALSE
+    for direct outputs of <code>clustord()</code>, will be changed to TRUE after
+    running <code><a href="https://rdrr.io/r/stats/reorder.factor.html" class="external-link">reorder()</a></code> on <code>clustord</code> output objects.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -1052,7 +1068,7 @@ index and c being the column cluster index.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>
