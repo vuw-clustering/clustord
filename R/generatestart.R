@@ -92,11 +92,11 @@ generate.mu.col_coef.init <- function(long.df, model,
                            ## the first element as the sum of the rest and then
                            ## drop the last one
                            if (constraint_sum_zero) {
-                               raw_coef <- colMeans(BL.coef)[2:p]
+                               raw_coef <- colMeans(BL.coef, na.rm=TRUE)[2:p]
                                full_coef <- c(-sum(raw_coef), raw_coef)
                                col_coef.init <- full_coef[1:(p-1)]
                            }
-                           else col_coef.init <- colMeans(BL.coef)[2:p]
+                           else col_coef.init <- colMeans(BL.coef, na.rm=TRUE)[2:p]
 
                            done.generating <- TRUE
 
