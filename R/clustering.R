@@ -989,6 +989,11 @@
 #'     assigned to a cluster based on maximum posterior probability of cluster
 #'     membership (\code{ppr} and \code{ppc})
 #'
+#'     \code{reordered}: Boolean indicating whether or not the outputs have been
+#'     reordered in order of row cluster and/or column cluster effects. FALSE
+#'     for direct outputs of \code{clustord()}, will be changed to TRUE after
+#'     running \code{reorder()} on \code{clustord} output objects.
+#'
 #' @references Fernandez, D., Arnold, R., & Pledger, S. (2016). Mixture-based clustering for the ordered stereotype model. \emph{Computational Statistics & Data Analysis}, 93, 46-75.
 #'
 #' @references Anderson, J. A. (1984). Regression and ordered categorical variables. \emph{Journal of the Royal Statistical Society: Series B (Methodological)}, 46(1), 1-22.
@@ -1225,6 +1230,8 @@ clustord <- function(formula,
     results$call <- match.call()
     results$formula <- formula
     results$terms <- terms(formula)
+
+    results$reordered <- FALSE
 
     class(results) <- "clustord"
 

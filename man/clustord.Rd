@@ -326,6 +326,11 @@ A \code{clustord} object, i.e. a list with components:
     assigned members of each row or column cluster, where each row/column is
     assigned to a cluster based on maximum posterior probability of cluster
     membership (\code{ppr} and \code{ppc})
+
+    \code{reordered}: Boolean indicating whether or not the outputs have been
+    reordered in order of row cluster and/or column cluster effects. FALSE
+    for direct outputs of \code{clustord()}, will be changed to TRUE after
+    running \code{reorder()} on \code{clustord} output objects.
 }
 \description{
 Likelihood-based clustering with parameters fitted using the EM algorithm.
