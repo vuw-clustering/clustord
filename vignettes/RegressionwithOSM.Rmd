@@ -16,8 +16,8 @@ header-includes:
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+    collapse = TRUE,
+    comment = "#>"
 )
 ```
 
@@ -219,7 +219,7 @@ and you still get the following error message, or something similar:
 
 ```
 Error in glm.fit(x = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  : 
-  NA/NaN/Inf in 'y'
+NA/NaN/Inf in 'y'
 In addition: Warning messages:
 1: In Ops.ordered(y, mu) : '-' is not meaningful for ordered factors
 2: In Ops.ordered(eta, offset) : '-' is not meaningful for ordered factors

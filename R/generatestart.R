@@ -1,12 +1,12 @@
-startEM.control <- function(EM.control) {
-    startEM <- EM.control
-    startEM$EMcycles <- EM.control$startEMcycles
+control_EM_start <- function(control_EM) {
+    startEM <- control_EM
+    startEM$maxiter <- control_EM$maxiter_start
 
     startEM
 }
 
 #' @importFrom stats runif
-generate.mixing.proportions <- function(nclus) {
+generate_init_pi <- function(nclus) {
     ## Note that simply generating the first nclus-1 values from Unif(0,1/nclus)
     ## then means that only one of the nclus proportions can ever be bigger than
     ## 1/nclus, which would prevent the generation of proportions like
@@ -17,67 +17,67 @@ generate.mixing.proportions <- function(nclus) {
     prop[1] <- runif(1,0,1/nclus)
     if (nclus > 2) {
         for (g in 2:(nclus-1)) {
-            nclus.remaining <- (nclus-g+1)
-            prop.cum <- sum(prop[1:(g-1)])
-            prop[g] <- runif(1,0,(1-prop.cum)/nclus.remaining)
+            nclus_remaining <- (nclus-g+1)
+            prop_cum <- sum(prop[1:(g-1)])
+            prop[g] <- runif(1,0,(1-prop_cum)/nclus_remaining)
         }
     }
     prop[nclus] <- 1-sum(prop[1:(nclus-1)])
     prop <- prop/sum(prop)
 }
 
-generate.u.init <- function(q) {
-    u.init <- runif(q-2,min=-1,max=1)
-    u.init
+generate_init_u <- function(q) {
+    init_u <- runif(q-2,min=-1,max=1)
+    init_u
 }
 
 #' @importFrom stats coef runif
-generate.mu.init <- function(long.df, model, use_random=FALSE,
+generate_init_mu <- function(long_df, model, use_random=FALSE,
                              verbose=TRUE) {
     if (!use_random) {
         switch(model,
                "OSM"={
-                   BL.ss.out <- nnet::multinom(Y~1, data=long.df, trace=verbose)
-                   BL.coef <- coef(BL.ss.out)
-                   mu.init <- BL.coef
+                   BL_ss_out <- nnet::multinom(Y~1, data=long_df, trace=verbose)
+                   BL_coef <- coef(BL_ss_out)
+                   init_mu <- BL_coef
                },
                "POM"={
-                   POM.sp.out <- MASS::polr(Y~1,data=long.df)
-                   mu.init <- POM.sp.out$zeta
+                   POM_sp_out <- MASS::polr(Y~1,data=long_df)
+                   init_mu <- POM_sp_out$zeta
                },
                "Binary"={
-                   num_Y <- as.numeric(long.df$Y)
-                   if (!is.numeric(num_Y)) num_Y <- as.numeric(as.character(long.df$Y))
-                   mu.init <- mean(num_Y)
+                   num_Y <- as.numeric(long_df$Y)
+                   if (!is.numeric(num_Y)) num_Y <- as.numeric(as.character(long_df$Y))
+                   init_mu <- mean(num_Y)
                })
 
     } else {
-        q <- length(levels(long.df$Y))
-        mu.init <- runif(q-1, min=-5, max=5)
+        q <- length(levels(long_df$Y))
+        init_mu <- runif(q-1, min=-5, max=5)
     }
-    mu.init
+    init_mu
 }
 
 #' @importFrom stats coef runif
-generate.mu.col_coef.init <- function(long.df, model,
+generate_init_mu_col_coef <- function(long_df, model,
                                       constraint_sum_zero=TRUE,
                                       use_random=FALSE,
                                       verbose=TRUE) {
 
-    p <- max(long.df$COL)
+    p <- max(long_df$COL)
     if (!use_random) {
         switch(model,
                "OSM"={
-                   done.generating <- FALSE
+                   done_generating <- FALSE
 
-                   nwts <- length(levels(long.df$Y))*(p+1)
+                   nwts <- length(levels(long_df$Y))*(p+1)
                    if (nwts <= 50000) {
                        MaxNWts <- nwts
 
                        tryCatch({
-                           BL.sp.out <- nnet::multinom(Y~as.factor(COL), data=long.df, MaxNWts=MaxNWts, trace=verbose)
-                           BL.coef <- coef(BL.sp.out)
-                           mu.init <- BL.coef[,1]
+                           BL_sp_out <- nnet::multinom(Y~as.factor(COL), data=long_df, MaxNWts=MaxNWts, trace=verbose)
+                           BL_coef <- coef(BL_sp_out)
+                           init_mu <- BL_coef[,1]
 
                            ## If not using constraint that col_coef sum to zero,
                            ## col_coef1 will be 0 but that's already been dropped
@@ -92,13 +92,13 @@ generate.mu.col_coef.init <- function(long.df, model,
                            ## the first element as the sum of the rest and then
                            ## drop the last one
                            if (constraint_sum_zero) {
-                               raw_coef <- colMeans(BL.coef, na.rm=TRUE)[2:p]
+                               raw_coef <- colMeans(BL_coef, na.rm=TRUE)[2:p]
                                full_coef <- c(-sum(raw_coef), raw_coef)
-                               col_coef.init <- full_coef[1:(p-1)]
+                               init_col_coef <- full_coef[1:(p-1)]
                            }
-                           else col_coef.init <- colMeans(BL.coef, na.rm=TRUE)[2:p]
+                           else init_col_coef <- colMeans(BL_coef, na.rm=TRUE)[2:p]
 
-                           done.generating <- TRUE
+                           done_generating <- TRUE
 
                        }, error = function(err) {
 
@@ -110,17 +110,17 @@ generate.mu.col_coef.init <- function(long.df, model,
                        warning("Data too large to run nnet::multinom. Generating initial col_coef parameters randomly.")
                    }
 
-                   if (!done.generating) {
-                       BL.ss.out <- nnet::multinom(Y~1, data=long.df)
-                       BL.coef <- coef(BL.ss.out)
-                       mu.init <- BL.coef
+                   if (!done_generating) {
+                       BL_ss_out <- nnet::multinom(Y~1, data=long_df)
+                       BL_coef <- coef(BL_ss_out)
+                       init_mu <- BL_coef
 
-                       col_coef.init <- runif(p-1,min=-2,max=2)
+                       init_col_coef <- runif(p-1,min=-2,max=2)
                    }
                },
                "POM"={
-                   POM.sp.out <- MASS::polr(Y~as.factor(COL),data=long.df)
-                   mu.init <- POM.sp.out$zeta
+                   POM_sp_out <- MASS::polr(Y~as.factor(COL),data=long_df)
+                   init_mu <- POM_sp_out$zeta
 
                    ## If not using constraint that col_coef sum to zero,
                    ## col_coef1 will be 0 but that's already been dropped by
@@ -132,18 +132,18 @@ generate.mu.col_coef.init <- function(long.df, model,
                    ## reverse, i.e. calculate the first element as the sum of
                    ## the rest and then drop the last one
                    if (constraint_sum_zero) {
-                       raw_coef <- POM.sp.out$coef ## This is already length p-1
+                       raw_coef <- POM_sp_out$coef ## This is already length p-1
                        full_coef <- c(-sum(raw_coef), raw_coef)
 
-                       col_coef.init <- full_coef[1:(p-1)]
+                       init_col_coef <- full_coef[1:(p-1)]
                    }
-                   else col_coef.init <- POM.sp.out$coef
+                   else init_col_coef <- POM_sp_out$coef
                },
                "Binary"={
-                   mu.init <- mean(as.numeric(as.character(long.df$Y)))
+                   init_mu <- mean(as.numeric(as.character(long_df$Y)))
 
-                   columnmeans <- sapply(1:p,function(col) {
-                       mean(as.numeric(as.character(long.df$Y[long.df$COL==col])))
+                   column_means <- sapply(1:p,function(col) {
+                       mean(as.numeric(as.character(long_df$Y[long_df$COL==col])))
                    })
                    ## If using constraint that col_coef sum to zero, need to
                    ## correct for the mean of the data
@@ -151,37 +151,37 @@ generate.mu.col_coef.init <- function(long.df, model,
                    ## col_coef1 will be 0 so need to correct other elements
                    ## of col_coef accordingly
                    if (constraint_sum_zero) {
-                       col_coef.init <- columnmeans[1:(p-1)] - mu.init
+                       init_col_coef <- column_means[1:(p-1)] - init_mu
                    }
-                   else col_coef.init <- columnmeans[2:p] - columnmeans[1]
+                   else init_col_coef <- column_means[2:p] - column_means[1]
                })
     } else {
-        q <- length(levels(long.df$Y))
-        mu.init <- runif(q-1, min=-5, max=5)
-        col_coef.init <- runif(p-1,min=-2,max=2)
+        q <- length(levels(long_df$Y))
+        init_mu <- runif(q-1, min=-5, max=5)
+        init_col_coef <- runif(p-1,min=-2,max=2)
     }
 
-    list(mu.init=mu.init, col_coef.init=col_coef.init)
+    list(init_mu=init_mu, init_col_coef=init_col_coef)
 }
 
 #' @importFrom stats kmeans runif
-generate.rowc_coef.pi.init <- function(long.df, RG, constraint_sum_zero=TRUE,
+generate_init_rowc_coef_pi <- function(long_df, RG, constraint_sum_zero=TRUE,
                                        use_random=FALSE) {
     found_init <- FALSE
-    if (!use_random & all(table(long.df[,c("ROW","COL")]) == 1)) {
+    if (!use_random & all(table(long_df[,c("ROW","COL")]) == 1)) {
         ## convert to data matrix
-        y.mat <- df2mat(long.df)
+        y_mat <- df_to_mat(long_df)
 
         tryCatch({
-            kmeans.data <- kmeans(y.mat,centers=RG,nstart=1000)
-            pi.init <- (kmeans.data$size)/sum(kmeans.data$size)
-            rowc_coef.kmeans <- rowMeans(kmeans.data$centers, na.rm=TRUE)
+            kmeans_data <- kmeans(y_mat,centers=RG,nstart=1000)
+            init_pi <- (kmeans_data$size)/sum(kmeans_data$size)
+            kmeans_row_coef <- rowMeans(kmeans_data$centers, na.rm=TRUE)
             ## By default, use rowc_coef sum to zero constraint, so DON'T set rowc_coef1 to zero here.
 
-            if (constraint_sum_zero) rowc_coef.init <- rowc_coef.kmeans[-RG]
+            if (constraint_sum_zero) init_rowc_coef <- kmeans_row_coef[-RG]
             else {
-                rowc_coef.kmeans <- rowc_coef.kmeans-rowc_coef.kmeans[1]
-                rowc_coef.init <- rowc_coef.kmeans[-1]
+                kmeans_row_coef <- kmeans_row_coef-kmeans_row_coef[1]
+                init_rowc_coef <- kmeans_row_coef[-1]
             }
             found_init <- TRUE
         }, warning = function(err) {
@@ -191,23 +191,23 @@ generate.rowc_coef.pi.init <- function(long.df, RG, constraint_sum_zero=TRUE,
         })
     }
     if (!found_init) {
-        if (all(table(long.df[,c("ROW","COL")]) != 1)) message("Some data is missing, so generating random start instead of using kmeans.")
+        if (all(table(long_df[,c("ROW","COL")]) != 1)) message("Some data is missing, so generating random start instead of using kmeans.")
 
-        rowc_coef.init <- runif(RG-1, min=-5, max=5)
-        pi.init <- generate.mixing.proportions(RG)
+        init_rowc_coef <- runif(RG-1, min=-5, max=5)
+        init_pi <- generate_init_pi(RG)
     }
 
-    list(rowc_coef.init=rowc_coef.init, pi.init=pi.init)
+    list(init_rowc_coef=init_rowc_coef, init_pi=init_pi)
 }
 
 #' @importFrom stats binomial glm runif
-generate.cov_coef.init <- function(long.df, formula_part, mm_part, model, use_random) {
+generate_init_cov_coef <- function(long_df, formula_part, mm_part, model, use_random) {
     if (!use_random) {
         switch(model,
                "OSM"={
                    tryCatch({
-                       OSM.out <- osm(formula_part,data=long.df)
-                       cov_coef.init <- OSM.out$beta
+                       OSM_out <- osm(formula_part,data=long_df)
+                       init_cov_coef <- OSM_out$beta
                    }, warning = function(warn) {
                        message("Problem using osm() to generate starting values for covariate parameters. Generating random starting values instead.")
                        message(paste("My warning:  ",warn))
@@ -215,8 +215,8 @@ generate.cov_coef.init <- function(long.df, formula_part, mm_part, model, use_ra
                },
                "POM"={
                    tryCatch({
-                       POM.out <- MASS::polr(formula_part,data=long.df)
-                       cov_coef.init <- POM.out$coef
+                       POM_out <- MASS::polr(formula_part,data=long_df)
+                       init_cov_coef <- POM_out$coef
                    }, warning = function(warn) {
                        message("Problem using MASS::polr() to generate starting values for covariate parameters. Generating random starting values instead.")
                        message(paste("My warning:  ",warn))
@@ -225,144 +225,144 @@ generate.cov_coef.init <- function(long.df, formula_part, mm_part, model, use_ra
                "Binary"={
                    # The binary model output includes an intercept term, which
                    # we want to remove
-                   Binary.out <- glm(formula_part, data=long.df, family=binomial(link='logit'))
-                   cov_coef.init <- Binary.out$coef[2:length(Binary.out$coef)]
+                   Binary_out <- glm(formula_part, data=long_df, family=binomial(link='logit'))
+                   init_cov_coef <- Binary_out$coef[2:length(Binary_out$coef)]
                })
     }
 
-    if (!exists("cov_coef.init")) {
+    if (!exists("init_cov_coef")) {
         num_coef <- ncol(mm_part)
-        cov_coef.init <- runif(num_coef,min=-2,max=2)
+        init_cov_coef <- runif(num_coef,min=-2,max=2)
     }
-    cov_coef.init
+    init_cov_coef
 }
 
-generate.matrix.init <- function(RG, p=NULL, CG=NULL) {
+generate_init_matrix <- function(RG, p=NULL, CG=NULL) {
     if (is.null(CG)) {
-        matrix.init <- rep(0.1,(RG-1)*(p-1))
+        init_matrix <- rep(0.1,(RG-1)*(p-1))
     } else {
-        matrix.init <- rep(0.1,(RG-1)*(CG-1))
+        init_matrix <- rep(0.1,(RG-1)*(CG-1))
     }
 
-    matrix.init
+    init_matrix
 }
 
-generate.initvect <- function(long.df, model, model_structure,
-                              RG, CG=NULL,
-                              constraint_sum_zero=TRUE,
-                              start_from_simple_model=TRUE,
-                              use_random=FALSE,
-                              EM.control=default.EM.control(),
-                              optim.method="L-BFGS-B",
-                              optim.control=default.optim.control(),
-                              verbose=TRUE) {
+generate_init_parvec <- function(long_df, model, model_structure,
+                                 RG, CG=NULL,
+                                 constraint_sum_zero=TRUE,
+                                 start_from_simple_model=TRUE,
+                                 use_random=FALSE,
+                                 control_EM=default_control_EM(),
+                                 optim_method="L-BFGS-B",
+                                 control_optim=default_control_optim(),
+                                 verbose=TRUE) {
 
-    pi.init <- NULL; kappa.init <- NULL
+    init_pi <- NULL; init_kappa <- NULL
 
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
-    q <- length(levels(long.df$Y))
+    n <- max(long_df$ROW)
+    p <- max(long_df$COL)
+    q <- length(levels(long_df$Y))
 
     param_lengths <- model_structure$param_lengths
 
     if (param_lengths['col'] == 0) {
-        mu.init <- generate.mu.init(long.df=long.df, model=model,
+        init_mu <- generate_init_mu(long_df=long_df, model=model,
                                     use_random=use_random,
                                     verbose=verbose)
     } else {
-        mu.col_coef.init <- generate.mu.col_coef.init(long.df=long.df, model=model,
+        init_mu_col_coef <- generate_init_mu_col_coef(long_df=long_df, model=model,
                                                       constraint_sum_zero = constraint_sum_zero,
                                                       use_random=use_random,
                                                       verbose=verbose)
-        mu.init <- mu.col_coef.init$mu.init
-        col_coef.init <- mu.col_coef.init$col_coef.init
+        init_mu <- init_mu_col_coef$init_mu
+        init_col_coef <- init_mu_col_coef$init_col_coef
     }
 
-    ## VERY IMPORTANT: do NOT change the order in which initvect is constructed
+    ## VERY IMPORTANT: do NOT change the order in which init_parvec is constructed
     ## from the different parts of the parameters. The Rcpp code relies on
-    ## having this order, because the elements of initvect are fetched by
+    ## having this order, because the elements of init_parvec are fetched by
     ## NUMERIC INDEX in the Rcpp because comparing strings is MUCH SLOWER in C++
-    ## So if you put initvect together in the wrong order, then elements of it
+    ## So if you put init_parvec together in the wrong order, then elements of it
     ## will be used as the wrong parameter values in the model-fitting steps
     ## The parameters MUST be in the following order, with some entries missing:
     ## 'mu','phi','rowc','colc','rowc_colc','row','col','rowc_col','colc_row',
     ## 'rowc_cov','colc_cov','cov'
-    initvect <- mu.init
+    init_parvec <- init_mu
 
     if (model == "OSM") {
-        u.init <- generate.u.init(q=q)
+        init_u <- generate_init_u(q=q)
 
-        initvect <- c(initvect, u.init)
+        init_parvec <- c(init_parvec, init_u)
     }
 
-    rowc_coef.pi.init <- generate.rowc_coef.pi.init(long.df=long.df, RG=RG,
+    init_rowc_coef_pi <- generate_init_rowc_coef_pi(long_df=long_df, RG=RG,
                                                     constraint_sum_zero=constraint_sum_zero,
                                                     use_random=use_random)
-    rowc_coef.init <- rowc_coef.pi.init$rowc_coef.init
-    pi.init <- rowc_coef.pi.init$pi.init
+    init_rowc_coef <- init_rowc_coef_pi$init_rowc_coef
+    init_pi <- init_rowc_coef_pi$init_pi
 
     if (param_lengths['rowc'] > 0) {
-        initvect <- c(initvect,rowc_coef.init)
+        init_parvec <- c(init_parvec,init_rowc_coef)
     }
 
     if (param_lengths['colc'] > 0) {
-        long.df.transp <- long.df
-        long.df.transp$ROW <- long.df$COL
-        long.df.transp$COL <- long.df$ROW
-        colc_coef.kappa.init <- generate.rowc_coef.pi.init(long.df=long.df.transp, RG=CG,
+        long_df_transp <- long_df
+        long_df_transp$ROW <- long_df$COL
+        long_df_transp$COL <- long_df$ROW
+        init_colc_coef_kappa <- generate_init_rowc_coef_pi(long_df=long_df_transp, RG=CG,
                                                            constraint_sum_zero=constraint_sum_zero,
                                                            use_random=use_random)
 
-        colc_coef.init <- colc_coef.kappa.init$rowc_coef.init
-        kappa.init <- colc_coef.kappa.init$pi.init
-        initvect <- c(initvect, colc_coef.init)
+        init_colc_coef <- init_colc_coef_kappa$init_rowc_coef
+        init_kappa <- init_colc_coef_kappa$init_pi
+        init_parvec <- c(init_parvec, init_colc_coef)
     }
     if (param_lengths['rowc_colc'] > 0) {
-        rowc_colc_coef.init <- generate.matrix.init(RG=RG, CG=CG)
-        initvect <- c(initvect, rowc_colc_coef.init)
+        init_rowc_colc_coef <- generate_init_matrix(RG=RG, CG=CG)
+        init_parvec <- c(init_parvec, init_rowc_colc_coef)
     }
     if (param_lengths['row'] > 0) {
-        mu.row_coef.init <- generate.mu.col_coef.init(long.df=long.df.transp, model=model,
+        init_mu_row_coef <- generate_init_mu_col_coef(long_df=long_df_transp, model=model,
                                                       constraint_sum_zero = constraint_sum_zero,
                                                       use_random=use_random,
                                                       verbose=verbose)
-        row_coef.init <- mu.row_coef.init$col_coef.init
-        initvect <- c(initvect,row_coef.init)
+        init_row_coef <- init_mu_row_coef$init_col_coef
+        init_parvec <- c(init_parvec,init_row_coef)
     }
     if (param_lengths['col'] > 0) {
-        initvect <- c(initvect,col_coef.init)
+        init_parvec <- c(init_parvec,init_col_coef)
     }
     if (param_lengths['rowc_col'] > 0) {
-        rowc_col_coef.init <- generate.matrix.init(RG=RG,p=p)
-        initvect <- c(initvect,rowc_col_coef.init)
+        init_rowc_col_coef <- generate_init_matrix(RG=RG,p=p)
+        init_parvec <- c(init_parvec,init_rowc_col_coef)
     }
     if (param_lengths['colc_row'] > 0) {
-        colc_row_coef.init <- generate.matrix.init(RG=CG,p=n)
-        initvect <- c(initvect,colc_row_coef.init)
+        init_colc_row_coef <- generate_init_matrix(RG=CG,p=n)
+        init_parvec <- c(init_parvec,init_colc_row_coef)
     }
 
     if (param_lengths['rowc_cov'] > 0) {
-        raw_coef.init <- generate.cov_coef.init(long.df=long.df,
+        init_raw_coef <- generate_init_cov_coef(long_df=long_df,
                                                 formula_part = model_structure$rowc_fo,
                                                 mm_part = model_structure$rowc_mm,
                                                 model=model, use_random=use_random)
-        rowc_cov_coef.init <- rep(raw_coef.init, times=RG)
-        initvect <- c(initvect, rowc_cov_coef.init)
+        init_rowc_cov_coef <- rep(init_raw_coef, times=RG)
+        init_parvec <- c(init_parvec, init_rowc_cov_coef)
     }
     if (param_lengths['colc_cov'] > 0) {
-        raw_coef.init <- generate.cov_coef.init(long.df=long.df,
+        init_raw_coef <- generate_init_cov_coef(long_df=long_df,
                                                 formula_part = model_structure$colc_fo,
                                                 mm_part = model_structure$colc_mm,
                                                 model=model, use_random=use_random)
-        colc_cov_coef.init <- rep(raw_coef.init, times=CG)
-        initvect <- c(initvect, colc_cov_coef.init)
+        init_colc_cov_coef <- rep(init_raw_coef, times=CG)
+        init_parvec <- c(init_parvec, init_colc_cov_coef)
     }
     if (param_lengths['cov'] > 0) {
-        cov_coef.init <- generate.cov_coef.init(long.df=long.df,
+        init_cov_coef <- generate_init_cov_coef(long_df=long_df,
                                                 formula_part = model_structure$cov_fo,
                                                 mm_part = model_structure$cov_mm,
                                                 model=model, use_random=use_random)
-        initvect <- c(initvect, cov_coef.init)
+        init_parvec <- c(init_parvec, init_cov_coef)
     }
 
     if (param_lengths['rowc'] > 0 &&
@@ -370,35 +370,35 @@ generate.initvect <- function(long.df, model, model_structure,
         start_from_simple_model) {
         if(verbose) cat("Using the output of simpler model as initial values for full model\n")
 
-        model_specific.init <- switch(model,
-                                      "OSM"=c(mu.init,u.init),
-                                      "POM"=c(mu.init),
-                                      "Binary"=c(mu.init))
+        init_model_specific <- switch(model,
+                                      "OSM"=c(init_mu,init_u),
+                                      "POM"=c(init_mu),
+                                      "Binary"=c(init_mu))
 
-        invect <- c(model_specific.init, rowc_coef.init)
+        invect <- c(init_model_specific, init_rowc_coef)
         temp_param_lengths <- param_lengths
         temp_param_lengths[!(names(temp_param_lengths) %in% c("mu","phi","rowc"))] <- 0
 
-        rs.out <- run.EM.rowcluster(invect=invect,model=model, long.df=long.df,
-                                    rowc_mm=model_structure$rowc_mm,
-                                    colc_mm=model_structure$colc_mm,
-                                    cov_mm=model_structure$cov_mm,
-                                    pi_v=pi.init,
-                                    param_lengths=temp_param_lengths,
-                                    constraint_sum_zero=constraint_sum_zero,
-                                    model_label="Row-cluster-only",
-                                    EM.control=startEM.control(EM.control),
-                                    optim.method=optim.method,
-                                    optim.control=optim.control,
-                                    verbose=verbose)
+        simple_row_cluster_out <- run_EM_rowcluster(init_parvec=invect,model=model, long_df=long_df,
+                                                    rowc_mm=model_structure$rowc_mm,
+                                                    colc_mm=model_structure$colc_mm,
+                                                    cov_mm=model_structure$cov_mm,
+                                                    pi_v=init_pi,
+                                                    param_lengths=temp_param_lengths,
+                                                    constraint_sum_zero=constraint_sum_zero,
+                                                    model_label="Row-cluster-only",
+                                                    control_EM=control_EM_start(control_EM),
+                                                    optim_method=optim_method,
+                                                    control_optim=control_optim,
+                                                    verbose=verbose)
         if (verbose) cat("=== End of initial row-cluster-only model fitting ===\n")
-        if (all(rs.out$pi.out > 1E-20)) pi.init <- rs.out$pi.out
+        if (all(simple_row_cluster_out$row_cluster_proportions > 1E-20)) init_pi <- simple_row_cluster_out$row_cluster_proportions
 
         ## If fitting a row clustering model with column effects, extract mu and
-        ## row cluster coefs from simple model invect, whereas if fitting
-        ## biclustering, just extract row cluster coefs from simple model invect
+        ## row cluster coefs from simple model out_parvec, whereas if fitting
+        ## biclustering, just extract row cluster coefs from simple model out_parvec
         if (param_lengths['col'] > 0 || param_lengths['rowc_col'] > 0) {
-            initvect[seq_along(rs.out$outvect)] <- rs.out$outvect
+            init_parvec[seq_along(simple_row_cluster_out$out_parvec)] <- simple_row_cluster_out$out_parvec
 
             if (param_lengths['col'] > 0 &&
                 (param_lengths['rowc_col'] || param_lengths['rowc_cov'] > 0) &&
@@ -406,363 +406,363 @@ generate.initvect <- function(long.df, model, model_structure,
                 if (verbose) cat("Using the output of intermediate model as initial values for full model\n")
 
                 # Need to extract latest param values from the previous simpler model
-                mu.init <- rs.out$outvect[1:(q-1)]
+                init_mu <- simple_row_cluster_out$out_parvec[1:(q-1)]
                 if (model == "OSM") {
-                    u.init <- rs.out$outvect[q:(q-1+q-2)]
-                    rowc_coef.init <- rs.out$outvect[(q-1+q-2+1):(q-1+q-2+RG-1)]
+                    init_u <- simple_row_cluster_out$out_parvec[q:(q-1+q-2)]
+                    init_rowc_coef <- simple_row_cluster_out$out_parvec[(q-1+q-2+1):(q-1+q-2+RG-1)]
                 } else {
-                    rowc_coef.init <- rs.out$outvect[q:(q-1+RG-1)]
+                    init_rowc_coef <- simple_row_cluster_out$out_parvec[q:(q-1+RG-1)]
                 }
 
-                invect <- c(model_specific.init, rowc_coef.init, col_coef.init)
+                invect <- c(init_model_specific, init_rowc_coef, init_col_coef)
 
                 temp_param_lengths <- param_lengths
                 temp_param_lengths[!(names(temp_param_lengths) %in% c("mu","phi","rowc","col"))] <- 0
 
-                rp.out <- run.EM.rowcluster(invect=invect,model=model, long.df=long.df,
-                                            rowc_mm=model_structure$rowc_mm,
-                                            colc_mm=model_structure$colc_mm,
-                                            cov_mm=model_structure$cov_mm,
-                                            pi_v=pi.init,
-                                            param_lengths=temp_param_lengths,
-                                            constraint_sum_zero=constraint_sum_zero,
-                                            model_label="Rowcluster-column",
-                                            EM.control=startEM.control(EM.control),
-                                            optim.method=optim.method,
-                                            optim.control=optim.control,
-                                            verbose=verbose)
+                rowc_col_effect_out <- run_EM_rowcluster(init_parvec=invect,model=model, long_df=long_df,
+                                                         rowc_mm=model_structure$rowc_mm,
+                                                         colc_mm=model_structure$colc_mm,
+                                                         cov_mm=model_structure$cov_mm,
+                                                         pi_v=init_pi,
+                                                         param_lengths=temp_param_lengths,
+                                                         constraint_sum_zero=constraint_sum_zero,
+                                                         model_label="Rowcluster-column",
+                                                         control_EM=control_EM_start(control_EM),
+                                                         optim_method=optim_method,
+                                                         control_optim=control_optim,
+                                                         verbose=verbose)
                 if (verbose) cat("=== End of intermediate rowcluster-column model fitting ===\n")
-                if (all(rp.out$pi.out > 1E-20))
-                    pi.init <- rp.out$pi.out
-                initvect[seq_along(rp.out$outvect)] <- rp.out$outvect
+                if (all(rowc_col_effect_out$row_cluster_proportions > 1E-20))
+                    init_pi <- rowc_col_effect_out$row_cluster_proportions
+                init_parvec[seq_along(rowc_col_effect_out$out_parvec)] <- rowc_col_effect_out$out_parvec
             }
         } else if (param_lengths['colc'] > 0) {
-            if (constraint_sum_zero) rowc_coef.init <- rs.out$parlist.out[['rowc']][1:RG-1]
-            else rowc_coef.init <- rs.out$parlist.out[['rowc']][2:RG]
+            if (constraint_sum_zero) init_rowc_coef <- simple_row_cluster_out$out_parlist[['rowc']][1:RG-1]
+            else init_rowc_coef <- simple_row_cluster_out$out_parlist[['rowc']][2:RG]
 
             ## Now fit simpler column clustering model to find starting values
             ## for column clustering
             if (verbose) cat("Fitting column-cluster-only model (as row-cluster-only model applied to y with ROW and COL switched), to find starting values for colc_coef and kappa_v\n")
-            sc.invect <- c(model_specific.init, colc_coef.init)
+            invect_col_cluster <- c(init_model_specific, init_colc_coef)
 
             temp_param_lengths <- param_lengths
             temp_param_lengths[!(names(temp_param_lengths) %in% c("mu","phi","colc"))] <- 0
             temp_param_lengths['rowc'] <- temp_param_lengths['colc']
             temp_param_lengths['colc'] <- 0
 
-            sc.out <- run.EM.rowcluster(invect=sc.invect,
-                                        long.df=long.df.transp, model=model,
-                                        rowc_mm=model_structure$rowc_mm,
-                                        colc_mm=model_structure$colc_mm,
-                                        cov_mm=model_structure$cov_mm,
-                                        pi_v=kappa.init,
-                                        param_lengths=temp_param_lengths,
-                                        constraint_sum_zero=constraint_sum_zero,
-                                        model_label="Column-cluster-only",
-                                        EM.control=startEM.control(EM.control),
-                                        optim.method=optim.method,
-                                        optim.control=optim.control,
-                                        verbose=verbose)
+            simple_col_cluster_out <- run_EM_rowcluster(init_parvec=invect_col_cluster,
+                                                        long_df=long_df_transp, model=model,
+                                                        rowc_mm=model_structure$rowc_mm,
+                                                        colc_mm=model_structure$colc_mm,
+                                                        cov_mm=model_structure$cov_mm,
+                                                        pi_v=init_kappa,
+                                                        param_lengths=temp_param_lengths,
+                                                        constraint_sum_zero=constraint_sum_zero,
+                                                        model_label="Column-cluster-only",
+                                                        control_EM=control_EM_start(control_EM),
+                                                        optim_method=optim_method,
+                                                        control_optim=control_optim,
+                                                        verbose=verbose)
 
             if (verbose) cat("=== End of initial column-cluster-only model fitting ===\n")
-            if (all(sc.out$pi.out > 1E-20)) {
-                kappa.init <- sc.out$pi.out
+            if (all(simple_col_cluster_out$row_cluster_proportions > 1E-20)) {
+                init_kappa <- simple_col_cluster_out$row_cluster_proportions
             }
 
-            if (constraint_sum_zero) colc_coef.init <- sc.out$parlist.out[['rowc']][1:CG-1]
-            else colc_coef.init <- sc.out$parlist.out[['rowc']][2:CG]
+            if (constraint_sum_zero) init_colc_coef <- simple_col_cluster_out$out_parlist[['rowc']][1:CG-1]
+            else init_colc_coef <- simple_col_cluster_out$out_parlist[['rowc']][2:CG]
 
-            ## Note that when you're constructing initvect from the outputs of
+            ## Note that when you're constructing init_parvec from the outputs of
             ## simpler models and it will contain rowc and colc elements, you
-            ## MUST reconstruct initvect to contain the rowc elements then the
+            ## MUST reconstruct init_parvec to contain the rowc elements then the
             ## colc elements, as the Rcpp code expects
-            simple_model_initvect <- c(model_specific.init, rowc_coef.init, colc_coef.init)
-            initvect[seq_along(simple_model_initvect)] <- simple_model_initvect
+            simple_model_init_parvec <- c(init_model_specific, init_rowc_coef, init_colc_coef)
+            init_parvec[seq_along(simple_model_init_parvec)] <- simple_model_init_parvec
 
             if (param_lengths['rowc_colc'] > 0) {
                 if (verbose) cat("Using the output of biclustering model without interaction as initial values for biclustering model with interaction\n")
 
-                rc.invect <- c(model_specific.init, rowc_coef.init, colc_coef.init)
+                invect_bicluster <- c(init_model_specific, init_rowc_coef, init_colc_coef)
                 temp_param_lengths <- param_lengths
                 temp_param_lengths[!(names(temp_param_lengths) %in% c("mu","phi","rowc","colc"))] <- 0
 
-                rc.out <- run.EM.bicluster(invect=rc.invect,
-                                           long.df=long.df.transp, model=model,
-                                           rowc_mm=model_structure$rowc_mm,
-                                           colc_mm=model_structure$colc_mm,
-                                           cov_mm=model_structure$cov_mm,
-                                           pi_v=pi.init, kappa_v=kappa.init,
-                                           param_lengths=temp_param_lengths,
-                                           model_label="Biclustering without interaction",
-                                           constraint_sum_zero=constraint_sum_zero,
-                                           EM.control=startEM.control(EM.control),
-                                           optim.method=optim.method,
-                                           optim.control=optim.control,
-                                           verbose=verbose)
+                simple_bi_cluster_out <- run_EM_bicluster(init_parvec=invect_bicluster,
+                                                          long_df=long_df_transp, model=model,
+                                                          rowc_mm=model_structure$rowc_mm,
+                                                          colc_mm=model_structure$colc_mm,
+                                                          cov_mm=model_structure$cov_mm,
+                                                          pi_v=init_pi, kappa_v=init_kappa,
+                                                          param_lengths=temp_param_lengths,
+                                                          model_label="Biclustering without interaction",
+                                                          constraint_sum_zero=constraint_sum_zero,
+                                                          control_EM=control_EM_start(control_EM),
+                                                          optim_method=optim_method,
+                                                          control_optim=control_optim,
+                                                          verbose=verbose)
                 if (verbose) cat("=== End of column-cluster-only model fitting ===\n")
 
-                pi.init <- rc.out$pi.out
-                kappa.init <- rc.out$kappa.out
-                initvect[seq_along(rc.out$outvect)] <- rc.out$outvect
+                init_pi <- simple_bi_cluster_out$row_cluster_proportions
+                init_kappa <- simple_bi_cluster_out$column_cluster_proportions
+                init_parvec[seq_along(simple_bi_cluster_out$out_parvec)] <- simple_bi_cluster_out$out_parvec
             }
         }
     }
 
-    list(initvect=initvect, pi.init=pi.init, kappa.init=kappa.init)
+    list(init_parvec=init_parvec, init_pi=init_pi, init_kappa=init_kappa)
 }
 
-generate.start.rowcluster <- function(long.df, model, model_structure, RG,
-                                      initvect=NULL, pi.init=NULL,
-                                      EM.control=default.EM.control(),
-                                      optim.method="L-BFGS-B",
-                                      optim.control=default.optim.control(),
+generate_start_rowcluster <- function(long_df, model, model_structure, RG,
+                                      init_parvec=NULL, init_pi=NULL,
+                                      control_EM=default_control_EM(),
+                                      optim_method="L-BFGS-B",
+                                      control_optim=default_control_optim(),
                                       constraint_sum_zero=TRUE,
                                       start_from_simple_model=TRUE,
                                       parallel_starts=FALSE,
                                       nstarts=5, verbose=TRUE) {
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
+    n <- max(long_df$ROW)
+    p <- max(long_df$COL)
 
-    q <- length(levels(long.df$Y))
+    q <- length(levels(long_df$Y))
 
-    start.params.every.iteration=list()
+    start_params=list()
 
-    ## Generate initvect -------------------------------------------------------
-    if (is.null(initvect)) {
+    ## Generate init_parvec -------------------------------------------------------
+    if (is.null(init_parvec)) {
 
         if (!parallel_starts) {
 
-            best.lli <- -Inf
+            best_lli <- -Inf
             for (s in 1:nstarts) {
                 if (verbose) cat(paste0("Randomly generated start #",s,"\n"))
-                initvect.pi.init <- generate.initvect(long.df, model=model,
-                                                      model_structure=model_structure,
-                                                      RG=RG, constraint_sum_zero=constraint_sum_zero,
-                                                      start_from_simple_model=start_from_simple_model,
-                                                      use_random=(s>1),
-                                                      EM.control=startEM.control(EM.control),
-                                                      verbose=verbose)
+                init_parvec_pi <- generate_init_parvec(long_df, model=model,
+                                                       model_structure=model_structure,
+                                                       RG=RG, constraint_sum_zero=constraint_sum_zero,
+                                                       start_from_simple_model=start_from_simple_model,
+                                                       use_random=(s>1),
+                                                       control_EM=control_EM_start(control_EM),
+                                                       verbose=verbose)
 
-                init.out <- run.EM.rowcluster(invect=initvect.pi.init$initvect,
-                                              model=model, long.df=long.df,
+                init_out <- run_EM_rowcluster(init_parvec=init_parvec_pi$init_parvec,
+                                              model=model, long_df=long_df,
                                               rowc_mm=model_structure$rowc_mm,
                                               colc_mm=model_structure$colc_mm,
                                               cov_mm=model_structure$cov_mm,
-                                              pi_v=initvect.pi.init$pi.init,
+                                              pi_v=init_parvec_pi$init_pi,
                                               param_lengths=model_structure$param_lengths,
                                               constraint_sum_zero=constraint_sum_zero,
                                               model_label="Random starts",
-                                              EM.control=startEM.control(EM.control),
-                                              optim.method=optim.method,
-                                              optim.control=optim.control,
+                                              control_EM=control_EM_start(control_EM),
+                                              optim_method=optim_method,
+                                              control_optim=control_optim,
                                               verbose=verbose)
 
-                new.lli <- init.out$EM.status$best.lli
-                if (new.lli > best.lli) {
-                    if (verbose) cat(paste("Found better incomplete log-like:",new.lli,"\n"))
-                    best.lli <- new.lli
-                    best.initvect.pi.init <- list(initvect=init.out$outvect,pi.init=init.out$pi.out)
-                    initvect <- init.out$outvect
+                new_lli <- init_out$EMstatus$best_lli
+                if (new_lli > best_lli) {
+                    if (verbose) cat(paste("Found better incomplete log-like:",new_lli,"\n"))
+                    best_lli <- new_lli
+                    best_init_parvec_pi <- list(init_parvec=init_out$out_parvec,init_pi=init_out$row_cluster_proportions)
+                    init_parvec <- init_out$out_parvec
                 }
 
-                if (EM.control$keepallparams) start.params.every.iteration[[s]] <- init.out$EM.status$params.every.iteration
+                if (control_EM$keep_all_params) start_params[[s]] <- init_out$EMstatus$params_every_iteration
             }
         } else {
 
-            start_control <- startEM.control(EM.control)
+            start_control <- control_EM_start(control_EM)
 
             ncores <- parallel::detectCores()
             message(paste("Using parallel starts on",ncores,"nodes."))
             cl <- parallel::makeCluster(ncores)
-            parallel::clusterExport(cl, c("long.df","model","model_structure","RG",
+            parallel::clusterExport(cl, c("long_df","model","model_structure","RG",
                                           "constraint_sum_zero","start_from_simple_model",
-                                          "start_control","optim.method","optim.control"),
+                                          "start_control","optim_method","control_optim"),
                                     envir=environment())
 
             start_results <- parallel::parLapply(cl, 1:nstarts, function(s) {
 
-                initvect.pi.init <- generate.initvect(long.df, model=model,
-                                                      model_structure=model_structure,
-                                                      RG=RG, constraint_sum_zero=constraint_sum_zero,
-                                                      start_from_simple_model=start_from_simple_model,
-                                                      use_random=(s>1),
-                                                      EM.control=start_control,
-                                                      verbose=FALSE)
+                init_parvec_pi <- generate_init_parvec(long_df, model=model,
+                                                       model_structure=model_structure,
+                                                       RG=RG, constraint_sum_zero=constraint_sum_zero,
+                                                       start_from_simple_model=start_from_simple_model,
+                                                       use_random=(s>1),
+                                                       control_EM=start_control,
+                                                       verbose=FALSE)
 
-                init.out <- run.EM.rowcluster(invect=initvect.pi.init$initvect,
-                                              model=model, long.df=long.df,
+                init_out <- run_EM_rowcluster(init_parvec=init_parvec_pi$init_parvec,
+                                              model=model, long_df=long_df,
                                               rowc_mm=model_structure$rowc_mm,
                                               colc_mm=model_structure$colc_mm,
                                               cov_mm=model_structure$cov_mm,
-                                              pi_v=initvect.pi.init$pi.init,
+                                              pi_v=init_parvec_pi$init_pi,
                                               param_lengths=model_structure$param_lengths,
                                               constraint_sum_zero=constraint_sum_zero,
                                               model_label="Random starts",
-                                              EM.control=start_control,
-                                              optim.method=optim.method,
-                                              optim.control=optim.control,
+                                              control_EM=start_control,
+                                              optim_method=optim_method,
+                                              control_optim=control_optim,
                                               verbose=FALSE)
 
             })
 
-            best_lli_vec <- sapply(start_results, function(res) res$EM.status$best.lli)
+            best_lli_vec <- sapply(start_results, function(res) res$EMstatus$best_lli)
             best_lli <- max(best_lli_vec)
             best_start_idx <- which.max(best_lli_vec)
             if (verbose) cat(paste("Best incomplete log-like:",best_lli," from start ",best_start_idx,"\n"))
 
-            best.initvect.pi.init <- list(initvect=start_results[[best_start_idx]]$outvect,
-                                          pi.init=start_results[[best_start_idx]]$pi.out)
-            initvect <- start_results[[best_start_idx]]$outvect
+            best_init_parvec_pi <- list(init_parvec=start_results[[best_start_idx]]$out_parvec,
+                                        init_pi=start_results[[best_start_idx]]$row_cluster_proportions)
+            init_parvec <- start_results[[best_start_idx]]$out_parvec
 
-            start.params.every.iteration <- lapply(start_results, function(res) res$EM.status$params.every.iteration)
+            start_params <- lapply(start_results, function(res) res$EMstatus$params_every_iteration)
 
             parallel::stopCluster(cl)
         }
     }
-    ## Generate pi.init --------------------------------------------------------
-    if (is.null(pi.init)) {
-        if (exists("initvect.pi.init") && !is.null(best.initvect.pi.init)) {
-            pi.init <- best.initvect.pi.init$pi.init
+    ## Generate init_pi --------------------------------------------------------
+    if (is.null(init_pi)) {
+        if (exists("init_parvec_pi") && !is.null(best_init_parvec_pi)) {
+            init_pi <- best_init_parvec_pi$init_pi
         } else {
-            pi.init <- generate.mixing.proportions(RG)
+            init_pi <- generate_init_pi(RG)
         }
     }
 
-    list(initvect=initvect, pi.init=pi.init,
-         start.params.every.iteration=start.params.every.iteration)
+    list(init_parvec=init_parvec, init_pi=init_pi,
+         start_params=start_params)
 }
 
-generate.start.bicluster <- function(long.df, model, model_structure, RG, CG,
-                                     initvect=NULL, pi.init=NULL, kappa.init=NULL,
-                                     EM.control=default.EM.control(),
-                                     optim.method="L-BFGS-B", optim.control=default.optim.control(),
+generate_start_bicluster <- function(long_df, model, model_structure, RG, CG,
+                                     init_parvec=NULL, init_pi=NULL, init_kappa=NULL,
+                                     control_EM=default_control_EM(),
+                                     optim_method="L-BFGS-B", control_optim=default_control_optim(),
                                      constraint_sum_zero=TRUE,
                                      start_from_simple_model=TRUE,
                                      parallel_starts=FALSE, nstarts=5,
                                      verbose=TRUE) {
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
+    n <- max(long_df$ROW)
+    p <- max(long_df$COL)
 
-    q <- length(levels(long.df$Y))
+    q <- length(levels(long_df$Y))
 
-    start.params.every.iteration=list()
+    start_params=list()
 
-    ## Generate initvect -------------------------------------------------------
-    if (is.null(initvect)) {
+    ## Generate init_parvec -------------------------------------------------------
+    if (is.null(init_parvec)) {
 
         if (!parallel_starts) {
 
-            best.lli <- -Inf
+            best_lli <- -Inf
             for (s in 1:nstarts) {
                 if (verbose) cat(paste0("Randomly generated start #",s,"\n"))
-                initvect.pi.kappa.init <- generate.initvect(long.df=long.df, model=model,
-                                                            model_structure=model_structure,
-                                                            RG=RG, CG=CG,
-                                                            constraint_sum_zero=constraint_sum_zero,
-                                                            start_from_simple_model=start_from_simple_model,
-                                                            use_random=(s>1),
-                                                            EM.control=startEM.control(EM.control),
-                                                            verbose=verbose)
+                init_parvec_pi_kappa <- generate_init_parvec(long_df=long_df, model=model,
+                                                             model_structure=model_structure,
+                                                             RG=RG, CG=CG,
+                                                             constraint_sum_zero=constraint_sum_zero,
+                                                             start_from_simple_model=start_from_simple_model,
+                                                             use_random=(s>1),
+                                                             control_EM=control_EM_start(control_EM),
+                                                             verbose=verbose)
 
-                init.out <- run.EM.bicluster(invect=initvect.pi.kappa.init$initvect,
-                                             model=model, long.df=long.df,
+                init_out <- run_EM_bicluster(init_parvec=init_parvec_pi_kappa$init_parvec,
+                                             model=model, long_df=long_df,
                                              rowc_mm=model_structure$rowc_mm,
                                              colc_mm=model_structure$colc_mm,
                                              cov_mm=model_structure$cov_mm,
-                                             pi_v=initvect.pi.kappa.init$pi.init,
-                                             kappa_v=initvect.pi.kappa.init$kappa.init,
+                                             pi_v=init_parvec_pi_kappa$init_pi,
+                                             kappa_v=init_parvec_pi_kappa$init_kappa,
                                              param_lengths=model_structure$param_lengths,
                                              constraint_sum_zero=constraint_sum_zero,
                                              model_label="Random starts",
-                                             EM.control=startEM.control(EM.control),
-                                             optim.method=optim.method,
-                                             optim.control=optim.control,
+                                             control_EM=control_EM_start(control_EM),
+                                             optim_method=optim_method,
+                                             control_optim=control_optim,
                                              verbose=verbose)
 
-                new.lli <- init.out$EM.status$best.lli
-                if (new.lli > best.lli) {
-                    if (verbose) cat(paste("Found better incomplete log-like:",new.lli,"\n"))
-                    best.lli <- new.lli
-                    best.initvect.pi.kappa.init <- list(initvect=init.out$outvect,
-                                                        pi.init=init.out$pi.out,
-                                                        kappa.init=init.out$kappa.out)
-                    initvect <- init.out$outvect
+                new_lli <- init_out$EMstatus$best_lli
+                if (new_lli > best_lli) {
+                    if (verbose) cat(paste("Found better incomplete log-like:",new_lli,"\n"))
+                    best_lli <- new_lli
+                    best_init_parvec_pi_kappa <- list(init_parvec=init_out$out_parvec,
+                                                      init_pi=init_out$row_cluster_proportions,
+                                                      init_kappa=init_out$column_cluster_proportions)
+                    init_parvec <- init_out$out_parvec
                 }
 
-                if (EM.control$keepallparams) start.params.every.iteration[[s]] <- init.out$EM.status$params.every.iteration
+                if (control_EM$keep_all_params) start_params[[s]] <- init_out$EMstatus$params_every_iteration
             }
 
         } else {
-            start_control <- startEM.control(EM.control)
+            start_control <- control_EM_start(control_EM)
 
             ncores <- parallel::detectCores()
             cl <- parallel::makeCluster(ncores)
-            parallel::clusterExport(cl, c("long.df","model","model_structure","RG","CG",
+            parallel::clusterExport(cl, c("long_df","model","model_structure","RG","CG",
                                           "constraint_sum_zero","start_from_simple_model",
-                                          "start_control","optim.method","optim.control"),
+                                          "start_control","optim_method","control_optim"),
                                     envir=environment())
 
             start_results <- parallel::parLapply(cl, 1:nstarts, function(s) {
 
-                initvect.pi.kappa.init <- generate.initvect(long.df=long.df, model=model,
-                                                            model_structure=model_structure,
-                                                            RG=RG, CG=CG,
-                                                            constraint_sum_zero=constraint_sum_zero,
-                                                            start_from_simple_model=start_from_simple_model,
-                                                            use_random=(s>1),
-                                                            EM.control=start_control,
-                                                            verbose=FALSE)
+                init_parvec_pi_kappa <- generate_init_parvec(long_df=long_df, model=model,
+                                                             model_structure=model_structure,
+                                                             RG=RG, CG=CG,
+                                                             constraint_sum_zero=constraint_sum_zero,
+                                                             start_from_simple_model=start_from_simple_model,
+                                                             use_random=(s>1),
+                                                             control_EM=start_control,
+                                                             verbose=FALSE)
 
-                init.out <- run.EM.bicluster(invect=initvect.pi.kappa.init$initvect,
-                                             model=model, long.df=long.df,
+                init_out <- run_EM_bicluster(init_parvec=init_parvec_pi_kappa$init_parvec,
+                                             model=model, long_df=long_df,
                                              rowc_mm=model_structure$rowc_mm,
                                              colc_mm=model_structure$colc_mm,
                                              cov_mm=model_structure$cov_mm,
-                                             pi_v=initvect.pi.kappa.init$pi.init,
-                                             kappa_v=initvect.pi.kappa.init$kappa.init,
+                                             pi_v=init_parvec_pi_kappa$init_pi,
+                                             kappa_v=init_parvec_pi_kappa$init_kappa,
                                              param_lengths=model_structure$param_lengths,
                                              constraint_sum_zero=constraint_sum_zero,
                                              model_label="Random starts",
-                                             EM.control=start_control,
-                                             optim.method=optim.method,
-                                             optim.control=optim.control,
+                                             control_EM=start_control,
+                                             optim_method=optim_method,
+                                             control_optim=control_optim,
                                              verbose=FALSE)
             })
 
-            best_lli_vec <- sapply(start_results, function(res) res$EM.status$best.lli)
+            best_lli_vec <- sapply(start_results, function(res) res$EMstatus$best_lli)
             best_lli <- max(best_lli_vec)
             best_start_idx <- which.max(best_lli_vec)
             if (verbose) cat(paste("Best incomplete log-like:",best_lli," from start ",best_start_idx,"\n"))
 
-            best.initvect.pi.kappa.init <- list(initvect=start_results[[best_start_idx]]$outvect,
-                                                pi.init=start_results[[best_start_idx]]$pi.out,
-                                                kappa.init=start_results[[best_start_idx]]$kappa.out)
-            initvect <- start_results[[best_start_idx]]$outvect
+            best_init_parvec_pi_kappa <- list(init_parvec=start_results[[best_start_idx]]$out_parvec,
+                                              init_pi=start_results[[best_start_idx]]$row_cluster_proportions,
+                                              init_kappa=start_results[[best_start_idx]]$column_cluster_proportions)
+            init_parvec <- start_results[[best_start_idx]]$out_parvec
 
-            start.params.every.iteration <- lapply(start_results, function(res) res$EM.status$params.every.iteration)
+            start_params <- lapply(start_results, function(res) res$EMstatus$params_every_iteration)
 
             parallel::stopCluster(cl)
         }
     }
 
-    ## Generate pi.init and kappa.init -----------------------------------------
-    if (is.null(pi.init)) {
-        if (exists("initvect.pi.kappa.init") && !is.null(best.initvect.pi.kappa.init))
+    ## Generate init_pi and init_kappa -----------------------------------------
+    if (is.null(init_pi)) {
+        if (exists("init_parvec_pi_kappa") && !is.null(best_init_parvec_pi_kappa))
         {
-            pi.init <- best.initvect.pi.kappa.init$pi.init
+            init_pi <- best_init_parvec_pi_kappa$init_pi
         } else {
-            pi.init <- generate.mixing.proportions(RG)
+            init_pi <- generate_init_pi(RG)
         }
     }
-    if (is.null(kappa.init)) {
-        if (exists("initvect.pi.kappa.init") && !is.null(best.initvect.pi.kappa.init))
+    if (is.null(init_kappa)) {
+        if (exists("init_parvec_pi_kappa") && !is.null(best_init_parvec_pi_kappa))
         {
-            kappa.init <- best.initvect.pi.kappa.init$kappa.init
+            init_kappa <- best_init_parvec_pi_kappa$init_kappa
         } else {
-            kappa.init <- generate.mixing.proportions(CG)
+            init_kappa <- generate_init_pi(CG)
         }
     }
 
-    list(initvect=initvect, pi.init=pi.init, kappa.init=kappa.init,
-         start.params.every.iteration=start.params.every.iteration)
+    list(init_parvec=init_parvec, init_pi=init_pi, init_kappa=init_kappa,
+         start_params=start_params)
 }

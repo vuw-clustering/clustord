@@ -494,20 +494,20 @@ vcov.osm <- function(object, ...)
     # the generalized inverse
     if (any(diag(vc) < 0)) vc <- MASS::ginv(object$Hessian)
     u <- object$u
-    u.ind <- length(object$beta) + length(object$mu[-1]) + seq_along(u)
+    u_idxs <- length(object$beta) + length(object$mu[-1]) + seq_along(u)
     J <- jacobian(u)
-    A <- diag(tail(u.ind,1))
+    A <- diag(tail(u_idxs,1))
 
     ## Apply delta method to get correct SE for phi
-    A[u.ind, u.ind] <- J
+    A[u_idxs, u_idxs] <- J
     V <- A %*% vc %*% t(A)
 
     cat("Variance-covariance matrix for beta coefficients, mu intercepts and the independent elements of phi.\n")
 
     ## Change the names of the phi elements of the matrix
     vcov_dimnames <- dimnames(object$Hessian)
-    vcov_dimnames[[1]][u.ind] <- paste0("phi",2:(length(u)+1))
-    vcov_dimnames[[2]][u.ind] <- paste0("phi",2:(length(u)+1))
+    vcov_dimnames[[1]][u_idxs] <- paste0("phi",2:(length(u)+1))
+    vcov_dimnames[[2]][u_idxs] <- paste0("phi",2:(length(u)+1))
     structure(V,  dimnames = vcov_dimnames)
 }
 

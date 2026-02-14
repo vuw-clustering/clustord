@@ -25,15 +25,15 @@
 #' requirement to provide any covariates, and you can provide only row
 #' covariates, or only column covariates.
 #'
-#' Before running \code{clustord}, you need to run \code{\link{mat2df}} to
+#' Before running \code{clustord}, you need to run \code{\link{mat_to_df}} to
 #' convert the data matrix into a long form data frame. The data frame needs to
 #' have at least three columns, \code{Y} and \code{ROW} and \code{COL}. Each row
 #' in the data frame corresponds to a single cell in the original data matrix;
 #' the response value in that cell is given by \code{Y}, and the row and column
 #' indices of that cell in the matrix are given by \code{ROW} and \code{COL}.
 #'
-#' \code{\link{mat2df}} also allows you to supply data frames of row or column
-#' covariates which will be incorporated into \code{long.df}.
+#' \code{\link{mat_to_df}} also allows you to supply data frames of row or column
+#' covariates which will be incorporated into \code{long_df}.
 #'
 #' Then, to run the \code{clustord} function, you need to enter your chosen
 #' formula and model, and the number of clusters you want to fit. The formula
@@ -67,13 +67,13 @@
 #' way as in \code{glm}.
 #'
 #' \code{ROWCLUST} and \code{COLCLUST} are used to indicate what row clustering
-#' model_structure you want, and what column clustering model_structure you want,
+#' model structure you want, and what column clustering model structure you want,
 #' respectively. The inclusion of \code{ROWCLUST} as a single term indicates
 #' that you want to include a row clustering effect in the model. In the
 #' simplest row clustering model, for Binary data with \strong{row clustering}
 #' effects only, the basic function call would be
 #'
-#' \code{clustord(Y ~ ROWCLUST, model="Binary", long.df=long.df)}
+#' \code{clustord(Y ~ ROWCLUST, model="Binary", long_df=long_df)}
 #'
 #' and the model fitted would have the form:
 #'
@@ -105,6 +105,7 @@
 #' \code{Y ~ ROWCLUST + COLCLUST}
 #'
 #' is the simplest possible \strong{biclustering} model,
+#'
 #' Logit(P(Y = 1)) = mu + rowc_coef_r + colc_coef_c
 #'
 #' If you want to include interaction between the rows and columns, i.e. you
@@ -113,9 +114,11 @@
 #' indexed by r and c.
 #'
 #' \code{clustord(Y ~ ROWCLUST*COLCLUST, model="Binary", ...)} has the model
+#'
 #' Logit(P(Y = 1)) = mu + rowc_colc_coef_rc
 #'
 #' This model can instead be called using the equivalent formula
+#'
 #' \code{Y ~ ROWCLUST + COLCLUST + ROWCLUST:COLCLUST}.
 #'
 #' You can instead use the formula \code{Y ~ ROWCLUST:COLCLUST}. Mathematically,
@@ -124,7 +127,7 @@
 #' number of independent parameters overall. If you include the main effects,
 #' then that reduces the number of independent parameters in the interaction
 #' term compared to if you just use the interaction term (see below section about
-#' \code{initvect}).
+#' \code{init_parvec}).
 #'
 #' You cannot include just one of the main effects alongside the interaction
 #' term, i.e. you cannot use \code{Y ~ ROWCLUST + ROWCLUST:COLCLUST} or
@@ -178,7 +181,7 @@
 #' where the row cluster effects and individual column effects are absorbed into
 #' the matrix rowc_col_coef_rj. These models are the same mathematically, the
 #' only differences between them are in how they are constrained (see below in
-#' the section about the \code{initvect} argument) and how they should be
+#' the section about the \code{init_parvec} argument) and how they should be
 #' interpreted.
 #'
 #' Note that if you were using covariates, then it would not be equivalent to
@@ -222,12 +225,11 @@
 #'
 #' which would have the Binary model
 #'
-#' Logit(P(Y = 1)) = mu + rowc_coef_r + row_coef1*xr1_i + row_coef2*log(xr2_i) +
-#'                          row_coef3*xr1_i*log(xr2_i)
+#' Logit(P(Y = 1)) = mu + rowc_coef_r + row_coef1*xr1_i + row_coef2*log(xr2_i) + row_coef3*xr1_i*log(xr2_i)
 #'
 #' If instead you want to add column covariates to the model, they work in the
-#' same way after they've been added to the \code{long.df} data frame using
-#' \code{\link{mat2df}}, but they are indexed by j instead of i. Simplest model,
+#' same way after they've been added to the \code{long_df} data frame using
+#' \code{\link{mat_to_df}}, but they are indexed by j instead of i. Simplest model,
 #' with one single column covariate xc, would have formula
 #'
 #' \code{Y ~ ROWCLUST + xc}
@@ -285,9 +287,9 @@
 #' \code{xr2} interacting with three row clusters, that gives you 6
 #' coefficients:
 #'
-#' \code{rowc_col_coef_11, rowc_col_coef_12,
-#' rowc_col_coef_21, rowc_col_coef_22,
-#' rowc_col_coef_31, rowc_col_coef_32}.
+#' \code{rowc_col_coef_11, rowc_col_coef_12, rowc_col_coef_21,}
+#'
+#' \code{rowc_col_coef_22, rowc_col_coef_31, rowc_col_coef_32}.
 #'
 #' and you can also have a three-way interaction between row cluster and those
 #' two covariates, which would add the coefficients \code{rowc_col_coef_r3}
@@ -316,7 +318,7 @@
 #'
 #' The primary restriction on the \code{formula} argument is that that you
 #' \strong{cannot} use functions of \code{ROW}, \code{COL}, \code{ROWCLUST} or
-#' \code{COLCLUST}, such as \code{log(ROW)} or I(COLCLUST^2). That is because
+#' \code{COLCLUST}, such as \code{log(ROW)} or \code{COLCLUST^2}. That is because
 #' they are not covariates, and cannot be manipulated like that; instead, they
 #' are indicators for particular elements of the clustering model_structure.
 #'
@@ -330,7 +332,7 @@
 #'
 #' or you can use \code{Y ~ ROWCLUST:COLCLUST}, and these two types of
 #' biclustering model will have different parameter constraints (see below under
-#' \code{initvect} details), but you \strong{cannot} use
+#' \code{init_parvec} details), but you \strong{cannot} use
 #'
 #' \code{Y ~ ROWCLUST + ROWCLUST:COLCLUST} or \code{Y ~ COLCLUST + ROWCLUST:COLCLUST}
 #'
@@ -432,19 +434,19 @@
 #' them into a single category to simplify the model-fitting process and the
 #' interpretation of the results.
 #'
-#' \code{initvect} \strong{argument details}
+#' \code{init_parvec} \strong{argument details}
 #'
 #' Initvect is the vector of starting values for the parameters, made up of
 #' sections for each different type of parameter in the model. Note that the
-#' length of each section of initvect is the number of \strong{independent}
+#' length of each section of init_parvec is the number of \strong{independent}
 #' parameter values, not the overall number of parameter values of that type.
 #'
 #' If you want to supply a vector of starting values for the EM algorithm, you
 #' need to be careful how many values you supply, and the order in which you
-#' include them in \code{initvect}, and you should \strong{CHECK} the output
+#' include them in \code{init_parvec}, and you should \strong{CHECK} the output
 #' list of parameters (which is the full set of parameter values, including
 #' dependent ones, broken up into each type of parameter) to check that your
-#' initvect model_structure is correct for the formula you have specified.
+#' init_parvec model_structure is correct for the formula you have specified.
 #'
 #' For example, the number of \code{mu} values will always be 1 fewer than the
 #' number of categories in the data, and the remaining value of mu is dependent
@@ -461,13 +463,15 @@
 #' the original data matrix.
 #'
 #' For Binary,
+#'
 #' There is one independent value for \code{mu}, i.e. q = 2.
 #'
 #' Ignore \code{phi}, which is not used in the Binary model.
 #'
 #' For OSM,
+#'
 #' The starting values for \code{mu_k} are length \code{q-1}, and the model
-#' has \code{mu_1} = 0 always, so the initvect values for \code{mu} will become
+#' has \code{mu_1} = 0 always, so the init_parvec values for \code{mu} will become
 #' \code{mu_2}, \code{mu_3}, etc. up to \code{mu_q}.
 #'
 #' The starting values for \code{phi_k} are length \code{q-2}.
@@ -485,39 +489,40 @@
 #'     \code{(phi[1] = 0 and phi[q] = 1)}.
 #'
 #' For POM,
+#'
 #' The starting values for \code{mu_k} are length \code{q-1}, but the starting
 #' values do not correspond directly to \code{mu_k}, because \code{mu_k} is
 #' restricted to being increasing, i.e. the model has to have
 #'     \code{mu_1} <= \code{mu_2} <= ... \code{mu_q} = \code{+Inf}
 #'
-#' So instead of using the initvect values directly for \code{mu_k}, the 2nd to
-#' (q-1)th elements of initvect are used to construct \code{mu_k} as follows:
+#' So instead of using the init_parvec values directly for \code{mu_k}, the 2nd to
+#' (q-1)th elements of init_parvec are used to construct \code{mu_k} as follows:
 #'
-#'     \code{mu_1 <- initvect[1]}
+#'     \code{mu_1 <- init_parvec[1]}
 #'
-#'     \code{mu_2 <- initvect[1] + exp(initvect[2])}
+#'     \code{mu_2 <- init_parvec[1] + exp(init_parvec[2])}
 #'
-#'     \code{mu_3 <- initvect[1] + exp(initvect[2]) + exp(initvect[3])}
+#'     \code{mu_3 <- init_parvec[1] + exp(init_parvec[2]) + exp(init_parvec[3])}
 #'
 #'     ... and so on up to \code{mu_{k-1}}, and \code{mu_k} is infinity, because
 #'     it is not used directly to construct the probability of Y = q.
 #'
 #' Thus the values that are used to construct \code{mu_k} can be unconstrained,
-#' which makes it easier to specify initvect and easier to optimize the parameter
+#' which makes it easier to specify init_parvec and easier to optimize the parameter
 #' values.
 #'
 #' Ignore \code{phi}, which is not used in POM.
 #'
 #' For \strong{all three models},
 #'
-#' The starting values for \code{rowc_coef_r} are length \code{nclus.row-1},
-#' where \code{nclus.row} is the number of row clusters. The final row cluster
+#' The starting values for \code{rowc_coef_r} are length \code{RG-1},
+#' where \code{RG} is the number of row clusters. The final row cluster
 #' parameter is dependent on the others (see the input parameter info for
 #' constraint_sum_zero), whereas if it were independent it would be colinear
 #' with the \code{mu_k} parameters and thus not identifiable.
 #'
 #' Similarly the starting values for \code{colc_coef_c} are length
-#' \code{nclus.column-1}, where \code{nclus.column} is the number of column
+#' \code{CG-1}, where \code{CG} is the number of column
 #' clusters, to avoid problems of colinearity and nonidentifiability.
 #'
 #' If you have biclustering with an interaction term between row clusters and
@@ -529,10 +534,10 @@
 #'
 #' \code{Y ~ ROWCLUST*COLCLUST},
 #'
-#' then the main effect term \code{ROWCLUST} has \code{nclus.row-1} independent
-#' parameters in \code{initvect}, and \code{COLCLUST} has \code{nclus.column-1}
-#' independent parameters in \code{initvect}, and \code{ROWCLUST:COLCLUST} will
-#' have \code{(nclus.row - 1)*(nclus.column - 1)} independent parameter values.
+#' then the main effect term \code{ROWCLUST} has \code{RG-1} independent
+#' parameters in \code{init_parvec}, and \code{COLCLUST} has \code{CG-1}
+#' independent parameters in \code{init_parvec}, and \code{ROWCLUST:COLCLUST} will
+#' have \code{(RG - 1)*(CG - 1)} independent parameter values.
 #' The final matrix of interaction terms will be constrained to have its last
 #' row equal to the negative sum of the other rows, and the last column equal to
 #' the negative sum of the other columns.
@@ -543,7 +548,7 @@
 #'
 #' \code{Y ~ ROWCLUST:COLCLUST},
 #'
-#' then that matrix of interaction terms will have \code{nclus.row*nclus.column - 1}
+#' then that matrix of interaction terms will have \code{RG*CG - 1}
 #' independent parameters, i.e. more independent parameters than if you included
 #' the main effects.
 #'
@@ -551,22 +556,22 @@
 #' alongside column clusters), without interactions, i.e. the formula
 #' \code{Y ~ ROWCLUST + COL} with Binary model Logit(P(Y = 1)) = mu +
 #' rowc_coef_r + col_coef_j
-#' then the row cluster coefficients have \code{nclus.row - 1} independent
+#' then the row cluster coefficients have \code{RG - 1} independent
 #' parameters, and the column effect coefficients have \code{p - 1} independent
 #' parameters, where p is the number of columns in the original data matrix,
-#' i.e. the maximum value of \code{long.df$COL}.
+#' i.e. the maximum value of \code{long_df$COL}.
 #'
 #' If you include the interaction term, then the number of independent parameters
 #' again depends on whether you just use the interaction term, or include the
 #' main effects.
 #'
 #' In the formula \code{Y ~ ROWCLUST + COL + ROWCLUST:COL} or its equivalent with
-#' "*", the interaction term will have \code{(nclus.row - 1)*(p-1)} independent
+#' "*", the interaction term will have \code{(RG - 1)*(p-1)} independent
 #' parameters.
 #'
 #' If you instead use the formula \code{Y ~ ROWCLUST:COL}, then the interaction
-#' term will have \code{nclus.row*p - 1} independent parameters. Either way, the
-#' total number of independent parameters in the model will be \code{nclus.row*p}.
+#' term will have \code{RG*p - 1} independent parameters. Either way, the
+#' total number of independent parameters in the model will be \code{RG*p}.
 #'
 #' Similarly, if you have row effects alongside column clusters, without
 #' interactions, i.e. the formula
@@ -575,19 +580,19 @@
 #'
 #' with Binary model Logit(P(Y = 1)) = mu + colc_coef_c + row_coef_i
 #'
-#' then the column cluster coefficients will have \code{nclus.column - 1}
+#' then the column cluster coefficients will have \code{CG - 1}
 #' independent parameters, and the row coefficients will have \code{n-1}
 #' independent parameters, where n is the number of rows in the original data
-#' matrix, i.e. the maximum value of \code{long.df$ROW}.
+#' matrix, i.e. the maximum value of \code{long_df$ROW}.
 #'
 #' If you include the interaction term alongside the main effects, i.e.
 #'
 #' \code{Y ~ COLCLUST + ROW + COLCLUST:ROW}, or its equivalent with "*", the
-#' interaction term will have \code{(nclus.column - 1)*(n-1)} independent
+#' interaction term will have \code{(CG - 1)*(n-1)} independent
 #' parameters.
 #'
 #' If you instead use the formula \code{Y ~ COLCLUST:ROW}, that interaction
-#' coefficient matrix will have \code{nclus.column*n - 1} independent parameters.
+#' coefficient matrix will have \code{CG*n - 1} independent parameters.
 #'
 #' Any covariate terms included in the formula will be split up by
 #' \code{clustord} into the covariates that interact with row clusters, the
@@ -595,7 +600,7 @@
 #' interact with row or column clusters.
 #'
 #' The number of independent parameters for row-cluster-interacting covariates
-#' will be \code{nclus.row*L}, where \code{L} is the number of terms involving
+#' will be \code{RG*L}, where \code{L} is the number of terms involving
 #' row clusters and covariates after any "*" terms have been expanded.
 #'
 #' So in this formula, for example,
@@ -608,11 +613,11 @@
 #' \code{Y ~ ROWCLUST + xr1 + xr2 + ROWCLUST:xr1 + ROWCLUST:log(xc1)}
 #'
 #' and the terms interacting with \code{ROWCLUST} would be \code{ROWCLUST:xr1}
-#' and \code{ROWCLUST:log(xc1)}, so there would be \code{nclus.row*2}
+#' and \code{ROWCLUST:log(xc1)}, so there would be \code{RG*2}
 #' independent coefficients for those covariates.
 #'
 #' The number of independent parameters for column-cluster-interacting
-#' covariates will be \code{nclus.column*M}, where \code{M} is the number of
+#' covariates will be \code{CG*M}, where \code{M} is the number of
 #' terms involving column clusters and covariates after any "*" terms have been
 #' expanded.
 #'
@@ -626,7 +631,7 @@
 #'
 #' and the terms interacting with \code{COLCLUST} would be \code{COLCLUST:xc1},
 #' \code{COLCLUST:xc2:xc3} and \code{COLCLUST:xr1}, so there would be
-#' \code{nclus.column*3} independent coefficients for those covariates.
+#' \code{CG*3} independent coefficients for those covariates.
 #'
 #' The number of independent parameters for covariates that do not interact with
 #' row or column clusters will be the same as the number of those covariate terms,
@@ -645,22 +650,33 @@
 #' Note that there are \strong{no intercept} terms for the coefficients,
 #' because those are incorporated into the parameters \code{mu_k}.
 #'
-#' The \strong{order of the} \code{initvect} \strong{entries} is as follows, and
+#' The \strong{order of the} \code{init_parvec} \strong{entries} is as follows, and
 #' any entries that are not included in the formula will be ignored and not
-#' included in \code{initvect}. That is, you should NOT provide values in
-#' \code{initvect} for components that are not included in the formula.
+#' included in \code{init_parvec}. That is, you should NOT provide values in
+#' \code{init_parvec} for components that are not included in the formula.
 #'
 #' 1) mu (or values used to construct mu, POM only)
+#'
 #' 2) values used to construct phi (OSM only)
+#'
 #' 3) row cluster coefficients
+#'
 #' 4) column cluster coefficients
+#'
 #' 5) [matrix] bicluster coefficients (i.e. interaction between row and column clusters)
+#'
 #' 6) individual row coefficients
+#'
 #' 7) individual column coefficients
+#'
 #' 8) [matrix] interactions between row clusters and individual column coefficients
+#'
 #' 9) [matrix] interactions between column clusters and individual row coefficients
+#'
 #' 10) [matrix] row-cluster-specific coefficients for covariates interacting with row clusters
+#'
 #' 11) [matrix] column-cluster-specific coefficients for covariates interacting with column clusters
+#'
 #' 12) coefficients for covariates that do not interact with row or column clusters
 #'
 #' Any entries marked as [matrix] will be constructed into matrices by filling
@@ -668,19 +684,22 @@
 #' 2 row clusters and 3 covariates interacting with those row clusters, the
 #' matrix of coefficients will become
 #'
-#' \code{1 2 3
-#' 4 5 6}
+#' \code{1 2 3}
+#'
+#' \code{4 5 6}
 #'
 #' For the formula \code{Y ~ ROWCLUST*COLCLUST}, where the matrix of interactions
-#' between row and column clusters has \code{(nclus.row - 1)*(nclus.column - 1)}
+#' between row and column clusters has \code{(RG - 1)*(CG - 1)}
 #' independent parameters, the last row and column of the matrix will be the
 #' negative sums of the rest, so e.g. if you have 2 row clusters and 3 column
 #' clusters, there will only be 2 independent values, so if you provide the
 #' starting values -0.5 and 1.2, the final matrix of parameters will be:
 #'
-#' \code{                column cluster 1   column cluster 2   column cluster 3
-#' row cluster 1   -0.5               1.2                -0.7
-#' row cluster 2   0.5                -1.2               0.7}
+#' \code{                column cluster 1   column cluster 2   column cluster 3}
+#'
+#' \code{row cluster 1   -0.5               1.2                -0.7}
+#'
+#' \code{row cluster 2   0.5                -1.2               0.7}
 #'
 #' If the matrix is a matrix relating to row clusters, then the row clusters are
 #' in the rows, and if it's a matrix relating to column clusters but not row
@@ -703,52 +722,54 @@
 #' @param formula model formula (see 'Details').
 #' @param model \code{"OSM"} for Ordered Stereotype Model or \code{"POM"} for
 #'     Proportional Odds Model or \code{"Binary"} for binary data model.
-#' @param nclus.row number of row clustering groups.
-#' @param nclus.column number of column clustering groups.
-#' @param long.df data frame with at least three columns, \code{Y} and \code{ROW}
+#' @param RG number of row clustering groups.
+#' @param CG number of column clustering groups.
+#' @param long_df data frame with at least three columns, \code{Y} and \code{ROW}
 #'     and \code{COL}. Each row in the data frame corresponds to a single cell
 #'     in the original data matrix; the response value in that cell is given by
 #'     \code{Y}, and the row and column indices of that cell in the matrix are
-#'     given by \code{ROW} and \code{COL}. Use \code{\link{mat2df}} to create
+#'     given by \code{ROW} and \code{COL}. Use \code{\link{mat_to_df}} to create
 #'     this data frame from your data matrix of responses.
-#'     \code{\link{mat2df}} also allows you to supply data frames of row or
-#'     column covariates which will be incorporated into \code{long.df}.
+#'     \code{\link{mat_to_df}} also allows you to supply data frames of row or
+#'     column covariates which will be incorporated into \code{long_df}.
 #'
-#' @param initvect (default NULL) vector of starting parameter values for the model.
+#' @param init_parvec (default \code{NULL}) vector of starting parameter values
+#'     for the model.
+#'
 #'     Note: if the user enters an initial vector of parameter values, it is
-#'     \strong{strongly recommend} that the user also check the values of
-#'     \code{parlist.init} in the output object, to \strong{make sure that the
+#'     \strong{strongly recommended} that the user also check the values of
+#'     \code{init_parlist} in the output object, to \strong{make sure that the
 #'     constructed parameters are as expected}.
 #'
 #'     If \code{NULL}, starting parameter values will be generated automatically.
 #'
 #'     See 'Details' for definitions of the parameters used for different models.
 #'
-#' @param pi.init (default \code{NULL}) starting parameter values for the proportions
+#' @param init_pi (default \code{NULL}) starting parameter values for the proportions
 #'     of observations in the different row clusters.
 #'
 #'     If \code{NULL}, starting values will be generated automatically.
 #'
-#'     User-specified values of \code{pi.init} must be of length \code{(nclus.row-1)}
+#'     User-specified values of \code{init_pi} must be of length \code{(RG-1)}
 #'     because the final value will be automatically calculated so that the
 #'     values of \code{pi} sum to 1.
-#' @param kappa.init (default \code{NULL}) starting parameter values for the
+#' @param init_kappa (default \code{NULL}) starting parameter values for the
 #'     proportions of observations in the different column clusters.
 #'
 #'     If \code{NULL}, starting values will be generated automatically.
 #'
-#'     User-specified values of \code{kappa.init} must be of length
-#'     \code{(nclus.column-1)} because the final value will be automatically
+#'     User-specified values of \code{init_kappa} must be of length
+#'     \code{(CG-1)} because the final value will be automatically
 #'     calculated so that the values of \code{kappa} sum to 1.
-#' @param EM.control (default = \code{list(EMcycles=50, EMlikelihoodtol=1e-4,
-#'     EMparamtol=1e-2, paramstopping=TRUE, startEMcycles=10, keepallparams=FALSE,
+#' @param control_EM (default = \code{list(maxiter=50, EM_likelihood_tol=1e-4,
+#'     EM_params_tol=1e-2, params_stopping=TRUE, maxiter_start=10, keep_all_params=FALSE,
 #'     epsilon=1e-6)})
 #'     list of parameters controlling the EM algorithm.
 #'
-#'     \code{EMcycles} controls how many EM iterations of the main EM algorithm
+#'     \code{maxiter} controls how many EM iterations of the main EM algorithm
 #'     are used to fit the chosen submodel.
 #'
-#'     \code{EMlikelihoodtol} is the tolerance for the stopping criterion for
+#'     \code{EM_likelihood_tol} is the tolerance for the stopping criterion for
 #'     the \strong{log-likelihood} in the EM algorithm. The criterion is the
 #'     absolute change in the \strong{incomplete} log-likelihood since the
 #'     previous iteration, scaled by the size of the dataset \code{n*p}, where
@@ -756,7 +777,7 @@
 #'     number of columns in the data matrix. The scaling is applied because the
 #'     incomplete log-likelihood is predominantly affected by the dataset size.
 #'
-#'     \code{EMparamtol} is the tolerance for the stopping criterion for the
+#'     \code{EM_params_tol} is the tolerance for the stopping criterion for the
 #'     \strong{parameters} in the EM algorithm. This is a tolerance for the
 #'     \strong{sum} of the scaled parameter changes from the last iteration,
 #'     i.e. the tolerance is not for any individual parameter but for the sum of
@@ -768,13 +789,14 @@
 #'     timestep. The exponentiation is to rescale parameter values that are
 #'     close to zero.
 #'
-#'     there are around 5 independent parameter values, then at the point of
-#'     convergence using default tolerances for the log-likelihood and the
-#'     parameters, each parameter will have a scaled absolute change since the
-#'     previous iteration of about 1e-4; if there are 20 or 30 independent
-#'     parameters, then each will have a scaled aboslute change of about 1e-6.
+#'     If, for example, there are around 5 independent parameter values, then at
+#'     the point of convergence using default tolerances for the log-likelihood
+#'     and the parameters, each parameter will have a scaled absolute change
+#'     since the previous iteration of about 1e-4; if there are 20 or 30
+#'     independent parameters, then each will have a scaled aboslute change of
+#'     about 1e-6.
 #'
-#'     \code{paramstopping}: if \code{FALSE}, indicates that the EM algorithm
+#'     \code{params_stopping}: if \code{FALSE}, indicates that the EM algorithm
 #'     should only check convergence based on the change in incomplete-data
 #'     log-likelihood, relative to the current difference between the
 #'     complete-data and incomplete-data log-likelihoods, i.e.
@@ -785,14 +807,14 @@
 #'     below the tolerance \code{EMstoppingpar}, to see whether the parameters
 #'     and the likelihood have both converged.
 #'
-#'     \code{startEMcycles} controls how many EM iterations are used when
+#'     \code{maxiter_start} controls how many EM iterations are used when
 #'     fitting the simpler submodels to get starting values for fitting models
 #'     with interaction.
 #'
-#'     \code{keepallparams}: if \code{TRUE}, keep a record of parameter values
+#'     \code{keep_all_params}: if \code{TRUE}, keep a record of parameter values
 #'     (including pi_r and kappa_c) for every EM iteration.
 #'
-#'     \code{rerunestepbeforelli}: if \code{TRUE}, and only when using biclustering,
+#'     \code{rerun_estep_before_lli}: if \code{TRUE}, and only when using biclustering,
 #'     rerun the E-step before calculating the incomplete-data log-likelihood.
 #'     The EM algorithm runs the E-step to estimate the cluster membership
 #'     probabilities and then runs the M-step to estimate the parameters by
@@ -804,7 +826,7 @@
 #'     parameter estimates. So the \code{TRUE} setting for this control
 #'     recalculates the cluster memberships before calculating the LLI approx.
 #'
-#'     \code{uselatestlli}: Kept for backwards compatibility with original
+#'     \code{use_latest_lli}: Kept for backwards compatibility with original
 #'     version of clustord algorithm. Original version of the algorithm had this
 #'     set to \code{FALSE}, which keeps the best LLI from any previous iteration
 #'     rather than the latest LLI. The default, \code{TRUE}, instead keeps the
@@ -819,23 +841,23 @@
 #'     For \code{columnclustering}, the parameters saved from each iteration
 #'     will NOT be converted to column clustering format, and will be in the row
 #'     clustering format, so \code{alpha} in
-#'     \code{EM.status$params.every.iteration} will correspond to beta_c and
+#'     \code{EMstatus$params_every_iteration} will correspond to beta_c and
 #'     \code{pi} will correspond to kappa.
 #'
 #'     \code{epsilon}: default 1e-6, small value used to adjust values of pi,
 #'     kappa and theta that are too close to zero so that taking logs of them
 #'     does not create infinite values.
 #'
-#' @param optim.method (default "L-BFGS-B") method to use in optim within the M
-#'     step of the EM algorithm. Must be one of 'L-BFGS-B', 'BFGS', 'CG' or
-#'     'Nelder-Mead' (i.e. not the SANN method).
-#' @param optim.control control list for the \code{optim} call within the M step
+#' @param optim_method (default "L-BFGS-B") method to use in optim within the M
+#'     step of the EM algorithm. Must be one of "L-BFGS-B", "BFGS", "CG" or
+#'     "Nelder-Mead" (i.e. not the SANN method).
+#' @param control_optim control list for the \code{optim} call within the M step
 #'     of the EM algorithm. See the control list Details in the \code{optim}
 #'     manual for more info.
 #'     Please note that although \code{optim}, by default, uses \code{pgtol=0}
 #'     and \code{factr=1e7} in the L-BFGS-B method, \code{clustord}, by default,
 #'     alters these to \code{pgtol=1e-4} and \code{factr=1e11}, but you can use
-#'     this \code{optim.control} argument in \code{clustord} to revert them to
+#'     this \code{control_optim} argument in \code{clustord} to revert them to
 #'     the defaults if you want. The reason for the change is that the chosen
 #'     values in \code{clustord} reduce the tolerance on the log-likelihood
 #'     function optimization in order to speed up the algorithm, and because the
@@ -850,9 +872,9 @@
 #'     size of the data matrix, which is still far larger than the tolerance in
 #'     the optimization.
 #'     If you need accurate parameter estimates, firstly make sure to try more
-#'     starting points, then perform model selection first, and then finally
-#'     rerun the chosen model with finer tolerance, e.g. the \code{optim}
-#'     defaults, \code{pgtol=0} and \code{factr=1e7}.
+#'     starting points, then perform model selection, and then finally rerun the
+#'     chosen model with finer tolerance, e.g. the \code{optim} defaults,
+#'     \code{pgtol=0} and \code{factr=1e7}.
 #' @param constraint_sum_zero (default \code{TRUE}) if \code{TRUE}, use constraints
 #'     that cluster effects sum to zero; if \code{FALSE}, use constraints that
 #'     the cluster effect for the first cluster will be 0.
@@ -867,7 +889,7 @@
 #'     simpler clustering model first and use that to provide starting values for
 #'     all parameters for the model with interactions;
 #'     if \code{FALSE}, use the more basic models to provide starting values only
-#'     for \code{pi.init} and \code{kappa.init}.
+#'     for \code{init_pi} and \code{init_kappa}.
 #'     If the full model has interaction terms, then simpler models are ones
 #'     without the interactions. If the model has individual row/column effects
 #'     alongside the clusters, then simpler models are ones without the individual
@@ -875,11 +897,11 @@
 #'     are ones without the covariates (to get starting values for the cluster
 #'     parameters), and ones with the covariates but no clustering (to get
 #'     starting values for the covariates).
-#' @param parallel_starts (default FALSE) if TRUE, by generating multiple random
-#'   starts, those random starts will be parallelised over as many cores as are
-#'   available. For example, on a personal computer this will be one fewer than
-#'   the number of cores in the machine, to make sure one is left for system
-#'   tasks external to R.
+#' @param parallel_starts (default \code{FALSE}) if TRUE, by generating multiple
+#'   random starts, those random starts will be parallelised over as many cores
+#'   as are available. For example, on a personal computer this will be one
+#'   fewer than the number of cores in the machine, to make sure one is left for
+#'   system tasks external to R.
 #' @param nstarts (default 5) number of random starts to generate, if generating
 #'     random starting points for the EM algorithm.
 #' @param verbose (default \code{FALSE}) changes how much is reported to the
@@ -894,7 +916,7 @@
 #'   also reports when it is fitting simpler models to find starting values for
 #'   the parameters vs fitting the final, more complex model.
 #'   If wanting the detailed output from \code{optim()}, use
-#'   \code{optim.control=list(trace=X)}, where X is 1 to 6, with 6 being the
+#'   \code{control_optim=list(trace=X)}, where X is 1 to 6, with 6 being the
 #'   highest level of verbosity for the L-BFGS-B algorithm.
 #' @returns
 #' A \code{clustord} object, i.e. a list with components:
@@ -905,14 +927,14 @@
 #'     \code{model}: The model used for fitting, "OSM" for Ordered Stereotype
 #'     Model, "POM" for Proportional Odds Model, or "Binary" for Binary model.
 #'
-#'     \code{EM.status}: a list containing the latest iteration \code{iter},
-#'     latest incomplete-data and complete-data log-likelihoods \code{new.lli}
-#'     and \code{new.llc}, the best incomplete-data log-likelihood \code{best.lli}
-#'     and the corresponding complete-data log-likelihood, \code{llc.for.best.lli},
+#'     \code{EMstatus}: a list containing the latest iteration \code{iter},
+#'     latest incomplete-data and complete-data log-likelihoods \code{new_lli}
+#'     and \code{new_llc}, the best incomplete-data log-likelihood \code{best_lli}
+#'     and the corresponding complete-data log-likelihood, \code{llc_for_best_lli},
 #'     and the parameters for the best incomplete-data log-likelihood,
-#'     \code{params.for.best.lli}, indicator of whether the algorithm converged
+#'     \code{params_for_best_lli}, indicator of whether the algorithm converged
 #'     \code{converged}, and if the user chose to keep all parameter values from
-#'     every iteration, also \code{params.every.iteration}.
+#'     every iteration, also \code{params_every_iteration}.
 #'
 #'     Note that for \strong{biclustering}, i.e. when \code{ROWCLUST} and
 #'     \code{COLCLUST} are both included in the model, the \strong{incomplete}
@@ -921,16 +943,16 @@
 #'     to converging. So beware of using the incomplete log-likelihood and the
 #'     corresponding AIC value \strong{unless the EM algorithm has converged}.
 #'
-#'     Also note that \code{outvect} unpacks the dependent elements of matrices
+#'     Also note that \code{out_parvec} unpacks the dependent elements of matrices
 #'     of effects, such as the row cluster and column cluster interaction
 #'     effects \code{rowc_colc} and other interaction effects, by row: the first
-#'     elements of the matrix in \code{outvect} would be the first \emph{row} of
-#'     the matrix, etc. By contrast, \code{EM.status$params.every.iteration}
-#'     simply unlists \code{parlist.out}, which happens automatically by column,
+#'     elements of the matrix in \code{out_parvec} would be the first \emph{row} of
+#'     the matrix, etc. By contrast, \code{EMstatus$params_every_iteration}
+#'     simply unlists \code{out_parlist}, which happens automatically by column,
 #'     so the first column of each matrix before the second column, etc. so if
 #'     it contains columns \code{rowc_colc1, rowc_colc2, rowc_colc3} etc. they
 #'     are the first \emph{column} of the \code{rowc_colc} matrix of parameters.
-#'     So if using \code{EM.status$params.every.iteration} to check specific
+#'     So if using \code{EMstatus$params_every_iteration} to check specific
 #'     parameter values during each iteration of the algorithm, be careful which
 #'     ones you're looking at.
 #'
@@ -939,7 +961,7 @@
 #'
 #'     \code{epsilon}: the very small value (default 1e-6) used to adjust values
 #'     of pi and kappa and theta that are too close to zero, so that taking logs
-#'     of them does not produce infinite values. Use the EM.control argument to
+#'     of them does not produce infinite values. Use the control_EM argument to
 #'     adjust epsilon.
 #'
 #'     \code{constraints_sum_zero}: the chosen value of constraints_sum_zero.
@@ -951,43 +973,43 @@
 #'     \code{rowc_cov_coef} value will be 0. If the component is included, then
 #'     the value given will include any dependent parameter/coefficient values,
 #'     so if column clusters are included then the \code{colc_coef} value will
-#'     be \code{nclus.column}, whereas the number of independent values will be
-#'     \code{nclus.column - 1}.
+#'     be \code{CG}, whereas the number of independent values will be
+#'     \code{CG - 1}.
 #'
-#'     \code{initvect}: the initial \emph{vector} of parameter values, either
+#'     \code{init_parvec}: the initial \emph{vector} of parameter values, either
 #'     specified by the user or generated automatically. This vector has only
 #'     the \strong{independent} values of the parameters, not the full set.
 #'
-#'     \code{outvect}: the final \emph{vector} of parameter values, containing
-#'     only the independent parameter values from \code{parlist.out}.
+#'     \code{out_parvec}: the final \emph{vector} of parameter values, containing
+#'     only the independent parameter values from \code{out_parlist}.
 #'
-#'     \code{parlist.init}: the initial list of parameters, constructed from
-#'     the initial parameter vector \code{initvect}. Note that if the initial
-#'     vector has been incorrectly specified, the values of \code{parlist.init}
+#'     \code{init_parlist}: the initial list of parameters, constructed from
+#'     the initial parameter vector \code{init_parvec}. Note that if the initial
+#'     vector has been incorrectly specified, the values of \code{init_parlist}
 #'     may not be as expected, and they should be checked by the user.
 #'
-#'     \code{parlist.out}: fitted values of parameters.
+#'     \code{out_parlist}: fitted values of parameters.
 #'
 #'     \code{pi}, \code{kappa}: fitted values of pi and kappa, where relevant.
 #'
-#'     \code{ppr}, \code{ppc}: the posterior probabilities of membership of the
+#'     \code{row_cluster_probs}, \code{column_cluster_probs}: the posterior probabilities of membership of the
 #'     row clusters and the column clusters, where relevant.
 #'
 #'     \code{rowc_mm}, \code{colc_mm}, \code{cov_mm}: the model matrices for,
 #'     respectively, the covariates interacting with row clusters, the covariates
 #'     interacting with column clusters, and the covariates not interacting with
 #'     row or column clusters (i.e. the covariates with constant coefficients).
-#'     Note that one row of each model matrix corresponds to one row of long.df.
+#'     Note that one row of each model matrix corresponds to one row of long_df.
 #'
-#'     \code{RowClusters}, \code{ColumnClusters}: the assigned row and column
+#'     \code{row_clusters}, \code{column_clusters}: the assigned row and column
 #'     clusters, where relevant, where each row/column is assigned to a cluster
-#'     based on maximum posterior probability of cluster membership (\code{ppr}
-#'     and \code{ppc}).
+#'     based on maximum posterior probability of cluster membership (\code{row_cluster_probs}
+#'     and \code{column_cluster_probs}).
 #'
-#'     \code{RowClusterMembers}, \code{ColumnClusterMembers}: vectors of
+#'     \code{row_cluster_members}, \code{column_cluster_members}: vectors of
 #'     assigned members of each row or column cluster, where each row/column is
 #'     assigned to a cluster based on maximum posterior probability of cluster
-#'     membership (\code{ppr} and \code{ppc})
+#'     membership (\code{row_cluster_probs} and \code{column_cluster_probs})
 #'
 #'     \code{reordered}: Boolean indicating whether or not the outputs have been
 #'     reordered in order of row cluster and/or column cluster effects. FALSE
@@ -1002,63 +1024,67 @@
 #'
 #' @examples
 #' set.seed(1)
-#' long.df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),
+#' long_df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),
 #'                ROW=factor(rep(1:20,times=5)),COL=rep(1:5,each=20))
 #'
 #' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*rowc_coef_r with 3 row clustering groups:
-#' clustord(Y~ROWCLUST,model="OSM",3,long.df=long.df,
-#'              EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
+#' clustord(Y~ROWCLUST,model="OSM",3,long_df=long_df,
+#'              control_EM=list(maxiter=2,maxiter_start=2), nstarts=2)
 #'
-#' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + col_coef_j) with 3 row clustering groups:
-#' clustord(Y~ROWCLUST+COL,model="OSM",3,long.df=long.df,
-#'              EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
+#' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + col_coef_j)
+#' #    with 3 row clustering groups:
+#' clustord(Y~ROWCLUST+COL,model="OSM",3,long_df=long_df,
+#'              control_EM=list(maxiter=2,maxiter_start=2), nstarts=2)
 #'
-#' # Model Logit(P(Y <= k))=mu_k-rowc_coef_r-col_coef_j-rowc_col_coef_rj with 2 row clustering groups:
-#' clustord(Y~ROWCLUST*COL,model="POM",nclus.row=2,long.df=long.df,
-#'              EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
+#' # Model Logit(P(Y <= k))=mu_k-rowc_coef_r-col_coef_j-rowc_col_coef_rj
+#' #    with 2 row clustering groups:
+#' clustord(Y~ROWCLUST*COL,model="POM",RG=2,long_df=long_df,
+#'              control_EM=list(maxiter=2,maxiter_start=2), nstarts=2)
 #'
-#' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c) with 3 column clustering groups:
-#' clustord(Y~COLCLUST,model="OSM",nclus.column=3,long.df=long.df,
-#'              EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
+#' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c)
+#' #    with 3 column clustering groups:
+#' clustord(Y~COLCLUST,model="OSM",CG=3,long_df=long_df,
+#'              control_EM=list(maxiter=2,maxiter_start=2), nstarts=2)
 #'
-#' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c + row_coef_i) with 3 column clustering groups:
-#' clustord(Y~COLCLUST+ROW,model="OSM",nclus.column=3,long.df=long.df,
-#'              EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
+#' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c + row_coef_i)
+#' #    with 3 column clustering groups:
+#' clustord(Y~COLCLUST+ROW,model="OSM",CG=3,long_df=long_df,
+#'              control_EM=list(maxiter=2,maxiter_start=2), nstarts=2)
 #'
 #' # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + colc_coef_c)
 #' #    with 3 row clustering groups and 2 column clustering groups:
-#' clustord(Y~ROWCLUST+COLCLUST,model="OSM",nclus.row=3,nclus.column=2,long.df=long.df,
-#'              EM.control=list(EMcycles=2), nstarts=1)
+#' clustord(Y~ROWCLUST+COLCLUST,model="OSM",RG=3,CG=2,long_df=long_df,
+#'              control_EM=list(maxiter=2), nstarts=1)
 #'
 #' # Model Logit(P(Y<=k))=mu_k-rowc_coef_r-colc_coef_c-rowc_colc_coef_rc
 #' #    with 2 row clustering groups and 4 column clustering groups, and
 #' #    interactions between them:
-#' clustord(Y~ROWCLUST*COLCLUST, model="POM", nclus.row=2, nclus.column=4,
-#'              long.df=long.df,EM.control=list(EMcycles=2), nstarts=1,
+#' clustord(Y~ROWCLUST*COLCLUST, model="POM", RG=2, CG=4,
+#'              long_df=long_df,control_EM=list(maxiter=2), nstarts=1,
 #'              start_from_simple_model=FALSE)
 #' @export
 clustord <- function(formula,
                      model,
-                     nclus.row=NULL,
-                     nclus.column=NULL,
-                     long.df,
-                     initvect=NULL,
-                     pi.init=NULL,
-                     kappa.init=NULL,
-                     EM.control=default.EM.control(),
-                     optim.method="L-BFGS-B",
-                     optim.control=default.optim.control(),
+                     RG=NULL,
+                     CG=NULL,
+                     long_df,
+                     init_parvec=NULL,
+                     init_pi=NULL,
+                     init_kappa=NULL,
+                     control_EM=default_control_EM(),
+                     optim_method="L-BFGS-B",
+                     control_optim=default_control_optim(),
                      constraint_sum_zero=TRUE,
                      start_from_simple_model=TRUE,
                      parallel_starts=FALSE,
                      nstarts=5,
                      verbose=FALSE){
 
-    validate.inputs(formula=formula, model=model,
-                    nclus.row=nclus.row, nclus.column=nclus.column,
-                    long.df=long.df, initvect=initvect,
-                    pi.init=pi.init, kappa.init=kappa.init,
-                    EM.control=EM.control, optim.method=optim.method,
+    validate_inputs(formula=formula, model=model,
+                    RG=RG, CG=CG,
+                    long_df=long_df, init_parvec=init_parvec,
+                    init_pi=init_pi, init_kappa=init_kappa,
+                    control_EM=control_EM, optim_method=optim_method,
                     constraint_sum_zero=constraint_sum_zero,
                     start_from_simple_model=start_from_simple_model,
                     parallel_starts=parallel_starts,
@@ -1066,167 +1092,164 @@ clustord <- function(formula,
 
     ## If ROW and COL are factors, convert them to their numeric values before
     ## running clustering
-    long.df <- check.factors(long.df)
+    long_df <- check_factors(long_df)
 
-    RG <- nclus.row
-    CG <- nclus.column
+    model_structure <- check_formula(formula, model, long_df, RG, CG)
 
-    model_structure <- check.formula(formula, model, long.df, RG, CG)
-
-    if (sum(model_structure$param_lengths) > nrow(long.df)/2) stop("You are trying to fit a model with more parameters than half the number of cells in the data matrix. You should try a simpler model.")
+    if (sum(model_structure$param_lengths) > nrow(long_df)/2) stop("You are trying to fit a model with more parameters than half the number of cells in the data matrix. You should try a simpler model.")
 
     ## Replace defaults with user-provided values, so that any control parameters
     ## the user did not specify are not left blank:
-    default.EM.control <- default.EM.control()
-    EM.control <- replacedefaults(default.EM.control, EM.control)
+    default_control_EM <- default_control_EM()
+    control_EM <- replacedefaults(default_control_EM, control_EM)
 
     if (verbose) cat(paste("EM algorithm for",model))
 
-    start.par <- NULL
+    start_out <- NULL
 
     if (!is.null(RG) && !is.null(CG)) {
-        EM.control$biclustering <- TRUE
-        if (is.null(initvect) | is.null(pi.init) | is.null(kappa.init)) {
-            ## generate.start will keep using whichever of initvect and pi.init and
-            ## kappa.init are not null
-            start.par <- generate.start.bicluster(long.df, model=model,
+        control_EM$biclustering <- TRUE
+        if (is.null(init_parvec) | is.null(init_pi) | is.null(init_kappa)) {
+            ## generate_start will keep using whichever of init_parvec and init_pi and
+            ## init_kappa are not null
+            start_out <- generate_start_bicluster(long_df, model=model,
                                                   model_structure=model_structure,
-                                                  RG=RG, CG=CG, initvect=initvect,
-                                                  pi.init=pi.init, kappa.init=kappa.init,
-                                                  EM.control=EM.control,
-                                                  optim.method=optim.method,
-                                                  optim.control=optim.control,
+                                                  RG=RG, CG=CG, init_parvec=init_parvec,
+                                                  init_pi=init_pi, init_kappa=init_kappa,
+                                                  control_EM=control_EM,
+                                                  optim_method=optim_method,
+                                                  control_optim=control_optim,
                                                   constraint_sum_zero=constraint_sum_zero,
                                                   start_from_simple_model=start_from_simple_model,
                                                   parallel_starts=parallel_starts,
                                                   nstarts=nstarts,
                                                   verbose=verbose)
-            initvect <- start.par$initvect
-            pi.init <- start.par$pi.init
-            kappa.init <- start.par$kappa.init
+            init_parvec <- start_out$init_parvec
+            init_pi <- start_out$init_pi
+            init_kappa <- start_out$init_kappa
         }
-        results <- run.EM.bicluster(invect=initvect, model=model, long.df=long.df,
+        results <- run_EM_bicluster(init_parvec=init_parvec, model=model, long_df=long_df,
                                     rowc_mm=model_structure$rowc_mm, colc_mm=model_structure$colc_mm,
                                     cov_mm=model_structure$cov_mm,
-                                    pi_v=pi.init, kappa_v=kappa.init,
+                                    pi_v=init_pi, kappa_v=init_kappa,
                                     param_lengths=model_structure$param_lengths,
                                     constraint_sum_zero=constraint_sum_zero,
-                                    EM.control=EM.control,
-                                    optim.method=optim.method, optim.control=optim.control,
+                                    control_EM=control_EM,
+                                    optim_method=optim_method, control_optim=control_optim,
                                     verbose=verbose)
     } else if (!is.null(RG)) {
-        EM.control$biclustering <- FALSE
-        if (is.null(initvect) | is.null(pi.init)) {
-            ## generate.start will keep using whichever of initvect and pi.init is not null
-            start.par <- generate.start.rowcluster(long.df, model=model,
+        control_EM$biclustering <- FALSE
+        if (is.null(init_parvec) | is.null(init_pi)) {
+            ## generate_start will keep using whichever of init_parvec and init_pi is not null
+            start_out <- generate_start_rowcluster(long_df, model=model,
                                                    model_structure=model_structure, RG=RG,
-                                                   initvect=initvect, pi.init=pi.init,
-                                                   EM.control=EM.control,
-                                                   optim.method=optim.method,
-                                                   optim.control=optim.control,
+                                                   init_parvec=init_parvec, init_pi=init_pi,
+                                                   control_EM=control_EM,
+                                                   optim_method=optim_method,
+                                                   control_optim=control_optim,
                                                    constraint_sum_zero=constraint_sum_zero,
                                                    start_from_simple_model=start_from_simple_model,
                                                    parallel_starts=parallel_starts,
                                                    nstarts=nstarts,
                                                    verbose=verbose)
-            initvect <- start.par$initvect
-            pi.init <- start.par$pi.init
+            init_parvec <- start_out$init_parvec
+            init_pi <- start_out$init_pi
         }
-        results <- run.EM.rowcluster(invect=initvect, model=model, long.df=long.df,
+        results <- run_EM_rowcluster(init_parvec=init_parvec, model=model, long_df=long_df,
                                      rowc_mm=model_structure$rowc_mm, colc_mm=model_structure$colc_mm,
                                      cov_mm=model_structure$cov_mm,
-                                     pi_v=pi.init, param_lengths=model_structure$param_lengths,
+                                     pi_v=init_pi, param_lengths=model_structure$param_lengths,
                                      constraint_sum_zero=constraint_sum_zero,
-                                     EM.control=EM.control,
-                                     optim.method=optim.method, optim.control=optim.control,
+                                     control_EM=control_EM,
+                                     optim_method=optim_method, control_optim=control_optim,
                                      verbose=verbose)
     } else if (!is.null(CG)) {
-        EM.control$biclustering <- FALSE
-        RG <- nclus.column
-        pi.init <- kappa.init
-        long.df.transp <- long.df
-        long.df.transp$ROW <- long.df$COL
-        long.df.transp$COL <- long.df$ROW
+        control_EM$biclustering <- FALSE
+        RG <- CG
+        init_pi <- init_kappa
+        long_df_transp <- long_df
+        long_df_transp$ROW <- long_df$COL
+        long_df_transp$COL <- long_df$ROW
 
         # Convert the model structure to row clustering instead of column clustering
-        model_structure.transp <- convert.model.row.to.column(model_structure)
+        model_structure.transp <- convert_model_row_to_column(model_structure)
 
-        if (is.null(initvect) | is.null(pi.init)) {
-            ## generate.start will keep using whichever of initvect and kappa.init is not null
-            start.par <- generate.start.rowcluster(long.df.transp, model=model,
+        if (is.null(init_parvec) | is.null(init_pi)) {
+            ## generate_start will keep using whichever of init_parvec and init_kappa is not null
+            start_out <- generate_start_rowcluster(long_df_transp, model=model,
                                                    model_structure=model_structure.transp, RG=RG,
-                                                   initvect=initvect, pi.init=kappa.init,
-                                                   EM.control=EM.control,
-                                                   optim.method=optim.method,
-                                                   optim.control=optim.control,
+                                                   init_parvec=init_parvec, init_pi=init_kappa,
+                                                   control_EM=control_EM,
+                                                   optim_method=optim_method,
+                                                   control_optim=control_optim,
                                                    constraint_sum_zero=constraint_sum_zero,
                                                    start_from_simple_model=start_from_simple_model,
                                                    parallel_starts=parallel_starts,
                                                    nstarts=nstarts,
                                                    verbose=verbose)
-            initvect <- start.par$initvect
-            pi.init <- start.par$pi.init
+            init_parvec <- start_out$init_parvec
+            init_pi <- start_out$init_pi
         }
 
-        results <- run.EM.rowcluster(invect=initvect, long.df=long.df.transp,
+        results <- run_EM_rowcluster(init_parvec=init_parvec, long_df=long_df_transp,
                                      model=model,
                                      rowc_mm=model_structure.transp$rowc_mm,
                                      colc_mm=model_structure.transp$colc_mm,
                                      cov_mm=model_structure.transp$cov_mm,
-                                     pi_v=pi.init,
+                                     pi_v=init_pi,
                                      param_lengths=model_structure.transp$param_lengths,
                                      constraint_sum_zero=constraint_sum_zero,
-                                     EM.control=EM.control,
-                                     optim.method=optim.method, optim.control=optim.control,
+                                     control_EM=control_EM,
+                                     optim_method=optim_method, control_optim=control_optim,
                                      verbose=verbose)
 
         ## Now convert the results back to row clustering ----
-        column.info <- results$info
-        column.info[c('nclus.column','n','p')] <- column.info[c('nclus.row','p','n')]
-        column.info <- column.info[-which(names(column.info) == "nclus.row")]
+        column_info <- results$info
+        column_info[c('CG','n','p')] <- column_info[c('RG','p','n')]
+        column_info <- column_info[-which(names(column_info) == "RG")]
 
-        column.parlist <- convert.output.row.to.column(results$parlist.out)
+        column_parlist <- convert_output_row_to_column(results$out_parlist)
 
-        column.best.parlist <- convert.output.row.to.column(results$EM.status$params.for.best.lli)
+        column_best_parlist <- convert_output_row_to_column(results$EMstatus$params_for_best_lli)
 
-        column.EM.status <- results$EM.status
-        column.EM.status$params.for.best.lli <- column.best.parlist
+        column_EMstatus <- results$EMstatus
+        column_EMstatus$params_for_best_lli <- column_best_parlist
 
         # Note: keep row-clustering-format param_lengths for
-        column.results <- list(info=column.info,
+        column_results <- list(info=column_info,
                                model=results$model,
                                clustering_mode="column clustering",
-                               EM.status=column.EM.status,
+                               EMstatus=column_EMstatus,
                                criteria=results$criteria,
-                               numerical.correction.epsilon=results$numerical.correction.epsilon,
+                               numerical_correction_epsilon=results$numerical_correction_epsilon,
                                constraint_sum_zero=results$constraint_sum_zero,
                                param_lengths=model_structure$param_lengths,
-                               initvect=initvect,
-                               parlist.out=column.parlist,
-                               kappa.init=results$pi.init,
-                               kappa.out=results$pi.out,
-                               ppc=results$ppr,
+                               init_parvec=init_parvec,
+                               out_parlist=column_parlist,
+                               init_kappa=results$init_pi,
+                               column_cluster_proportions=results$row_cluster_proportions,
+                               column_cluster_probs=results$row_cluster_probs,
                                colc_mm=model_structure$colc_mm,
                                cov_mm=model_structure$cov_mm,
-                               ColumnClusters=results$RowClusters,
-                               ColumnClusterMembers=results$RowClusterMembers,
+                               column_clusters=results$row_clusters,
+                               column_cluster_members=results$row_cluster_members,
                                rowc_format_param_lengths=results$param_lengths,
-                               rowc_format_outvect=results$outvect,
-                               rowc_format_parlist.init=results$parlist.init,
+                               rowc_format_out_parvec=results$out_parvec,
+                               rowc_format_init_parlist=results$init_parlist,
                                rowc_format_rowc_mm=model_structure.transp$rowc_mm)
 
-        results <- column.results
+        results <- column_results
     } else {
-        stop("Both nclus.row and nclus.col are NULL. Please set one or both to integers and try again.")
+        stop("Both RG and CG are NULL. Please set one or both to integers and try again.")
     }
 
     ## If the model contains individual row or column effects, rename them accordingly
-    results <- tidy.output(results, long.df)
+    results <- tidy_output(results, long_df)
 
-    if (results$EM.status$converged) message("EM algorithm has successfully converged.")
+    if (results$EMstatus$converged) message("EM algorithm has successfully converged.")
     else message("EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.")
 
-    results$start.par <- start.par
+    results$start_out <- start_out
     results$call <- match.call()
     results$formula <- formula
     results$terms <- terms(formula)
@@ -1248,14 +1271,14 @@ print.clustord <- function(x, digits = max(3L, getOption("digits") - 3L), ...)
         x$clustering_mode)
 
     cat("\n\nConverged:\n",
-        x$EM.status$converged)
+        x$EMstatus$converged)
 
     cat("\n\nCluster sizes:\n")
-    if ("RowClusterMembers" %in% names(x)) {
-        cat("Row clusters: ", sapply(x$RowClusterMembers, length), "\n")
+    if ("row_cluster_members" %in% names(x)) {
+        cat("Row clusters: ", sapply(x$row_cluster_members, length), "\n")
     }
-    if ("ColumnClusterMembers" %in% names(x)) {
-        cat("Column clusters: ", sapply(x$ColumnClusterMembers, length), "\n")
+    if ("column_cluster_members" %in% names(x)) {
+        cat("Column clusters: ", sapply(x$column_cluster_members, length), "\n")
     }
 
     invisible(x)
@@ -1268,27 +1291,27 @@ summary.clustord <- function (object, ...)
 
     ans <- z[c("call", "terms", "formula", "model", "clustering_mode")]
 
-    ans$convergence <- z$EM.status$converged
+    ans$convergence <- z$EMstatus$converged
 
-    ans$numiter <- z$EM.status$iter
-    ans$loglikelihood <- z$EM.status$best.lli
+    ans$numiter <- z$EMstatus$iter
+    ans$loglikelihood <- z$EMstatus$best_lli
     ans$loglikelihood_type <- ifelse(z$clustering_mode == "biclustering","approximate","exact")
     ans$AIC <- z$criteria$AIC
     ans$BIC <- z$criteria$BIC
 
-    ans$estimates <- z$parlist.out
+    ans$estimates <- z$out_parlist
 
-    if("RowClusterMembers" %in% names(z)) {
-        ans$rowclustersizes <- sapply(z$RowClusterMembers, length)
-        ans$rowclusterprobs <- sapply(1:z$info['nclus.row'], function(idx) {
-            if (length(z$RowClusterMembers[[idx]]) > 0) mean(z$ppr[z$RowClusterMembers[[idx]],idx])
+    if("row_cluster_members" %in% names(z)) {
+        ans$rowclustersizes <- sapply(z$row_cluster_members, length)
+        ans$rowclusterprobs <- sapply(1:z$info['RG'], function(idx) {
+            if (length(z$row_cluster_members[[idx]]) > 0) mean(z$row_cluster_probs[z$row_cluster_members[[idx]],idx])
             else 0
         })
     }
-    if ("ColumnClusterMembers" %in% names(z)) {
-        ans$colclustersizes <- sapply(z$ColumnClusterMembers, length)
-        ans$colclusterprobs <- sapply(1:z$info['nclus.column'], function(idx) {
-            if (length(z$ColumnClusterMembers[[idx]]) > 0) mean(z$ppr[z$ColumnClusterMembers[[idx]],idx])
+    if ("column_cluster_members" %in% names(z)) {
+        ans$colclustersizes <- sapply(z$column_cluster_members, length)
+        ans$colclusterprobs <- sapply(1:z$info['CG'], function(idx) {
+            if (length(z$column_cluster_members[[idx]]) > 0) mean(z$row_cluster_probs[z$column_cluster_members[[idx]],idx])
             else 0
         })
     }
@@ -1341,28 +1364,28 @@ print.summary.clustord <- function (x, digits = max(3L, getOption("digits") - 3L
 #'
 #' Either way, you call the function in the same way, supplying the previous
 #' results object and a dataset, and optionally a new number of iterations
-#' (`EM.control=list(EMcycles=XXX)`, where `XXX` is the new number of iterations.)
+#' (`control_EM=list(maxiter=XXX)`, where `XXX` is the new number of iterations.)
 #'
 #' The output parameters of the old result will be used as the new initial
 #' parameters.
 #'
-#' @param results.original The results of the previous run that you want to use
+#' @param results_original The results of the previous run that you want to use
 #'    as a starting point. The model, number of clusters, and final parameter
-#'    values will be used, and the cluster controls such as EMcycles will be
+#'    values will be used, and the cluster controls such as maxiter will be
 #'    reused unless the user specifies new values. But the row cluster and/or
 #'    column cluster memberships will NOT be reused, and nor will the dataset,
 #'    so you can change the dataset slightly and the rest of the details will
 #'    be applied to this new dataset.
-#' @param long.df The dataset to use for this run, which may be slightly
+#' @param long_df The dataset to use for this run, which may be slightly
 #'    different to the original. Please note that the only compatibility check
 #'    performed is comparing the sizes of the original and new datasets, and it
 #'    is up to the user to check that the new dataset is sufficiently similar
 #'    to the old one.
-#' @param EM.control Options to use for this run such as EMcycles (number of EM
-#'    iterations). Note that "startEMcycles" will not be relevant as this run
+#' @param control_EM Options to use for this run such as maxiter (number of EM
+#'    iterations). Note that "maxiter_start" will not be relevant as this run
 #'    will not generate random starts, it will run from the end parameters of
 #'    the other run. See \link{clustord} documentation for more info.
-#' @param optim.control Options to use for this run within \code{optim()}, which
+#' @param control_optim Options to use for this run within \code{optim()}, which
 #'    is used to estimate the parameters during each M-step. See \link{clustord}
 #'    documentation for more info.
 #' @param verbose (default \code{FALSE}) changes how much is reported to the
@@ -1371,57 +1394,57 @@ print.summary.clustord <- function (x, digits = max(3L, getOption("digits") - 3L
 #' @returns An object of class \code{clustord}. See \link{clustord} for more info.
 #' @examples
 #' set.seed(1)
-#' long.df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),
+#' long_df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),
 #'                ROW=rep(1:20,times=5),COL=rep(1:5,each=20))
-#' results.original <- clustord(Y ~ ROWCLUST, model="OSM", nclus.row=4,
-#'                              long.df=long.df, EM.control=list(EMcycles=2))
-#' results.original$EM.status$converged
+#' results_original <- clustord(Y ~ ROWCLUST, model="OSM", RG=4,
+#'                              long_df=long_df, control_EM=list(maxiter=2))
+#' results_original$EMstatus$converged
 #' # FALSE
 #'
 #' ## Since original run did not converge, rerun from that finishing point and
 #' ## allow more iterations this time
-#' results.new <- rerun(results.original, long.df, EM.control=list(EMcycles=10))
+#' results_new <- rerun(results_original, long_df, control_EM=list(maxiter=10))
 #'
 #' ## Alternatively, if dataset has changed slightly then rerun from the
 #' ## previous finishing point to give the new results a helping hand
-#' long.df.new <- long.df[-c(4,25,140),]
-#' results.new <- rerun(results.original, long.df.new)
+#' long_df.new <- long_df[-c(4,25,140),]
+#' results_new <- rerun(results_original, long_df.new)
 #' @export
-rerun <- function(results.original, long.df, EM.control=NULL, verbose=FALSE, optim.control=NULL) {
-    if (!("clustord" %in% class(results.original))) stop("results.original must be a clustord results object.")
+rerun <- function(results_original, long_df, control_EM=NULL, verbose=FALSE, control_optim=NULL) {
+    if (!("clustord" %in% class(results_original))) stop("results_original must be a clustord results object.")
 
-    model <- results.original$model
-    formula <- results.original$formula
+    model <- results_original$model
+    formula <- results_original$formula
 
-    if ("nclus.row" %in% names(results.original$info)) nclus.row <- results.original$info['nclus.row']
-    else nclus.row <- NULL
-    if ("nclus.column" %in% names(results.original$info)) nclus.column <- results.original$info['nclus.column']
-    else nclus.column <- NULL
+    if ("RG" %in% names(results_original$info)) RG <- results_original$info['RG']
+    else RG <- NULL
+    if ("CG" %in% names(results_original$info)) CG <- results_original$info['CG']
+    else CG <- NULL
 
     # Normalise pi/kappa before resupplying, just in case the outputs don't quite
     # add up to 1.
-    if ("pi.out" %in% names(results.original)) pi.init <- results.original$pi.out/sum(results.original$pi.out)
-    else pi.init <- NULL
-    if ("kappa.out" %in% names(results.original)) kappa.init <- results.original$kappa.out/sum(results.original$kappa.out)
-    else kappa.init <- NULL
+    if ("row_cluster_proportions" %in% names(results_original)) init_pi <- results_original$row_cluster_proportions/sum(results_original$row_cluster_proportions)
+    else init_pi <- NULL
+    if ("column_cluster_proportions" %in% names(results_original)) init_kappa <- results_original$column_cluster_proportions/sum(results_original$column_cluster_proportions)
+    else init_kappa <- NULL
 
-    if ("outvect" %in% names(results.original)) initvect <- results.original$outvect
-    else if ("rowc_format_outvect" %in% names(results.original)) initvect <- results.original$rowc_format_outvect
-    else initvect <- NULL
+    if ("out_parvec" %in% names(results_original)) init_parvec <- results_original$out_parvec
+    else if ("rowc_format_out_parvec" %in% names(results_original)) init_parvec <- results_original$rowc_format_out_parvec
+    else init_parvec <- NULL
 
-    if (abs(length(unique(long.df$ROW)) - results.original$info['n'])/results.original$info['n'] > 0.01) warning("The number of rows in the data matrix has changed by more than 1%. This run may not be compatible with the original run.")
-    if (abs(length(unique(long.df$COL)) - results.original$info['p'])/results.original$info['p'] > 0.01) warning("The number of columns in the data matrix has changed by more than 1%. This run may not be compatible with the original run.")
+    if (abs(length(unique(long_df$ROW)) - results_original$info['n'])/results_original$info['n'] > 0.01) warning("The number of rows in the data matrix has changed by more than 1%. This run may not be compatible with the original run.")
+    if (abs(length(unique(long_df$COL)) - results_original$info['p'])/results_original$info['p'] > 0.01) warning("The number of columns in the data matrix has changed by more than 1%. This run may not be compatible with the original run.")
 
-    results.new <- clustord(formula=formula, model=model, nclus.row=nclus.row,
-                            nclus.column=nclus.column, long.df=long.df,
-                            initvect=initvect, pi.init=pi.init, kappa.init=kappa.init,
-                            EM.control=EM.control, verbose=verbose,
-                            optim.control=optim.control)
-    results.new$call$formula <- formula
-    results.new$call$model <- model
-    names(nclus.row) <- NULL; names(nclus.column) <- NULL
-    results.new$call$nclus.row <- nclus.row
-    results.new$call$nclus.column <- nclus.column
-    results.new$call$verbose <- verbose
-    results.new
+    results_new <- clustord(formula=formula, model=model, RG=RG,
+                            CG=CG, long_df=long_df,
+                            init_parvec=init_parvec, init_pi=init_pi, init_kappa=init_kappa,
+                            control_EM=control_EM, verbose=verbose,
+                            control_optim=control_optim)
+    results_new$call$formula <- formula
+    results_new$call$model <- model
+    names(RG) <- NULL; names(CG) <- NULL
+    results_new$call$RG <- RG
+    results_new$call$CG <- CG
+    results_new$call$verbose <- verbose
+    results_new
 }

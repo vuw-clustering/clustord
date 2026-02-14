@@ -117,7 +117,7 @@ test_that("unpack_parvec produces correct results.", {
 
     expect_warning(unpack_parvec(c(1,2,3,-1,1,-1.5,2,1.5,0.5,0.5,0.6),model="OSM",
                                  param_lengths=param_lengths, n=n, p=p, q=q, RG=RG, CG=2, constraint_sum_zero=FALSE),
-                   "initvect is TOO LONG, the parameters may have been specified incorrectly. Please double-check initvect.")
+                   "init_parvec is TOO LONG, the parameters may have been specified incorrectly. Please double-check init_parvec.")
 
     CG <- 4
     param_lengths <- c(q,q,RG,0,0,0,0,CG,0,0,0,RG*CG)
@@ -247,7 +247,7 @@ test_that("unpack_parvec produces correct results.", {
 
     expect_warning(unpack_parvec(c(1,log(1),log(1),-1.5,2,1.5,0.5,0.5,0.6),model="POM",
                                  param_lengths=param_lengths, n=n, p=p, q=q, RG=RG, CG=2, constraint_sum_zero=FALSE),
-                   "initvect is TOO LONG, the parameters may have been specified incorrectly. Please double-check initvect.")
+                   "init_parvec is TOO LONG, the parameters may have been specified incorrectly. Please double-check init_parvec.")
 
     CG <- 4
     param_lengths <- c(q,0,RG,0,0,0,0,CG,0,0,0,RG*CG)
@@ -331,7 +331,7 @@ test_that("unpack_parvec produces correct results.", {
     expect_warning(unpack_parvec(c(1,-1.5,2,1.5,0.5,0.5,0.6),model="Binary",
                                  param_lengths=param_lengths,
                                  n=n, p=p, q=q, RG=RG, CG=2, constraint_sum_zero=FALSE),
-                   "initvect is TOO LONG, the parameters may have been specified incorrectly. Please double-check initvect.")
+                   "init_parvec is TOO LONG, the parameters may have been specified incorrectly. Please double-check init_parvec.")
 
     CG <- 4
     param_lengths <- c(q,0,RG,0,0,0,0,CG,0,0,0,RG*CG)

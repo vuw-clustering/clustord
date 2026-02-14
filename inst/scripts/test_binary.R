@@ -40,7 +40,7 @@ construct_dat <- function(N,M,theta,row_membership,col_membership) {
 }
 
 construct_longdat <- function(dat) {
-    longdat <- mat2df(dat)
+    longdat <- mat_to_df(dat)
     longdat$ntrials <- rep(1,nrow(longdat))
     longdat$nsucc <- longdat$Y
     longdat$nfail <- 1-longdat$Y
@@ -49,7 +49,7 @@ construct_longdat <- function(dat) {
 
 check_results <- function(output, true_membership, type="row") {
     total <- switch(type,"row"=N,"col"=M)
-    result_clust <- result <- switch(type,"row"=output$ppr,"col"=output$ppc)
+    result_clust <- result <- switch(type,"row"=output$row_cluster_probs,"col"=output$column_cluster_probs)
     assignments <- apply(result_clust,1,which.max)
     percent_correct <- sum(assignments==true_membership)/total*100
     percent_confident_correct <- sum(assignments==true_membership &
@@ -75,10 +75,10 @@ if (F) {
 
     longdat <- data.frame(Y=as.factor(as.vector(dat)),ROW=rep(1:N,times=M),COL=rep(1:M,each=N))
 
-    row2clust.out <- rowclustering("Y~row",model="Binary",long.df=longdat, nclus.row=2,
-                                   EM.control=list(EMcycles=100, EMstoppingpar=1e-4))
+    row2clust.out <- rowclustering("Y~row",model="Binary",long_df=longdat, RG=2,
+                                   control_EM=list(maxiter=100, EMstoppingpar=1e-4))
 
-    round(row2clust.out$ppr,2)
+    round(row2clust.out$row_cluster_probs,2)
     check_results(row2clust.out, row_membership, type="row")
 
     ## Now flip a few of the columns
@@ -87,9 +87,9 @@ if (F) {
 
     longdat2 <- data.frame(Y=as.factor(as.vector(dat2)),ROW=rep(1:N,times=M),COL=rep(1:M,each=N))
 
-    row2clustflip.out <- rowclustering("Y~row+column",model="Binary",long.df=longdat2, nclus.row=2,
-                                       EM.control=list(EMcycles=100, EMstoppingpar=1e-4))
-    round(row2clustflip.out$ppr,2)
+    row2clustflip.out <- rowclustering("Y~row+column",model="Binary",long_df=longdat2, RG=2,
+                                       control_EM=list(maxiter=100, EMstoppingpar=1e-4))
+    round(row2clustflip.out$row_cluster_probs,2)
     check_results(row2clustflip.out, row_membership, type="row")
 
 
@@ -107,10 +107,10 @@ if (F) {
 
     longdat <- data.frame(Y=as.factor(as.vector(dat)),ROW=rep(1:N,times=M),COL=rep(1:M,each=N))
 
-    row2clust.out <- rowclustering("Y~row",model="Binary",long.df=longdat, nclus.row=2,
-                                   EM.control=list(EMcycles=100, EMstoppingpar=1e-4))
+    row2clust.out <- rowclustering("Y~row",model="Binary",long_df=longdat, RG=2,
+                                   control_EM=list(maxiter=100, EMstoppingpar=1e-4))
 
-    round(row2clust.out$ppr,2)
+    round(row2clust.out$row_cluster_probs,2)
     check_results(row2clust.out, row_membership, type="row")
 
     ## Now flip a few of the columns
@@ -119,16 +119,16 @@ if (F) {
 
     longdat2 <- data.frame(Y=as.factor(as.vector(dat2)),ROW=rep(1:N,times=M),COL=rep(1:M,each=N))
 
-    row2clustflip.out <- rowclustering("Y~row+column",model="Binary",long.df=longdat2, nclus.row=2,
-                                       EM.control=list(EMcycles=100, EMstoppingpar=1e-4))
-    round(row2clustflip.out$ppr,2)
+    row2clustflip.out <- rowclustering("Y~row+column",model="Binary",long_df=longdat2, RG=2,
+                                       control_EM=list(maxiter=100, EMstoppingpar=1e-4))
+    round(row2clustflip.out$row_cluster_probs,2)
     check_results(row2clustflip.out, row_membership, type="row")
 
-    row2clustflip.out <- rowclustering("Y~row*column",model="Binary",long.df=longdat2, nclus.row=2,
-                                       EM.control=list(EMcycles=100, EMstoppingpar=1e-4))
-    row2clustflip.out <- rowclustering("Y~row*column",model="Binary",long.df=longdat2, nclus.row=2,
-                                       EM.control=list(EMcycles=100, EMstoppingpar=1e-4, paramstopping=FALSE))
-    round(row2clustflip.out$ppr,2)
+    row2clustflip.out <- rowclustering("Y~row*column",model="Binary",long_df=longdat2, RG=2,
+                                       control_EM=list(maxiter=100, EMstoppingpar=1e-4))
+    row2clustflip.out <- rowclustering("Y~row*column",model="Binary",long_df=longdat2, RG=2,
+                                       control_EM=list(maxiter=100, EMstoppingpar=1e-4, params_stopping=FALSE))
+    round(row2clustflip.out$row_cluster_probs,2)
     check_results(row2clustflip.out, row_membership, type="row")
 
 
@@ -144,10 +144,10 @@ if (F) {
 
     longdat <- data.frame(Y=as.factor(as.vector(dat)),ROW=rep(1:N,times=M),COL=rep(1:M,each=N))
 
-    row2clust.out <- rowclustering("Y~row",model="Binary",long.df=longdat, nclus.row=2,
-                                   EM.control=list(EMcycles=100, EMstoppingpar=1e-4))
+    row2clust.out <- rowclustering("Y~row",model="Binary",long_df=longdat, RG=2,
+                                   control_EM=list(maxiter=100, EMstoppingpar=1e-4))
 
-    round(row2clust.out$ppr,2)
+    round(row2clust.out$row_cluster_probs,2)
     check_results(row2clust.out, row_membership, type="row")
 
     ## Now flip a few of the columns
@@ -156,24 +156,24 @@ if (F) {
 
     longdat2 <- data.frame(Y=as.factor(as.vector(dat2)),ROW=rep(1:N,times=M),COL=rep(1:M,each=N))
 
-    row2clustflip.out <- rowclustering("Y~row+column",model="Binary",long.df=longdat2, nclus.row=2,
-                                       EM.control=list(EMcycles=100, EMstoppingpar=1e-4))
-    round(row2clustflip.out$ppr,2)
+    row2clustflip.out <- rowclustering("Y~row+column",model="Binary",long_df=longdat2, RG=2,
+                                       control_EM=list(maxiter=100, EMstoppingpar=1e-4))
+    round(row2clustflip.out$row_cluster_probs,2)
     check_results(row2clustflip.out, row_membership, type="row")
 
 
 
-    row3clust.out <- rowclustering("Y~row+column",model="Binary",long.df=longdat, nclus.row=3,
-                                       EM.control=list(EMcycles=100, EMstoppingpar=1e-4))
-    round(row3clust.out$ppr,2)
+    row3clust.out <- rowclustering("Y~row+column",model="Binary",long_df=longdat, RG=3,
+                                       control_EM=list(maxiter=100, EMstoppingpar=1e-4))
+    round(row3clust.out$row_cluster_probs,2)
     check_results(row3clust.out, row_membership, type="row")
-    row3clustflip.out <- rowclustering("Y~row+column",model="Binary",long.df=longdat2, nclus.row=3,
-                                   EM.control=list(EMcycles=100, EMstoppingpar=1e-4))
-    round(row3clustflip.out$ppr,2)
+    row3clustflip.out <- rowclustering("Y~row+column",model="Binary",long_df=longdat2, RG=3,
+                                   control_EM=list(maxiter=100, EMstoppingpar=1e-4))
+    round(row3clustflip.out$row_cluster_probs,2)
     check_results(row3clustflip.out, row_membership, type="row")
-    row3clustflip.out <- rowclustering("Y~row*column",model="Binary",long.df=longdat2, nclus.row=3,
-                                       EM.control=list(EMcycles=100, EMstoppingpar=1e-4,paramstopping=FALSE))
-    round(row3clustflip.out$ppr,2)
+    row3clustflip.out <- rowclustering("Y~row*column",model="Binary",long_df=longdat2, RG=3,
+                                       control_EM=list(maxiter=100, EMstoppingpar=1e-4,params_stopping=FALSE))
+    round(row3clustflip.out$row_cluster_probs,2)
     check_results(row3clustflip.out, row_membership, type="row")
 
 }
@@ -210,12 +210,12 @@ if (F) {
 
     longdat <- data.frame(Y=as.factor(as.vector(dat)),ROW=rep(1:N,times=M),COL=rep(1:M,each=N))
 
-    clust.out <- biclustering("Y~row+column",model="Binary",long.df=longdat,
-                                      nclus.row=2, nclus.column=2,
-                                      EM.control=list(EMcycles=100, EMstoppingpar=1e-4))
-    round(clust.out$ppr,2)
+    clust.out <- biclustering("Y~row+column",model="Binary",long_df=longdat,
+                                      RG=2, CG=2,
+                                      control_EM=list(maxiter=100, EMstoppingpar=1e-4))
+    round(clust.out$row_cluster_probs,2)
     check_results(clust.out, row_membership, type="row")
-    round(clust.out$ppc,2)
+    round(clust.out$column_cluster_probs,2)
     check_results(clust.out, col_membership, type="col")
 
 
@@ -232,12 +232,12 @@ if (F) {
 
     longdat <- data.frame(Y=as.factor(as.vector(dat)),ROW=rep(1:N,times=M),COL=rep(1:M,each=N))
 
-    clust.out <- biclustering("Y~row+column",model="Binary",long.df=longdat,
-                                      nclus.row=2, nclus.column=2,
-                                      EM.control=list(EMcycles=100, EMstoppingpar=1e-4))
-    round(clust.out$ppr,2)
+    clust.out <- biclustering("Y~row+column",model="Binary",long_df=longdat,
+                                      RG=2, CG=2,
+                                      control_EM=list(maxiter=100, EMstoppingpar=1e-4))
+    round(clust.out$row_cluster_probs,2)
     check_results(clust.out, row_membership, type="row")
-    round(clust.out$ppc,2)
+    round(clust.out$column_cluster_probs,2)
     check_results(clust.out, col_membership, type="col")
 
 
@@ -273,11 +273,11 @@ if (F) {
 
     longdat <- data.frame(Y=as.factor(as.vector(dat)),ROW=rep(1:N,times=M),COL=rep(1:M,each=N))
 
-    clust.out <- biclustering("Y~row+column",model="Binary",long.df=longdat,
-                                      nclus.row=2, nclus.column=2,
-                                      EM.control=list(EMcycles=100, EMstoppingpar=1e-4))
-    round(clust.out$ppr,2)
+    clust.out <- biclustering("Y~row+column",model="Binary",long_df=longdat,
+                                      RG=2, CG=2,
+                                      control_EM=list(maxiter=100, EMstoppingpar=1e-4))
+    round(clust.out$row_cluster_probs,2)
     check_results(clust.out, row_membership, type="row")
-    round(clust.out$ppc,2)
+    round(clust.out$column_cluster_probs,2)
     check_results(clust.out, col_membership, type="col")
 }

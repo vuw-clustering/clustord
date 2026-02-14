@@ -1,30 +1,30 @@
-default.EM.control <- function() {
-    list(EMcycles=50, EMlikelihoodtol=1e-4, EMparamtol=1e-2,
-         paramstopping=TRUE, startEMcycles=5, keepallparams=FALSE,
-         rerunestepbeforelli=FALSE, uselatestlli=TRUE,
+default_control_EM <- function() {
+    list(maxiter=50, EM_likelihood_tol=1e-4, EM_params_tol=1e-2,
+         params_stopping=TRUE, maxiter_start=5, keep_all_params=FALSE,
+         rerun_estep_before_lli=FALSE, use_latest_lli=TRUE,
          epsilon=1e-6)
 }
 
-default.optim.control <- function() {
+default_control_optim <- function() {
     list(maxit=100,trace=0,pgtol=1e-4,factr=1e11)
 }
 
-new.EM.status <- function() {
-    list(iter=0,finished=FALSE,converged=FALSE, paramstopping=FALSE,
-         llc.for.best.lli=-.Machine$double.xmax,
-         params.for.best.lli=list(),best.lli=-.Machine$double.xmax,
-         new.lli=-.Machine$double.xmax, previous.lli=-.Machine$double.xmax,
-         params.every.iteration=vector())
+new_EMstatus <- function() {
+    list(iter=0,finished=FALSE,converged=FALSE, params_stopping=FALSE,
+         llc_for_best_lli=-.Machine$double.xmax,
+         params_for_best_lli=list(),best_lli=-.Machine$double.xmax,
+         new_lli=-.Machine$double.xmax, previous_lli=-.Machine$double.xmax,
+         params_every_iteration=vector())
 }
 
 #' @keywords internal
-check.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
-                             parlist.out, n, p, pi_v=NULL, kappa_v=NULL, EM.control) {
-    iter <- EM.status$iter+1
+check_EMstatus <- function(EMstatus, new_llc, new_lli, current_parvec, new_parvec,
+                           out_parlist, n, p, pi_v=NULL, kappa_v=NULL, control_EM) {
+    iter <- EMstatus$iter+1
     finished <- FALSE
     converged <- FALSE
 
-    if (new.lli > EM.status$best.lli | EM.control$uselatestlli) {
+    if (new_lli > EMstatus$best_lli | control_EM$use_latest_lli) {
         ## For the biclustering algorithm, LLI is an approximation because the
         ## exact version is computationally infeasible to calculate. And the
         ## approximation gets more accurate as you get closer to the MLE, but
@@ -33,89 +33,89 @@ check.EM.status <- function(EM.status, new.llc, new.lli, invect, outvect,
         ## For the rowclustering algorithm, the exact LLI should always increase
         ## from one timestep to the next (the EM algorithm creators proved this
         ## mathematically) so you should take the latest LLI.
-        best.lli <- new.lli
-        llc.for.best.lli <- new.llc
-        params.for.best.lli <- parlist.out
-        params.for.best.lli$n <- NULL
-        params.for.best.lli$p <- NULL
-        params.for.best.lli$pi <- pi_v
-        if (!is.null(kappa_v)) params.for.best.lli$kappa <- kappa_v
+        best_lli <- new_lli
+        llc_for_best_lli <- new_llc
+        params_for_best_lli <- out_parlist
+        params_for_best_lli$n <- NULL
+        params_for_best_lli$p <- NULL
+        params_for_best_lli$pi <- pi_v
+        if (!is.null(kappa_v)) params_for_best_lli$kappa <- kappa_v
     } else {
         ## This version is kept for backwards compatibility with the original
         ## clustord algorithm
-        best.lli <- EM.status$best.lli
-        llc.for.best.lli <- EM.status$llc.for.best.lli
-        params.for.best.lli <- EM.status$params.for.best.lli
+        best_lli <- EMstatus$best_lli
+        llc_for_best_lli <- EMstatus$llc_for_best_lli
+        params_for_best_lli <- EMstatus$params_for_best_lli
     }
 
-    param.exp.in <- exp(abs(invect))
-    param.exp.out <- exp(abs(outvect))
-    param.stopping.criterion <- sum(abs(param.exp.in - param.exp.out)/param.exp.out)
+    param_exp_in <- exp(abs(current_parvec))
+    param_exp_out <- exp(abs(new_parvec))
+    param_stopping_criterion <- sum(abs(param_exp_in - param_exp_out)/param_exp_out)
 
     ## Use the size of the dataset to scale the result, because the lli value is
     ## strongly negatively correlated with the size of the dataset
-    likelihood.stopping.criterion <- abs(EM.status$previous.lli - new.lli)/(n*p)
+    likelihood_stopping_criterion <- abs(EMstatus$previous_lli - new_lli)/(n*p)
 
-    if (is.infinite(new.lli)) likelihood.stopping.criterion <- Inf
+    if (is.infinite(new_lli)) likelihood_stopping_criterion <- Inf
 
-    if (any(is.infinite(param.exp.out))) param.stopping.criterion <- Inf
+    if (any(is.infinite(param_exp_out))) param_stopping_criterion <- Inf
 
-    if (likelihood.stopping.criterion < EM.control$EMlikelihoodtol &
-        (!EM.control$paramstopping || param.stopping.criterion < EM.control$EMparamtol)) converged <- TRUE
+    if (likelihood_stopping_criterion < control_EM$EM_likelihood_tol &
+        (!control_EM$params_stopping || param_stopping_criterion < control_EM$EM_params_tol)) converged <- TRUE
 
-    if (converged || iter >= EM.control$EMcycles) finished <- TRUE
-    EM.status.out <- list(iter=iter,finished=finished,converged=converged,
-                          new.llc=new.llc, new.lli=new.lli, previous.lli=EM.status$new.lli,
-                          llc.for.best.lli=llc.for.best.lli, params.for.best.lli=params.for.best.lli,
-                          best.lli=best.lli, paramstopping=EM.control$paramstopping)
-    if (EM.control$keepallparams) {
-        names(new.lli) <- "lli"
-        names(new.llc) <- "llc"
+    if (converged || iter >= control_EM$maxiter) finished <- TRUE
+    EMstatus_out <- list(iter=iter,finished=finished,converged=converged,
+                         new_llc=new_llc, new_lli=new_lli, previous_lli=EMstatus$new_lli,
+                         llc_for_best_lli=llc_for_best_lli, params_for_best_lli=params_for_best_lli,
+                         best_lli=best_lli, params_stopping=control_EM$params_stopping)
+    if (control_EM$keep_all_params) {
+        names(new_lli) <- "lli"
+        names(new_llc) <- "llc"
         names(pi_v) <- paste0("pi",seq_along(pi_v))
         if (!is.null(kappa_v)) {
             names(kappa_v) <- paste0("kappa",seq_along(kappa_v))
 
-            ## IMPORTANT: note that params.every.iteration unpacks matrices
-            ## such as rowc_colc effects BY COLUMN, not by row, unlike outvect
-            newparams <- c(unlist(parlist.out),
-                           pi_v,kappa_v,new.lli,new.llc)
+            ## IMPORTANT: note that params_every_iteration unpacks matrices
+            ## such as rowc_colc effects BY COLUMN, not by row, unlike out_parvec
+            newparams <- c(unlist(out_parlist),
+                           pi_v,kappa_v,new_lli,new_llc)
         } else {
-            newparams <- c(unlist(parlist.out), pi_v,new.lli,new.llc)
+            newparams <- c(unlist(out_parlist), pi_v,new_lli,new_llc)
         }
 
-        EM.status.out$params.every.iteration <- rbind(EM.status$params.every.iteration,
-                                                      newparams)
+        EMstatus_out$params_every_iteration <- rbind(EMstatus$params_every_iteration,
+                                                     newparams)
     }
 
-    EM.status.out
+    EMstatus_out
 }
 
 #' @importFrom stats optim
-run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
+run_EM_rowcluster <- function(init_parvec, model, long_df, rowc_mm, colc_mm, cov_mm,
                               pi_v, param_lengths,
                               constraint_sum_zero=TRUE,
-                              model_label="Full", EM.control=default.EM.control(),
-                              optim.method="L-BFGS-B", optim.control=default.optim.control(),
+                              model_label="Full", control_EM=default_control_EM(),
+                              optim_method="L-BFGS-B", control_optim=default_control_optim(),
                               verbose=TRUE) {
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
-    q <- length(levels(long.df$Y))
+    n <- max(long_df$ROW)
+    p <- max(long_df$COL)
+    q <- length(levels(long_df$Y))
     RG <- length(pi_v)
 
-    ## Extract parameters in R in order to check that invect is the correct length
-    parlist.in <- unpack_parvec(invect, model=model, param_lengths=param_lengths,
-                                n, p, q, RG, CG = NULL,
-                                constraint_sum_zero = constraint_sum_zero)
-    if (any(sapply(parlist.in,function(elt) any(is.na(elt))))) stop("Error unpacking parameters for model.")
-    if (any(sapply(parlist.in,function(elt) is.null(elt)))) stop("Error unpacking parameters for model.")
+    ## Extract parameters in R in order to check that init_parvec is the correct length
+    init_parlist <- unpack_parvec(init_parvec, model=model, param_lengths=param_lengths,
+                                  n, p, q, RG, CG = NULL,
+                                  constraint_sum_zero = constraint_sum_zero)
+    if (any(sapply(init_parlist,function(elt) any(is.na(elt))))) stop("Error unpacking parameters for model.")
+    if (any(sapply(init_parlist,function(elt) is.null(elt)))) stop("Error unpacking parameters for model.")
 
     ## Important: do NOT change the order of the three columns in this call,
     ## because the C++ code relies on having this order for Y, ROW and COL
-    ydf <- cbind(long.df$Y, as.numeric(long.df$ROW), as.numeric(long.df$COL))
+    ydf <- cbind(long_df$Y, as.numeric(long_df$ROW), as.numeric(long_df$COL))
 
-    optim.control$fnscale <- -1
+    control_optim$fnscale <- -1
 
-    epsilon <- EM.control$epsilon
+    epsilon <- control_EM$epsilon
 
     ## Important: do NOT change the order of these model types or entries in
     ## param_lengths, because the Rcpp code relies on having this order for the
@@ -125,16 +125,15 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
     param_lengths_num <- param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
                                          'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
 
-    parlist.init <- parlist.in
-    pi.init <- pi_v
-    initvect <- invect
-    outvect <- invect
+    init_pi <- pi_v
+    current_parvec <- init_parvec
+    new_parvec <- init_parvec
     # Run the EM cycle:
-    EM.status <- new.EM.status()
+    EMstatus <- new_EMstatus()
 
-    while(!EM.status$finished)
+    while(!EMstatus$finished)
     {
-        ppr_m <- rcpp_Rcluster_Estep(invect, model_num,
+        ppr_m <- rcpp_Rcluster_Estep(current_parvec, model_num,
                                      ydf, rowc_mm, colc_mm, cov_mm,
                                      pi_v, param_lengths_num,
                                      RG, p, n, q, epsilon, constraint_sum_zero)
@@ -144,10 +143,10 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 
         pi_v <- colMeans(ppr_m)
 
-        invect <- outvect
+        current_parvec <- new_parvec
         # M-step:
         #use numerical maximisation
-        optim.fit <- optim(par=invect,
+        optim_fit <- optim(par=current_parvec,
                            fn=rcpp_Rclusterll,
                            model_num=model_num,
                            ydf=ydf,
@@ -161,16 +160,16 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                            constraint_sum_zero=constraint_sum_zero,
                            partial=TRUE,
                            incomplete=FALSE,
-                           method=optim.method,
-                           hessian=F,control=optim.control)
+                           method=optim_method,
+                           hessian=F,control=control_optim)
 
-        outvect <- optim.fit$par
+        new_parvec <- optim_fit$par
 
-        parlist.out <- unpack_parvec(outvect,model=model, param_lengths=param_lengths,
+        out_parlist <- unpack_parvec(new_parvec,model=model, param_lengths=param_lengths,
                                      n, p, q, RG, CG = NULL,
                                      constraint_sum_zero = constraint_sum_zero)
 
-        llc <- rcpp_Rclusterll(outvect,
+        llc <- rcpp_Rclusterll(new_parvec,
                                model_num=model_num,
                                ydf=ydf,
                                rowc_mm=rowc_mm,
@@ -184,7 +183,7 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                partial=FALSE,
                                incomplete=FALSE)
 
-        lli <- rcpp_Rclusterll(outvect,
+        lli <- rcpp_Rclusterll(new_parvec,
                                model_num=model_num,
                                ydf=ydf,
                                rowc_mm=rowc_mm,
@@ -198,73 +197,76 @@ run.EM.rowcluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                partial=FALSE,
                                incomplete=TRUE)
 
-        EM.status <- check.EM.status(EM.status,new.llc=llc,new.lli=lli,
-                                      parlist.out=parlist.out,
-                                      invect=invect,outvect=outvect, n=n, p=p,
-                                      pi_v=pi_v,EM.control=EM.control)
+        EMstatus <- check_EMstatus(EMstatus,new_llc=llc,new_lli=lli,
+                                   out_parlist=out_parlist,
+                                   current_parvec=current_parvec,
+                                   new_parvec=new_parvec, n=n, p=p,
+                                   pi_v=pi_v,control_EM=control_EM)
 
-        if (verbose | (!verbose & EM.status$iter %% 10 == 0)) cat(paste(model_label,'model iter=',EM.status$iter, ' incomplete-data log-like=', lli ,'\n'))
+        if (verbose | (!verbose & EMstatus$iter %% 10 == 0)) cat(paste(model_label,'model iter=',EMstatus$iter, ' incomplete-data log-like=', lli ,'\n'))
     }
+
+    out_parvec <- new_parvec
 
     # Find cluster groupings:
     Rclusmem <- assignments(ppr_m)
     Rclusters <- apply(ppr_m, 1, which.max)
 
     # Save results:
-    initvect <- name_invect(initvect, model, param_lengths, n, p, q, RG, constraint_sum_zero=constraint_sum_zero)
-    outvect <- name_invect(outvect, model, param_lengths, n, p, q, RG, constraint_sum_zero=constraint_sum_zero)
-    npar <- length(invect) + length(pi_v)-1
-    ninitvect <- length(invect)
-    criteria <- calc.criteria(EM.status$best.lli, EM.status$llc.for.best.lli, npar, n, p)
-    info <- c(n, p, q, npar, ninitvect, RG)
-    names(info) <- c("n","p","q","npar","ninitvect","nclus.row")
+    init_parvec <- name_init_parvec(init_parvec, model, param_lengths, n, p, q, RG, constraint_sum_zero=constraint_sum_zero)
+    out_parvec <- name_init_parvec(out_parvec, model, param_lengths, n, p, q, RG, constraint_sum_zero=constraint_sum_zero)
+    npar <- length(out_parvec) + length(pi_v)-1
+    ninit_parvec <- length(out_parvec)
+    criteria <- calc_criteria(EMstatus$best_lli, EMstatus$llc_for_best_lli, npar, n, p)
+    info <- c(n, p, q, npar, ninit_parvec, RG)
+    names(info) <- c("n","p","q","npar","ninit_parvec","RG")
     list("info"=info,
          "model"=model,
          "clustering_mode"="row clustering",
-         "EM.status"=EM.status,
+         "EMstatus"=EMstatus,
          "criteria"=criteria,
-         "numerical.correction.epsilon"=epsilon,
+         "numerical_correction_epsilon"=epsilon,
          "constraint_sum_zero"=constraint_sum_zero,
          "param_lengths"=param_lengths,
-         "initvect"=initvect,
-         "outvect"=outvect,
-         "parlist.init"=parlist.init,
-         "parlist.out"=parlist.out,
-         "pi.init"=pi.init,
-         "pi.out"=pi_v,
-         "ppr"=ppr_m,
-         "rowc_mm"=rowc_mm,
-         "cov_mm"=cov_mm,
-         "RowClusterMembers"=Rclusmem,
-         "RowClusters"=Rclusters)
+         "init_parvec"=init_parvec,
+         "out_parvec"=out_parvec,
+         "init_parlist"=init_parlist,
+         "out_parlist"=out_parlist,
+         "init_pi"=init_pi,
+         "row_cluster_proportions"=pi_v,
+         "row_cluster_probs"=ppr_m,
+         "row_cluster_interaction_matrix"=rowc_mm,
+         "covariates_model_matrix"=cov_mm,
+         "row_cluster_members"=Rclusmem,
+         "row_clusters"=Rclusters)
 }
 
-run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
+run_EM_bicluster <- function(init_parvec, model, long_df, rowc_mm, colc_mm, cov_mm,
                              pi_v, kappa_v, param_lengths,
                              constraint_sum_zero=TRUE,
-                             model_label="Full", EM.control=default.EM.control(),
-                             optim.method="L-BFGS-B", optim.control=default.optim.control(),
+                             model_label="Full", control_EM=default_control_EM(),
+                             optim_method="L-BFGS-B", control_optim=default_control_optim(),
                              verbose=TRUE) {
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
-    q <- length(levels(long.df$Y))
+    n <- max(long_df$ROW)
+    p <- max(long_df$COL)
+    q <- length(levels(long_df$Y))
     RG <- length(pi_v)
     CG <- length(kappa_v)
 
-    ## Extract parameters in R in order to check that invect is the correct length
-    parlist.in <- unpack_parvec(invect, model=model, param_lengths=param_lengths,
-                                n, p, q, RG, CG,
-                                constraint_sum_zero = constraint_sum_zero)
-    if (any(sapply(parlist.in,function(elt) any(is.na(elt))))) stop("Error unpacking parameters for model.")
-    if (any(sapply(parlist.in,function(elt) is.null(elt)))) stop("Error unpacking parameters for model.")
+    ## Extract parameters in R in order to check that init_parvec is the correct length
+    init_parlist <- unpack_parvec(init_parvec, model=model, param_lengths=param_lengths,
+                                  n, p, q, RG, CG,
+                                  constraint_sum_zero = constraint_sum_zero)
+    if (any(sapply(init_parlist,function(elt) any(is.na(elt))))) stop("Error unpacking parameters for model.")
+    if (any(sapply(init_parlist,function(elt) is.null(elt)))) stop("Error unpacking parameters for model.")
 
     ## Important: do NOT change the order of the three columns in this call,
     ## because the C++ code relies on having this order for Y, ROW and COL
-    ydf <- cbind(long.df$Y, as.numeric(long.df$ROW), as.numeric(long.df$COL))
+    ydf <- cbind(long_df$Y, as.numeric(long_df$ROW), as.numeric(long_df$COL))
 
-    optim.control$fnscale <- -1
+    control_optim$fnscale <- -1
 
-    epsilon <- EM.control$epsilon
+    epsilon <- control_EM$epsilon
 
     ## Important: do NOT change the order of these model types or entries in
     ## param_lengths, because the Rcpp code relies on having this order for the
@@ -276,17 +278,16 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
     param_lengths_num <- param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
                                          'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
 
-    parlist.init <- parlist.in
-    pi.init <- pi_v
-    kappa.init <- kappa_v
-    initvect <- invect
-    outvect <- invect
+    init_pi <- pi_v
+    init_kappa <- kappa_v
+    current_parvec <- init_parvec
+    new_parvec <- init_parvec
     # Run the EM cycle:
-    EM.status <- new.EM.status()
+    EMstatus <- new_EMstatus()
 
-    while(!EM.status$finished)
+    while(!EMstatus$finished)
     {
-        ppr_m <- rcpp_Bicluster_Estep(invect, model_num,
+        ppr_m <- rcpp_Bicluster_Estep(current_parvec, model_num,
                                       ydf, rowc_mm, colc_mm, cov_mm,
                                       pi_v, kappa_v, param_lengths_num,
                                       RG, CG, p, n, q, epsilon, constraint_sum_zero,
@@ -297,7 +298,7 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 
         pi_v <- colMeans(ppr_m)
 
-        ppc_m <- rcpp_Bicluster_Estep(invect, model_num,
+        ppc_m <- rcpp_Bicluster_Estep(current_parvec, model_num,
                                       ydf, rowc_mm, colc_mm, cov_mm,
                                       pi_v, kappa_v, param_lengths_num,
                                       RG, CG, p, n, q, epsilon, constraint_sum_zero,
@@ -308,10 +309,10 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
 
         kappa_v <- colMeans(ppc_m)
 
-        invect <- outvect
+        current_parvec <- new_parvec
         # M-step:
         #use numerical maximisation
-        optim.fit <- optim(par=invect,
+        optim_fit <- optim(par=current_parvec,
                            fn=rcpp_Biclusterll,
                            model_num=model_num,
                            ydf=ydf,
@@ -327,16 +328,16 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                            constraint_sum_zero=constraint_sum_zero,
                            partial=TRUE,
                            incomplete=FALSE, llc=NA,
-                           method=optim.method,
-                           hessian=F,control=optim.control)
+                           method=optim_method,
+                           hessian=F,control=control_optim)
 
-        outvect <- optim.fit$par
+        new_parvec <- optim_fit$par
 
-        parlist.out <- unpack_parvec(outvect,model=model, param_lengths=param_lengths,
+        out_parlist <- unpack_parvec(new_parvec,model=model, param_lengths=param_lengths,
                                      n, p, q, RG, CG,
                                      constraint_sum_zero = constraint_sum_zero)
 
-        llc <- rcpp_Biclusterll(outvect,
+        llc <- rcpp_Biclusterll(new_parvec,
                                 model_num=model_num,
                                 ydf=ydf,
                                 rowc_mm=rowc_mm,
@@ -352,22 +353,22 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                 partial=FALSE,
                                 incomplete=FALSE, llc=NA)
 
-        if (EM.control$biclustering && EM.control$rerunestepbeforelli) {
-            ppr_m_latest <- rcpp_Bicluster_Estep(invect, model_num,
-                                          ydf, rowc_mm, colc_mm, cov_mm,
-                                          pi_v, kappa_v, param_lengths_num,
-                                          RG, CG, p, n, q, epsilon, constraint_sum_zero,
-                                          row_clusters=TRUE)
+        if (control_EM$biclustering && control_EM$rerun_estep_before_lli) {
+            ppr_m_latest <- rcpp_Bicluster_Estep(new_parvec, model_num,
+                                                 ydf, rowc_mm, colc_mm, cov_mm,
+                                                 pi_v, kappa_v, param_lengths_num,
+                                                 RG, CG, p, n, q, epsilon, constraint_sum_zero,
+                                                 row_clusters=TRUE)
 
             ## Now set any NA values in the posterior probabilities matrix to 0
             ppr_m_latest[is.na(ppr_m_latest)] <- 0
-            ppc_m_latest <- rcpp_Bicluster_Estep(invect, model_num,
-                                          ydf, rowc_mm, colc_mm, cov_mm,
-                                          pi_v, kappa_v, param_lengths_num,
-                                          RG, CG, p, n, q, epsilon, constraint_sum_zero,
-                                          row_clusters=FALSE)
+            ppc_m_latest <- rcpp_Bicluster_Estep(new_parvec, model_num,
+                                                 ydf, rowc_mm, colc_mm, cov_mm,
+                                                 pi_v, kappa_v, param_lengths_num,
+                                                 RG, CG, p, n, q, epsilon, constraint_sum_zero,
+                                                 row_clusters=FALSE)
             ppc_m_latest[is.na(ppc_m_latest)] <- 0
-            lli <- rcpp_Biclusterll(outvect,
+            lli <- rcpp_Biclusterll(new_parvec,
                                     model_num=model_num,
                                     ydf=ydf,
                                     rowc_mm=rowc_mm,
@@ -383,35 +384,38 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
                                     partial=FALSE,
                                     incomplete=TRUE, llc=llc)
         } else {
-        lli <- rcpp_Biclusterll(outvect,
-                                model_num=model_num,
-                                ydf=ydf,
-                                rowc_mm=rowc_mm,
-                                colc_mm=colc_mm,
-                                cov_mm=cov_mm,
-                                ppr_m=ppr_m,
-                                ppc_m=ppc_m,
-                                pi_v=pi_v,
-                                kappa_v=kappa_v,
-                                param_lengths=param_lengths_num,
-                                RG=RG, CG=CG, p=p, n=n, q=q, epsilon=epsilon,
-                                constraint_sum_zero=constraint_sum_zero,
-                                partial=FALSE,
-                                incomplete=TRUE, llc=llc)
+            lli <- rcpp_Biclusterll(new_parvec,
+                                    model_num=model_num,
+                                    ydf=ydf,
+                                    rowc_mm=rowc_mm,
+                                    colc_mm=colc_mm,
+                                    cov_mm=cov_mm,
+                                    ppr_m=ppr_m,
+                                    ppc_m=ppc_m,
+                                    pi_v=pi_v,
+                                    kappa_v=kappa_v,
+                                    param_lengths=param_lengths_num,
+                                    RG=RG, CG=CG, p=p, n=n, q=q, epsilon=epsilon,
+                                    constraint_sum_zero=constraint_sum_zero,
+                                    partial=FALSE,
+                                    incomplete=TRUE, llc=llc)
         }
         if (is.na(lli)) browser()
 
-        EM.status <- check.EM.status(EM.status,new.llc=llc,new.lli=lli,
-                                      parlist.out=parlist.out,
-                                      invect=invect,outvect=outvect, n=n, p=p,
-                                      pi_v=pi_v, kappa_v=kappa_v, EM.control=EM.control)
+        EMstatus <- check_EMstatus(EMstatus,new_llc=llc,new_lli=lli,
+                                   out_parlist=out_parlist,
+                                   current_parvec=current_parvec,
+                                   new_parvec=new_parvec, n=n, p=p,
+                                   pi_v=pi_v, kappa_v=kappa_v, control_EM=control_EM)
 
-        if (verbose | (!verbose & EM.status$iter %% 10 == 0)) {
-            cat(paste(model_label,'model iter=',EM.status$iter, ' partial complete-data log-like=', -optim.fit$value ,'\n'))
-            cat(paste(model_label,'model iter=',EM.status$iter, ' complete-data log-like=', llc ,'\n'))
-            cat(paste(model_label,'model iter=',EM.status$iter, ' APPROXIMATE incomplete-data log-like=', lli ,'\n'))
+        if (verbose | (!verbose & EMstatus$iter %% 10 == 0)) {
+            cat(paste(model_label,'model iter=',EMstatus$iter, ' partial complete-data log-like=', -optim_fit$value ,'\n'))
+            cat(paste(model_label,'model iter=',EMstatus$iter, ' complete-data log-like=', llc ,'\n'))
+            cat(paste(model_label,'model iter=',EMstatus$iter, ' APPROXIMATE incomplete-data log-like=', lli ,'\n'))
         }
     }
+
+    out_parvec <- new_parvec
 
     # Find cluster groupings:
     Rclusmem <- assignments(ppr_m)
@@ -420,155 +424,155 @@ run.EM.bicluster <- function(invect, model, long.df, rowc_mm, colc_mm, cov_mm,
     Cclusters <- apply(ppc_m, 1, which.max)
 
     # Save results:
-    initvect <- name_invect(initvect, model, param_lengths, n, p, q, RG, CG, constraint_sum_zero=constraint_sum_zero)
-    outvect <- name_invect(outvect, model, param_lengths, n, p, q, RG, CG, constraint_sum_zero=constraint_sum_zero)
-    npar <- length(invect) + length(pi_v)-1 + length(kappa_v)-1
-    ninitvect <- length(initvect)
-    criteria <- calc.criteria(EM.status$best.lli, EM.status$llc.for.best.lli, npar, n, p)
-    info <- c(n, p, q, npar, ninitvect, RG, CG)
-    names(info) <- c("n","p","q","npar","ninitvect","nclus.row","nclus.column")
+    init_parvec <- name_init_parvec(init_parvec, model, param_lengths, n, p, q, RG, CG, constraint_sum_zero=constraint_sum_zero)
+    out_parvec <- name_init_parvec(out_parvec, model, param_lengths, n, p, q, RG, CG, constraint_sum_zero=constraint_sum_zero)
+    npar <- length(out_parvec) + length(pi_v)-1 + length(kappa_v)-1
+    ninit_parvec <- length(out_parvec)
+    criteria <- calc_criteria(EMstatus$best_lli, EMstatus$llc_for_best_lli, npar, n, p)
+    info <- c(n, p, q, npar, ninit_parvec, RG, CG)
+    names(info) <- c("n","p","q","npar","ninit_parvec","RG","CG")
     list("info"=info,
          "model"=model,
          "clustering_mode"="biclustering",
-         "EM.status"=EM.status,
+         "EMstatus"=EMstatus,
          "criteria"=criteria,
-         "numerical.correction.epsilon"=epsilon,
+         "numerical_correction_epsilon"=epsilon,
          "constraint_sum_zero"=constraint_sum_zero,
          "param_lengths"=param_lengths,
-         "initvect"=initvect,
-         "outvect"=outvect,
-         "parlist.init"=parlist.init,
-         "parlist.out"=parlist.out,
-         "pi.init"=pi.init,
-         "kappa.init"=kappa.init,
-         "pi.out"=pi_v,
-         "ppr"=ppr_m,
-         "kappa.out"=kappa_v,
-         "ppc"=ppc_m,
-         "rowc_mm"=rowc_mm,
-         "colc_mm"=colc_mm,
-         "cov_mm"=cov_mm,
-         "RowClusterMembers"=Rclusmem,
-         "RowClusters"=Rclusters,
-         "ColumnClusterMembers"=Cclusmem,
-         "ColumnClusters"=Cclusters)
+         "init_parvec"=init_parvec,
+         "out_parvec"=out_parvec,
+         "init_parlist"=init_parlist,
+         "out_parlist"=out_parlist,
+         "init_pi"=init_pi,
+         "init_kappa"=init_kappa,
+         "row_cluster_proportions"=pi_v,
+         "row_cluster_probs"=ppr_m,
+         "column_cluster_proportions"=kappa_v,
+         "column_cluster_probs"=ppc_m,
+         "row_cluster_interaction_matrix"=rowc_mm,
+         "column_cluster_interaction_matrix"=colc_mm,
+         "covariates_model_matrix"=cov_mm,
+         "row_cluster_members"=Rclusmem,
+         "row_clusters"=Rclusters,
+         "column_cluster_members"=Cclusmem,
+         "column_clusters"=Cclusters)
 }
 
-#' @describeIn calc.SE.bicluster SE for rowclustering
+#' @describeIn calc_SE_bicluster SE for rowclustering
 #' @importFrom stats optimHess
 #' @export
-calc.SE.rowcluster <- function(long.df, clust.out,
-                               optim.control=default.optim.control()) {
-    optim.control$fnscale=-1
+calc_SE_rowcluster <- function(long_df, clust_out,
+                               control_optim=default_control_optim()) {
+    control_optim$fnscale=-1
 
-    if (all(c('nclus.row','nclus.column') %in% names(clust.out$info))) stop("Use calc.SE.bicluster for biclustering results.")
+    if (all(c('RG','CG') %in% names(clust_out$info))) stop("Use calc_SE_bicluster for biclustering results.")
 
     # param_lengths indicates use of row clustering, rowc_format_param_lengths
     # indicates use of column clustering
-    if (!("rowc_format_param_lengths" %in% names(clust.out))) {
+    if (!("rowc_format_param_lengths" %in% names(clust_out))) {
         ## Important: do NOT change the order of the three columns in this call,
         ## because the C++ code relies on having this order for Y, ROW and COL
-        ydf <- cbind(long.df$Y, as.numeric(long.df$ROW), as.numeric(long.df$COL))
+        ydf <- cbind(long_df$Y, as.numeric(long_df$ROW), as.numeric(long_df$COL))
 
         ## Important: do NOT change the order of these model types or entries in
         ## param_lengths, because the Rcpp code relies on having this order for the
         ## model numbers
         ## Numeric version is used because comparing strings is MUCH SLOWER in C++
-        model_num <- switch(clust.out$model,"OSM"=1,"POM"=2,"Binary"=3)
-        param_lengths_num <- clust.out$param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
+        model_num <- switch(clust_out$model,"OSM"=1,"POM"=2,"Binary"=3)
+        param_lengths_num <- clust_out$param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
                                                        'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
 
-        optim.hess <- optimHess(par=clust.out$outvect,
+        optim_hess <- optimHess(par=clust_out$out_parvec,
                                 fn=rcpp_Rclusterll,
                                 model_num=model_num,
                                 ydf=ydf,
-                                rowc_mm=clust.out$rowc_mm,
+                                rowc_mm=clust_out$rowc_mm,
                                 colc_mm=matrix(1),
-                                cov_mm=clust.out$cov_mm,
-                                ppr_m=clust.out$ppr,
-                                pi_v=clust.out$pi.out,
+                                cov_mm=clust_out$cov_mm,
+                                ppr_m=clust_out$row_cluster_probs,
+                                pi_v=clust_out$row_cluster_proportions,
                                 param_lengths=param_lengths_num,
-                                RG=clust.out$info["nclus.row"], p=clust.out$info["p"],
-                                n=clust.out$info["n"], q=clust.out$info["q"],
-                                epsilon=clust.out$numerical.correction.epsilon,
-                                constraint_sum_zero=clust.out$constraint_sum_zero,
+                                RG=clust_out$info["RG"], p=clust_out$info["p"],
+                                n=clust_out$info["n"], q=clust_out$info["q"],
+                                epsilon=clust_out$numerical_correction_epsilon,
+                                constraint_sum_zero=clust_out$constraint_sum_zero,
                                 partial=FALSE,
                                 incomplete=TRUE,
-                                control=optim.control)
+                                control=control_optim)
 
-        vc <- solve(-optim.hess)
+        vc <- solve(-optim_hess)
 
-        if (clust.out$model == "OSM") {
-            outvect <- clust.out$outvect
-            q <- clust.out$info["q"]
-            u.ind <- (q-1+1):(q-1+q-2)
-            u <- outvect[u.ind]
-            J <- jacobian.phi(u)
-            A <- diag(length(outvect))
+        if (clust_out$model == "OSM") {
+            out_parvec <- clust_out$out_parvec
+            q <- clust_out$info["q"]
+            u_idxs <- (q-1+1):(q-1+q-2)
+            u <- out_parvec[u_idxs]
+            J <- jacobian_phi(u)
+            A <- diag(length(out_parvec))
 
             ## Apply delta method to get correct SE for phi
-            A[u.ind, u.ind] <- J
+            A[u_idxs, u_idxs] <- J
             vc <- A %*% vc %*% t(A)
         }
         SE <- sqrt(diag(vc))
 
-        named_SE <- name_invect(SE, clust.out$model, clust.out$param_lengths,
-                                RG=clust.out$info["nclus.row"], p=clust.out$info["p"],
-                                n=clust.out$info["n"], q=clust.out$info["q"],
-                                constraint_sum_zero = clust.out$constraint_sum_zero)
+        named_SE <- name_init_parvec(SE, clust_out$model, clust_out$param_lengths,
+                                     RG=clust_out$info["RG"], p=clust_out$info["p"],
+                                     n=clust_out$info["n"], q=clust_out$info["q"],
+                                     constraint_sum_zero = clust_out$constraint_sum_zero)
 
     } else {
         ## Important: do NOT change the order of the three columns in this call,
         ## because the C++ code relies on having this order for Y, ROW and COL
         ## (and for column clustering results this is TRANSPOSED on purpose!)
-        ydf.transp <- cbind(long.df$Y, as.numeric(long.df$COL), as.numeric(long.df$ROW))
+        ydf_transp <- cbind(long_df$Y, as.numeric(long_df$COL), as.numeric(long_df$ROW))
 
         ## Important: do NOT change the order of these model types or entries in
         ## param_lengths, because the Rcpp code relies on having this order for the
         ## model numbers
         ## Numeric version is used because comparing strings is MUCH SLOWER in C++
-        model_num <- switch(clust.out$model,"OSM"=1,"POM"=2,"Binary"=3)
-        param_lengths_num <- clust.out$rowc_format_param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
+        model_num <- switch(clust_out$model,"OSM"=1,"POM"=2,"Binary"=3)
+        param_lengths_num <- clust_out$rowc_format_param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
                                                                    'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
 
-        optim.hess <- optimHess(par=clust.out$rowc_format_outvect,
+        optim_hess <- optimHess(par=clust_out$rowc_format_out_parvec,
                                 fn=rcpp_Rclusterll,
                                 model_num=model_num,
-                                ydf=ydf.transp,
-                                rowc_mm=clust.out$rowc_format_rowc_mm,
+                                ydf=ydf_transp,
+                                rowc_mm=clust_out$rowc_format_rowc_mm,
                                 colc_mm=matrix(1),
-                                cov_mm=clust.out$cov_mm,
-                                ppr_m=clust.out$ppc,
-                                pi_v=clust.out$kappa.out,
+                                cov_mm=clust_out$cov_mm,
+                                ppr_m=clust_out$column_cluster_probs,
+                                pi_v=clust_out$column_cluster_proportions,
                                 param_lengths=param_lengths_num,
-                                RG=clust.out$info["nclus.column"], p=clust.out$info["n"],
-                                n=clust.out$info["p"], q=clust.out$info["q"],
-                                epsilon=clust.out$numerical.correction.epsilon,
-                                constraint_sum_zero=clust.out$constraint_sum_zero,
+                                RG=clust_out$info["CG"], p=clust_out$info["n"],
+                                n=clust_out$info["p"], q=clust_out$info["q"],
+                                epsilon=clust_out$numerical_correction_epsilon,
+                                constraint_sum_zero=clust_out$constraint_sum_zero,
                                 partial=FALSE,
                                 incomplete=TRUE,
-                                control=optim.control)
+                                control=control_optim)
 
-        vc <- solve(-optim.hess)
+        vc <- solve(-optim_hess)
 
-        if (clust.out$model == "OSM") {
-            outvect <- clust.out$row_format_outvect
-            q <- clust.out$info["q"]
-            u.ind <- (q-1+1):(q-1+q-2)
-            u <- outvect[u.ind]
-            J <- jacobian.phi(u)
-            A <- diag(length(outvect))
+        if (clust_out$model == "OSM") {
+            out_parvec <- clust_out$row_format_out_parvec
+            q <- clust_out$info["q"]
+            u_idxs <- (q-1+1):(q-1+q-2)
+            u <- out_parvec[u_idxs]
+            J <- jacobian_phi(u)
+            A <- diag(length(out_parvec))
 
             ## Apply delta method to get correct SE for phi
-            A[u.ind, u.ind] <- J
+            A[u_idxs, u_idxs] <- J
             vc <- A %*% vc %*% t(A)
         }
         SE <- sqrt(diag(vc))
 
-        named_SE <- name_invect(SE, clust.out$model, clust.out$param_lengths,
-                                RG=NULL, CG=clust.out$info["nclus.column"],
-                                p=clust.out$info["p"], n=clust.out$info["n"], q=clust.out$info["q"],
-                                constraint_sum_zero = clust.out$constraint_sum_zero)
+        named_SE <- name_init_parvec(SE, clust_out$model, clust_out$param_lengths,
+                                     RG=NULL, CG=clust_out$info["CG"],
+                                     p=clust_out$info["p"], n=clust_out$info["n"], q=clust_out$info["q"],
+                                     constraint_sum_zero = clust_out$constraint_sum_zero)
     }
 
     named_SE
@@ -578,15 +582,15 @@ calc.SE.rowcluster <- function(long.df, clust.out,
 #'
 #' Calculate SE of parameters fitted using \code{\link{clustord}}.
 #'
-#' Use \code{calc.SE.rowcluster} to calculate SE for row clustering and column
-#' clustering, or \code{calc.SE.bicluster} to calculate SE for biclustering.
+#' Use \code{calc_SE_rowcluster} to calculate SE for row clustering and column
+#' clustering, or \code{calc_SE_bicluster} to calculate SE for biclustering.
 #'
 #' Calculates SE by running \code{optimHess} (see \code{\link[stats]{optim}}) on
 #' the incomplete-data log-likelihood to find the hessian at the fitted parameter
 #' values from \code{\link{clustord}}.
 #' Then the square roots of the diagonal elements of the negative inverse of the
 #' hessian are the standard errors of the parameters
-#' i.e. \code{SE <- sqrt(diag(solve(-optim.hess))}.
+#' i.e. \code{SE <- sqrt(diag(solve(-optim_hess))}.
 #'
 #' Note that SE values are \strong{only} calculated for the independent
 #' parameters. For example, if the constraint on the row clustering parameters
@@ -596,72 +600,72 @@ calc.SE.rowcluster <- function(long.df, clust.out,
 #' similarly to individual column effect coefficients, etc.
 #'
 #' The function requires an input which is the output of
-#' \code{\link{clustord}}, which includes the component \code{outvect}, the
+#' \code{\link{clustord}}, which includes the component \code{out_parvec}, the
 #' final vector of independent parameter values from the EM algorithm, which
-#' will correspond to a subset of the parameter values in \code{parlist.out}.
+#' will correspond to a subset of the parameter values in \code{out_parlist}.
 #'
-#' @param long.df The data frame, in long format, as passed to \code{clustord}.
+#' @param long_df The data frame, in long format, as passed to \code{clustord}.
 #'
-#' @param clust.out A \code{clustord} object.
+#' @param clust_out A \code{clustord} object.
 #'
-#' @param optim.control control list for the \code{optim} call within the M step
+#' @param control_optim control list for the \code{optim} call within the M step
 #'     of the EM algorithm. See the control list Details in the \code{optim}
 #'     manual for more info.
 #'
 #' @return
-#'     The standard errors corresponding to the elements of \code{clust.out$outvect}.
-#' @describeIn calc.SE.bicluster SE for biclustering
+#'     The standard errors corresponding to the elements of \code{clust_out$out_parvec}.
+#' @describeIn calc_SE_bicluster SE for biclustering
 #' @export
-calc.SE.bicluster <- function(long.df, clust.out,
-                              optim.control=default.optim.control()) {
+calc_SE_bicluster <- function(long_df, clust_out,
+                              control_optim=default_control_optim()) {
 
-    optim.control$fnscale=-1
+    control_optim$fnscale=-1
 
-    if (!all(c('nclus.row','nclus.column') %in% names(clust.out$info))) stop("Use calc.SE.rowcluster for row or column clustering results.")
+    if (!all(c('RG','CG') %in% names(clust_out$info))) stop("Use calc_SE_rowcluster for row or column clustering results.")
 
     ## Important: do NOT change the order of the three columns in this call,
     ## because the C++ code relies on having this order for Y, ROW and COL
-    ydf <- cbind(long.df$Y, as.numeric(long.df$ROW), as.numeric(long.df$COL))
+    ydf <- cbind(long_df$Y, as.numeric(long_df$ROW), as.numeric(long_df$COL))
 
     ## Important: do NOT change the order of these model types, because the Rcpp
     ## code relies on having this order for the model numbers
     ## Model numbers are used because comparing strings is MUCH SLOWER in C++
-    model_num <- switch(clust.out$model,"OSM"=1,"POM"=2,"Binary"=3)
-    param_lengths_num <- clust.out$param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
+    model_num <- switch(clust_out$model,"OSM"=1,"POM"=2,"Binary"=3)
+    param_lengths_num <- clust_out$param_lengths[c('mu','phi','rowc','colc','rowc_colc','row','col',
                                                    'rowc_col','colc_row','rowc_cov','colc_cov','cov')]
 
-    optim.hess <- optimHess(par=clust.out$outvect,
+    optim_hess <- optimHess(par=clust_out$out_parvec,
                             fn=rcpp_Biclusterll,
                             model_num=model_num,
                             ydf=ydf,
-                            rowc_mm=clust.out$rowc_mm,
-                            colc_mm=clust.out$colc_mm,
-                            cov_mm=clust.out$cov_mm,
-                            ppr_m=clust.out$ppr,
-                            ppc_m=clust.out$ppc,
-                            pi_v=clust.out$pi.out,
-                            kappa_v=clust.out$kappa.out,
+                            rowc_mm=clust_out$rowc_mm,
+                            colc_mm=clust_out$colc_mm,
+                            cov_mm=clust_out$cov_mm,
+                            ppr_m=clust_out$row_cluster_probs,
+                            ppc_m=clust_out$column_cluster_probs,
+                            pi_v=clust_out$row_cluster_proportions,
+                            kappa_v=clust_out$column_cluster_proportions,
                             param_lengths=param_lengths_num,
-                            RG=clust.out$info["nclus.row"], CG=clust.out$info["nclus.column"],
-                            p=clust.out$info["p"], n=clust.out$info["n"],
-                            q=clust.out$info["q"],
-                            epsilon=clust.out$numerical.correction.epsilon,
-                            constraint_sum_zero=clust.out$constraint_sum_zero,
+                            RG=clust_out$info["RG"], CG=clust_out$info["CG"],
+                            p=clust_out$info["p"], n=clust_out$info["n"],
+                            q=clust_out$info["q"],
+                            epsilon=clust_out$numerical_correction_epsilon,
+                            constraint_sum_zero=clust_out$constraint_sum_zero,
                             partial=FALSE,
                             incomplete=TRUE, llc=NA,
-                            control=optim.control)
+                            control=control_optim)
 
-    SE <- sqrt(diag(solve(-optim.hess)))
+    SE <- sqrt(diag(solve(-optim_hess)))
 
-    named_SE <- name_invect(SE, clust.out$model, clust.out$param_lengths,
-                            RG=clust.out$info["nclus.row"], CG=clust.out$info["nclus.column"],
-                            p=clust.out$info["p"], n=clust.out$info["n"],
-                            q=clust.out$info["q"],
-                            constraint_sum_zero = clust.out$constraint_sum_zero)
+    named_SE <- name_init_parvec(SE, clust_out$model, clust_out$param_lengths,
+                                 RG=clust_out$info["RG"], CG=clust_out$info["CG"],
+                                 p=clust_out$info["p"], n=clust_out$info["n"],
+                                 q=clust_out$info["q"],
+                                 constraint_sum_zero = clust_out$constraint_sum_zero)
     named_SE
 }
 
-jacobian.phi <- function(u) {
+jacobian_phi <- function(u) {
     m <- length(u)
     eu <- exp(u)
     csum <- csum(u[1L], eu[-1L])

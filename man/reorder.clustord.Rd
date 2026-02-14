@@ -32,15 +32,15 @@ An object of class \code{clustord}, with all the relevant elements
    Elements of \code{clustord} object that may be reordered (which ones are
    reordered depends on whether row clusters are being reordered and whether
    column clusters are being reordered:
-   - \code{parlist.out} (the final list of estimated parameter values)
-   - \code{pi.out} and/or \code{kappa.out}
-   - \code{ppr} and/or \code{ppc}
-   - \code{outvect}
-   - \code{RowClusterMembers} and \code{RowClusters} and/or
-       \code{ColumnClusterMembers} and \code{ColumnClusters}
-   - \code{EM.status$params.for.best.lli}
-   - \code{EM.status$params.every.iteration}, if using option
-       \code{EM.control$keepallparams}
+   - \code{out_parlist} (the final list of estimated parameter values)
+   - \code{row_cluster_proportions} and/or \code{column_cluster_proportions}
+   - \code{row_cluster_probs} and/or \code{column_cluster_probs}
+   - \code{out_parvec}
+   - \code{row_cluster_members} and \code{row_clusters} and/or
+       \code{column_cluster_members} and \code{column_clusters}
+   - \code{EMstatus$params_for_best_lli}
+   - \code{EMstatus$params_every_iteration}, if using option
+       \code{control_EM$keep_all_params}
    - \code{start.par}
 
    .
@@ -90,12 +90,12 @@ term (and similarly for \code{COLCLUST}).
 }
 \examples{
 set.seed(1)
-long.df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),
+long_df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),
                ROW=rep(1:10,times=10),COL=rep(1:10,each=10))
-results.original <- clustord(Y ~ ROWCLUST + COLCLUST, model="OSM",
-                             nclus.row=3, nclus.column=2, long.df=long.df,
-                             EM.control=list(EMcycles=2))
-results.original$parlist.out
+results_original <- clustord(Y ~ ROWCLUST + COLCLUST, model="OSM",
+                             RG=3, CG=2, long_df=long_df,
+                             control_EM=list(maxiter=2))
+results_original$out_parlist
 # $mu
 # mu_1      mu_2      mu_3
 # 0.0000000 0.2053150 0.4107883
@@ -114,18 +114,18 @@ results.original$parlist.out
 
 ## Run reorder type "row" to reorder based on row cluster effects,
 ## in increasing order by default
-results.reorder <- reorder(results.original, type="row")
-results.reorder$parlist.out
+results.reorder <- reorder(results_original, type="row")
+results.reorder$out_parlist
 
 ## Run reorder type "column" to reorder based on column cluster effects,
 ## in decreasing order
-results.reorder <- reorder(results.original, type="column", decreasing=TRUE)
-results.reorder$parlist.out
+results.reorder <- reorder(results_original, type="column", decreasing=TRUE)
+results.reorder$out_parlist
 
 ## Run reorder type "row" to reorder based on row and column cluster effects,
 ## with row effects in increasing order and column effects in decreasing
 ## order
-results.reorder <- reorder(results.original, type="both", decreasing=c(FALSE,TRUE))
-results.reorder$parlist.out
+results.reorder <- reorder(results_original, type="both", decreasing=c(FALSE,TRUE))
+results.reorder$out_parlist
 
 }

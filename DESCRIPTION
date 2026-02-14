@@ -1,7 +1,7 @@
 Package: clustord
 Type: Package
 Title: Cluster Ordinal Data via Proportional Odds or Ordered Stereotype
-Version: 1.3.6
+Version: 2.0.0
 Date: 2026-02-02
 Authors@R: c(
     person(given = "Louise", 

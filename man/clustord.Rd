@@ -8,15 +8,15 @@ Odds Models (POM) or Binary Models}
 clustord(
   formula,
   model,
-  nclus.row = NULL,
-  nclus.column = NULL,
-  long.df,
-  initvect = NULL,
-  pi.init = NULL,
-  kappa.init = NULL,
-  EM.control = default.EM.control(),
-  optim.method = "L-BFGS-B",
-  optim.control = default.optim.control(),
+  RG = NULL,
+  CG = NULL,
+  long_df,
+  init_parvec = NULL,
+  init_pi = NULL,
+  init_kappa = NULL,
+  control_EM = default_control_EM(),
+  optim_method = "L-BFGS-B",
+  control_optim = default_control_optim(),
   constraint_sum_zero = TRUE,
   start_from_simple_model = TRUE,
   parallel_starts = FALSE,
@@ -30,56 +30,58 @@ clustord(
 \item{model}{\code{"OSM"} for Ordered Stereotype Model or \code{"POM"} for
 Proportional Odds Model or \code{"Binary"} for binary data model.}
 
-\item{nclus.row}{number of row clustering groups.}
+\item{RG}{number of row clustering groups.}
 
-\item{nclus.column}{number of column clustering groups.}
+\item{CG}{number of column clustering groups.}
 
-\item{long.df}{data frame with at least three columns, \code{Y} and \code{ROW}
+\item{long_df}{data frame with at least three columns, \code{Y} and \code{ROW}
 and \code{COL}. Each row in the data frame corresponds to a single cell
 in the original data matrix; the response value in that cell is given by
 \code{Y}, and the row and column indices of that cell in the matrix are
-given by \code{ROW} and \code{COL}. Use \code{\link{mat2df}} to create
+given by \code{ROW} and \code{COL}. Use \code{\link{mat_to_df}} to create
 this data frame from your data matrix of responses.
-\code{\link{mat2df}} also allows you to supply data frames of row or
-column covariates which will be incorporated into \code{long.df}.}
+\code{\link{mat_to_df}} also allows you to supply data frames of row or
+column covariates which will be incorporated into \code{long_df}.}
 
-\item{initvect}{(default NULL) vector of starting parameter values for the model.
+\item{init_parvec}{(default \code{NULL}) vector of starting parameter values
+    for the model.
+
     Note: if the user enters an initial vector of parameter values, it is
-    \strong{strongly recommend} that the user also check the values of
-    \code{parlist.init} in the output object, to \strong{make sure that the
+    \strong{strongly recommended} that the user also check the values of
+    \code{init_parlist} in the output object, to \strong{make sure that the
     constructed parameters are as expected}.
 
     If \code{NULL}, starting parameter values will be generated automatically.
 
     See 'Details' for definitions of the parameters used for different models.}
 
-\item{pi.init}{(default \code{NULL}) starting parameter values for the proportions
+\item{init_pi}{(default \code{NULL}) starting parameter values for the proportions
     of observations in the different row clusters.
 
     If \code{NULL}, starting values will be generated automatically.
 
-    User-specified values of \code{pi.init} must be of length \code{(nclus.row-1)}
+    User-specified values of \code{init_pi} must be of length \code{(RG-1)}
     because the final value will be automatically calculated so that the
     values of \code{pi} sum to 1.}
 
-\item{kappa.init}{(default \code{NULL}) starting parameter values for the
+\item{init_kappa}{(default \code{NULL}) starting parameter values for the
     proportions of observations in the different column clusters.
 
     If \code{NULL}, starting values will be generated automatically.
 
-    User-specified values of \code{kappa.init} must be of length
-    \code{(nclus.column-1)} because the final value will be automatically
+    User-specified values of \code{init_kappa} must be of length
+    \code{(CG-1)} because the final value will be automatically
     calculated so that the values of \code{kappa} sum to 1.}
 
-\item{EM.control}{(default = \code{list(EMcycles=50, EMlikelihoodtol=1e-4,
-    EMparamtol=1e-2, paramstopping=TRUE, startEMcycles=10, keepallparams=FALSE,
+\item{control_EM}{(default = \code{list(maxiter=50, EM_likelihood_tol=1e-4,
+    EM_params_tol=1e-2, params_stopping=TRUE, maxiter_start=10, keep_all_params=FALSE,
     epsilon=1e-6)})
     list of parameters controlling the EM algorithm.
 
-    \code{EMcycles} controls how many EM iterations of the main EM algorithm
+    \code{maxiter} controls how many EM iterations of the main EM algorithm
     are used to fit the chosen submodel.
 
-    \code{EMlikelihoodtol} is the tolerance for the stopping criterion for
+    \code{EM_likelihood_tol} is the tolerance for the stopping criterion for
     the \strong{log-likelihood} in the EM algorithm. The criterion is the
     absolute change in the \strong{incomplete} log-likelihood since the
     previous iteration, scaled by the size of the dataset \code{n*p}, where
@@ -87,7 +89,7 @@ column covariates which will be incorporated into \code{long.df}.}
     number of columns in the data matrix. The scaling is applied because the
     incomplete log-likelihood is predominantly affected by the dataset size.
 
-    \code{EMparamtol} is the tolerance for the stopping criterion for the
+    \code{EM_params_tol} is the tolerance for the stopping criterion for the
     \strong{parameters} in the EM algorithm. This is a tolerance for the
     \strong{sum} of the scaled parameter changes from the last iteration,
     i.e. the tolerance is not for any individual parameter but for the sum of
@@ -99,13 +101,14 @@ column covariates which will be incorporated into \code{long.df}.}
     timestep. The exponentiation is to rescale parameter values that are
     close to zero.
 
-    there are around 5 independent parameter values, then at the point of
-    convergence using default tolerances for the log-likelihood and the
-    parameters, each parameter will have a scaled absolute change since the
-    previous iteration of about 1e-4; if there are 20 or 30 independent
-    parameters, then each will have a scaled aboslute change of about 1e-6.
+    If, for example, there are around 5 independent parameter values, then at
+    the point of convergence using default tolerances for the log-likelihood
+    and the parameters, each parameter will have a scaled absolute change
+    since the previous iteration of about 1e-4; if there are 20 or 30
+    independent parameters, then each will have a scaled aboslute change of
+    about 1e-6.
 
-    \code{paramstopping}: if \code{FALSE}, indicates that the EM algorithm
+    \code{params_stopping}: if \code{FALSE}, indicates that the EM algorithm
     should only check convergence based on the change in incomplete-data
     log-likelihood, relative to the current difference between the
     complete-data and incomplete-data log-likelihoods, i.e.
@@ -116,14 +119,14 @@ column covariates which will be incorporated into \code{long.df}.}
     below the tolerance \code{EMstoppingpar}, to see whether the parameters
     and the likelihood have both converged.
 
-    \code{startEMcycles} controls how many EM iterations are used when
+    \code{maxiter_start} controls how many EM iterations are used when
     fitting the simpler submodels to get starting values for fitting models
     with interaction.
 
-    \code{keepallparams}: if \code{TRUE}, keep a record of parameter values
+    \code{keep_all_params}: if \code{TRUE}, keep a record of parameter values
     (including pi_r and kappa_c) for every EM iteration.
 
-    \code{rerunestepbeforelli}: if \code{TRUE}, and only when using biclustering,
+    \code{rerun_estep_before_lli}: if \code{TRUE}, and only when using biclustering,
     rerun the E-step before calculating the incomplete-data log-likelihood.
     The EM algorithm runs the E-step to estimate the cluster membership
     probabilities and then runs the M-step to estimate the parameters by
@@ -135,7 +138,7 @@ column covariates which will be incorporated into \code{long.df}.}
     parameter estimates. So the \code{TRUE} setting for this control
     recalculates the cluster memberships before calculating the LLI approx.
 
-    \code{uselatestlli}: Kept for backwards compatibility with original
+    \code{use_latest_lli}: Kept for backwards compatibility with original
     version of clustord algorithm. Original version of the algorithm had this
     set to \code{FALSE}, which keeps the best LLI from any previous iteration
     rather than the latest LLI. The default, \code{TRUE}, instead keeps the
@@ -150,24 +153,24 @@ column covariates which will be incorporated into \code{long.df}.}
     For \code{columnclustering}, the parameters saved from each iteration
     will NOT be converted to column clustering format, and will be in the row
     clustering format, so \code{alpha} in
-    \code{EM.status$params.every.iteration} will correspond to beta_c and
+    \code{EMstatus$params_every_iteration} will correspond to beta_c and
     \code{pi} will correspond to kappa.
 
     \code{epsilon}: default 1e-6, small value used to adjust values of pi,
     kappa and theta that are too close to zero so that taking logs of them
     does not create infinite values.}
 
-\item{optim.method}{(default "L-BFGS-B") method to use in optim within the M
-step of the EM algorithm. Must be one of 'L-BFGS-B', 'BFGS', 'CG' or
-'Nelder-Mead' (i.e. not the SANN method).}
+\item{optim_method}{(default "L-BFGS-B") method to use in optim within the M
+step of the EM algorithm. Must be one of "L-BFGS-B", "BFGS", "CG" or
+"Nelder-Mead" (i.e. not the SANN method).}
 
-\item{optim.control}{control list for the \code{optim} call within the M step
+\item{control_optim}{control list for the \code{optim} call within the M step
 of the EM algorithm. See the control list Details in the \code{optim}
 manual for more info.
 Please note that although \code{optim}, by default, uses \code{pgtol=0}
 and \code{factr=1e7} in the L-BFGS-B method, \code{clustord}, by default,
 alters these to \code{pgtol=1e-4} and \code{factr=1e11}, but you can use
-this \code{optim.control} argument in \code{clustord} to revert them to
+this \code{control_optim} argument in \code{clustord} to revert them to
 the defaults if you want. The reason for the change is that the chosen
 values in \code{clustord} reduce the tolerance on the log-likelihood
 function optimization in order to speed up the algorithm, and because the
@@ -182,9 +185,9 @@ probably have a likelihood that is better on about 1/10th or 1/100th the
 size of the data matrix, which is still far larger than the tolerance in
 the optimization.
 If you need accurate parameter estimates, firstly make sure to try more
-starting points, then perform model selection first, and then finally
-rerun the chosen model with finer tolerance, e.g. the \code{optim}
-defaults, \code{pgtol=0} and \code{factr=1e7}.}
+starting points, then perform model selection, and then finally rerun the
+chosen model with finer tolerance, e.g. the \code{optim} defaults,
+\code{pgtol=0} and \code{factr=1e7}.}
 
 \item{constraint_sum_zero}{(default \code{TRUE}) if \code{TRUE}, use constraints
 that cluster effects sum to zero; if \code{FALSE}, use constraints that
@@ -201,7 +204,7 @@ rows sum to zero).}
 simpler clustering model first and use that to provide starting values for
 all parameters for the model with interactions;
 if \code{FALSE}, use the more basic models to provide starting values only
-for \code{pi.init} and \code{kappa.init}.
+for \code{init_pi} and \code{init_kappa}.
 If the full model has interaction terms, then simpler models are ones
 without the interactions. If the model has individual row/column effects
 alongside the clusters, then simpler models are ones without the individual
@@ -210,11 +213,11 @@ are ones without the covariates (to get starting values for the cluster
 parameters), and ones with the covariates but no clustering (to get
 starting values for the covariates).}
 
-\item{parallel_starts}{(default FALSE) if TRUE, by generating multiple random
-starts, those random starts will be parallelised over as many cores as are
-available. For example, on a personal computer this will be one fewer than
-the number of cores in the machine, to make sure one is left for system
-tasks external to R.}
+\item{parallel_starts}{(default \code{FALSE}) if TRUE, by generating multiple
+random starts, those random starts will be parallelised over as many cores
+as are available. For example, on a personal computer this will be one
+fewer than the number of cores in the machine, to make sure one is left for
+system tasks external to R.}
 
 \item{nstarts}{(default 5) number of random starts to generate, if generating
 random starting points for the EM algorithm.}
@@ -231,7 +234,7 @@ whenever it finds a better log-likelihood than all previous starts, and it
 also reports when it is fitting simpler models to find starting values for
 the parameters vs fitting the final, more complex model.
 If wanting the detailed output from \code{optim()}, use
-\code{optim.control=list(trace=X)}, where X is 1 to 6, with 6 being the
+\code{control_optim=list(trace=X)}, where X is 1 to 6, with 6 being the
 highest level of verbosity for the L-BFGS-B algorithm.}
 }
 \value{
@@ -243,14 +246,14 @@ A \code{clustord} object, i.e. a list with components:
     \code{model}: The model used for fitting, "OSM" for Ordered Stereotype
     Model, "POM" for Proportional Odds Model, or "Binary" for Binary model.
 
-    \code{EM.status}: a list containing the latest iteration \code{iter},
-    latest incomplete-data and complete-data log-likelihoods \code{new.lli}
-    and \code{new.llc}, the best incomplete-data log-likelihood \code{best.lli}
-    and the corresponding complete-data log-likelihood, \code{llc.for.best.lli},
+    \code{EMstatus}: a list containing the latest iteration \code{iter},
+    latest incomplete-data and complete-data log-likelihoods \code{new_lli}
+    and \code{new_llc}, the best incomplete-data log-likelihood \code{best_lli}
+    and the corresponding complete-data log-likelihood, \code{llc_for_best_lli},
     and the parameters for the best incomplete-data log-likelihood,
-    \code{params.for.best.lli}, indicator of whether the algorithm converged
+    \code{params_for_best_lli}, indicator of whether the algorithm converged
     \code{converged}, and if the user chose to keep all parameter values from
-    every iteration, also \code{params.every.iteration}.
+    every iteration, also \code{params_every_iteration}.
 
     Note that for \strong{biclustering}, i.e. when \code{ROWCLUST} and
     \code{COLCLUST} are both included in the model, the \strong{incomplete}
@@ -259,16 +262,16 @@ A \code{clustord} object, i.e. a list with components:
     to converging. So beware of using the incomplete log-likelihood and the
     corresponding AIC value \strong{unless the EM algorithm has converged}.
 
-    Also note that \code{outvect} unpacks the dependent elements of matrices
+    Also note that \code{out_parvec} unpacks the dependent elements of matrices
     of effects, such as the row cluster and column cluster interaction
     effects \code{rowc_colc} and other interaction effects, by row: the first
-    elements of the matrix in \code{outvect} would be the first \emph{row} of
-    the matrix, etc. By contrast, \code{EM.status$params.every.iteration}
-    simply unlists \code{parlist.out}, which happens automatically by column,
+    elements of the matrix in \code{out_parvec} would be the first \emph{row} of
+    the matrix, etc. By contrast, \code{EMstatus$params_every_iteration}
+    simply unlists \code{out_parlist}, which happens automatically by column,
     so the first column of each matrix before the second column, etc. so if
     it contains columns \code{rowc_colc1, rowc_colc2, rowc_colc3} etc. they
     are the first \emph{column} of the \code{rowc_colc} matrix of parameters.
-    So if using \code{EM.status$params.every.iteration} to check specific
+    So if using \code{EMstatus$params_every_iteration} to check specific
     parameter values during each iteration of the algorithm, be careful which
     ones you're looking at.
 
@@ -277,7 +280,7 @@ A \code{clustord} object, i.e. a list with components:
 
     \code{epsilon}: the very small value (default 1e-6) used to adjust values
     of pi and kappa and theta that are too close to zero, so that taking logs
-    of them does not produce infinite values. Use the EM.control argument to
+    of them does not produce infinite values. Use the control_EM argument to
     adjust epsilon.
 
     \code{constraints_sum_zero}: the chosen value of constraints_sum_zero.
@@ -289,43 +292,43 @@ A \code{clustord} object, i.e. a list with components:
     \code{rowc_cov_coef} value will be 0. If the component is included, then
     the value given will include any dependent parameter/coefficient values,
     so if column clusters are included then the \code{colc_coef} value will
-    be \code{nclus.column}, whereas the number of independent values will be
-    \code{nclus.column - 1}.
+    be \code{CG}, whereas the number of independent values will be
+    \code{CG - 1}.
 
-    \code{initvect}: the initial \emph{vector} of parameter values, either
+    \code{init_parvec}: the initial \emph{vector} of parameter values, either
     specified by the user or generated automatically. This vector has only
     the \strong{independent} values of the parameters, not the full set.
 
-    \code{outvect}: the final \emph{vector} of parameter values, containing
-    only the independent parameter values from \code{parlist.out}.
+    \code{out_parvec}: the final \emph{vector} of parameter values, containing
+    only the independent parameter values from \code{out_parlist}.
 
-    \code{parlist.init}: the initial list of parameters, constructed from
-    the initial parameter vector \code{initvect}. Note that if the initial
-    vector has been incorrectly specified, the values of \code{parlist.init}
+    \code{init_parlist}: the initial list of parameters, constructed from
+    the initial parameter vector \code{init_parvec}. Note that if the initial
+    vector has been incorrectly specified, the values of \code{init_parlist}
     may not be as expected, and they should be checked by the user.
 
-    \code{parlist.out}: fitted values of parameters.
+    \code{out_parlist}: fitted values of parameters.
 
     \code{pi}, \code{kappa}: fitted values of pi and kappa, where relevant.
 
-    \code{ppr}, \code{ppc}: the posterior probabilities of membership of the
+    \code{row_cluster_probs}, \code{column_cluster_probs}: the posterior probabilities of membership of the
     row clusters and the column clusters, where relevant.
 
     \code{rowc_mm}, \code{colc_mm}, \code{cov_mm}: the model matrices for,
     respectively, the covariates interacting with row clusters, the covariates
     interacting with column clusters, and the covariates not interacting with
     row or column clusters (i.e. the covariates with constant coefficients).
-    Note that one row of each model matrix corresponds to one row of long.df.
+    Note that one row of each model matrix corresponds to one row of long_df.
 
-    \code{RowClusters}, \code{ColumnClusters}: the assigned row and column
+    \code{row_clusters}, \code{column_clusters}: the assigned row and column
     clusters, where relevant, where each row/column is assigned to a cluster
-    based on maximum posterior probability of cluster membership (\code{ppr}
-    and \code{ppc}).
+    based on maximum posterior probability of cluster membership (\code{row_cluster_probs}
+    and \code{column_cluster_probs}).
 
-    \code{RowClusterMembers}, \code{ColumnClusterMembers}: vectors of
+    \code{row_cluster_members}, \code{column_cluster_members}: vectors of
     assigned members of each row or column cluster, where each row/column is
     assigned to a cluster based on maximum posterior probability of cluster
-    membership (\code{ppr} and \code{ppc})
+    membership (\code{row_cluster_probs} and \code{column_cluster_probs})
 
     \code{reordered}: Boolean indicating whether or not the outputs have been
     reordered in order of row cluster and/or column cluster effects. FALSE
@@ -358,15 +361,15 @@ representing auxiliary information about each species. There is no
 requirement to provide any covariates, and you can provide only row
 covariates, or only column covariates.
 
-Before running \code{clustord}, you need to run \code{\link{mat2df}} to
+Before running \code{clustord}, you need to run \code{\link{mat_to_df}} to
 convert the data matrix into a long form data frame. The data frame needs to
 have at least three columns, \code{Y} and \code{ROW} and \code{COL}. Each row
 in the data frame corresponds to a single cell in the original data matrix;
 the response value in that cell is given by \code{Y}, and the row and column
 indices of that cell in the matrix are given by \code{ROW} and \code{COL}.
 
-\code{\link{mat2df}} also allows you to supply data frames of row or column
-covariates which will be incorporated into \code{long.df}.
+\code{\link{mat_to_df}} also allows you to supply data frames of row or column
+covariates which will be incorporated into \code{long_df}.
 
 Then, to run the \code{clustord} function, you need to enter your chosen
 formula and model, and the number of clusters you want to fit. The formula
@@ -400,13 +403,13 @@ include in the model, and these are unrestricted, and can be used in the same
 way as in \code{glm}.
 
 \code{ROWCLUST} and \code{COLCLUST} are used to indicate what row clustering
-model_structure you want, and what column clustering model_structure you want,
+model structure you want, and what column clustering model structure you want,
 respectively. The inclusion of \code{ROWCLUST} as a single term indicates
 that you want to include a row clustering effect in the model. In the
 simplest row clustering model, for Binary data with \strong{row clustering}
 effects only, the basic function call would be
 
-\code{clustord(Y ~ ROWCLUST, model="Binary", long.df=long.df)}
+\code{clustord(Y ~ ROWCLUST, model="Binary", long_df=long_df)}
 
 and the model fitted would have the form:
 
@@ -438,6 +441,7 @@ The formula
 \code{Y ~ ROWCLUST + COLCLUST}
 
 is the simplest possible \strong{biclustering} model,
+
 Logit(P(Y = 1)) = mu + rowc_coef_r + colc_coef_c
 
 If you want to include interaction between the rows and columns, i.e. you
@@ -446,9 +450,11 @@ cluster r and a column cluster c, then that model has a matrix of parameters
 indexed by r and c.
 
 \code{clustord(Y ~ ROWCLUST*COLCLUST, model="Binary", ...)} has the model
+
 Logit(P(Y = 1)) = mu + rowc_colc_coef_rc
 
 This model can instead be called using the equivalent formula
+
 \code{Y ~ ROWCLUST + COLCLUST + ROWCLUST:COLCLUST}.
 
 You can instead use the formula \code{Y ~ ROWCLUST:COLCLUST}. Mathematically,
@@ -457,7 +463,7 @@ be equivalent but in clustering, they are equivalent, and have the same
 number of independent parameters overall. If you include the main effects,
 then that reduces the number of independent parameters in the interaction
 term compared to if you just use the interaction term (see below section about
-\code{initvect}).
+\code{init_parvec}).
 
 You cannot include just one of the main effects alongside the interaction
 term, i.e. you cannot use \code{Y ~ ROWCLUST + ROWCLUST:COLCLUST} or
@@ -511,7 +517,7 @@ Logit(P(Y = 1)) = mu + rowc_col_coef_rj
 where the row cluster effects and individual column effects are absorbed into
 the matrix rowc_col_coef_rj. These models are the same mathematically, the
 only differences between them are in how they are constrained (see below in
-the section about the \code{initvect} argument) and how they should be
+the section about the \code{init_parvec} argument) and how they should be
 interpreted.
 
 Note that if you were using covariates, then it would not be equivalent to
@@ -555,12 +561,11 @@ interactions between them, and functions of them, as in regression models, e.g.
 
 which would have the Binary model
 
-Logit(P(Y = 1)) = mu + rowc_coef_r + row_coef1*xr1_i + row_coef2*log(xr2_i) +
-                         row_coef3*xr1_i*log(xr2_i)
+Logit(P(Y = 1)) = mu + rowc_coef_r + row_coef1*xr1_i + row_coef2*log(xr2_i) + row_coef3*xr1_i*log(xr2_i)
 
 If instead you want to add column covariates to the model, they work in the
-same way after they've been added to the \code{long.df} data frame using
-\code{\link{mat2df}}, but they are indexed by j instead of i. Simplest model,
+same way after they've been added to the \code{long_df} data frame using
+\code{\link{mat_to_df}}, but they are indexed by j instead of i. Simplest model,
 with one single column covariate xc, would have formula
 
 \code{Y ~ ROWCLUST + xc}
@@ -618,9 +623,9 @@ direction of clustering. So if there are two row covariates \code{xr1} and
 \code{xr2} interacting with three row clusters, that gives you 6
 coefficients:
 
-\code{rowc_col_coef_11, rowc_col_coef_12,
-rowc_col_coef_21, rowc_col_coef_22,
-rowc_col_coef_31, rowc_col_coef_32}.
+\code{rowc_col_coef_11, rowc_col_coef_12, rowc_col_coef_21,}
+
+\code{rowc_col_coef_22, rowc_col_coef_31, rowc_col_coef_32}.
 
 and you can also have a three-way interaction between row cluster and those
 two covariates, which would add the coefficients \code{rowc_col_coef_r3}
@@ -649,7 +654,7 @@ clusters, \code{log(xc1)}, with coefficients \code{colc_cov_coef_c1}.
 
 The primary restriction on the \code{formula} argument is that that you
 \strong{cannot} use functions of \code{ROW}, \code{COL}, \code{ROWCLUST} or
-\code{COLCLUST}, such as \code{log(ROW)} or I(COLCLUST^2). That is because
+\code{COLCLUST}, such as \code{log(ROW)} or \code{COLCLUST^2}. That is because
 they are not covariates, and cannot be manipulated like that; instead, they
 are indicators for particular elements of the clustering model_structure.
 
@@ -663,7 +668,7 @@ the interaction. That is, you can use
 
 or you can use \code{Y ~ ROWCLUST:COLCLUST}, and these two types of
 biclustering model will have different parameter constraints (see below under
-\code{initvect} details), but you \strong{cannot} use
+\code{init_parvec} details), but you \strong{cannot} use
 
 \code{Y ~ ROWCLUST + ROWCLUST:COLCLUST} or \code{Y ~ COLCLUST + ROWCLUST:COLCLUST}
 
@@ -765,19 +770,19 @@ to distinguish between categories 2 and 3, and so you might as well merge
 them into a single category to simplify the model-fitting process and the
 interpretation of the results.
 
-\code{initvect} \strong{argument details}
+\code{init_parvec} \strong{argument details}
 
 Initvect is the vector of starting values for the parameters, made up of
 sections for each different type of parameter in the model. Note that the
-length of each section of initvect is the number of \strong{independent}
+length of each section of init_parvec is the number of \strong{independent}
 parameter values, not the overall number of parameter values of that type.
 
 If you want to supply a vector of starting values for the EM algorithm, you
 need to be careful how many values you supply, and the order in which you
-include them in \code{initvect}, and you should \strong{CHECK} the output
+include them in \code{init_parvec}, and you should \strong{CHECK} the output
 list of parameters (which is the full set of parameter values, including
 dependent ones, broken up into each type of parameter) to check that your
-initvect model_structure is correct for the formula you have specified.
+init_parvec model_structure is correct for the formula you have specified.
 
 For example, the number of \code{mu} values will always be 1 fewer than the
 number of categories in the data, and the remaining value of mu is dependent
@@ -794,13 +799,15 @@ of rows in the original data matrix, and \code{p} is the number of columns in
 the original data matrix.
 
 For Binary,
+
 There is one independent value for \code{mu}, i.e. q = 2.
 
 Ignore \code{phi}, which is not used in the Binary model.
 
 For OSM,
+
 The starting values for \code{mu_k} are length \code{q-1}, and the model
-has \code{mu_1} = 0 always, so the initvect values for \code{mu} will become
+has \code{mu_1} = 0 always, so the init_parvec values for \code{mu} will become
 \code{mu_2}, \code{mu_3}, etc. up to \code{mu_q}.
 
 The starting values for \code{phi_k} are length \code{q-2}.
@@ -818,39 +825,40 @@ Note that the starting values for \code{phi} do not correspond directly to
     \code{(phi[1] = 0 and phi[q] = 1)}.
 
 For POM,
+
 The starting values for \code{mu_k} are length \code{q-1}, but the starting
 values do not correspond directly to \code{mu_k}, because \code{mu_k} is
 restricted to being increasing, i.e. the model has to have
     \code{mu_1} <= \code{mu_2} <= ... \code{mu_q} = \code{+Inf}
 
-So instead of using the initvect values directly for \code{mu_k}, the 2nd to
-(q-1)th elements of initvect are used to construct \code{mu_k} as follows:
+So instead of using the init_parvec values directly for \code{mu_k}, the 2nd to
+(q-1)th elements of init_parvec are used to construct \code{mu_k} as follows:
 
-    \code{mu_1 <- initvect[1]}
+    \code{mu_1 <- init_parvec[1]}
 
-    \code{mu_2 <- initvect[1] + exp(initvect[2])}
+    \code{mu_2 <- init_parvec[1] + exp(init_parvec[2])}
 
-    \code{mu_3 <- initvect[1] + exp(initvect[2]) + exp(initvect[3])}
+    \code{mu_3 <- init_parvec[1] + exp(init_parvec[2]) + exp(init_parvec[3])}
 
     ... and so on up to \code{mu_{k-1}}, and \code{mu_k} is infinity, because
     it is not used directly to construct the probability of Y = q.
 
 Thus the values that are used to construct \code{mu_k} can be unconstrained,
-which makes it easier to specify initvect and easier to optimize the parameter
+which makes it easier to specify init_parvec and easier to optimize the parameter
 values.
 
 Ignore \code{phi}, which is not used in POM.
 
 For \strong{all three models},
 
-The starting values for \code{rowc_coef_r} are length \code{nclus.row-1},
-where \code{nclus.row} is the number of row clusters. The final row cluster
+The starting values for \code{rowc_coef_r} are length \code{RG-1},
+where \code{RG} is the number of row clusters. The final row cluster
 parameter is dependent on the others (see the input parameter info for
 constraint_sum_zero), whereas if it were independent it would be colinear
 with the \code{mu_k} parameters and thus not identifiable.
 
 Similarly the starting values for \code{colc_coef_c} are length
-\code{nclus.column-1}, where \code{nclus.column} is the number of column
+\code{CG-1}, where \code{CG} is the number of column
 clusters, to avoid problems of colinearity and nonidentifiability.
 
 If you have biclustering with an interaction term between row clusters and
@@ -862,10 +870,10 @@ column clusters separately. That is, if you use the biclustering model
 
 \code{Y ~ ROWCLUST*COLCLUST},
 
-then the main effect term \code{ROWCLUST} has \code{nclus.row-1} independent
-parameters in \code{initvect}, and \code{COLCLUST} has \code{nclus.column-1}
-independent parameters in \code{initvect}, and \code{ROWCLUST:COLCLUST} will
-have \code{(nclus.row - 1)*(nclus.column - 1)} independent parameter values.
+then the main effect term \code{ROWCLUST} has \code{RG-1} independent
+parameters in \code{init_parvec}, and \code{COLCLUST} has \code{CG-1}
+independent parameters in \code{init_parvec}, and \code{ROWCLUST:COLCLUST} will
+have \code{(RG - 1)*(CG - 1)} independent parameter values.
 The final matrix of interaction terms will be constrained to have its last
 row equal to the negative sum of the other rows, and the last column equal to
 the negative sum of the other columns.
@@ -876,7 +884,7 @@ i.e.
 
 \code{Y ~ ROWCLUST:COLCLUST},
 
-then that matrix of interaction terms will have \code{nclus.row*nclus.column - 1}
+then that matrix of interaction terms will have \code{RG*CG - 1}
 independent parameters, i.e. more independent parameters than if you included
 the main effects.
 
@@ -884,22 +892,22 @@ If you have column effects alongside row clusters (they are not permitted
 alongside column clusters), without interactions, i.e. the formula
 \code{Y ~ ROWCLUST + COL} with Binary model Logit(P(Y = 1)) = mu +
 rowc_coef_r + col_coef_j
-then the row cluster coefficients have \code{nclus.row - 1} independent
+then the row cluster coefficients have \code{RG - 1} independent
 parameters, and the column effect coefficients have \code{p - 1} independent
 parameters, where p is the number of columns in the original data matrix,
-i.e. the maximum value of \code{long.df$COL}.
+i.e. the maximum value of \code{long_df$COL}.
 
 If you include the interaction term, then the number of independent parameters
 again depends on whether you just use the interaction term, or include the
 main effects.
 
 In the formula \code{Y ~ ROWCLUST + COL + ROWCLUST:COL} or its equivalent with
-"*", the interaction term will have \code{(nclus.row - 1)*(p-1)} independent
+"*", the interaction term will have \code{(RG - 1)*(p-1)} independent
 parameters.
 
 If you instead use the formula \code{Y ~ ROWCLUST:COL}, then the interaction
-term will have \code{nclus.row*p - 1} independent parameters. Either way, the
-total number of independent parameters in the model will be \code{nclus.row*p}.
+term will have \code{RG*p - 1} independent parameters. Either way, the
+total number of independent parameters in the model will be \code{RG*p}.
 
 Similarly, if you have row effects alongside column clusters, without
 interactions, i.e. the formula
@@ -908,19 +916,19 @@ interactions, i.e. the formula
 
 with Binary model Logit(P(Y = 1)) = mu + colc_coef_c + row_coef_i
 
-then the column cluster coefficients will have \code{nclus.column - 1}
+then the column cluster coefficients will have \code{CG - 1}
 independent parameters, and the row coefficients will have \code{n-1}
 independent parameters, where n is the number of rows in the original data
-matrix, i.e. the maximum value of \code{long.df$ROW}.
+matrix, i.e. the maximum value of \code{long_df$ROW}.
 
 If you include the interaction term alongside the main effects, i.e.
 
 \code{Y ~ COLCLUST + ROW + COLCLUST:ROW}, or its equivalent with "*", the
-interaction term will have \code{(nclus.column - 1)*(n-1)} independent
+interaction term will have \code{(CG - 1)*(n-1)} independent
 parameters.
 
 If you instead use the formula \code{Y ~ COLCLUST:ROW}, that interaction
-coefficient matrix will have \code{nclus.column*n - 1} independent parameters.
+coefficient matrix will have \code{CG*n - 1} independent parameters.
 
 Any covariate terms included in the formula will be split up by
 \code{clustord} into the covariates that interact with row clusters, the
@@ -928,7 +936,7 @@ covariates that interact with column clusters, and the covariates that do not
 interact with row or column clusters.
 
 The number of independent parameters for row-cluster-interacting covariates
-will be \code{nclus.row*L}, where \code{L} is the number of terms involving
+will be \code{RG*L}, where \code{L} is the number of terms involving
 row clusters and covariates after any "*" terms have been expanded.
 
 So in this formula, for example,
@@ -941,11 +949,11 @@ expanded formula would be
 \code{Y ~ ROWCLUST + xr1 + xr2 + ROWCLUST:xr1 + ROWCLUST:log(xc1)}
 
 and the terms interacting with \code{ROWCLUST} would be \code{ROWCLUST:xr1}
-and \code{ROWCLUST:log(xc1)}, so there would be \code{nclus.row*2}
+and \code{ROWCLUST:log(xc1)}, so there would be \code{RG*2}
 independent coefficients for those covariates.
 
 The number of independent parameters for column-cluster-interacting
-covariates will be \code{nclus.column*M}, where \code{M} is the number of
+covariates will be \code{CG*M}, where \code{M} is the number of
 terms involving column clusters and covariates after any "*" terms have been
 expanded.
 
@@ -959,7 +967,7 @@ would be expanded as
 
 and the terms interacting with \code{COLCLUST} would be \code{COLCLUST:xc1},
 \code{COLCLUST:xc2:xc3} and \code{COLCLUST:xr1}, so there would be
-\code{nclus.column*3} independent coefficients for those covariates.
+\code{CG*3} independent coefficients for those covariates.
 
 The number of independent parameters for covariates that do not interact with
 row or column clusters will be the same as the number of those covariate terms,
@@ -978,22 +986,33 @@ so there would be 3 independent coefficients for the terms \code{xr1, xr2, xc1}.
 Note that there are \strong{no intercept} terms for the coefficients,
 because those are incorporated into the parameters \code{mu_k}.
 
-The \strong{order of the} \code{initvect} \strong{entries} is as follows, and
+The \strong{order of the} \code{init_parvec} \strong{entries} is as follows, and
 any entries that are not included in the formula will be ignored and not
-included in \code{initvect}. That is, you should NOT provide values in
-\code{initvect} for components that are not included in the formula.
+included in \code{init_parvec}. That is, you should NOT provide values in
+\code{init_parvec} for components that are not included in the formula.
 
 1) mu (or values used to construct mu, POM only)
+
 2) values used to construct phi (OSM only)
+
 3) row cluster coefficients
+
 4) column cluster coefficients
+
 5) [matrix] bicluster coefficients (i.e. interaction between row and column clusters)
+
 6) individual row coefficients
+
 7) individual column coefficients
+
 8) [matrix] interactions between row clusters and individual column coefficients
+
 9) [matrix] interactions between column clusters and individual row coefficients
+
 10) [matrix] row-cluster-specific coefficients for covariates interacting with row clusters
+
 11) [matrix] column-cluster-specific coefficients for covariates interacting with column clusters
+
 12) coefficients for covariates that do not interact with row or column clusters
 
 Any entries marked as [matrix] will be constructed into matrices by filling
@@ -1001,19 +1020,22 @@ those matrices row-wise, e.g. if you want starting values 1:6 for a matrix of
 2 row clusters and 3 covariates interacting with those row clusters, the
 matrix of coefficients will become
 
-\code{1 2 3
-4 5 6}
+\code{1 2 3}
+
+\code{4 5 6}
 
 For the formula \code{Y ~ ROWCLUST*COLCLUST}, where the matrix of interactions
-between row and column clusters has \code{(nclus.row - 1)*(nclus.column - 1)}
+between row and column clusters has \code{(RG - 1)*(CG - 1)}
 independent parameters, the last row and column of the matrix will be the
 negative sums of the rest, so e.g. if you have 2 row clusters and 3 column
 clusters, there will only be 2 independent values, so if you provide the
 starting values -0.5 and 1.2, the final matrix of parameters will be:
 
-\code{                column cluster 1   column cluster 2   column cluster 3
-row cluster 1   -0.5               1.2                -0.7
-row cluster 2   0.5                -1.2               0.7}
+\code{                column cluster 1   column cluster 2   column cluster 3}
+
+\code{row cluster 1   -0.5               1.2                -0.7}
+
+\code{row cluster 2   0.5                -1.2               0.7}
 
 If the matrix is a matrix relating to row clusters, then the row clusters are
 in the rows, and if it's a matrix relating to column clusters but not row
@@ -1035,39 +1057,43 @@ index and c being the column cluster index.
 }
 \examples{
 set.seed(1)
-long.df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),
+long_df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),
                ROW=factor(rep(1:20,times=5)),COL=rep(1:5,each=20))
 
 # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*rowc_coef_r with 3 row clustering groups:
-clustord(Y~ROWCLUST,model="OSM",3,long.df=long.df,
-             EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
+clustord(Y~ROWCLUST,model="OSM",3,long_df=long_df,
+             control_EM=list(maxiter=2,maxiter_start=2), nstarts=2)
 
-# Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + col_coef_j) with 3 row clustering groups:
-clustord(Y~ROWCLUST+COL,model="OSM",3,long.df=long.df,
-             EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
+# Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + col_coef_j)
+#    with 3 row clustering groups:
+clustord(Y~ROWCLUST+COL,model="OSM",3,long_df=long_df,
+             control_EM=list(maxiter=2,maxiter_start=2), nstarts=2)
 
-# Model Logit(P(Y <= k))=mu_k-rowc_coef_r-col_coef_j-rowc_col_coef_rj with 2 row clustering groups:
-clustord(Y~ROWCLUST*COL,model="POM",nclus.row=2,long.df=long.df,
-             EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
+# Model Logit(P(Y <= k))=mu_k-rowc_coef_r-col_coef_j-rowc_col_coef_rj
+#    with 2 row clustering groups:
+clustord(Y~ROWCLUST*COL,model="POM",RG=2,long_df=long_df,
+             control_EM=list(maxiter=2,maxiter_start=2), nstarts=2)
 
-# Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c) with 3 column clustering groups:
-clustord(Y~COLCLUST,model="OSM",nclus.column=3,long.df=long.df,
-             EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
+# Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c)
+#    with 3 column clustering groups:
+clustord(Y~COLCLUST,model="OSM",CG=3,long_df=long_df,
+             control_EM=list(maxiter=2,maxiter_start=2), nstarts=2)
 
-# Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c + row_coef_i) with 3 column clustering groups:
-clustord(Y~COLCLUST+ROW,model="OSM",nclus.column=3,long.df=long.df,
-             EM.control=list(EMcycles=2,startEMcycles=2), nstarts=2)
+# Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c + row_coef_i)
+#    with 3 column clustering groups:
+clustord(Y~COLCLUST+ROW,model="OSM",CG=3,long_df=long_df,
+             control_EM=list(maxiter=2,maxiter_start=2), nstarts=2)
 
 # Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + colc_coef_c)
 #    with 3 row clustering groups and 2 column clustering groups:
-clustord(Y~ROWCLUST+COLCLUST,model="OSM",nclus.row=3,nclus.column=2,long.df=long.df,
-             EM.control=list(EMcycles=2), nstarts=1)
+clustord(Y~ROWCLUST+COLCLUST,model="OSM",RG=3,CG=2,long_df=long_df,
+             control_EM=list(maxiter=2), nstarts=1)
 
 # Model Logit(P(Y<=k))=mu_k-rowc_coef_r-colc_coef_c-rowc_colc_coef_rc
 #    with 2 row clustering groups and 4 column clustering groups, and
 #    interactions between them:
-clustord(Y~ROWCLUST*COLCLUST, model="POM", nclus.row=2, nclus.column=4,
-             long.df=long.df,EM.control=list(EMcycles=2), nstarts=1,
+clustord(Y~ROWCLUST*COLCLUST, model="POM", RG=2, CG=4,
+             long_df=long_df,control_EM=list(maxiter=2), nstarts=1,
              start_from_simple_model=FALSE)
 }
 \references{

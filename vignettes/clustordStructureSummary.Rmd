@@ -98,7 +98,7 @@ Example formulae with interaction between row clustering and some of the row cov
 `Y ~ ROWCLUST*age + nationality*occupation`
 
 
-You need to also supply these row covariates as `xr.df` to the function `mat2df()` when creating the long data frame for clustering (see the `clustord` Tutorial vignette for more details).
+You need to also supply these row covariates as `xr_df` to the function `mat_to_df()` when creating the long data frame for clustering (see the `clustord` Tutorial vignette for more details).
 
 You can also include individual column effects as well as covariates:
 
@@ -120,7 +120,7 @@ The formula works the same as for other covariates:
 `Y + ROWCLUST + honesty`
 
 
-but you need to supply these column covariates as `xc.df` to the function `mat2df()` when creating the long form data frame.
+but you need to supply these column covariates as `xc_df` to the function `mat_to_df()` when creating the long form data frame.
 
 
 ## Column clustering
@@ -182,7 +182,7 @@ Column clustering with covariates and interaction:
 `Y + COLCLUST*honesty`
 
 
-Supply column covariates as `xc.df` to `mat2df()`.
+Supply column covariates as `xc_df` to `mat_to_df()`.
 
 Parameters: `colc`, `cov` and possible interaction `colc_cov`.
  
@@ -203,7 +203,7 @@ Column clustering with covariates and interaction:
 `Y + COLCLUST*age`
 
 
-Supply row covariates as `xr.df` to `mat2df()`.
+Supply row covariates as `xr_df` to `mat_to_df()`.
 
 Parameters: `colc`, `cov` and possible interaction `colc_cov`.
  

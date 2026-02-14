@@ -5,8 +5,8 @@
 #' categorical data.
 #'
 #' The clustord package provides six functions: \code{clustord()}, \code{rerun()},
-#' \code{mat2df()}, \code{calc.SE.rowcluster()}, \code{calc.SE.bicluster()}, and
-#' \code{calc.cluster.comparisons()}.
+#' \code{mat_to_df()}, \code{calc_SE_rowcluster()}, \code{calc_SE_bicluster()}, and
+#' \code{calc_cluster_comparisons()}.
 #'
 #' @section Clustering function: The main function is \code{clustord()}, which
 #'   fits a clustering model to the data. The model is fitted using
@@ -30,18 +30,18 @@
 #' up all the input parameters based on the original model fitting run.#'
 #'
 #' @section Utility function:
-#' \code{mat2df()} is a utility function provided to convert a data matrix of
+#' \code{mat_to_df()} is a utility function provided to convert a data matrix of
 #' responses into the long-form data frame format required by
 #' \code{clustord()}, and can also attach any covariates to that long-form
 #' data frame if needed.
 #'
 #' @section SE calculation functions:
-#' \code{calc.SE.rowcluster()} and \code{calc.SE.bicluster()} are functions to
+#' \code{calc_SE_rowcluster()} and \code{calc_SE_bicluster()} are functions to
 #' run after running \code{clustord()}, to calculate the standard errors on
 #' the parameters fitted using \code{clustord()}.
 #'
 #' @section Clustering comparisons:
-#' \code{calc.cluster.comparisons()} can be used to compare the assigned cluster
+#' \code{calc_cluster_comparisons()} can be used to compare the assigned cluster
 #' memberships of the rows or columns of the data matrix from two different
 #' clustering fits, in a way that avoids the label-switching problem.
 #'

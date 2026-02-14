@@ -1,11 +1,11 @@
 #' @importFrom methods is
-validate.inputs <- function(formula, model,
-                            nclus.row=NULL,nclus.column=NULL,
-                            long.df,
-                            initvect=NULL,
-                            pi.init=NULL, kappa.init=NULL,
-                            EM.control=default.EM.control(),
-                            optim.method="L-BFGS-B",
+validate_inputs <- function(formula, model,
+                            RG=NULL,CG=NULL,
+                            long_df,
+                            init_parvec=NULL,
+                            init_pi=NULL, init_kappa=NULL,
+                            control_EM=default_control_EM(),
+                            optim_method="L-BFGS-B",
                             constraint_sum_zero=TRUE,
                             start_from_simple_model=TRUE,
                             parallel_starts=FALSE,
@@ -21,80 +21,80 @@ validate.inputs <- function(formula, model,
     if (!is.character(model) || !is.vector(model) || length(model) != 1) stop("model must be a string, 'OSM' or 'POM' or 'Binary'.")
     if (!(model %in% c("OSM","POM","Binary"))) stop("model must be either 'OSM' or POM' for the ordered stereotype and proportional odds models, or 'Binary' for the binary model.")
 
-    ## Check that clustering settings are valid (later, in check.formula, will
-    ## make sure user has provide nclus.row or nclus.column or both, depending
+    ## Check that clustering settings are valid (later, in check_formula, will
+    ## make sure user has provide RG or CG or both, depending
     ## on formula supplied)
-    if (!is.null(nclus.row)) {
-        if (!is.vector(nclus.row) || length(nclus.row) != 1 || nclus.row <= 1 ||
-            nclus.row %% 1 != 0 || is.na(nclus.row)) {
-            stop("nclus.row must be an integer, from 2 to the number of rows/observations in the data.")
+    if (!is.null(RG)) {
+        if (!is.vector(RG) || length(RG) != 1 || RG <= 1 ||
+            RG %% 1 != 0 || is.na(RG)) {
+            stop("RG must be an integer, from 2 to the number of rows/observations in the data.")
         }
     }
-    if (!is.null(nclus.column)) {
-        if (!is.vector(nclus.column) || length(nclus.column) != 1 ||
-            nclus.column <= 1 || nclus.column %% 1 != 0 || is.na(nclus.column)) {
-            stop("nclus.column must be an integer, from 2 to the number of columns/questions in the data.")
+    if (!is.null(CG)) {
+        if (!is.vector(CG) || length(CG) != 1 ||
+            CG <= 1 || CG %% 1 != 0 || is.na(CG)) {
+            stop("CG must be an integer, from 2 to the number of columns/questions in the data.")
         }
     }
 
-    if (is.null(long.df)) stop("long.df cannot be null.")
-    if (!is.data.frame(long.df)) stop("long.df must be a data frame.")
-    if (length(long.df) < 3) stop("long.df must have at least 3 columns, Y and ROW and COL.")
-    names.df <- names(long.df)
+    if (is.null(long_df)) stop("long_df cannot be null.")
+    if (!is.data.frame(long_df)) stop("long_df must be a data frame.")
+    if (length(long_df) < 3) stop("long_df must have at least 3 columns, Y and ROW and COL.")
+    names_df <- names(long_df)
     # Convert the Y, ROW and COL variables to upper case if they are in the df but
     # in the wrong case
-    if ("y" %in% names.df) names.df[which(names.df == "y")] <- "Y"
-    if ("ROW" %in% toupper(names.df)) names.df[which(toupper(names.df) == "ROW")] <- "ROW"
-    if ("COL" %in% toupper(names.df)) names.df[which(toupper(names.df) == "COL")] <- "COL"
-    if (!("Y" %in% names.df)) stop("long.df must have a column named 'Y' which contains the response values.")
-    if (!("ROW" %in% names.df)) stop("long.df must have a column named 'ROW' which indicates what observation (row in the data matrix) each value of Y corresponds to.")
-    if (!("COL" %in% names.df)) stop("long.df must have a column named 'COL' which indicates what variable (column in the data matrix) each value of Y corresponds to.")
-    if (length(which(names.df == "Y")) > 1) stop("long.df should only have one column named 'Y'.")
-    if (length(which(names.df == "ROW")) > 1) stop("long.df should only have one column named 'ROW'.")
-    if (length(which(names.df == "COL")) > 1) stop("long.df should only have one column named 'COL'.")
+    if ("y" %in% names_df) names_df[which(names_df == "y")] <- "Y"
+    if ("ROW" %in% toupper(names_df)) names_df[which(toupper(names_df) == "ROW")] <- "ROW"
+    if ("COL" %in% toupper(names_df)) names_df[which(toupper(names_df) == "COL")] <- "COL"
+    if (!("Y" %in% names_df)) stop("long_df must have a column named 'Y' which contains the response values.")
+    if (!("ROW" %in% names_df)) stop("long_df must have a column named 'ROW' which indicates what observation (row in the data matrix) each value of Y corresponds to.")
+    if (!("COL" %in% names_df)) stop("long_df must have a column named 'COL' which indicates what variable (column in the data matrix) each value of Y corresponds to.")
+    if (length(which(names_df == "Y")) > 1) stop("long_df should only have one column named 'Y'.")
+    if (length(which(names_df == "ROW")) > 1) stop("long_df should only have one column named 'ROW'.")
+    if (length(which(names_df == "COL")) > 1) stop("long_df should only have one column named 'COL'.")
 
-    if (!is.factor(long.df$Y)) stop("long.df$Y must be a factor.")
+    if (!is.factor(long_df$Y)) stop("long_df$Y must be a factor.")
 
-    if (any(is.na(long.df$Y))) stop("long.df$Y has missing values (NA). Please delete these rows and try again.")
-    if (is.list(long.df$Y) || any(sapply(long.df$Y,is.list)) ||
-        any(sapply(long.df$Y,is.infinite))) stop("long.df$Y is a list, or has list elements or infinite elements. long.df$Y should be a factor with q levels.")
-    if (model == "Binary" && length(unique(long.df$Y)) > 2) stop("For the Binary model, long.df$Y should only have 2 possible values.")
-    if (model %in% c("OSM","POM") && length(unique(long.df$Y)) < 3) stop("For OSM or POM, long.df$Y should have more than 2 possible values. For data with only 2 values, please use the Binary model.")
-    if (!is.factor(long.df$ROW) &&
-        (is.list(long.df$ROW) || any(sapply(long.df$ROW,is.list)) || any(is.na(long.df$ROW)) ||
-         any(sapply(long.df$ROW,is.infinite)) || any(long.df$ROW %% 1 != 0) ||
-         any(long.df$ROW < 1) || all(long.df$ROW > 1))) stop("long.df$ROW must be a factor or integers from 1 to the number of observations, i.e. the number of rows in the original data matrix.")
-    if (!is.factor(long.df$COL) &&
-        (is.list(long.df$COL) || any(sapply(long.df$COL,is.list)) || any(is.na(long.df$COL)) ||
-         any(sapply(long.df$COL,is.infinite)) || any(long.df$COL %% 1 != 0) ||
-         any(long.df$COL < 1) || all(long.df$COL > 1))) stop("long.df$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix.")
+    if (any(is.na(long_df$Y))) stop("long_df$Y has missing values (NA). Please delete these rows and try again.")
+    if (is.list(long_df$Y) || any(sapply(long_df$Y,is.list)) ||
+        any(sapply(long_df$Y,is.infinite))) stop("long_df$Y is a list, or has list elements or infinite elements. long_df$Y should be a factor with q levels.")
+    if (model == "Binary" && length(unique(long_df$Y)) > 2) stop("For the Binary model, long_df$Y should only have 2 possible values.")
+    if (model %in% c("OSM","POM") && length(unique(long_df$Y)) < 3) stop("For OSM or POM, long_df$Y should have more than 2 possible values. For data with only 2 values, please use the Binary model.")
+    if (!is.factor(long_df$ROW) &&
+        (is.list(long_df$ROW) || any(sapply(long_df$ROW,is.list)) || any(is.na(long_df$ROW)) ||
+         any(sapply(long_df$ROW,is.infinite)) || any(long_df$ROW %% 1 != 0) ||
+         any(long_df$ROW < 1) || all(long_df$ROW > 1))) stop("long_df$ROW must be a factor or integers from 1 to the number of observations, i.e. the number of rows in the original data matrix.")
+    if (!is.factor(long_df$COL) &&
+        (is.list(long_df$COL) || any(sapply(long_df$COL,is.list)) || any(is.na(long_df$COL)) ||
+         any(sapply(long_df$COL,is.infinite)) || any(long_df$COL %% 1 != 0) ||
+         any(long_df$COL < 1) || all(long_df$COL > 1))) stop("long_df$COL must be a factor or integers from 1 to the number of variables, i.e. the number of columns in the original data matrix.")
 
-    if (any(table(long.df[,c("ROW","COL")]) > 1)) stop("Each element from the original data matrix must correspond to no more than 1 row in long.df.")
+    if (any(table(long_df[,c("ROW","COL")]) > 1)) stop("Each element from the original data matrix must correspond to no more than 1 row in long_df.")
 
-    cov_idxs <- which(!(names(long.df) %in% c("Y","ROW","COL")))
+    cov_idxs <- which(!(names(long_df) %in% c("Y","ROW","COL")))
     for (j in cov_idxs) {
-        col <- long.df[,j]
+        col <- long_df[,j]
         non_na_col <- col[!is.na(col)]
-        if (length(unique(non_na_col)) == 1) stop(paste("Covariate",names(long.df)[j],"only takes one non-missing value for all entries of the data matrix. Please remove this covariate before continuing."))
+        if (length(unique(non_na_col)) == 1) stop(paste("Covariate",names(long_df)[j],"only takes one non-missing value for all entries of the data matrix. Please remove this covariate before continuing."))
     }
 
-    if (!is.null(nclus.row) && nclus.row >= max(as.numeric(long.df$ROW))) stop("nclus.row must be smaller than the maximum value of long.df$ROW.")
-    if (!is.null(nclus.column) && nclus.column >= max(as.numeric(long.df$COL))) stop("nclus.column must be smaller than the maximum value of long.df$COL.")
+    if (!is.null(RG) && RG >= max(as.numeric(long_df$ROW))) stop("RG must be smaller than the maximum value of long_df$ROW.")
+    if (!is.null(CG) && CG >= max(as.numeric(long_df$COL))) stop("CG must be smaller than the maximum value of long_df$COL.")
 
-    if (!is.null(initvect)) {
-        if (!is.vector(initvect) || !is.numeric(initvect) || any(is.na(initvect)) ||
-            any(is.infinite(initvect))) stop("If supplied, initvect must be a numeric vector with finite values.")
+    if (!is.null(init_parvec)) {
+        if (!is.vector(init_parvec) || !is.numeric(init_parvec) || any(is.na(init_parvec)) ||
+            any(is.infinite(init_parvec))) stop("If supplied, init_parvec must be a numeric vector with finite values.")
     }
 
-    if (!is.null(pi.init)) {
-        if (!is.vector(pi.init) || !is.numeric(pi.init) || any(is.na(pi.init)) ||
-            any(pi.init < 0) || any(pi.init > 1)) stop("If supplied, pi.init must be a vector of numbers between 0 and 1.")
-        if (length(pi.init) != nclus.row || abs(sum(pi.init) - 1) > 1e-12) stop("pi.init must be the same length as the number of row clusters, and must add up to 1")
+    if (!is.null(init_pi)) {
+        if (!is.vector(init_pi) || !is.numeric(init_pi) || any(is.na(init_pi)) ||
+            any(init_pi < 0) || any(init_pi > 1)) stop("If supplied, init_pi must be a vector of numbers between 0 and 1.")
+        if (length(init_pi) != RG || abs(sum(init_pi) - 1) > 1e-12) stop("init_pi must be the same length as the number of row clusters, and must add up to 1")
     }
-    if (!is.null(kappa.init)) {
-        if (!is.vector(kappa.init) || !is.numeric(kappa.init) || any(is.na(kappa.init)) ||
-            any(kappa.init < 0) | any(kappa.init > 1)) stop("If supplied, kappa.init must be a vector of numbers between 0 and 1.")
-        if (length(kappa.init) != nclus.column || abs(sum(kappa.init) - 1) > 1e-12) stop("kappa.init must be the same length as the number of column clusters, and must add up to 1")
+    if (!is.null(init_kappa)) {
+        if (!is.vector(init_kappa) || !is.numeric(init_kappa) || any(is.na(init_kappa)) ||
+            any(init_kappa < 0) | any(init_kappa > 1)) stop("If supplied, init_kappa must be a vector of numbers between 0 and 1.")
+        if (length(init_kappa) != CG || abs(sum(init_kappa) - 1) > 1e-12) stop("init_kappa must be the same length as the number of column clusters, and must add up to 1")
     }
 
     if (!is.logical(constraint_sum_zero) || !is.vector(constraint_sum_zero) ||
@@ -111,47 +111,47 @@ validate.inputs <- function(formula, model,
         stop("parallel_starts must be TRUE or FALSE.")
     }
 
-    if (!is.null(EM.control) & (!is.list(EM.control) || length(EM.control) == 0 || length(EM.control) > 9 ||
-        !all(names(EM.control) %in% c("EMcycles","EMlikelihoodtol","EMparamtol",
-                                      "paramstopping","startEMcycles","keepallparams",
-                                      "epsilon", "rerunestepbeforelli",
-                                      "uselatestlli")))) {
-        stop("If supplied, EM.control must be a list of control parameters for the EM algorithm. Please see the manual for more info.")
+    if (!is.null(control_EM) & (!is.list(control_EM) || length(control_EM) == 0 || length(control_EM) > 9 ||
+                                !all(names(control_EM) %in% c("maxiter","EM_likelihood_tol","EM_params_tol",
+                                                              "params_stopping","maxiter_start","keep_all_params",
+                                                              "epsilon", "rerun_estep_before_lli",
+                                                              "use_latest_lli")))) {
+        stop("If supplied, control_EM must be a list of control parameters for the EM algorithm. Please see the manual for more info.")
     }
 
-    if (is.null(optim.method) || !is.character(optim.method) || !is.vector(optim.method) ||
-        length(optim.method) != 1 || !(optim.method %in% c("Nelder-Mead","BFGS","CG","L-BFGS-B"))) stop("If supplied, optim.method must be one of the valid methods for optim, 'Nelder-Mead', 'CG', 'BFGS' or 'L-BFGS-B'.")
+    if (is.null(optim_method) || !is.character(optim_method) || !is.vector(optim_method) ||
+        length(optim_method) != 1 || !(optim_method %in% c("Nelder-Mead","BFGS","CG","L-BFGS-B"))) stop("If supplied, optim_method must be one of the valid methods for optim, 'Nelder-Mead', 'CG', 'BFGS' or 'L-BFGS-B'.")
 
     if (!(verbose %in% c(TRUE,FALSE))) stop("verbose must be TRUE or FALSE.")
 }
 
-check.factors <- function(long.df) {
-    if (is.factor(long.df$ROW)) {
+check_factors <- function(long_df) {
+    if (is.factor(long_df$ROW)) {
         message("Converting factor ROW to numeric.")
-        attributes(long.df)$ROWlevels <- levels(long.df$ROW)
-        long.df$ROW <- as.numeric(long.df$ROW)
+        attributes(long_df)$ROWlevels <- levels(long_df$ROW)
+        long_df$ROW <- as.numeric(long_df$ROW)
     }
-    if (is.factor(long.df$COL)) {
+    if (is.factor(long_df$COL)) {
         message("Converting factor COL to numeric.")
-        attributes(long.df)$COLlevels <- levels(long.df$COL)
-        long.df$COL <- as.numeric(long.df$COL)
+        attributes(long_df)$COLlevels <- levels(long_df$COL)
+        long_df$COL <- as.numeric(long_df$COL)
     }
 
     # Check that all categorical covariates are factors
-    cov_idxs <- which(!(names(long.df) %in% c("Y","ROW","COL")))
+    cov_idxs <- which(!(names(long_df) %in% c("Y","ROW","COL")))
     for (j in cov_idxs) {
-        if (is.character(long.df[,j])) long.df[,j] <- factor(long.df[,j])
+        if (is.character(long_df[,j])) long_df[,j] <- factor(long_df[,j])
     }
 
-    long.df
+    long_df
 }
 
 #' @importFrom stats model.matrix
-check.formula <- function(formula, model, long.df, RG=NULL, CG=NULL) {
+check_formula <- function(formula, model, long_df, RG=NULL, CG=NULL) {
 
-    n <- max(long.df$ROW)
-    p <- max(long.df$COL)
-    q <- max(as.numeric(long.df$Y))
+    n <- max(long_df$ROW)
+    p <- max(long_df$COL)
+    q <- max(as.numeric(long_df$Y))
 
     fo_terms <- terms(formula)
     fo_vars <- as.character(unlist(as.list(attr(fo_terms,"variables"))))
@@ -174,10 +174,10 @@ check.formula <- function(formula, model, long.df, RG=NULL, CG=NULL) {
     if (rowc_grep == 0 && colc_grep == 0) {
         stop("You must include ROWCLUST or COLCLUST in the formula.")
     }
-    if (rowc_grep > 0 && is.null(RG)) stop("If you include ROWCLUST in the formula, you must also supply an integer value for nclus.row.")
-    if (rowc_grep == 0 && !is.null(RG)) stop("If you do not include ROWCLUST in the formula, you must NOT supply an integer value for nclus.row.")
-    if (colc_grep > 0 && is.null(CG)) stop("If you include COLCLUST in the formula, you must also supply an integer value for nclus.column.")
-    if (colc_grep == 0 && !is.null(CG)) stop("If you do not include COLCLUST in the formula, you must NOT supply an integer value for nclus.column.")
+    if (rowc_grep > 0 && is.null(RG)) stop("If you include ROWCLUST in the formula, you must also supply an integer value for RG.")
+    if (rowc_grep == 0 && !is.null(RG)) stop("If you do not include ROWCLUST in the formula, you must NOT supply an integer value for RG.")
+    if (colc_grep > 0 && is.null(CG)) stop("If you include COLCLUST in the formula, you must also supply an integer value for CG.")
+    if (colc_grep == 0 && !is.null(CG)) stop("If you do not include COLCLUST in the formula, you must NOT supply an integer value for CG.")
 
     if (any(fo_labels == "ROWCLUST")) {
         rowc_part <- "ROWCLUST"
@@ -276,7 +276,7 @@ check.formula <- function(formula, model, long.df, RG=NULL, CG=NULL) {
         }
     }
 
-    # A.7  Check that all other variables in the formula are in long.df, and in
+    # A.7  Check that all other variables in the formula are in long_df, and in
     # the process separate out the ROW/COL/ROWCLUST/COLCLUST parts, the ROWCLUST
     # covariate parts, the COLCLUST covariate parts, and the pure covariate
     # parts
@@ -298,11 +298,11 @@ check.formula <- function(formula, model, long.df, RG=NULL, CG=NULL) {
             stop("If you are including interactions between row clusters and covariates, you must include the main effect term for ROWCLUST.")
         }
 
-        rowc_parts <- extract.covs("ROWCLUST", non_row_col_part[rowc_idxs], long.df)
+        rowc_parts <- extract_covs("ROWCLUST", non_row_col_part[rowc_idxs], long_df)
         rowc_cov_part <- rowc_parts$clust_cov_part
         rowc_fo <- rowc_parts$clust_fo
         rowc_mm <- rowc_parts$clust_mm
-        if (nrow(rowc_mm) < nrow(long.df)) stop("NA or NaN rows have been dropped from model matrix, possibly after calculating covariate terms derived from raw covariates. clustord cannot yet handle missing data in covariates. Please check your formula and covariate values and try again.")
+        if (nrow(rowc_mm) < nrow(long_df)) stop("NA or NaN rows have been dropped from model matrix, possibly after calculating covariate terms derived from raw covariates. clustord cannot yet handle missing data in covariates. Please check your formula and covariate values and try again.")
     } else {
         rowc_fo <- NULL
         rowc_mm <- matrix(1)
@@ -314,11 +314,11 @@ check.formula <- function(formula, model, long.df, RG=NULL, CG=NULL) {
             stop("If you are including interactions between column clusters and covariates, you must include the main effect term for COLCLUST.")
         }
 
-        colc_parts <- extract.covs("COLCLUST", non_row_col_part[colc_idxs], long.df)
+        colc_parts <- extract_covs("COLCLUST", non_row_col_part[colc_idxs], long_df)
         colc_cov_part <- colc_parts$clust_cov_part
         colc_fo <- colc_parts$clust_fo
         colc_mm <- colc_parts$clust_mm
-        if (nrow(colc_mm) < nrow(long.df)) stop("NA or NaN rows have been dropped from model matrix, possibly after calculating covariate terms derived from raw covariates. clustord cannot yet handle missing data in covariates. Please check your formula and covariate values and try again.")
+        if (nrow(colc_mm) < nrow(long_df)) stop("NA or NaN rows have been dropped from model matrix, possibly after calculating covariate terms derived from raw covariates. clustord cannot yet handle missing data in covariates. Please check your formula and covariate values and try again.")
     } else {
         colc_fo <- NULL
         colc_mm <- matrix(1)
@@ -336,10 +336,10 @@ check.formula <- function(formula, model, long.df, RG=NULL, CG=NULL) {
         # scope for another independent column for the final category of any
         # categorical variable, but we don't actually want to include that in our
         # model matrix
-        cov_mm <- model.matrix(cov_tf, data=long.df)
+        cov_mm <- model.matrix(cov_tf, data=long_df)
         # When dropping the intercept column, need to KEEP the matrix structure
         cov_mm <- cov_mm[,-1, drop=FALSE]
-        if (nrow(cov_mm) < nrow(long.df)) stop("NA or NaN rows have been dropped from model matrix, possibly after calculating covariate terms derived from raw covariates. clustord cannot yet handle missing data in covariates. Please check your formula and covariate values and try again.")
+        if (nrow(cov_mm) < nrow(long_df)) stop("NA or NaN rows have been dropped from model matrix, possibly after calculating covariate terms derived from raw covariates. clustord cannot yet handle missing data in covariates. Please check your formula and covariate values and try again.")
     } else {
         cov_fo <- NULL
         cov_mm <- matrix(1)
@@ -353,8 +353,8 @@ check.formula <- function(formula, model, long.df, RG=NULL, CG=NULL) {
     # the model-fitting algorithm, but to keep things consistent, we will
     # construct the entries of param lengths in the same order as the ones in
     # the Rcpp code
-    # This will change the order of the entries in EM.status$params.every.iteration
-    # to match the order of the entries in initvect/outvect
+    # This will change the order of the entries in EMstatus$params_every_iteration
+    # to match the order of the entries in init_parvec/out_parvec
     param_lengths <- rep(0, 12)
     names(param_lengths) <- c("mu","phi","rowc","colc","rowc_colc",
                               "row","col","rowc_col","colc_row",
@@ -387,8 +387,8 @@ check.formula <- function(formula, model, long.df, RG=NULL, CG=NULL) {
 ## Conversion of the column clustering formula into row clustering format, in
 ## order for the actual clustering to be done via the row clustering functions
 #' @importFrom stats terms formula
-convert.model.row.to.column <- function(row.model_structure) {
-    pl <- row.model_structure$param_lengths
+convert_model_row_to_column <- function(row_model_structure) {
+    pl <- row_model_structure$param_lengths
 
     if (pl['colc'] > 0 && pl['rowc'] == 0) {
         pl['rowc'] <- pl['colc']
@@ -410,29 +410,29 @@ convert.model.row.to.column <- function(row.model_structure) {
     rowc_fo <- NULL
     colc_mm <- matrix(1)
     colc_fo <- NULL
-    cov_mm <- row.model_structure$cov_mm
-    cov_fo <- row.model_structure$cov_fo
+    cov_mm <- row_model_structure$cov_mm
+    cov_fo <- row_model_structure$cov_fo
 
-    if (any(dim(row.model_structure$colc_mm) > 1) &&
-        all(dim(row.model_structure$rowc_mm) == 1)) {
-        rowc_mm <- row.model_structure$colc_mm
+    if (any(dim(row_model_structure$colc_mm) > 1) &&
+        all(dim(row_model_structure$rowc_mm) == 1)) {
+        rowc_mm <- row_model_structure$colc_mm
         colc_mm <- matrix(1)
 
-        colc_terms <- terms(row.model_structure$colc_fo)
+        colc_terms <- terms(row_model_structure$colc_fo)
         colc_labels <- attr(colc_terms, "term.labels")
         rowc_fo <- formula(paste("Y ~",paste(colc_labels, collapse="+")))
         colc_fo <- NULL
     }
 
     if (any(pl[c('colc','row','colc_row','colc_cov')] > 0) ||
-        any(dim(row.model_structure$rowc_mm) > 1)) stop("Error involving model structure.")
+        any(dim(row_model_structure$rowc_mm) > 1)) stop("Error involving model structure.")
 
     list(param_lengths=pl, rowc_fo=rowc_fo, rowc_mm=rowc_mm,
          colc_fo=colc_fo, colc_mm=colc_mm, cov_fo=cov_fo, cov_mm=cov_mm)
 }
 
 #' @importFrom stats model.matrix
-extract.covs <- function(clust_name, non_row_col_part, long.df) {
+extract_covs <- function(clust_name, non_row_col_part, long_df) {
 
     clust_cov_part <- non_row_col_part
     # First, remove the clustering term from those parts, because we want to
@@ -455,7 +455,7 @@ extract.covs <- function(clust_name, non_row_col_part, long.df) {
     # model matrix
     clust_fo <- formula(paste("Y ~",paste(clust_cov_part,collapse="+")))
     clust_tf <- terms(clust_fo)
-    clust_mm <- model.matrix(clust_tf, data=long.df)
+    clust_mm <- model.matrix(clust_tf, data=long_df)
     # When dropping the intercept column, need to KEEP the matrix structure
     clust_mm <- clust_mm[,-1, drop=FALSE]
 

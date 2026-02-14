@@ -19,8 +19,8 @@ reference:
   contents:
   - clustord
   - rerun
-  - calc.SE.rowcluster
-  - calc.SE.bicluster
+  - calc_SE_rowcluster
+  - calc_SE_bicluster
 
 - subtitle: Regression
   desc: >
@@ -32,8 +32,8 @@ reference:
   desc: >
     Functions for setting up the long-form data frame for clustering, calculating measures to compare sets of clustering results, or rearranging the results in order of cluster effects
   contents:
-  - mat2df
-  - calc.cluster.comparisons
+  - mat_to_df
+  - calc_cluster_comparisons
   - reorder.clustord
 
 - subtitle: Package information

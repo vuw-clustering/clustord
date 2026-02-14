@@ -17,7 +17,7 @@ double rcpp_logit(double x) {
 }
 
 void rcpp_unpack(const int & model_num,
-                 const NumericVector & invect,
+                 const NumericVector & init_parvec,
                  const IntegerVector & param_lengths,
                  NumericVector & mu,
                  NumericVector & phi,
@@ -48,8 +48,8 @@ void rcpp_unpack(const int & model_num,
         mu[0] = 0;
         for (kk=1; kk < q; kk++) {
             ind = kk-1;
-            // Rcout << "The index of invect : " << ind << "\n";
-            mu[kk] = invect[ind];
+            // Rcout << "The index of init_parvec : " << ind << "\n";
+            mu[kk] = init_parvec[ind];
         }
         nelts += q-1;
         // Rcout << "The value of nelts : " << nelts << "\n";
@@ -60,8 +60,8 @@ void rcpp_unpack(const int & model_num,
         NumericVector u (q-1);
         for (kk=1; kk < q-1; kk++) {
             ind = nelts + kk-1;
-            // Rcout << "The index of invect : " << ind << "\n";
-            u[kk] = invect[ind];
+            // Rcout << "The index of init_parvec : " << ind << "\n";
+            u[kk] = init_parvec[ind];
         }
         // Rcout << "The value of u : " << u << "\n";
 
@@ -85,15 +85,15 @@ void rcpp_unpack(const int & model_num,
     } else if (model_num == 2) {
         // Convert to mu from w, where w can vary between -Inf and +Inf
         // but mu must be increasing i.e. mu[1] <= mu[2] <= mu[3]...
-        mu[0] = invect[0];
+        mu[0] = init_parvec[0];
         for (kk=1; kk < q-1; kk++) {
-            mu[kk] = mu[kk-1] + exp(invect[kk]);
+            mu[kk] = mu[kk-1] + exp(init_parvec[kk]);
         }
         nelts += q-1;
         // Rcout << "The value of nelts : " << nelts << "\n";
         // Rcout << "The value of mu : " << mu << "\n";
     } else if (model_num == 3) {
-        mu[0] = invect[0];
+        mu[0] = init_parvec[0];
         nelts += 1;
         // Rcout << "The value of nelts : " << nelts << "\n";
         // Rcout << "The value of mu : " << mu << "\n";
@@ -104,16 +104,16 @@ void rcpp_unpack(const int & model_num,
             rowc_coef[RG-1] = 0;
             for (rr=0; rr < RG-1; rr++) {
                 ind = nelts + rr;
-                // Rcout << "The index of invect : " << ind << "\n";
-                rowc_coef[rr] = invect[ind];
-                rowc_coef[RG-1] -= invect[ind];
+                // Rcout << "The index of init_parvec : " << ind << "\n";
+                rowc_coef[rr] = init_parvec[ind];
+                rowc_coef[RG-1] -= init_parvec[ind];
             }
         } else {
             rowc_coef[0] = 0;
             for (rr=1; rr < RG; rr++) {
                 ind = nelts + rr-1;
-                // Rcout << "The index of invect : " << ind << "\n";
-                rowc_coef[rr] = invect[ind];
+                // Rcout << "The index of init_parvec : " << ind << "\n";
+                rowc_coef[rr] = init_parvec[ind];
             }
         }
         nelts += RG-1;
@@ -125,16 +125,16 @@ void rcpp_unpack(const int & model_num,
             colc_coef[CG-1] = 0;
             for (cc=0; cc < CG-1; cc++) {
                 ind = nelts + cc;
-                // Rcout << "The index of invect : " << ind << "\n";
-                colc_coef[cc] = invect[ind];
-                colc_coef[CG-1] -= invect[ind];
+                // Rcout << "The index of init_parvec : " << ind << "\n";
+                colc_coef[cc] = init_parvec[ind];
+                colc_coef[CG-1] -= init_parvec[ind];
             }
         } else {
             colc_coef[0] = 0;
             for (cc=1; cc < CG; cc++) {
                 ind = nelts + cc-1;
-                // Rcout << "The index of invect : " << ind << "\n";
-                colc_coef[cc] = invect[ind];
+                // Rcout << "The index of init_parvec : " << ind << "\n";
+                colc_coef[cc] = init_parvec[ind];
             }
         }
         nelts += CG-1;
@@ -151,16 +151,16 @@ void rcpp_unpack(const int & model_num,
                 for (cc=0; cc < CG-1; cc++) {
                     ind = nelts + rr*(CG-1)+cc;
 
-                    // Rcout << "The index of invect : " << ind << "\n";
+                    // Rcout << "The index of init_parvec : " << ind << "\n";
                     // Using constraint formulation from original POM code, with
                     // final row of rowc.colc.coef equal to negative sum of other
                     // rows. This is unlike the v0.1 clustord code and the original
                     // OSM code, had FIRST row of rowc.colc.coef equal to negative
                     // sum of other rows
-                    rowc_colc_coef(rr,cc) = invect[ind];
-                    rowc_colc_coef(rr,CG-1) -= invect[ind]; // fill last column with negative sum of other columns
-                    rowc_colc_coef(RG-1,cc) -= invect[ind]; // fill last row with negative sum of other rows
-                    rowc_colc_coef(RG-1,CG-1) += invect[ind]; // fill last element with sum of all independent elements
+                    rowc_colc_coef(rr,cc) = init_parvec[ind];
+                    rowc_colc_coef(rr,CG-1) -= init_parvec[ind]; // fill last column with negative sum of other columns
+                    rowc_colc_coef(RG-1,cc) -= init_parvec[ind]; // fill last row with negative sum of other rows
+                    rowc_colc_coef(RG-1,CG-1) += init_parvec[ind]; // fill last element with sum of all independent elements
                 }
             }
             nelts += (RG-1)*(CG-1);
@@ -172,10 +172,10 @@ void rcpp_unpack(const int & model_num,
 
                     if (rr != RG-1 || cc != CG-1) {
                         ind = nelts + rr*CG + cc;
-                        // Rcout << "The index of invect : " << ind << "\n";
-                        rowc_colc_coef(rr,cc) = invect[ind];
+                        // Rcout << "The index of init_parvec : " << ind << "\n";
+                        rowc_colc_coef(rr,cc) = init_parvec[ind];
                         // fill last element with negative sum of other elements
-                        rowc_colc_coef(RG-1,CG-1) -= invect[ind];
+                        rowc_colc_coef(RG-1,CG-1) -= init_parvec[ind];
                     }
                 }
             }
@@ -190,15 +190,15 @@ void rcpp_unpack(const int & model_num,
             row_coef[n-1] = 0;
             for (ii=0; ii < n-1; ii++) {
                 ind = nelts + ii;
-                // Rcout << "The index of invect : " << ind << "\n";
-                row_coef[ii] = invect[ind];
-                row_coef[n-1] -= invect[ind];
+                // Rcout << "The index of init_parvec : " << ind << "\n";
+                row_coef[ii] = init_parvec[ind];
+                row_coef[n-1] -= init_parvec[ind];
             }
         } else {
             row_coef[0] = 0;
             for (ii=0; ii < n-1; ii++) {
                 ind = nelts + ii;
-                row_coef[ii+1] = invect[ind];
+                row_coef[ii+1] = init_parvec[ind];
             }
         }
         nelts += n-1;
@@ -210,16 +210,16 @@ void rcpp_unpack(const int & model_num,
             col_coef[p-1] = 0;
             for (jj=0; jj < p-1; jj++) {
                 ind = nelts + jj;
-                // Rcout << "The index of invect : " << ind << "\n";
-                col_coef[jj] = invect[ind];
-                col_coef[p-1] -= invect[ind];
+                // Rcout << "The index of init_parvec : " << ind << "\n";
+                col_coef[jj] = init_parvec[ind];
+                col_coef[p-1] -= init_parvec[ind];
                 // Rcout << "The value of col_coef : " << col_coef << "\n";
             }
         } else {
             col_coef[0] = 0;
             for (jj=0; jj < p-1; jj++) {
                 ind = nelts + jj;
-                col_coef[jj+1] = invect[ind];
+                col_coef[jj+1] = init_parvec[ind];
             }
         }
         nelts += p-1;
@@ -238,12 +238,12 @@ void rcpp_unpack(const int & model_num,
             for (rr=0; rr < RG-1; rr++) {
                 for (jj=0; jj < p-1; jj++) {
                     ind = nelts + rr*(p-1) + jj;
-                    // Rcout << "The index of invect : " << ind << "\n";
+                    // Rcout << "The index of init_parvec : " << ind << "\n";
 
-                    rowc_col_coef(rr,jj) = invect[ind];
-                    rowc_col_coef(rr,p-1) -= invect[ind]; // fill last column with negative sum of other columns
-                    rowc_col_coef(RG-1,jj) -= invect[ind]; // fill last row with negative sum of other rows
-                    rowc_col_coef(RG-1,p-1) += invect[ind]; // fill last element with sum of all independent elements
+                    rowc_col_coef(rr,jj) = init_parvec[ind];
+                    rowc_col_coef(rr,p-1) -= init_parvec[ind]; // fill last column with negative sum of other columns
+                    rowc_col_coef(RG-1,jj) -= init_parvec[ind]; // fill last row with negative sum of other rows
+                    rowc_col_coef(RG-1,p-1) += init_parvec[ind]; // fill last element with sum of all independent elements
                 }
             }
             nelts += (RG-1)*(p-1);
@@ -253,9 +253,9 @@ void rcpp_unpack(const int & model_num,
                 for (jj=0; jj < p; jj++) {
                     if (rr != RG-1 || jj != p-1) {
                         ind = nelts + rr*p + jj;
-                        // Rcout << "The index of invect : " << ind << "\n";
-                        rowc_col_coef(rr,jj) = invect[ind];
-                        rowc_col_coef(RG-1,p-1) -= invect[ind];
+                        // Rcout << "The index of init_parvec : " << ind << "\n";
+                        rowc_col_coef(rr,jj) = init_parvec[ind];
+                        rowc_col_coef(RG-1,p-1) -= init_parvec[ind];
                     }
                 }
             }
@@ -277,10 +277,10 @@ void rcpp_unpack(const int & model_num,
                 for (ii=0; ii < n-1; ii++) {
                     ind = nelts + cc*(n-1) + ii;
 
-                    colc_row_coef(cc,ii) = invect[ind];
-                    colc_row_coef(cc,n-1) -= invect[ind]; // fill last column with negative sum of other columns
-                    colc_row_coef(CG-1,ii) -= invect[ind]; // fill last row with negative sum of other rows
-                    colc_row_coef(CG-1,n-1) += invect[ind]; // fill last element with sum of all independent elements
+                    colc_row_coef(cc,ii) = init_parvec[ind];
+                    colc_row_coef(cc,n-1) -= init_parvec[ind]; // fill last column with negative sum of other columns
+                    colc_row_coef(CG-1,ii) -= init_parvec[ind]; // fill last row with negative sum of other rows
+                    colc_row_coef(CG-1,n-1) += init_parvec[ind]; // fill last element with sum of all independent elements
                 }
             }
             nelts += (CG-1)*(n-1);
@@ -290,8 +290,8 @@ void rcpp_unpack(const int & model_num,
                 for (ii=0; ii < n; ii++) {
                     if (cc != CG-1 || ii != n-1) {
                         ind = nelts + cc*n + ii;
-                        colc_row_coef(cc,ii) = invect[ind];
-                        colc_row_coef(CG-1,n-1) -= invect[ind];
+                        colc_row_coef(cc,ii) = init_parvec[ind];
+                        colc_row_coef(CG-1,n-1) -= init_parvec[ind];
                     }
                 }
             }
@@ -310,8 +310,8 @@ void rcpp_unpack(const int & model_num,
         for (rr=0; rr < RG; rr++) {
             for (ll=0; ll < nrowccov; ll++) {
                 ind = nelts + rr*nrowccov + ll;
-                // Rcout << "The index of invect : " << ind << "\n";
-                rowc_cov_coef(rr,ll) = invect[ind];
+                // Rcout << "The index of init_parvec : " << ind << "\n";
+                rowc_cov_coef(rr,ll) = init_parvec[ind];
             }
         }
         nelts += RG*nrowccov;
@@ -326,8 +326,8 @@ void rcpp_unpack(const int & model_num,
         for (cc=0; cc < CG; cc++) {
             for (ll=0; ll < ncolccov; ll++) {
                 ind = nelts + cc*ncolccov + ll;
-                // Rcout << "The index of invect : " << ind << "\n";
-                colc_cov_coef(cc,ll) = invect[ind];
+                // Rcout << "The index of init_parvec : " << ind << "\n";
+                colc_cov_coef(cc,ll) = init_parvec[ind];
             }
         }
         nelts += CG*ncolccov;
@@ -339,8 +339,8 @@ void rcpp_unpack(const int & model_num,
     if (ncov > 0) {
         for (ll=0; ll < ncov; ll++) {
             ind = nelts + ll;
-            // Rcout << "The index of invect : " << ind << "\n";
-            cov_coef[ll] = invect[ind];
+            // Rcout << "The index of init_parvec : " << ind << "\n";
+            cov_coef[ll] = init_parvec[ind];
         }
         nelts += ncov;
         // Rcout << "The value of nelts : " << nelts << "\n";
@@ -500,7 +500,7 @@ double rcpp_theta_from_linear(const int & model_num,
 }
 
 // [[Rcpp::export]]
-double rcpp_Rclusterll(const NumericVector & invect,
+double rcpp_Rclusterll(const NumericVector & init_parvec,
                        const int & model_num,
                        const NumericMatrix & ydf,
                        const NumericMatrix & rowc_mm,
@@ -517,7 +517,7 @@ double rcpp_Rclusterll(const NumericVector & invect,
     // vector, only double quotes: param_lengths["rowc"], else you will get a
     // fatal error that will crash rr!
 
-    // Note that invect MUST be the first argument, so this likelihood function
+    // Note that init_parvec MUST be the first argument, so this likelihood function
     // can be used inside optim()!
 
     NumericVector mu(q,NA_REAL);
@@ -548,7 +548,7 @@ double rcpp_Rclusterll(const NumericVector & invect,
     std::fill( rowc_colc_coef.begin(), rowc_colc_coef.end(), NA_REAL ) ;
     int CG = 0;
 
-    rcpp_unpack(model_num, invect, param_lengths, mu, phi, rowc_coef, colc_coef,
+    rcpp_unpack(model_num, init_parvec, param_lengths, mu, phi, rowc_coef, colc_coef,
                 rowc_colc_coef, row_coef, col_coef, rowc_col_coef, colc_row_coef,
                 rowc_cov_coef, colc_cov_coef, cov_coef,
                 RG, CG, p, n, q, constraint_sum_zero);
@@ -880,7 +880,7 @@ double rcpp_Rclusterll(const NumericVector & invect,
 }
 
 // [[Rcpp::export]]
-double rcpp_Biclusterll(const NumericVector & invect,
+double rcpp_Biclusterll(const NumericVector & init_parvec,
                         const int & model_num,
                         const NumericMatrix & ydf,
                         const NumericMatrix & rowc_mm,
@@ -901,7 +901,7 @@ double rcpp_Biclusterll(const NumericVector & invect,
     // vector, only double quotes: param_lengths["rowc"], else you will get a
     // fatal error that will crash rr!
 
-    // Note that invect MUST be the first argument, so this likelihood function
+    // Note that init_parvec MUST be the first argument, so this likelihood function
     // can be used inside optim()!
 
     NumericVector mu(q,NA_REAL);
@@ -941,7 +941,7 @@ double rcpp_Biclusterll(const NumericVector & invect,
 
     NumericVector cov_coef(param_lengths["cov"],NA_REAL);
 
-    rcpp_unpack(model_num, invect, param_lengths, mu, phi, rowc_coef, colc_coef,
+    rcpp_unpack(model_num, init_parvec, param_lengths, mu, phi, rowc_coef, colc_coef,
                 rowc_colc_coef, row_coef, col_coef, rowc_col_coef, colc_row_coef,
                 rowc_cov_coef, colc_cov_coef, cov_coef,
                 RG, CG, p, n, q, constraint_sum_zero);
@@ -1115,7 +1115,7 @@ double rcpp_Biclusterll(const NumericVector & invect,
             // Rcout << "The value of pi_v : " << pi_v << "\n";
             // Rcout << "The value of kappa_v : " << kappa_v << "\n";
 
-            // Rcout << "The value of ppr : " << ppr_m << "\n";
+            // Rcout << "The value of row_cluster_probs : " << ppr_m << "\n";
             // Rcout << "The value of ppc : " << ppc_m << "\n";
 
             for (ii=0; ii < n; ii++) {
@@ -1180,7 +1180,7 @@ double rcpp_Biclusterll(const NumericVector & invect,
 }
 
 // [[Rcpp::export]]
-NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
+NumericMatrix rcpp_Rcluster_Estep(const NumericVector & init_parvec,
                                   const int & model_num,
                                   const NumericMatrix & ydf,
                                   const NumericMatrix & rowc_mm,
@@ -1196,7 +1196,7 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
     // vector, only double quotes: param_lengths["rowc"], else you will get a
     // fatal error that will crash rr!
 
-    // Note that invect MUST be the first argument, so this likelihood function
+    // Note that init_parvec MUST be the first argument, so this likelihood function
     // can be used inside optim()!
 
     NumericVector mu(q,NA_REAL);
@@ -1227,7 +1227,7 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
     std::fill( rowc_colc_coef.begin(), rowc_colc_coef.end(), NA_REAL ) ;
     int CG = 0;
 
-    rcpp_unpack(model_num, invect, param_lengths, mu, phi, rowc_coef, colc_coef,
+    rcpp_unpack(model_num, init_parvec, param_lengths, mu, phi, rowc_coef, colc_coef,
                 rowc_colc_coef, row_coef, col_coef, rowc_col_coef, colc_row_coef,
                 rowc_cov_coef, colc_cov_coef, cov_coef,
                 RG, CG, p, n, q, constraint_sum_zero);
@@ -1306,7 +1306,7 @@ NumericMatrix rcpp_Rcluster_Estep(const NumericVector & invect,
 }
 
 // [[Rcpp::export]]
-NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
+NumericMatrix rcpp_Bicluster_Estep(const NumericVector & init_parvec,
                                    const int & model_num,
                                    const NumericMatrix & ydf,
                                    const NumericMatrix & rowc_mm,
@@ -1325,7 +1325,7 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
     // vector, only double quotes: param_lengths["rowc"], else you will get a
     // fatal error that will crash rr!
 
-    // Note that invect MUST be the first argument, so this likelihood function
+    // Note that init_parvec MUST be the first argument, so this likelihood function
     // can be used inside optim()!
 
     NumericVector mu(q,NA_REAL);
@@ -1365,7 +1365,7 @@ NumericMatrix rcpp_Bicluster_Estep(const NumericVector & invect,
 
     NumericVector cov_coef(param_lengths["cov"],NA_REAL);
 
-    rcpp_unpack(model_num, invect, param_lengths, mu, phi, rowc_coef, colc_coef,
+    rcpp_unpack(model_num, init_parvec, param_lengths, mu, phi, rowc_coef, colc_coef,
                 rowc_colc_coef, row_coef, col_coef, rowc_col_coef, colc_row_coef,
                 rowc_cov_coef, colc_cov_coef, cov_coef,
                 RG, CG, p, n, q, constraint_sum_zero);
