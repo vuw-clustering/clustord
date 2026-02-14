@@ -2,7 +2,7 @@
 
 ### All vignettes
 
-- [\`clustord Convergence
+- [\`clustord\` Convergence
   Tutorial](https://vuw-clustering.github.io/clustord/articles/clustordConvergence.md):
 - [\`clustord\` Ordinal
   Models](https://vuw-clustering.github.io/clustord/articles/clustordOrdinalModels.md):

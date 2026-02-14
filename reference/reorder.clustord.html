@@ -23,7 +23,7 @@ and cluster 1 in the second result."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">clustord</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,7 +34,7 @@ and cluster 1 in the second result."></head><body>
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clustordConvergence.html">`clustord Convergence Tutorial</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clustordConvergence.html">`clustord` Convergence Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/clustordOrdinalModels.html">`clustord` Ordinal Models</a></li>
     <li><a class="dropdown-item" href="../articles/clustordStructureSummary.html">`clustord` Structure Summary</a></li>
     <li><a class="dropdown-item" href="../articles/clustordTutorial.html">`clustord` Tutorial</a></li>
@@ -110,15 +110,15 @@ If two element vector is used, which is only permissible when
    Elements of <code>clustord</code> object that may be reordered (which ones are
    reordered depends on whether row clusters are being reordered and whether
    column clusters are being reordered:
-   - <code>parlist.out</code> (the final list of estimated parameter values)
-   - <code>pi.out</code> and/or <code>kappa.out</code>
-   - <code>ppr</code> and/or <code>ppc</code>
-   - <code>outvect</code>
-   - <code>RowClusterMembers</code> and <code>RowClusters</code> and/or
-       <code>ColumnClusterMembers</code> and <code>ColumnClusters</code>
-   - <code>EM.status$params.for.best.lli</code>
-   - <code>EM.status$params.every.iteration</code>, if using option
-       <code>EM.control$keepallparams</code>
+   - <code>out_parlist</code> (the final list of estimated parameter values)
+   - <code>row_cluster_proportions</code> and/or <code>column_cluster_proportions</code>
+   - <code>row_cluster_probs</code> and/or <code>column_cluster_probs</code>
+   - <code>out_parvec</code>
+   - <code>row_cluster_members</code> and <code>row_clusters</code> and/or
+       <code>column_cluster_members</code> and <code>column_clusters</code>
+   - <code>EMstatus$params_for_best_lli</code>
+   - <code>EMstatus$params_every_iteration</code>, if using option
+       <code>control_EM$keep_all_params</code>
    - <code>start.par</code></p>
 <p>.</p>
     </div>
@@ -155,13 +155,13 @@ term (and similarly for <code>COLCLUST</code>).</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">long.df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>,<span class="fl">5</span><span class="op">*</span><span class="fl">20</span>,replace<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span><span class="va">long_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>,<span class="fl">5</span><span class="op">*</span><span class="fl">20</span>,replace<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>               ROW<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,times<span class="op">=</span><span class="fl">10</span><span class="op">)</span>,COL<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,each<span class="op">=</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">results.original</span> <span class="op">&lt;-</span> <span class="fu"><a href="clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">ROWCLUST</span> <span class="op">+</span> <span class="va">COLCLUST</span>, model<span class="op">=</span><span class="st">"OSM"</span>,</span></span>
-<span class="r-in"><span>                             nclus.row<span class="op">=</span><span class="fl">3</span>, nclus.column<span class="op">=</span><span class="fl">2</span>, long.df<span class="op">=</span><span class="va">long.df</span>,</span></span>
-<span class="r-in"><span>                             EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">results_original</span> <span class="op">&lt;-</span> <span class="fu"><a href="clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">ROWCLUST</span> <span class="op">+</span> <span class="va">COLCLUST</span>, model<span class="op">=</span><span class="st">"OSM"</span>,</span></span>
+<span class="r-in"><span>                             RG<span class="op">=</span><span class="fl">3</span>, CG<span class="op">=</span><span class="fl">2</span>, long_df<span class="op">=</span><span class="va">long_df</span>,</span></span>
+<span class="r-in"><span>                             control_EM<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxiter<span class="op">=</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.</span>
-<span class="r-in"><span><span class="va">results.original</span><span class="op">$</span><span class="va">parlist.out</span></span></span>
+<span class="r-in"><span><span class="va">results_original</span><span class="op">$</span><span class="va">out_parlist</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $mu</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        mu_1        mu_2        mu_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.00000000  0.13787191 -0.06928604 </span>
@@ -196,8 +196,8 @@ term (and similarly for <code>COLCLUST</code>).</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Run reorder type "row" to reorder based on row cluster effects,</span></span></span>
 <span class="r-in"><span><span class="co">## in increasing order by default</span></span></span>
-<span class="r-in"><span><span class="va">results.reorder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html" class="external-link">reorder</a></span><span class="op">(</span><span class="va">results.original</span>, type<span class="op">=</span><span class="st">"row"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">results.reorder</span><span class="op">$</span><span class="va">parlist.out</span></span></span>
+<span class="r-in"><span><span class="va">results.reorder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html" class="external-link">reorder</a></span><span class="op">(</span><span class="va">results_original</span>, type<span class="op">=</span><span class="st">"row"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">results.reorder</span><span class="op">$</span><span class="va">out_parlist</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $mu</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        mu_1        mu_2        mu_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.00000000  0.13787191 -0.06928604 </span>
@@ -217,8 +217,8 @@ term (and similarly for <code>COLCLUST</code>).</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Run reorder type "column" to reorder based on column cluster effects,</span></span></span>
 <span class="r-in"><span><span class="co">## in decreasing order</span></span></span>
-<span class="r-in"><span><span class="va">results.reorder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html" class="external-link">reorder</a></span><span class="op">(</span><span class="va">results.original</span>, type<span class="op">=</span><span class="st">"column"</span>, decreasing<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">results.reorder</span><span class="op">$</span><span class="va">parlist.out</span></span></span>
+<span class="r-in"><span><span class="va">results.reorder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html" class="external-link">reorder</a></span><span class="op">(</span><span class="va">results_original</span>, type<span class="op">=</span><span class="st">"column"</span>, decreasing<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">results.reorder</span><span class="op">$</span><span class="va">out_parlist</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $mu</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        mu_1        mu_2        mu_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.00000000  0.13787191 -0.06928604 </span>
@@ -239,8 +239,8 @@ term (and similarly for <code>COLCLUST</code>).</p>
 <span class="r-in"><span><span class="co">## Run reorder type "row" to reorder based on row and column cluster effects,</span></span></span>
 <span class="r-in"><span><span class="co">## with row effects in increasing order and column effects in decreasing</span></span></span>
 <span class="r-in"><span><span class="co">## order</span></span></span>
-<span class="r-in"><span><span class="va">results.reorder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html" class="external-link">reorder</a></span><span class="op">(</span><span class="va">results.original</span>, type<span class="op">=</span><span class="st">"both"</span>, decreasing<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">FALSE</span>,<span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">results.reorder</span><span class="op">$</span><span class="va">parlist.out</span></span></span>
+<span class="r-in"><span><span class="va">results.reorder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html" class="external-link">reorder</a></span><span class="op">(</span><span class="va">results_original</span>, type<span class="op">=</span><span class="st">"both"</span>, decreasing<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">FALSE</span>,<span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">results.reorder</span><span class="op">$</span><span class="va">out_parlist</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $mu</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        mu_1        mu_2        mu_3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.00000000  0.13787191 -0.06928604 </span>

@@ -17,7 +17,7 @@ Proportional Odds Model (POM) and a dedicated Binary Model for binary data."></h
 
     <a class="navbar-brand me-2" href="../index.html">clustord</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,7 +28,7 @@ Proportional Odds Model (POM) and a dedicated Binary Model for binary data."></h
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clustordConvergence.html">`clustord Convergence Tutorial</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clustordConvergence.html">`clustord` Convergence Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/clustordOrdinalModels.html">`clustord` Ordinal Models</a></li>
     <li><a class="dropdown-item" href="../articles/clustordStructureSummary.html">`clustord` Structure Summary</a></li>
     <li><a class="dropdown-item" href="../articles/clustordTutorial.html">`clustord` Tutorial</a></li>
@@ -63,15 +63,15 @@ Proportional Odds Model (POM) and a dedicated Binary Model for binary data.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">clustord</span><span class="op">(</span></span>
 <span>  <span class="va">formula</span>,</span>
 <span>  <span class="va">model</span>,</span>
-<span>  nclus.row <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  nclus.column <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">long.df</span>,</span>
-<span>  initvect <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  pi.init <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  kappa.init <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  EM.control <span class="op">=</span> <span class="fu">default.EM.control</span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  optim.method <span class="op">=</span> <span class="st">"L-BFGS-B"</span>,</span>
-<span>  optim.control <span class="op">=</span> <span class="fu">default.optim.control</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  RG <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  CG <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">long_df</span>,</span>
+<span>  init_parvec <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  init_pi <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  init_kappa <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  control_EM <span class="op">=</span> <span class="fu">default_control_EM</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  optim_method <span class="op">=</span> <span class="st">"L-BFGS-B"</span>,</span>
+<span>  control_optim <span class="op">=</span> <span class="fu">default_control_optim</span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  constraint_sum_zero <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  start_from_simple_model <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  parallel_starts <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -93,68 +93,69 @@ Proportional Odds Model (POM) and a dedicated Binary Model for binary data.</p>
 Proportional Odds Model or <code>"Binary"</code> for binary data model.</p></dd>
 
 
-<dt id="arg-nclus-row">nclus.row<a class="anchor" aria-label="anchor" href="#arg-nclus-row"></a></dt>
+<dt id="arg-rg">RG<a class="anchor" aria-label="anchor" href="#arg-rg"></a></dt>
 <dd><p>number of row clustering groups.</p></dd>
 
 
-<dt id="arg-nclus-column">nclus.column<a class="anchor" aria-label="anchor" href="#arg-nclus-column"></a></dt>
+<dt id="arg-cg">CG<a class="anchor" aria-label="anchor" href="#arg-cg"></a></dt>
 <dd><p>number of column clustering groups.</p></dd>
 
 
-<dt id="arg-long-df">long.df<a class="anchor" aria-label="anchor" href="#arg-long-df"></a></dt>
+<dt id="arg-long-df">long_df<a class="anchor" aria-label="anchor" href="#arg-long-df"></a></dt>
 <dd><p>data frame with at least three columns, <code>Y</code> and <code>ROW</code>
 and <code>COL</code>. Each row in the data frame corresponds to a single cell
 in the original data matrix; the response value in that cell is given by
 <code>Y</code>, and the row and column indices of that cell in the matrix are
-given by <code>ROW</code> and <code>COL</code>. Use <code><a href="mat2df.html">mat2df</a></code> to create
+given by <code>ROW</code> and <code>COL</code>. Use <code><a href="mat_to_df.html">mat_to_df</a></code> to create
 this data frame from your data matrix of responses.
-<code><a href="mat2df.html">mat2df</a></code> also allows you to supply data frames of row or
-column covariates which will be incorporated into <code>long.df</code>.</p></dd>
+<code><a href="mat_to_df.html">mat_to_df</a></code> also allows you to supply data frames of row or
+column covariates which will be incorporated into <code>long_df</code>.</p></dd>
 
 
-<dt id="arg-initvect">initvect<a class="anchor" aria-label="anchor" href="#arg-initvect"></a></dt>
-<dd><p>(default NULL) vector of starting parameter values for the model.
-    Note: if the user enters an initial vector of parameter values, it is
-    <strong>strongly recommend</strong> that the user also check the values of
-    <code>parlist.init</code> in the output object, to <strong>make sure that the
+<dt id="arg-init-parvec">init_parvec<a class="anchor" aria-label="anchor" href="#arg-init-parvec"></a></dt>
+<dd><p>(default <code>NULL</code>) vector of starting parameter values
+    for the model.</p>
+<p>Note: if the user enters an initial vector of parameter values, it is
+    <strong>strongly recommended</strong> that the user also check the values of
+    <code>init_parlist</code> in the output object, to <strong>make sure that the
     constructed parameters are as expected</strong>.</p>
 <p>If <code>NULL</code>, starting parameter values will be generated automatically.</p>
 <p>See 'Details' for definitions of the parameters used for different models.</p></dd>
 
 
-<dt id="arg-pi-init">pi.init<a class="anchor" aria-label="anchor" href="#arg-pi-init"></a></dt>
+<dt id="arg-init-pi">init_pi<a class="anchor" aria-label="anchor" href="#arg-init-pi"></a></dt>
 <dd><p>(default <code>NULL</code>) starting parameter values for the proportions
     of observations in the different row clusters.</p>
 <p>If <code>NULL</code>, starting values will be generated automatically.</p>
-<p>User-specified values of <code>pi.init</code> must be of length <code>(nclus.row-1)</code>
+<p>User-specified values of <code>init_pi</code> must be of length <code>(RG-1)</code>
     because the final value will be automatically calculated so that the
     values of <code>pi</code> sum to 1.</p></dd>
 
 
-<dt id="arg-kappa-init">kappa.init<a class="anchor" aria-label="anchor" href="#arg-kappa-init"></a></dt>
+<dt id="arg-init-kappa">init_kappa<a class="anchor" aria-label="anchor" href="#arg-init-kappa"></a></dt>
 <dd><p>(default <code>NULL</code>) starting parameter values for the
     proportions of observations in the different column clusters.</p>
 <p>If <code>NULL</code>, starting values will be generated automatically.</p>
-<p>User-specified values of <code>kappa.init</code> must be of length
-    <code>(nclus.column-1)</code> because the final value will be automatically
+<p>User-specified values of <code>init_kappa</code> must be of length
+    <code>(CG-1)</code> because the final value will be automatically
     calculated so that the values of <code>kappa</code> sum to 1.</p></dd>
 
 
-<dt id="arg-em-control">EM.control<a class="anchor" aria-label="anchor" href="#arg-em-control"></a></dt>
-<dd><p>(default = <code>list(EMcycles=50, EMlikelihoodtol=1e-4,
-    EMparamtol=1e-2, paramstopping=TRUE, startEMcycles=10, keepallparams=FALSE,
+<dt id="arg-control-em">control_EM<a class="anchor" aria-label="anchor" href="#arg-control-em"></a></dt>
+<dd><p>(default = <code>list(maxiter=50, EM_likelihood_tol=1e-4,
+    EM_params_tol=1e-2, params_stopping=TRUE, maxiter_start=10, keep_all_params=FALSE,
     epsilon=1e-6)</code>)
     list of parameters controlling the EM algorithm.</p>
-<p><code>EMcycles</code> controls how many EM iterations of the main EM algorithm
+<p><code>maxiter</code> controls how many EM iterations of the main EM algorithm
     are used to fit the chosen submodel.</p>
-<p><code>EMlikelihoodtol</code> is the tolerance for the stopping criterion for
+<p><code>EM_likelihood_tol</code> is the tolerance for the stopping criterion for
     the <strong>log-likelihood</strong> in the EM algorithm. The criterion is the
     absolute change in the <strong>incomplete</strong> log-likelihood since the
     previous iteration, scaled by the size of the dataset <code>n*p</code>, where
     <code>n</code> is the number of rows in the data matrix and <code>p</code> is the
     number of columns in the data matrix. The scaling is applied because the
     incomplete log-likelihood is predominantly affected by the dataset size.</p>
-<p><code>EMparamtol</code> is the tolerance for the stopping criterion for the
+<p><code>EM_params_tol</code> is the tolerance for the stopping criterion for the
     <strong>parameters</strong> in the EM algorithm. This is a tolerance for the
     <strong>sum</strong> of the scaled parameter changes from the last iteration,
     i.e. the tolerance is not for any individual parameter but for the sum of
@@ -165,12 +166,13 @@ column covariates which will be incorporated into <code>long.df</code>.</p></dd>
     proportion of the exponentiated absolute parameter value at the current
     timestep. The exponentiation is to rescale parameter values that are
     close to zero.</p>
-<p>there are around 5 independent parameter values, then at the point of
-    convergence using default tolerances for the log-likelihood and the
-    parameters, each parameter will have a scaled absolute change since the
-    previous iteration of about 1e-4; if there are 20 or 30 independent
-    parameters, then each will have a scaled aboslute change of about 1e-6.</p>
-<p><code>paramstopping</code>: if <code>FALSE</code>, indicates that the EM algorithm
+<p>If, for example, there are around 5 independent parameter values, then at
+    the point of convergence using default tolerances for the log-likelihood
+    and the parameters, each parameter will have a scaled absolute change
+    since the previous iteration of about 1e-4; if there are 20 or 30
+    independent parameters, then each will have a scaled aboslute change of
+    about 1e-6.</p>
+<p><code>params_stopping</code>: if <code>FALSE</code>, indicates that the EM algorithm
     should only check convergence based on the change in incomplete-data
     log-likelihood, relative to the current difference between the
     complete-data and incomplete-data log-likelihoods, i.e.
@@ -180,12 +182,12 @@ column covariates which will be incorporated into <code>long.df</code>.</p></dd>
     in the exponentials of the absolute values of the current parameters is
     below the tolerance <code>EMstoppingpar</code>, to see whether the parameters
     and the likelihood have both converged.</p>
-<p><code>startEMcycles</code> controls how many EM iterations are used when
+<p><code>maxiter_start</code> controls how many EM iterations are used when
     fitting the simpler submodels to get starting values for fitting models
     with interaction.</p>
-<p><code>keepallparams</code>: if <code>TRUE</code>, keep a record of parameter values
+<p><code>keep_all_params</code>: if <code>TRUE</code>, keep a record of parameter values
     (including pi_r and kappa_c) for every EM iteration.</p>
-<p><code>rerunestepbeforelli</code>: if <code>TRUE</code>, and only when using biclustering,
+<p><code>rerun_estep_before_lli</code>: if <code>TRUE</code>, and only when using biclustering,
     rerun the E-step before calculating the incomplete-data log-likelihood.
     The EM algorithm runs the E-step to estimate the cluster membership
     probabilities and then runs the M-step to estimate the parameters by
@@ -196,7 +198,7 @@ column covariates which will be incorporated into <code>long.df</code>.</p></dd>
     cluster membership probabilities are recalculated using the very latest
     parameter estimates. So the <code>TRUE</code> setting for this control
     recalculates the cluster memberships before calculating the LLI approx.</p>
-<p><code>uselatestlli</code>: Kept for backwards compatibility with original
+<p><code>use_latest_lli</code>: Kept for backwards compatibility with original
     version of clustord algorithm. Original version of the algorithm had this
     set to <code>FALSE</code>, which keeps the best LLI from any previous iteration
     rather than the latest LLI. The default, <code>TRUE</code>, instead keeps the
@@ -210,27 +212,27 @@ column covariates which will be incorporated into <code>long.df</code>.</p></dd>
 <p>For <code>columnclustering</code>, the parameters saved from each iteration
     will NOT be converted to column clustering format, and will be in the row
     clustering format, so <code>alpha</code> in
-    <code>EM.status$params.every.iteration</code> will correspond to beta_c and
+    <code>EMstatus$params_every_iteration</code> will correspond to beta_c and
     <code>pi</code> will correspond to kappa.</p>
 <p><code>epsilon</code>: default 1e-6, small value used to adjust values of pi,
     kappa and theta that are too close to zero so that taking logs of them
     does not create infinite values.</p></dd>
 
 
-<dt id="arg-optim-method">optim.method<a class="anchor" aria-label="anchor" href="#arg-optim-method"></a></dt>
+<dt id="arg-optim-method">optim_method<a class="anchor" aria-label="anchor" href="#arg-optim-method"></a></dt>
 <dd><p>(default "L-BFGS-B") method to use in optim within the M
-step of the EM algorithm. Must be one of 'L-BFGS-B', 'BFGS', 'CG' or
-'Nelder-Mead' (i.e. not the SANN method).</p></dd>
+step of the EM algorithm. Must be one of "L-BFGS-B", "BFGS", "CG" or
+"Nelder-Mead" (i.e. not the SANN method).</p></dd>
 
 
-<dt id="arg-optim-control">optim.control<a class="anchor" aria-label="anchor" href="#arg-optim-control"></a></dt>
+<dt id="arg-control-optim">control_optim<a class="anchor" aria-label="anchor" href="#arg-control-optim"></a></dt>
 <dd><p>control list for the <code>optim</code> call within the M step
 of the EM algorithm. See the control list Details in the <code>optim</code>
 manual for more info.
 Please note that although <code>optim</code>, by default, uses <code>pgtol=0</code>
 and <code>factr=1e7</code> in the L-BFGS-B method, <code>clustord</code>, by default,
 alters these to <code>pgtol=1e-4</code> and <code>factr=1e11</code>, but you can use
-this <code>optim.control</code> argument in <code>clustord</code> to revert them to
+this <code>control_optim</code> argument in <code>clustord</code> to revert them to
 the defaults if you want. The reason for the change is that the chosen
 values in <code>clustord</code> reduce the tolerance on the log-likelihood
 function optimization in order to speed up the algorithm, and because the
@@ -245,9 +247,9 @@ probably have a likelihood that is better on about 1/10th or 1/100th the
 size of the data matrix, which is still far larger than the tolerance in
 the optimization.
 If you need accurate parameter estimates, firstly make sure to try more
-starting points, then perform model selection first, and then finally
-rerun the chosen model with finer tolerance, e.g. the <code>optim</code>
-defaults, <code>pgtol=0</code> and <code>factr=1e7</code>.</p></dd>
+starting points, then perform model selection, and then finally rerun the
+chosen model with finer tolerance, e.g. the <code>optim</code> defaults,
+<code>pgtol=0</code> and <code>factr=1e7</code>.</p></dd>
 
 
 <dt id="arg-constraint-sum-zero">constraint_sum_zero<a class="anchor" aria-label="anchor" href="#arg-constraint-sum-zero"></a></dt>
@@ -268,7 +270,7 @@ rows sum to zero).</p></dd>
 simpler clustering model first and use that to provide starting values for
 all parameters for the model with interactions;
 if <code>FALSE</code>, use the more basic models to provide starting values only
-for <code>pi.init</code> and <code>kappa.init</code>.
+for <code>init_pi</code> and <code>init_kappa</code>.
 If the full model has interaction terms, then simpler models are ones
 without the interactions. If the model has individual row/column effects
 alongside the clusters, then simpler models are ones without the individual
@@ -279,11 +281,11 @@ starting values for the covariates).</p></dd>
 
 
 <dt id="arg-parallel-starts">parallel_starts<a class="anchor" aria-label="anchor" href="#arg-parallel-starts"></a></dt>
-<dd><p>(default FALSE) if TRUE, by generating multiple random
-starts, those random starts will be parallelised over as many cores as are
-available. For example, on a personal computer this will be one fewer than
-the number of cores in the machine, to make sure one is left for system
-tasks external to R.</p></dd>
+<dd><p>(default <code>FALSE</code>) if TRUE, by generating multiple
+random starts, those random starts will be parallelised over as many cores
+as are available. For example, on a personal computer this will be one
+fewer than the number of cores in the machine, to make sure one is left for
+system tasks external to R.</p></dd>
 
 
 <dt id="arg-nstarts">nstarts<a class="anchor" aria-label="anchor" href="#arg-nstarts"></a></dt>
@@ -304,7 +306,7 @@ whenever it finds a better log-likelihood than all previous starts, and it
 also reports when it is fitting simpler models to find starting values for
 the parameters vs fitting the final, more complex model.
 If wanting the detailed output from <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim()</a></code>, use
-<code>optim.control=list(trace=X)</code>, where X is 1 to 6, with 6 being the
+<code>control_optim=list(trace=X)</code>, where X is 1 to 6, with 6 being the
 highest level of verbosity for the L-BFGS-B algorithm.</p></dd>
 
 </dl></div>
@@ -315,37 +317,37 @@ highest level of verbosity for the L-BFGS-B algorithm.</p></dd>
     row clusters and the number of column clusters, where relevant.</p>
 <p><code>model</code>: The model used for fitting, "OSM" for Ordered Stereotype
     Model, "POM" for Proportional Odds Model, or "Binary" for Binary model.</p>
-<p><code>EM.status</code>: a list containing the latest iteration <code>iter</code>,
-    latest incomplete-data and complete-data log-likelihoods <code>new.lli</code>
-    and <code>new.llc</code>, the best incomplete-data log-likelihood <code>best.lli</code>
-    and the corresponding complete-data log-likelihood, <code>llc.for.best.lli</code>,
+<p><code>EMstatus</code>: a list containing the latest iteration <code>iter</code>,
+    latest incomplete-data and complete-data log-likelihoods <code>new_lli</code>
+    and <code>new_llc</code>, the best incomplete-data log-likelihood <code>best_lli</code>
+    and the corresponding complete-data log-likelihood, <code>llc_for_best_lli</code>,
     and the parameters for the best incomplete-data log-likelihood,
-    <code>params.for.best.lli</code>, indicator of whether the algorithm converged
+    <code>params_for_best_lli</code>, indicator of whether the algorithm converged
     <code>converged</code>, and if the user chose to keep all parameter values from
-    every iteration, also <code>params.every.iteration</code>.</p>
+    every iteration, also <code>params_every_iteration</code>.</p>
 <p>Note that for <strong>biclustering</strong>, i.e. when <code>ROWCLUST</code> and
     <code>COLCLUST</code> are both included in the model, the <strong>incomplete</strong>
     log-likelihood is calculated using the entropy approximation, and this
     may be <strong>inaccurate</strong> unless the algorithm has converged or is close
     to converging. So beware of using the incomplete log-likelihood and the
     corresponding AIC value <strong>unless the EM algorithm has converged</strong>.</p>
-<p>Also note that <code>outvect</code> unpacks the dependent elements of matrices
+<p>Also note that <code>out_parvec</code> unpacks the dependent elements of matrices
     of effects, such as the row cluster and column cluster interaction
     effects <code>rowc_colc</code> and other interaction effects, by row: the first
-    elements of the matrix in <code>outvect</code> would be the first <em>row</em> of
-    the matrix, etc. By contrast, <code>EM.status$params.every.iteration</code>
-    simply unlists <code>parlist.out</code>, which happens automatically by column,
+    elements of the matrix in <code>out_parvec</code> would be the first <em>row</em> of
+    the matrix, etc. By contrast, <code>EMstatus$params_every_iteration</code>
+    simply unlists <code>out_parlist</code>, which happens automatically by column,
     so the first column of each matrix before the second column, etc. so if
     it contains columns <code>rowc_colc1, rowc_colc2, rowc_colc3</code> etc. they
     are the first <em>column</em> of the <code>rowc_colc</code> matrix of parameters.
-    So if using <code>EM.status$params.every.iteration</code> to check specific
+    So if using <code>EMstatus$params_every_iteration</code> to check specific
     parameter values during each iteration of the algorithm, be careful which
     ones you're looking at.</p>
 <p><code>criteria</code>: the calculated values of AIC, BIC,
     etc. from the best incomplete-data log-likelihood.</p>
 <p><code>epsilon</code>: the very small value (default 1e-6) used to adjust values
     of pi and kappa and theta that are too close to zero, so that taking logs
-    of them does not produce infinite values. Use the EM.control argument to
+    of them does not produce infinite values. Use the control_EM argument to
     adjust epsilon.</p>
 <p><code>constraints_sum_zero</code>: the chosen value of constraints_sum_zero.</p>
 <p><code>param_lengths</code>: vector of total number of parameters/coefficients
@@ -355,34 +357,34 @@ highest level of verbosity for the L-BFGS-B algorithm.</p></dd>
     <code>rowc_cov_coef</code> value will be 0. If the component is included, then
     the value given will include any dependent parameter/coefficient values,
     so if column clusters are included then the <code>colc_coef</code> value will
-    be <code>nclus.column</code>, whereas the number of independent values will be
-    <code>nclus.column - 1</code>.</p>
-<p><code>initvect</code>: the initial <em>vector</em> of parameter values, either
+    be <code>CG</code>, whereas the number of independent values will be
+    <code>CG - 1</code>.</p>
+<p><code>init_parvec</code>: the initial <em>vector</em> of parameter values, either
     specified by the user or generated automatically. This vector has only
     the <strong>independent</strong> values of the parameters, not the full set.</p>
-<p><code>outvect</code>: the final <em>vector</em> of parameter values, containing
-    only the independent parameter values from <code>parlist.out</code>.</p>
-<p><code>parlist.init</code>: the initial list of parameters, constructed from
-    the initial parameter vector <code>initvect</code>. Note that if the initial
-    vector has been incorrectly specified, the values of <code>parlist.init</code>
+<p><code>out_parvec</code>: the final <em>vector</em> of parameter values, containing
+    only the independent parameter values from <code>out_parlist</code>.</p>
+<p><code>init_parlist</code>: the initial list of parameters, constructed from
+    the initial parameter vector <code>init_parvec</code>. Note that if the initial
+    vector has been incorrectly specified, the values of <code>init_parlist</code>
     may not be as expected, and they should be checked by the user.</p>
-<p><code>parlist.out</code>: fitted values of parameters.</p>
+<p><code>out_parlist</code>: fitted values of parameters.</p>
 <p><code>pi</code>, <code>kappa</code>: fitted values of pi and kappa, where relevant.</p>
-<p><code>ppr</code>, <code>ppc</code>: the posterior probabilities of membership of the
+<p><code>row_cluster_probs</code>, <code>column_cluster_probs</code>: the posterior probabilities of membership of the
     row clusters and the column clusters, where relevant.</p>
 <p><code>rowc_mm</code>, <code>colc_mm</code>, <code>cov_mm</code>: the model matrices for,
     respectively, the covariates interacting with row clusters, the covariates
     interacting with column clusters, and the covariates not interacting with
     row or column clusters (i.e. the covariates with constant coefficients).
-    Note that one row of each model matrix corresponds to one row of long.df.</p>
-<p><code>RowClusters</code>, <code>ColumnClusters</code>: the assigned row and column
+    Note that one row of each model matrix corresponds to one row of long_df.</p>
+<p><code>row_clusters</code>, <code>column_clusters</code>: the assigned row and column
     clusters, where relevant, where each row/column is assigned to a cluster
-    based on maximum posterior probability of cluster membership (<code>ppr</code>
-    and <code>ppc</code>).</p>
-<p><code>RowClusterMembers</code>, <code>ColumnClusterMembers</code>: vectors of
+    based on maximum posterior probability of cluster membership (<code>row_cluster_probs</code>
+    and <code>column_cluster_probs</code>).</p>
+<p><code>row_cluster_members</code>, <code>column_cluster_members</code>: vectors of
     assigned members of each row or column cluster, where each row/column is
     assigned to a cluster based on maximum posterior probability of cluster
-    membership (<code>ppr</code> and <code>ppc</code>)</p>
+    membership (<code>row_cluster_probs</code> and <code>column_cluster_probs</code>)</p>
 <p><code>reordered</code>: Boolean indicating whether or not the outputs have been
     reordered in order of row cluster and/or column cluster effects. FALSE
     for direct outputs of <code>clustord()</code>, will be changed to TRUE after
@@ -404,14 +406,14 @@ could additionally supply species covariates linked to the columns,
 representing auxiliary information about each species. There is no
 requirement to provide any covariates, and you can provide only row
 covariates, or only column covariates.</p>
-<p>Before running <code>clustord</code>, you need to run <code><a href="mat2df.html">mat2df</a></code> to
+<p>Before running <code>clustord</code>, you need to run <code><a href="mat_to_df.html">mat_to_df</a></code> to
 convert the data matrix into a long form data frame. The data frame needs to
 have at least three columns, <code>Y</code> and <code>ROW</code> and <code>COL</code>. Each row
 in the data frame corresponds to a single cell in the original data matrix;
 the response value in that cell is given by <code>Y</code>, and the row and column
 indices of that cell in the matrix are given by <code>ROW</code> and <code>COL</code>.</p>
-<p><code><a href="mat2df.html">mat2df</a></code> also allows you to supply data frames of row or column
-covariates which will be incorporated into <code>long.df</code>.</p>
+<p><code><a href="mat_to_df.html">mat_to_df</a></code> also allows you to supply data frames of row or column
+covariates which will be incorporated into <code>long_df</code>.</p>
 <p>Then, to run the <code>clustord</code> function, you need to enter your chosen
 formula and model, and the number of clusters you want to fit. The formula
 model_structure is akin to that for <code>glm</code>, but with a few restrictions. You
@@ -437,12 +439,12 @@ act as indicators of the clustering model_structure you want to use.</p>
 include in the model, and these are unrestricted, and can be used in the same
 way as in <code>glm</code>.</p>
 <p><code>ROWCLUST</code> and <code>COLCLUST</code> are used to indicate what row clustering
-model_structure you want, and what column clustering model_structure you want,
+model structure you want, and what column clustering model structure you want,
 respectively. The inclusion of <code>ROWCLUST</code> as a single term indicates
 that you want to include a row clustering effect in the model. In the
 simplest row clustering model, for Binary data with <strong>row clustering</strong>
 effects only, the basic function call would be</p>
-<p><code>clustord(Y ~ ROWCLUST, model="Binary", long.df=long.df)</code></p>
+<p><code>clustord(Y ~ ROWCLUST, model="Binary", long_df=long_df)</code></p>
 <p>and the model fitted would have the form:</p>
 <p>Logit(P(Y = 1)) = mu + rowc_coef_r</p>
 <p>where mu is the intercept term, and rowc_coef_r is the row cluster effect
@@ -464,23 +466,23 @@ without interaction, then the terms just correspond to including rowc_coef_r
 and colc_coef_c in the model:</p>
 <p>The formula</p>
 <p><code>Y ~ ROWCLUST + COLCLUST</code></p>
-<p>is the simplest possible <strong>biclustering</strong> model,
-Logit(P(Y = 1)) = mu + rowc_coef_r + colc_coef_c</p>
+<p>is the simplest possible <strong>biclustering</strong> model,</p>
+<p>Logit(P(Y = 1)) = mu + rowc_coef_r + colc_coef_c</p>
 <p>If you want to include interaction between the rows and columns, i.e. you
 want to perform block biclustering where each block corresponds to a row
 cluster r and a column cluster c, then that model has a matrix of parameters
 indexed by r and c.</p>
-<p><code>clustord(Y ~ ROWCLUST*COLCLUST, model="Binary", ...)</code> has the model
-Logit(P(Y = 1)) = mu + rowc_colc_coef_rc</p>
-<p>This model can instead be called using the equivalent formula
-<code>Y ~ ROWCLUST + COLCLUST + ROWCLUST:COLCLUST</code>.</p>
+<p><code>clustord(Y ~ ROWCLUST*COLCLUST, model="Binary", ...)</code> has the model</p>
+<p>Logit(P(Y = 1)) = mu + rowc_colc_coef_rc</p>
+<p>This model can instead be called using the equivalent formula</p>
+<p><code>Y ~ ROWCLUST + COLCLUST + ROWCLUST:COLCLUST</code>.</p>
 <p>You can instead use the formula <code>Y ~ ROWCLUST:COLCLUST</code>. Mathematically,
 this is equivalent to the previous two. In regression, the models would not
 be equivalent but in clustering, they are equivalent, and have the same
 number of independent parameters overall. If you include the main effects,
 then that reduces the number of independent parameters in the interaction
 term compared to if you just use the interaction term (see below section about
-<code>initvect</code>).</p>
+<code>init_parvec</code>).</p>
 <p>You cannot include just one of the main effects alongside the interaction
 term, i.e. you cannot use <code>Y ~ ROWCLUST + ROWCLUST:COLCLUST</code> or
 <code>Y ~ COLCLUST + ROWCLUST:COLCLUST</code>. This is for simplicity in the code,
@@ -518,7 +520,7 @@ individual column effects, and rowc_col_coef_rj are the interaction terms.</p>
 <p>where the row cluster effects and individual column effects are absorbed into
 the matrix rowc_col_coef_rj. These models are the same mathematically, the
 only differences between them are in how they are constrained (see below in
-the section about the <code>initvect</code> argument) and how they should be
+the section about the <code>init_parvec</code> argument) and how they should be
 interpreted.</p>
 <p>Note that if you were using covariates, then it would not be equivalent to
 leave out the main effects and just use the interaction terms, but the
@@ -547,11 +549,10 @@ model.</p>
 interactions between them, and functions of them, as in regression models, e.g.</p>
 <p><code>Y ~ ROWCLUST + xr1*log(xr2)</code></p>
 <p>which would have the Binary model</p>
-<p>Logit(P(Y = 1)) = mu + rowc_coef_r + row_coef1*xr1_i + row_coef2*log(xr2_i) +
-                         row_coef3*xr1_i*log(xr2_i)</p>
+<p>Logit(P(Y = 1)) = mu + rowc_coef_r + row_coef1*xr1_i + row_coef2*log(xr2_i) + row_coef3*xr1_i*log(xr2_i)</p>
 <p>If instead you want to add column covariates to the model, they work in the
-same way after they've been added to the <code>long.df</code> data frame using
-<code><a href="mat2df.html">mat2df</a></code>, but they are indexed by j instead of i. Simplest model,
+same way after they've been added to the <code>long_df</code> data frame using
+<code><a href="mat_to_df.html">mat_to_df</a></code>, but they are indexed by j instead of i. Simplest model,
 with one single column covariate xc, would have formula</p>
 <p><code>Y ~ ROWCLUST + xc</code></p>
 <p>with Binary model Logit(P(Y = 1)) = mu + rowc_coef_r + col_coef1*xc_j</p>
@@ -594,9 +595,8 @@ index of the covariate among the list of covariates interacting with that
 direction of clustering. So if there are two row covariates <code>xr1</code> and
 <code>xr2</code> interacting with three row clusters, that gives you 6
 coefficients:</p>
-<p><code>rowc_col_coef_11, rowc_col_coef_12,
-rowc_col_coef_21, rowc_col_coef_22,
-rowc_col_coef_31, rowc_col_coef_32</code>.</p>
+<p><code>rowc_col_coef_11, rowc_col_coef_12, rowc_col_coef_21,</code></p>
+<p><code>rowc_col_coef_22, rowc_col_coef_31, rowc_col_coef_32</code>.</p>
 <p>and you can also have a three-way interaction between row cluster and those
 two covariates, which would add the coefficients <code>rowc_col_coef_r3</code>
 for the <code>xr1:xr2</code> term.</p>
@@ -617,7 +617,7 @@ clusters, <code>log(xc1)</code>, with coefficients <code>colc_cov_coef_c1</code>
 <p><strong>Restrictions on <code>formula</code></strong></p>
 <p>The primary restriction on the <code>formula</code> argument is that that you
 <strong>cannot</strong> use functions of <code>ROW</code>, <code>COL</code>, <code>ROWCLUST</code> or
-<code>COLCLUST</code>, such as <code>log(ROW)</code> or I(COLCLUST^2). That is because
+<code>COLCLUST</code>, such as <code>log(ROW)</code> or <code>COLCLUST^2</code>. That is because
 they are not covariates, and cannot be manipulated like that; instead, they
 are indicators for particular elements of the clustering model_structure.</p>
 <p>If performing biclustering, i.e. if <code>ROWCLUST</code> and <code>COLCLUST</code> are
@@ -628,7 +628,7 @@ the interaction. That is, you can use</p>
 <p><code>Y ~ ROWCLUST + COLCLUST + ROWCLUST:COLCLUST</code> or <code>Y ~ ROWCLUST*COLCLUST</code>,</p>
 <p>or you can use <code>Y ~ ROWCLUST:COLCLUST</code>, and these two types of
 biclustering model will have different parameter constraints (see below under
-<code>initvect</code> details), but you <strong>cannot</strong> use</p>
+<code>init_parvec</code> details), but you <strong>cannot</strong> use</p>
 <p><code>Y ~ ROWCLUST + ROWCLUST:COLCLUST</code> or <code>Y ~ COLCLUST + ROWCLUST:COLCLUST</code></p>
 <p>As stated above, you also cannot include individual row effects alongside
 row clustering, and you cannot use individual column effects alongside
@@ -701,17 +701,17 @@ phi_3 = 0.13, that suggests that there is not enough information in the data
 to distinguish between categories 2 and 3, and so you might as well merge
 them into a single category to simplify the model-fitting process and the
 interpretation of the results.</p>
-<p><code>initvect</code> <strong>argument details</strong></p>
+<p><code>init_parvec</code> <strong>argument details</strong></p>
 <p>Initvect is the vector of starting values for the parameters, made up of
 sections for each different type of parameter in the model. Note that the
-length of each section of initvect is the number of <strong>independent</strong>
+length of each section of init_parvec is the number of <strong>independent</strong>
 parameter values, not the overall number of parameter values of that type.</p>
 <p>If you want to supply a vector of starting values for the EM algorithm, you
 need to be careful how many values you supply, and the order in which you
-include them in <code>initvect</code>, and you should <strong>CHECK</strong> the output
+include them in <code>init_parvec</code>, and you should <strong>CHECK</strong> the output
 list of parameters (which is the full set of parameter values, including
 dependent ones, broken up into each type of parameter) to check that your
-initvect model_structure is correct for the formula you have specified.</p>
+init_parvec model_structure is correct for the formula you have specified.</p>
 <p>For example, the number of <code>mu</code> values will always be 1 fewer than the
 number of categories in the data, and the remaining value of mu is dependent
 on those q-1 values. In the OSM for data with 3 categories, the first value
@@ -724,12 +724,12 @@ other 4 levels.</p>
 <p><code>q</code> is the number of levels in the values of y, <code>n</code> is the number
 of rows in the original data matrix, and <code>p</code> is the number of columns in
 the original data matrix.</p>
-<p>For Binary,
-There is one independent value for <code>mu</code>, i.e. q = 2.</p>
+<p>For Binary,</p>
+<p>There is one independent value for <code>mu</code>, i.e. q = 2.</p>
 <p>Ignore <code>phi</code>, which is not used in the Binary model.</p>
-<p>For OSM,
-The starting values for <code>mu_k</code> are length <code>q-1</code>, and the model
-has <code>mu_1</code> = 0 always, so the initvect values for <code>mu</code> will become
+<p>For OSM,</p>
+<p>The starting values for <code>mu_k</code> are length <code>q-1</code>, and the model
+has <code>mu_1</code> = 0 always, so the init_parvec values for <code>mu</code> will become
 <code>mu_2</code>, <code>mu_3</code>, etc. up to <code>mu_q</code>.</p>
 <p>The starting values for <code>phi_k</code> are length <code>q-2</code>.</p>
 <p>Note that the starting values for <code>phi</code> do not correspond directly to
@@ -740,30 +740,30 @@ has <code>mu_1</code> = 0 always, so the initvect values for <code>mu</code> wil
 <p><code>phi[2] &lt;- expit(u[2])</code> and</p>
 <p><code>phi[k] &lt;- expit(u[2] + sum(exp(u[3:k])))</code> for k between 3 and q-1</p>
 <p><code>(phi[1] = 0 and phi[q] = 1)</code>.</p>
-<p>For POM,
-The starting values for <code>mu_k</code> are length <code>q-1</code>, but the starting
+<p>For POM,</p>
+<p>The starting values for <code>mu_k</code> are length <code>q-1</code>, but the starting
 values do not correspond directly to <code>mu_k</code>, because <code>mu_k</code> is
 restricted to being increasing, i.e. the model has to have
     <code>mu_1</code> &lt;= <code>mu_2</code> &lt;= ... <code>mu_q</code> = <code>+Inf</code></p>
-<p>So instead of using the initvect values directly for <code>mu_k</code>, the 2nd to
-(q-1)th elements of initvect are used to construct <code>mu_k</code> as follows:</p>
-<p><code>mu_1 &lt;- initvect[1]</code></p>
-<p><code>mu_2 &lt;- initvect[1] + exp(initvect[2])</code></p>
-<p><code>mu_3 &lt;- initvect[1] + exp(initvect[2]) + exp(initvect[3])</code></p>
+<p>So instead of using the init_parvec values directly for <code>mu_k</code>, the 2nd to
+(q-1)th elements of init_parvec are used to construct <code>mu_k</code> as follows:</p>
+<p><code>mu_1 &lt;- init_parvec[1]</code></p>
+<p><code>mu_2 &lt;- init_parvec[1] + exp(init_parvec[2])</code></p>
+<p><code>mu_3 &lt;- init_parvec[1] + exp(init_parvec[2]) + exp(init_parvec[3])</code></p>
 <p>... and so on up to <code>mu_{k-1}</code>, and <code>mu_k</code> is infinity, because
     it is not used directly to construct the probability of Y = q.</p>
 <p>Thus the values that are used to construct <code>mu_k</code> can be unconstrained,
-which makes it easier to specify initvect and easier to optimize the parameter
+which makes it easier to specify init_parvec and easier to optimize the parameter
 values.</p>
 <p>Ignore <code>phi</code>, which is not used in POM.</p>
 <p>For <strong>all three models</strong>,</p>
-<p>The starting values for <code>rowc_coef_r</code> are length <code>nclus.row-1</code>,
-where <code>nclus.row</code> is the number of row clusters. The final row cluster
+<p>The starting values for <code>rowc_coef_r</code> are length <code>RG-1</code>,
+where <code>RG</code> is the number of row clusters. The final row cluster
 parameter is dependent on the others (see the input parameter info for
 constraint_sum_zero), whereas if it were independent it would be colinear
 with the <code>mu_k</code> parameters and thus not identifiable.</p>
 <p>Similarly the starting values for <code>colc_coef_c</code> are length
-<code>nclus.column-1</code>, where <code>nclus.column</code> is the number of column
+<code>CG-1</code>, where <code>CG</code> is the number of column
 clusters, to avoid problems of colinearity and nonidentifiability.</p>
 <p>If you have biclustering with an interaction term between row clusters and
 column clusters, then the number of independent values in the matrix of
@@ -771,10 +771,10 @@ interaction terms depends on whether you include the main effects of row and
 column clusters separately. That is, if you use the biclustering model</p>
 <p><code>Y ~ ROWCLUST + COLCLUST + ROWCLUST:COLCLUST</code>, or equivalently</p>
 <p><code>Y ~ ROWCLUST*COLCLUST</code>,</p>
-<p>then the main effect term <code>ROWCLUST</code> has <code>nclus.row-1</code> independent
-parameters in <code>initvect</code>, and <code>COLCLUST</code> has <code>nclus.column-1</code>
-independent parameters in <code>initvect</code>, and <code>ROWCLUST:COLCLUST</code> will
-have <code>(nclus.row - 1)*(nclus.column - 1)</code> independent parameter values.
+<p>then the main effect term <code>ROWCLUST</code> has <code>RG-1</code> independent
+parameters in <code>init_parvec</code>, and <code>COLCLUST</code> has <code>CG-1</code>
+independent parameters in <code>init_parvec</code>, and <code>ROWCLUST:COLCLUST</code> will
+have <code>(RG - 1)*(CG - 1)</code> independent parameter values.
 The final matrix of interaction terms will be constrained to have its last
 row equal to the negative sum of the other rows, and the last column equal to
 the negative sum of the other columns.</p>
@@ -782,46 +782,46 @@ the negative sum of the other columns.</p>
 main effects (which for the clustering model is mathematically equivalent),
 i.e.</p>
 <p><code>Y ~ ROWCLUST:COLCLUST</code>,</p>
-<p>then that matrix of interaction terms will have <code>nclus.row*nclus.column - 1</code>
+<p>then that matrix of interaction terms will have <code>RG*CG - 1</code>
 independent parameters, i.e. more independent parameters than if you included
 the main effects.</p>
 <p>If you have column effects alongside row clusters (they are not permitted
 alongside column clusters), without interactions, i.e. the formula
 <code>Y ~ ROWCLUST + COL</code> with Binary model Logit(P(Y = 1)) = mu +
 rowc_coef_r + col_coef_j
-then the row cluster coefficients have <code>nclus.row - 1</code> independent
+then the row cluster coefficients have <code>RG - 1</code> independent
 parameters, and the column effect coefficients have <code>p - 1</code> independent
 parameters, where p is the number of columns in the original data matrix,
-i.e. the maximum value of <code>long.df$COL</code>.</p>
+i.e. the maximum value of <code>long_df$COL</code>.</p>
 <p>If you include the interaction term, then the number of independent parameters
 again depends on whether you just use the interaction term, or include the
 main effects.</p>
 <p>In the formula <code>Y ~ ROWCLUST + COL + ROWCLUST:COL</code> or its equivalent with
-"*", the interaction term will have <code>(nclus.row - 1)*(p-1)</code> independent
+"*", the interaction term will have <code>(RG - 1)*(p-1)</code> independent
 parameters.</p>
 <p>If you instead use the formula <code>Y ~ ROWCLUST:COL</code>, then the interaction
-term will have <code>nclus.row*p - 1</code> independent parameters. Either way, the
-total number of independent parameters in the model will be <code>nclus.row*p</code>.</p>
+term will have <code>RG*p - 1</code> independent parameters. Either way, the
+total number of independent parameters in the model will be <code>RG*p</code>.</p>
 <p>Similarly, if you have row effects alongside column clusters, without
 interactions, i.e. the formula</p>
 <p><code>Y ~ COLCLUST + ROW</code>,</p>
 <p>with Binary model Logit(P(Y = 1)) = mu + colc_coef_c + row_coef_i</p>
-<p>then the column cluster coefficients will have <code>nclus.column - 1</code>
+<p>then the column cluster coefficients will have <code>CG - 1</code>
 independent parameters, and the row coefficients will have <code>n-1</code>
 independent parameters, where n is the number of rows in the original data
-matrix, i.e. the maximum value of <code>long.df$ROW</code>.</p>
+matrix, i.e. the maximum value of <code>long_df$ROW</code>.</p>
 <p>If you include the interaction term alongside the main effects, i.e.</p>
 <p><code>Y ~ COLCLUST + ROW + COLCLUST:ROW</code>, or its equivalent with "*", the
-interaction term will have <code>(nclus.column - 1)*(n-1)</code> independent
+interaction term will have <code>(CG - 1)*(n-1)</code> independent
 parameters.</p>
 <p>If you instead use the formula <code>Y ~ COLCLUST:ROW</code>, that interaction
-coefficient matrix will have <code>nclus.column*n - 1</code> independent parameters.</p>
+coefficient matrix will have <code>CG*n - 1</code> independent parameters.</p>
 <p>Any covariate terms included in the formula will be split up by
 <code>clustord</code> into the covariates that interact with row clusters, the
 covariates that interact with column clusters, and the covariates that do not
 interact with row or column clusters.</p>
 <p>The number of independent parameters for row-cluster-interacting covariates
-will be <code>nclus.row*L</code>, where <code>L</code> is the number of terms involving
+will be <code>RG*L</code>, where <code>L</code> is the number of terms involving
 row clusters and covariates after any "*" terms have been expanded.</p>
 <p>So in this formula, for example,</p>
 <p><code>Y ~ ROWCLUST*xr1 + xr2 + ROWCLUST:log(xc1)</code></p>
@@ -829,10 +829,10 @@ row clusters and covariates after any "*" terms have been expanded.</p>
 expanded formula would be</p>
 <p><code>Y ~ ROWCLUST + xr1 + xr2 + ROWCLUST:xr1 + ROWCLUST:log(xc1)</code></p>
 <p>and the terms interacting with <code>ROWCLUST</code> would be <code>ROWCLUST:xr1</code>
-and <code>ROWCLUST:log(xc1)</code>, so there would be <code>nclus.row*2</code>
+and <code>ROWCLUST:log(xc1)</code>, so there would be <code>RG*2</code>
 independent coefficients for those covariates.</p>
 <p>The number of independent parameters for column-cluster-interacting
-covariates will be <code>nclus.column*M</code>, where <code>M</code> is the number of
+covariates will be <code>CG*M</code>, where <code>M</code> is the number of
 terms involving column clusters and covariates after any "*" terms have been
 expanded.</p>
 <p>So this formula, for example,</p>
@@ -841,7 +841,7 @@ expanded.</p>
 <p><code>Y ~ COLCLUST + xr1 + I(xr1^2) + xc1 + COLCLUST:xc1 + COLCLUST:xc2:xc3 + COLCLUST:xr1</code></p>
 <p>and the terms interacting with <code>COLCLUST</code> would be <code>COLCLUST:xc1</code>,
 <code>COLCLUST:xc2:xc3</code> and <code>COLCLUST:xr1</code>, so there would be
-<code>nclus.column*3</code> independent coefficients for those covariates.</p>
+<code>CG*3</code> independent coefficients for those covariates.</p>
 <p>The number of independent parameters for covariates that do not interact with
 row or column clusters will be the same as the number of those covariate terms,
 after any "*" terms have been expanded.</p>
@@ -852,37 +852,37 @@ after any "*" terms have been expanded.</p>
 <p>so there would be 3 independent coefficients for the terms <code>xr1, xr2, xc1</code>.</p>
 <p>Note that there are <strong>no intercept</strong> terms for the coefficients,
 because those are incorporated into the parameters <code>mu_k</code>.</p>
-<p>The <strong>order of the</strong> <code>initvect</code> <strong>entries</strong> is as follows, and
+<p>The <strong>order of the</strong> <code>init_parvec</code> <strong>entries</strong> is as follows, and
 any entries that are not included in the formula will be ignored and not
-included in <code>initvect</code>. That is, you should NOT provide values in
-<code>initvect</code> for components that are not included in the formula.</p>
-<p>1) mu (or values used to construct mu, POM only)
-2) values used to construct phi (OSM only)
-3) row cluster coefficients
-4) column cluster coefficients
-5) [matrix] bicluster coefficients (i.e. interaction between row and column clusters)
-6) individual row coefficients
-7) individual column coefficients
-8) [matrix] interactions between row clusters and individual column coefficients
-9) [matrix] interactions between column clusters and individual row coefficients
-10) [matrix] row-cluster-specific coefficients for covariates interacting with row clusters
-11) [matrix] column-cluster-specific coefficients for covariates interacting with column clusters
-12) coefficients for covariates that do not interact with row or column clusters</p>
+included in <code>init_parvec</code>. That is, you should NOT provide values in
+<code>init_parvec</code> for components that are not included in the formula.</p>
+<p>1) mu (or values used to construct mu, POM only)</p>
+<p>2) values used to construct phi (OSM only)</p>
+<p>3) row cluster coefficients</p>
+<p>4) column cluster coefficients</p>
+<p>5) [matrix] bicluster coefficients (i.e. interaction between row and column clusters)</p>
+<p>6) individual row coefficients</p>
+<p>7) individual column coefficients</p>
+<p>8) [matrix] interactions between row clusters and individual column coefficients</p>
+<p>9) [matrix] interactions between column clusters and individual row coefficients</p>
+<p>10) [matrix] row-cluster-specific coefficients for covariates interacting with row clusters</p>
+<p>11) [matrix] column-cluster-specific coefficients for covariates interacting with column clusters</p>
+<p>12) coefficients for covariates that do not interact with row or column clusters</p>
 <p>Any entries marked as [matrix] will be constructed into matrices by filling
 those matrices row-wise, e.g. if you want starting values 1:6 for a matrix of
 2 row clusters and 3 covariates interacting with those row clusters, the
 matrix of coefficients will become</p>
-<p><code>1 2 3
-4 5 6</code></p>
+<p><code>1 2 3</code></p>
+<p><code>4 5 6</code></p>
 <p>For the formula <code>Y ~ ROWCLUST*COLCLUST</code>, where the matrix of interactions
-between row and column clusters has <code>(nclus.row - 1)*(nclus.column - 1)</code>
+between row and column clusters has <code>(RG - 1)*(CG - 1)</code>
 independent parameters, the last row and column of the matrix will be the
 negative sums of the rest, so e.g. if you have 2 row clusters and 3 column
 clusters, there will only be 2 independent values, so if you provide the
 starting values -0.5 and 1.2, the final matrix of parameters will be:</p>
-<p><code>                column cluster 1   column cluster 2   column cluster 3
-row cluster 1   -0.5               1.2                -0.7
-row cluster 2   0.5                -1.2               0.7</code></p>
+<p><code>                column cluster 1   column cluster 2   column cluster 3</code></p>
+<p><code>row cluster 1   -0.5               1.2                -0.7</code></p>
+<p><code>row cluster 2   0.5                -1.2               0.7</code></p>
 <p>If the matrix is a matrix relating to row clusters, then the row clusters are
 in the rows, and if it's a matrix relating to column clusters but not row
 clusters, then the column clusters are in the rows, i.e. the matrix of
@@ -909,19 +909,18 @@ index and c being the column cluster index.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">long.df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>,<span class="fl">5</span><span class="op">*</span><span class="fl">20</span>,replace<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span><span class="va">long_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>,<span class="fl">5</span><span class="op">*</span><span class="fl">20</span>,replace<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>               ROW<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span>,times<span class="op">=</span><span class="fl">5</span><span class="op">)</span><span class="op">)</span>,COL<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>,each<span class="op">=</span><span class="fl">20</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*rowc_coef_r with 3 row clustering groups:</span></span></span>
-<span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">ROWCLUST</span>,model<span class="op">=</span><span class="st">"OSM"</span>,<span class="fl">3</span>,long.df<span class="op">=</span><span class="va">long.df</span>,</span></span>
-<span class="r-in"><span>             EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">2</span>,startEMcycles<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">ROWCLUST</span>,model<span class="op">=</span><span class="st">"OSM"</span>,<span class="fl">3</span>,long_df<span class="op">=</span><span class="va">long_df</span>,</span></span>
+<span class="r-in"><span>             control_EM<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxiter<span class="op">=</span><span class="fl">2</span>,maxiter_start<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converting factor ROW to numeric.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ ROWCLUST, model = "OSM", nclus.row = 3, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     long.df = long.df, EM.control = list(EMcycles = 2, startEMcycles = 2), </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     nstarts = 2)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ ROWCLUST, model = "OSM", RG = 3, long_df = long_df, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     control_EM = list(maxiter = 2, maxiter_start = 2), nstarts = 2)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Clustering mode:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  row clustering</span>
@@ -932,15 +931,16 @@ index and c being the column cluster index.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Cluster sizes:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Row clusters:  2 18 0 </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + col_coef_j) with 3 row clustering groups:</span></span></span>
-<span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">ROWCLUST</span><span class="op">+</span><span class="va">COL</span>,model<span class="op">=</span><span class="st">"OSM"</span>,<span class="fl">3</span>,long.df<span class="op">=</span><span class="va">long.df</span>,</span></span>
-<span class="r-in"><span>             EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">2</span>,startEMcycles<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + col_coef_j)</span></span></span>
+<span class="r-in"><span><span class="co">#    with 3 row clustering groups:</span></span></span>
+<span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">ROWCLUST</span><span class="op">+</span><span class="va">COL</span>,model<span class="op">=</span><span class="st">"OSM"</span>,<span class="fl">3</span>,long_df<span class="op">=</span><span class="va">long_df</span>,</span></span>
+<span class="r-in"><span>             control_EM<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxiter<span class="op">=</span><span class="fl">2</span>,maxiter_start<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converting factor ROW to numeric.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ ROWCLUST + COL, model = "OSM", nclus.row = 3, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     long.df = long.df, EM.control = list(EMcycles = 2, startEMcycles = 2), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ ROWCLUST + COL, model = "OSM", RG = 3, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     long_df = long_df, control_EM = list(maxiter = 2, maxiter_start = 2), </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     nstarts = 2)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Clustering mode:</span>
@@ -952,15 +952,16 @@ index and c being the column cluster index.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Cluster sizes:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Row clusters:  0 3 17 </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Model Logit(P(Y &lt;= k))=mu_k-rowc_coef_r-col_coef_j-rowc_col_coef_rj with 2 row clustering groups:</span></span></span>
-<span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">ROWCLUST</span><span class="op">*</span><span class="va">COL</span>,model<span class="op">=</span><span class="st">"POM"</span>,nclus.row<span class="op">=</span><span class="fl">2</span>,long.df<span class="op">=</span><span class="va">long.df</span>,</span></span>
-<span class="r-in"><span>             EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">2</span>,startEMcycles<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Model Logit(P(Y &lt;= k))=mu_k-rowc_coef_r-col_coef_j-rowc_col_coef_rj</span></span></span>
+<span class="r-in"><span><span class="co">#    with 2 row clustering groups:</span></span></span>
+<span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">ROWCLUST</span><span class="op">*</span><span class="va">COL</span>,model<span class="op">=</span><span class="st">"POM"</span>,RG<span class="op">=</span><span class="fl">2</span>,long_df<span class="op">=</span><span class="va">long_df</span>,</span></span>
+<span class="r-in"><span>             control_EM<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxiter<span class="op">=</span><span class="fl">2</span>,maxiter_start<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converting factor ROW to numeric.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ ROWCLUST * COL, model = "POM", nclus.row = 2, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     long.df = long.df, EM.control = list(EMcycles = 2, startEMcycles = 2), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ ROWCLUST * COL, model = "POM", RG = 2, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     long_df = long_df, control_EM = list(maxiter = 2, maxiter_start = 2), </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     nstarts = 2)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Clustering mode:</span>
@@ -972,16 +973,16 @@ index and c being the column cluster index.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Cluster sizes:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Row clusters:  20 0 </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c) with 3 column clustering groups:</span></span></span>
-<span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">COLCLUST</span>,model<span class="op">=</span><span class="st">"OSM"</span>,nclus.column<span class="op">=</span><span class="fl">3</span>,long.df<span class="op">=</span><span class="va">long.df</span>,</span></span>
-<span class="r-in"><span>             EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">2</span>,startEMcycles<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c)</span></span></span>
+<span class="r-in"><span><span class="co">#    with 3 column clustering groups:</span></span></span>
+<span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">COLCLUST</span>,model<span class="op">=</span><span class="st">"OSM"</span>,CG<span class="op">=</span><span class="fl">3</span>,long_df<span class="op">=</span><span class="va">long_df</span>,</span></span>
+<span class="r-in"><span>             control_EM<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxiter<span class="op">=</span><span class="fl">2</span>,maxiter_start<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converting factor ROW to numeric.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ COLCLUST, model = "OSM", nclus.column = 3, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     long.df = long.df, EM.control = list(EMcycles = 2, startEMcycles = 2), </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     nstarts = 2)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ COLCLUST, model = "OSM", CG = 3, long_df = long_df, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     control_EM = list(maxiter = 2, maxiter_start = 2), nstarts = 2)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Clustering mode:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  column clustering</span>
@@ -992,15 +993,16 @@ index and c being the column cluster index.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Cluster sizes:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Column clusters:  5 0 0 </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c + row_coef_i) with 3 column clustering groups:</span></span></span>
-<span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">COLCLUST</span><span class="op">+</span><span class="va">ROW</span>,model<span class="op">=</span><span class="st">"OSM"</span>,nclus.column<span class="op">=</span><span class="fl">3</span>,long.df<span class="op">=</span><span class="va">long.df</span>,</span></span>
-<span class="r-in"><span>             EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">2</span>,startEMcycles<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(colc_coef_c + row_coef_i)</span></span></span>
+<span class="r-in"><span><span class="co">#    with 3 column clustering groups:</span></span></span>
+<span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">COLCLUST</span><span class="op">+</span><span class="va">ROW</span>,model<span class="op">=</span><span class="st">"OSM"</span>,CG<span class="op">=</span><span class="fl">3</span>,long_df<span class="op">=</span><span class="va">long_df</span>,</span></span>
+<span class="r-in"><span>             control_EM<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxiter<span class="op">=</span><span class="fl">2</span>,maxiter_start<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converting factor ROW to numeric.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ COLCLUST + ROW, model = "OSM", nclus.column = 3, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     long.df = long.df, EM.control = list(EMcycles = 2, startEMcycles = 2), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ COLCLUST + ROW, model = "OSM", CG = 3, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     long_df = long_df, control_EM = list(maxiter = 2, maxiter_start = 2), </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     nstarts = 2)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Clustering mode:</span>
@@ -1014,14 +1016,14 @@ index and c being the column cluster index.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Model Log(P(Y=k)/P(Y=1))=mu_k+phi_k*(rowc_coef_r + colc_coef_c)</span></span></span>
 <span class="r-in"><span><span class="co">#    with 3 row clustering groups and 2 column clustering groups:</span></span></span>
-<span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">ROWCLUST</span><span class="op">+</span><span class="va">COLCLUST</span>,model<span class="op">=</span><span class="st">"OSM"</span>,nclus.row<span class="op">=</span><span class="fl">3</span>,nclus.column<span class="op">=</span><span class="fl">2</span>,long.df<span class="op">=</span><span class="va">long.df</span>,</span></span>
-<span class="r-in"><span>             EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">ROWCLUST</span><span class="op">+</span><span class="va">COLCLUST</span>,model<span class="op">=</span><span class="st">"OSM"</span>,RG<span class="op">=</span><span class="fl">3</span>,CG<span class="op">=</span><span class="fl">2</span>,long_df<span class="op">=</span><span class="va">long_df</span>,</span></span>
+<span class="r-in"><span>             control_EM<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxiter<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converting factor ROW to numeric.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ ROWCLUST + COLCLUST, model = "OSM", nclus.row = 3, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     nclus.column = 2, long.df = long.df, EM.control = list(EMcycles = 2), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ ROWCLUST + COLCLUST, model = "OSM", RG = 3, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     CG = 2, long_df = long_df, control_EM = list(maxiter = 2), </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     nstarts = 1)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Clustering mode:</span>
@@ -1037,15 +1039,15 @@ index and c being the column cluster index.</p>
 <span class="r-in"><span><span class="co"># Model Logit(P(Y&lt;=k))=mu_k-rowc_coef_r-colc_coef_c-rowc_colc_coef_rc</span></span></span>
 <span class="r-in"><span><span class="co">#    with 2 row clustering groups and 4 column clustering groups, and</span></span></span>
 <span class="r-in"><span><span class="co">#    interactions between them:</span></span></span>
-<span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">ROWCLUST</span><span class="op">*</span><span class="va">COLCLUST</span>, model<span class="op">=</span><span class="st">"POM"</span>, nclus.row<span class="op">=</span><span class="fl">2</span>, nclus.column<span class="op">=</span><span class="fl">4</span>,</span></span>
-<span class="r-in"><span>             long.df<span class="op">=</span><span class="va">long.df</span>,EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">1</span>,</span></span>
+<span class="r-in"><span><span class="fu">clustord</span><span class="op">(</span><span class="va">Y</span><span class="op">~</span><span class="va">ROWCLUST</span><span class="op">*</span><span class="va">COLCLUST</span>, model<span class="op">=</span><span class="st">"POM"</span>, RG<span class="op">=</span><span class="fl">2</span>, CG<span class="op">=</span><span class="fl">4</span>,</span></span>
+<span class="r-in"><span>             long_df<span class="op">=</span><span class="va">long_df</span>,control_EM<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxiter<span class="op">=</span><span class="fl">2</span><span class="op">)</span>, nstarts<span class="op">=</span><span class="fl">1</span>,</span></span>
 <span class="r-in"><span>             start_from_simple_model<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Converting factor ROW to numeric.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ ROWCLUST * COLCLUST, model = "POM", nclus.row = 2, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     nclus.column = 4, long.df = long.df, EM.control = list(EMcycles = 2), </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> clustord(formula = Y ~ ROWCLUST * COLCLUST, model = "POM", RG = 2, </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     CG = 4, long_df = long_df, control_EM = list(maxiter = 2), </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     start_from_simple_model = FALSE, nstarts = 1)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Clustering mode:</span>

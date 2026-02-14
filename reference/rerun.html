@@ -15,7 +15,7 @@ is quicker than starting the run again from scratch with more iterations."></hea
 
     <a class="navbar-brand me-2" href="../index.html">clustord</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.3.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -26,7 +26,7 @@ is quicker than starting the run again from scratch with more iterations."></hea
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clustordConvergence.html">`clustord Convergence Tutorial</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/clustordConvergence.html">`clustord` Convergence Tutorial</a></li>
     <li><a class="dropdown-item" href="../articles/clustordOrdinalModels.html">`clustord` Ordinal Models</a></li>
     <li><a class="dropdown-item" href="../articles/clustordStructureSummary.html">`clustord` Structure Summary</a></li>
     <li><a class="dropdown-item" href="../articles/clustordTutorial.html">`clustord` Tutorial</a></li>
@@ -58,11 +58,11 @@ is quicker than starting the run again from scratch with more iterations.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">rerun</span><span class="op">(</span></span>
-<span>  <span class="va">results.original</span>,</span>
-<span>  <span class="va">long.df</span>,</span>
-<span>  EM.control <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">results_original</span>,</span>
+<span>  <span class="va">long_df</span>,</span>
+<span>  control_EM <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  optim.control <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  control_optim <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -70,17 +70,17 @@ is quicker than starting the run again from scratch with more iterations.</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-results-original">results.original<a class="anchor" aria-label="anchor" href="#arg-results-original"></a></dt>
+<dl><dt id="arg-results-original">results_original<a class="anchor" aria-label="anchor" href="#arg-results-original"></a></dt>
 <dd><p>The results of the previous run that you want to use
 as a starting point. The model, number of clusters, and final parameter
-values will be used, and the cluster controls such as EMcycles will be
+values will be used, and the cluster controls such as maxiter will be
 reused unless the user specifies new values. But the row cluster and/or
 column cluster memberships will NOT be reused, and nor will the dataset,
 so you can change the dataset slightly and the rest of the details will
 be applied to this new dataset.</p></dd>
 
 
-<dt id="arg-long-df">long.df<a class="anchor" aria-label="anchor" href="#arg-long-df"></a></dt>
+<dt id="arg-long-df">long_df<a class="anchor" aria-label="anchor" href="#arg-long-df"></a></dt>
 <dd><p>The dataset to use for this run, which may be slightly
 different to the original. Please note that the only compatibility check
 performed is comparing the sizes of the original and new datasets, and it
@@ -88,9 +88,9 @@ is up to the user to check that the new dataset is sufficiently similar
 to the old one.</p></dd>
 
 
-<dt id="arg-em-control">EM.control<a class="anchor" aria-label="anchor" href="#arg-em-control"></a></dt>
-<dd><p>Options to use for this run such as EMcycles (number of EM
-iterations). Note that "startEMcycles" will not be relevant as this run
+<dt id="arg-control-em">control_EM<a class="anchor" aria-label="anchor" href="#arg-control-em"></a></dt>
+<dd><p>Options to use for this run such as maxiter (number of EM
+iterations). Note that "maxiter_start" will not be relevant as this run
 will not generate random starts, it will run from the end parameters of
 the other run. See <a href="clustord.html">clustord</a> documentation for more info.</p></dd>
 
@@ -101,7 +101,7 @@ console during the algorithm's progress. See <a href="clustord.html">clustord</a
 documentation for more info.</p></dd>
 
 
-<dt id="arg-optim-control">optim.control<a class="anchor" aria-label="anchor" href="#arg-optim-control"></a></dt>
+<dt id="arg-control-optim">control_optim<a class="anchor" aria-label="anchor" href="#arg-control-optim"></a></dt>
 <dd><p>Options to use for this run within <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">optim()</a></code>, which
 is used to estimate the parameters during each M-step. See <a href="clustord.html">clustord</a>
 documentation for more info.</p></dd>
@@ -117,7 +117,7 @@ documentation for more info.</p></dd>
 and want to rerun from the previous endpoint to save time.</p>
 <p>Either way, you call the function in the same way, supplying the previous
 results object and a dataset, and optionally a new number of iterations
-(`EM.control=list(EMcycles=XXX)`, where `XXX` is the new number of iterations.)</p>
+(`control_EM=list(maxiter=XXX)`, where `XXX` is the new number of iterations.)</p>
 <p>The output parameters of the old result will be used as the new initial
 parameters.</p>
     </div>
@@ -125,24 +125,24 @@ parameters.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">long.df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>,<span class="fl">5</span><span class="op">*</span><span class="fl">20</span>,replace<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span><span class="va">long_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>Y<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>,<span class="fl">5</span><span class="op">*</span><span class="fl">20</span>,replace<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>               ROW<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span>,times<span class="op">=</span><span class="fl">5</span><span class="op">)</span>,COL<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>,each<span class="op">=</span><span class="fl">20</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">results.original</span> <span class="op">&lt;-</span> <span class="fu"><a href="clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">ROWCLUST</span>, model<span class="op">=</span><span class="st">"OSM"</span>, nclus.row<span class="op">=</span><span class="fl">4</span>,</span></span>
-<span class="r-in"><span>                             long.df<span class="op">=</span><span class="va">long.df</span>, EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">results_original</span> <span class="op">&lt;-</span> <span class="fu"><a href="clustord.html">clustord</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="va">ROWCLUST</span>, model<span class="op">=</span><span class="st">"OSM"</span>, RG<span class="op">=</span><span class="fl">4</span>,</span></span>
+<span class="r-in"><span>                             long_df<span class="op">=</span><span class="va">long_df</span>, control_EM<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxiter<span class="op">=</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.</span>
-<span class="r-in"><span><span class="va">results.original</span><span class="op">$</span><span class="va">EM.status</span><span class="op">$</span><span class="va">converged</span></span></span>
+<span class="r-in"><span><span class="va">results_original</span><span class="op">$</span><span class="va">EMstatus</span><span class="op">$</span><span class="va">converged</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
 <span class="r-in"><span><span class="co"># FALSE</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Since original run did not converge, rerun from that finishing point and</span></span></span>
 <span class="r-in"><span><span class="co">## allow more iterations this time</span></span></span>
-<span class="r-in"><span><span class="va">results.new</span> <span class="op">&lt;-</span> <span class="fu">rerun</span><span class="op">(</span><span class="va">results.original</span>, <span class="va">long.df</span>, EM.control<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>EMcycles<span class="op">=</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">results_new</span> <span class="op">&lt;-</span> <span class="fu">rerun</span><span class="op">(</span><span class="va">results_original</span>, <span class="va">long_df</span>, control_EM<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>maxiter<span class="op">=</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> EM algorithm has successfully converged.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## Alternatively, if dataset has changed slightly then rerun from the</span></span></span>
 <span class="r-in"><span><span class="co">## previous finishing point to give the new results a helping hand</span></span></span>
-<span class="r-in"><span><span class="va">long.df.new</span> <span class="op">&lt;-</span> <span class="va">long.df</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>,<span class="fl">25</span>,<span class="fl">140</span><span class="op">)</span>,<span class="op">]</span></span></span>
-<span class="r-in"><span><span class="va">results.new</span> <span class="op">&lt;-</span> <span class="fu">rerun</span><span class="op">(</span><span class="va">results.original</span>, <span class="va">long.df.new</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">long_df.new</span> <span class="op">&lt;-</span> <span class="va">long_df</span><span class="op">[</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>,<span class="fl">25</span>,<span class="fl">140</span><span class="op">)</span>,<span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">results_new</span> <span class="op">&lt;-</span> <span class="fu">rerun</span><span class="op">(</span><span class="va">results_original</span>, <span class="va">long_df.new</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> EM algorithm has successfully converged.</span>
 </code></pre></div>
     </div>

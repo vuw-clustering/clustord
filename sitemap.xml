@@ -8,12 +8,12 @@
 <url><loc>https://vuw-clustering.github.io/clustord/articles/index.html</loc></url>
 <url><loc>https://vuw-clustering.github.io/clustord/authors.html</loc></url>
 <url><loc>https://vuw-clustering.github.io/clustord/index.html</loc></url>
-<url><loc>https://vuw-clustering.github.io/clustord/reference/calc.SE.bicluster.html</loc></url>
-<url><loc>https://vuw-clustering.github.io/clustord/reference/calc.cluster.comparisons.html</loc></url>
+<url><loc>https://vuw-clustering.github.io/clustord/reference/calc_SE_bicluster.html</loc></url>
+<url><loc>https://vuw-clustering.github.io/clustord/reference/calc_cluster_comparisons.html</loc></url>
 <url><loc>https://vuw-clustering.github.io/clustord/reference/clustord-package.html</loc></url>
 <url><loc>https://vuw-clustering.github.io/clustord/reference/clustord.html</loc></url>
 <url><loc>https://vuw-clustering.github.io/clustord/reference/index.html</loc></url>
-<url><loc>https://vuw-clustering.github.io/clustord/reference/mat2df.html</loc></url>
+<url><loc>https://vuw-clustering.github.io/clustord/reference/mat_to_df.html</loc></url>
 <url><loc>https://vuw-clustering.github.io/clustord/reference/osm.html</loc></url>
 <url><loc>https://vuw-clustering.github.io/clustord/reference/reorder.clustord.html</loc></url>
 <url><loc>https://vuw-clustering.github.io/clustord/reference/rerun.html</loc></url>

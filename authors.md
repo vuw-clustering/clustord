@@ -24,13 +24,13 @@
 
 McMillan L, Fernández Martínez D, Cui Y, Matechou E (2026). *clustord:
 Cluster Ordinal Data via Proportional Odds or Ordered Stereotype*. R
-package version 1.3.6, <https://vuw-clustering.github.io/clustord/>.
+package version 2.0.0, <https://vuw-clustering.github.io/clustord/>.
 
     @Manual{,
       title = {clustord: Cluster Ordinal Data via Proportional Odds or Ordered Stereotype},
       author = {Louise McMillan and Daniel {Fernández Martínez} and Ying Cui and Eleni Matechou},
       year = {2026},
-      note = {R package version 1.3.6},
+      note = {R package version 2.0.0},
       url = {https://vuw-clustering.github.io/clustord/},
     }
 

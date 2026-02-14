@@ -80,8 +80,8 @@ row covariates:
 
 `Y ~ ROWCLUST*age + nationality*occupation`
 
-You need to also supply these row covariates as `xr.df` to the function
-[`mat2df()`](https://vuw-clustering.github.io/clustord/reference/mat2df.md)
+You need to also supply these row covariates as `xr_df` to the function
+[`mat_to_df()`](https://vuw-clustering.github.io/clustord/reference/mat_to_df.md)
 when creating the long data frame for clustering (see the `clustord`
 Tutorial vignette for more details).
 
@@ -105,9 +105,9 @@ The formula works the same as for other covariates:
 
 `Y + ROWCLUST + honesty`
 
-but you need to supply these column covariates as `xc.df` to the
+but you need to supply these column covariates as `xc_df` to the
 function
-[`mat2df()`](https://vuw-clustering.github.io/clustord/reference/mat2df.md)
+[`mat_to_df()`](https://vuw-clustering.github.io/clustord/reference/mat_to_df.md)
 when creating the long form data frame.
 
 ## Column clustering
@@ -175,8 +175,8 @@ Column clustering with covariates and interaction:
 
 `Y + COLCLUST*honesty`
 
-Supply column covariates as `xc.df` to
-[`mat2df()`](https://vuw-clustering.github.io/clustord/reference/mat2df.md).
+Supply column covariates as `xc_df` to
+[`mat_to_df()`](https://vuw-clustering.github.io/clustord/reference/mat_to_df.md).
 
 Parameters: `colc`, `cov` and possible interaction `colc_cov`.
 
@@ -197,8 +197,8 @@ Column clustering with covariates and interaction:
 
 `Y + COLCLUST*age`
 
-Supply row covariates as `xr.df` to
-[`mat2df()`](https://vuw-clustering.github.io/clustord/reference/mat2df.md).
+Supply row covariates as `xr_df` to
+[`mat_to_df()`](https://vuw-clustering.github.io/clustord/reference/mat_to_df.md).
 
 Parameters: `colc`, `cov` and possible interaction `colc_cov`.
 

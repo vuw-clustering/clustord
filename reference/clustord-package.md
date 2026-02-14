@@ -9,11 +9,11 @@ model for ordinal categorical data.
 The clustord package provides six functions:
 [`clustord()`](https://vuw-clustering.github.io/clustord/reference/clustord.md),
 [`rerun()`](https://vuw-clustering.github.io/clustord/reference/rerun.md),
-[`mat2df()`](https://vuw-clustering.github.io/clustord/reference/mat2df.md),
-[`calc.SE.rowcluster()`](https://vuw-clustering.github.io/clustord/reference/calc.SE.bicluster.md),
-[`calc.SE.bicluster()`](https://vuw-clustering.github.io/clustord/reference/calc.SE.bicluster.md),
+[`mat_to_df()`](https://vuw-clustering.github.io/clustord/reference/mat_to_df.md),
+[`calc_SE_rowcluster()`](https://vuw-clustering.github.io/clustord/reference/calc_SE_bicluster.md),
+[`calc_SE_bicluster()`](https://vuw-clustering.github.io/clustord/reference/calc_SE_bicluster.md),
 and
-[`calc.cluster.comparisons()`](https://vuw-clustering.github.io/clustord/reference/calc.cluster.comparisons.md).
+[`calc_cluster_comparisons()`](https://vuw-clustering.github.io/clustord/reference/calc_cluster_comparisons.md).
 
 ## Clustering function
 
@@ -43,7 +43,7 @@ the input parameters based on the original model fitting run.#'
 
 ## Utility function
 
-[`mat2df()`](https://vuw-clustering.github.io/clustord/reference/mat2df.md)
+[`mat_to_df()`](https://vuw-clustering.github.io/clustord/reference/mat_to_df.md)
 is a utility function provided to convert a data matrix of responses
 into the long-form data frame format required by
 [`clustord()`](https://vuw-clustering.github.io/clustord/reference/clustord.md),
@@ -52,9 +52,9 @@ needed.
 
 ## SE calculation functions
 
-[`calc.SE.rowcluster()`](https://vuw-clustering.github.io/clustord/reference/calc.SE.bicluster.md)
+[`calc_SE_rowcluster()`](https://vuw-clustering.github.io/clustord/reference/calc_SE_bicluster.md)
 and
-[`calc.SE.bicluster()`](https://vuw-clustering.github.io/clustord/reference/calc.SE.bicluster.md)
+[`calc_SE_bicluster()`](https://vuw-clustering.github.io/clustord/reference/calc_SE_bicluster.md)
 are functions to run after running
 [`clustord()`](https://vuw-clustering.github.io/clustord/reference/clustord.md),
 to calculate the standard errors on the parameters fitted using
@@ -62,7 +62,7 @@ to calculate the standard errors on the parameters fitted using
 
 ## Clustering comparisons
 
-[`calc.cluster.comparisons()`](https://vuw-clustering.github.io/clustord/reference/calc.cluster.comparisons.md)
+[`calc_cluster_comparisons()`](https://vuw-clustering.github.io/clustord/reference/calc_cluster_comparisons.md)
 can be used to compare the assigned cluster memberships of the rows or
 columns of the data matrix from two different clustering fits, in a way
 that avoids the label-switching problem.

@@ -1,4 +1,4 @@
-# \`clustord Convergence Tutorial
+# \`clustord\` Convergence Tutorial
 
 ## Introduction
 
@@ -22,10 +22,10 @@ convergence using the simplest row clustering model.
 ``` r
 library(clustord)
 set.seed(30)
-long.df.sim <- data.frame(Y=factor(sample(1:3,5*30,replace=TRUE)),
+long_df_sim <- data.frame(Y=factor(sample(1:3,5*30,replace=TRUE)),
                           ROW=factor(rep(1:30,times=5)),COL=rep(1:5,each=30))
-fit <- clustord(Y ~ ROWCLUST, model="POM", nclus.row=2, long.df=long.df.sim, 
-                nstarts=2, EM.control = list(EMcycles=2))
+fit <- clustord(Y ~ ROWCLUST, model="POM", RG=2, long_df=long_df_sim, 
+                nstarts=2, control_EM = list(maxiter=2))
 #> Converting factor ROW to numeric.
 #> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.
 ```
@@ -38,8 +38,8 @@ You can check the convergence in three ways.
 fit
 #> 
 #> Call:
-#> clustord(formula = Y ~ ROWCLUST, model = "POM", nclus.row = 2, 
-#>     long.df = long.df.sim, EM.control = list(EMcycles = 2), nstarts = 2)
+#> clustord(formula = Y ~ ROWCLUST, model = "POM", RG = 2, long_df = long_df_sim, 
+#>     control_EM = list(maxiter = 2), nstarts = 2)
 #> 
 #> Clustering mode:
 #>  row clustering
@@ -56,8 +56,8 @@ fit
 ``` r
 summary(fit)
 #> 
-#> Call: clustord(formula = Y ~ ROWCLUST, model = "POM", nclus.row = 2, 
-#>     long.df = long.df.sim, EM.control = list(EMcycles = 2), nstarts = 2)
+#> Call: clustord(formula = Y ~ ROWCLUST, model = "POM", RG = 2, long_df = long_df_sim, 
+#>     control_EM = list(maxiter = 2), nstarts = 2)
 #> 
 #> Clustering mode:  row clustering 
 #> Model:  POM 
@@ -85,7 +85,7 @@ summary(fit)
 3.  Fetch the convergence check from the results object:
 
 ``` r
-fit$EM.status$converged
+fit$EMstatus$converged
 #> [1] FALSE
 ```
 
@@ -111,29 +111,28 @@ In order to do this, use the
 [`rerun()`](https://vuw-clustering.github.io/clustord/reference/rerun.md)
 function. This allows you to pass in a previous run and use it as the
 starting point of a new run. You supply the output of the previous run,
-and the dataset, and any options you want in `EM.control`, which may
+and the dataset, and any options you want in `control_EM`, which may
 include changing the number of iterations.
 
 For diagnostic purposes, you also have the option of changing the
 `verbose` setting for the new run or supplying a different
-`optim.control` list. `optim.control` has an entry called `trace` which
+`control_optim` list. `control_optim` has an entry called `trace` which
 can make [`optim()`](https://rdrr.io/r/stats/optim.html) produce much
 more verbose output during the M-step, but most users will not need this
 functionality.
 
 For now, we will just ask for more iterations for the next run using
-`EM.control` since the previous run only used 5.
+`control_EM` since the previous run only used 5.
 
 ``` r
-fit_continued <- rerun(fit, long.df=long.df.sim, EM.control=list(EMcycles=20))
+fit_continued <- rerun(fit, long_df=long_df_sim, control_EM=list(maxiter=20))
 #> Converting factor ROW to numeric.
 #> EM algorithm has successfully converged.
 summary(fit_continued)
 #> 
-#> Call: clustord(formula = Y ~ ROWCLUST, model = "POM", nclus.row = 2, 
-#>     long.df = long.df, initvect = initvect, pi.init = pi.init, 
-#>     kappa.init = kappa.init, EM.control = EM.control, optim.control = optim.control, 
-#>     verbose = FALSE)
+#> Call: clustord(formula = Y ~ ROWCLUST, model = "POM", RG = 2, long_df = long_df, 
+#>     init_parvec = init_parvec, init_pi = init_pi, init_kappa = init_kappa, 
+#>     control_EM = control_EM, control_optim = control_optim, verbose = FALSE)
 #> 
 #> Clustering mode:  row clustering 
 #> Model:  POM 
@@ -162,8 +161,13 @@ summary(fit_continued)
 
 If you still find that the algorithm does not converge within e.g. 500
 iterations, then it would be worth running the algorithm from scratch
-(i.e. without supplying `initvect`) and increasing the number of starts
-in order to improve the chances of finding a better starting point that
-might allow the algorithm to converge faster. You should use at least 20
-starting points for any clustering structure more complex than
-`Y ~ ROWCLUST` (the simplest model).
+(i.e. without supplying `init_parvec`) and increasing the number of
+starts in order to improve the chances of finding a better starting
+point that might allow the algorithm to converge faster. You should use
+at least 20 starting points for any clustering structure more complex
+than `Y ~ ROWCLUST` (the simplest model).
+
+Also note that if you have multiple cores available on your machine, or
+access to a high-performance computing cluster with many CPUs, you can
+leverage the `parallel_starts` option in `clustord` to speed up the
+process of running many starting points.

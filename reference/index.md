@@ -13,8 +13,8 @@ parameter estimates
 - [`rerun()`](https://vuw-clustering.github.io/clustord/reference/rerun.md)
   : Rerun clustord using the results of a previous run as the starting
   point.
-- [`calc.SE.rowcluster()`](https://vuw-clustering.github.io/clustord/reference/calc.SE.bicluster.md)
-  [`calc.SE.bicluster()`](https://vuw-clustering.github.io/clustord/reference/calc.SE.bicluster.md)
+- [`calc_SE_rowcluster()`](https://vuw-clustering.github.io/clustord/reference/calc_SE_bicluster.md)
+  [`calc_SE_bicluster()`](https://vuw-clustering.github.io/clustord/reference/calc_SE_bicluster.md)
   : Calculate standard errors of clustering parameters.
 
 ### Regression
@@ -31,10 +31,10 @@ Functions for setting up the long-form data frame for clustering,
 calculating measures to compare sets of clustering results, or
 rearranging the results in order of cluster effects
 
-- [`mat2df()`](https://vuw-clustering.github.io/clustord/reference/mat2df.md)
+- [`mat_to_df()`](https://vuw-clustering.github.io/clustord/reference/mat_to_df.md)
   : Converting matrix of responses into a long-form data frame and
   incorporating covariates, if supplied.
-- [`calc.cluster.comparisons()`](https://vuw-clustering.github.io/clustord/reference/calc.cluster.comparisons.md)
+- [`calc_cluster_comparisons()`](https://vuw-clustering.github.io/clustord/reference/calc_cluster_comparisons.md)
   : Calculate comparison measures between two sets of clustering results
 - [`reorder(`*`<clustord>`*`)`](https://vuw-clustering.github.io/clustord/reference/reorder.clustord.md)
   : Reorder row or column clusters in order of increasing (or

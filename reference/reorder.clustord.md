@@ -52,12 +52,13 @@ for more info about the contents of `clustord` objects. The `clustord`
 object will gain an extra field, `reordered = TRUE`. Elements of
 `clustord` object that may be reordered (which ones are reordered
 depends on whether row clusters are being reordered and whether column
-clusters are being reordered: - `parlist.out` (the final list of
-estimated parameter values) - `pi.out` and/or `kappa.out` - `ppr` and/or
-`ppc` - `outvect` - `RowClusterMembers` and `RowClusters` and/or
-`ColumnClusterMembers` and `ColumnClusters` -
-`EM.status$params.for.best.lli` - `EM.status$params.every.iteration`, if
-using option `EM.control$keepallparams` - `start.par`
+clusters are being reordered: - `out_parlist` (the final list of
+estimated parameter values) - `row_cluster_proportions` and/or
+`column_cluster_proportions` - `row_cluster_probs` and/or
+`column_cluster_probs` - `out_parvec` - `row_cluster_members` and
+`row_clusters` and/or `column_cluster_members` and `column_clusters` -
+`EMstatus$params_for_best_lli` - `EMstatus$params_every_iteration`, if
+using option `control_EM$keep_all_params` - `start.par`
 
 .
 
@@ -99,13 +100,13 @@ terms without the main cluster effects e.g. if you included
 
 ``` r
 set.seed(1)
-long.df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),
+long_df <- data.frame(Y=factor(sample(1:3,5*20,replace=TRUE)),
                ROW=rep(1:10,times=10),COL=rep(1:10,each=10))
-results.original <- clustord(Y ~ ROWCLUST + COLCLUST, model="OSM",
-                             nclus.row=3, nclus.column=2, long.df=long.df,
-                             EM.control=list(EMcycles=2))
+results_original <- clustord(Y ~ ROWCLUST + COLCLUST, model="OSM",
+                             RG=3, CG=2, long_df=long_df,
+                             control_EM=list(maxiter=2))
 #> EM algorithm has not converged. Please try again, or with a different random seed, or with more starting points.
-results.original$parlist.out
+results_original$out_parlist
 #> $mu
 #>        mu_1        mu_2        mu_3 
 #>  0.00000000  0.13787191 -0.06928604 
@@ -140,8 +141,8 @@ results.original$parlist.out
 
 ## Run reorder type "row" to reorder based on row cluster effects,
 ## in increasing order by default
-results.reorder <- reorder(results.original, type="row")
-results.reorder$parlist.out
+results.reorder <- reorder(results_original, type="row")
+results.reorder$out_parlist
 #> $mu
 #>        mu_1        mu_2        mu_3 
 #>  0.00000000  0.13787191 -0.06928604 
@@ -161,8 +162,8 @@ results.reorder$parlist.out
 
 ## Run reorder type "column" to reorder based on column cluster effects,
 ## in decreasing order
-results.reorder <- reorder(results.original, type="column", decreasing=TRUE)
-results.reorder$parlist.out
+results.reorder <- reorder(results_original, type="column", decreasing=TRUE)
+results.reorder$out_parlist
 #> $mu
 #>        mu_1        mu_2        mu_3 
 #>  0.00000000  0.13787191 -0.06928604 
@@ -183,8 +184,8 @@ results.reorder$parlist.out
 ## Run reorder type "row" to reorder based on row and column cluster effects,
 ## with row effects in increasing order and column effects in decreasing
 ## order
-results.reorder <- reorder(results.original, type="both", decreasing=c(FALSE,TRUE))
-results.reorder$parlist.out
+results.reorder <- reorder(results_original, type="both", decreasing=c(FALSE,TRUE))
+results.reorder$out_parlist
 #> $mu
 #>        mu_1        mu_2        mu_3 
 #>  0.00000000  0.13787191 -0.06928604 

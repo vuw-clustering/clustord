@@ -13,10 +13,10 @@ keywords: `ROWCLUST` and `COLCLUST` include row or column clusters, and
 
 You have to convert the data matrix to long-format **before
 clustering**, using the
-[`mat2df()`](https://vuw-clustering.github.io/clustord/reference/mat2df.md)
+[`mat_to_df()`](https://vuw-clustering.github.io/clustord/reference/mat_to_df.md)
 function. **After clustering**, perform model selection using AIC or BIC
 in the `criteria` part of the output. Examine the **parameter
-estimates** within the `parlist.out` part of the output. **Positive**
+estimates** within the `out_parlist` part of the output. **Positive**
 parameter estimates increase the chances of getting **higher** ordinal
 responses, whereas **negative** parameter estimates increase the chances
 of getting **lower** ordinal responses.
@@ -24,15 +24,15 @@ of getting **lower** ordinal responses.
 You can include covariates in the clustering, and they can be numerical
 or categorical, just like predictors in a regression model. Add these as
 inputs to
-[`mat2df()`](https://vuw-clustering.github.io/clustord/reference/mat2df.md)
+[`mat_to_df()`](https://vuw-clustering.github.io/clustord/reference/mat_to_df.md)
 to make the object for clustering. Use the covariate names in the
 formula like in [`lm()`](https://rdrr.io/r/stats/lm.html) or
 [`glm()`](https://rdrr.io/r/stats/glm.html).
 
-Check the algorithm has converged using `EM.status$converged` in the
+Check the algorithm has converged using `EMstatus$converged` in the
 output object, and if it has not, try increasing the number of random
 starting points using `nstarts` or increase the maximum number of EM
-iterations using the `EM.control = list(EMcycles = X)` input, where X is
+iterations using the `control_EM = list(maxiter = X)` input, where X is
 the number of iterations you want.
 
 `clustord` can fit two kinds of ordinal models. “POM”, the
@@ -229,17 +229,17 @@ The long-form also incorporates any covariates linked to the responses.
 We will discuss these more later.
 
 `clustord` provides a function,
-[`mat2df()`](https://vuw-clustering.github.io/clustord/reference/mat2df.md),
+[`mat_to_df()`](https://vuw-clustering.github.io/clustord/reference/mat_to_df.md),
 to carry out the conversion to the long form data frame:
 
 ``` r
-long.df <- mat2df(df)
+long_df <- mat_to_df(df)
 ```
 
-    ## Warning in mat2df(df): Removing 4 entries for which Y is NA.
+    ## Warning in mat_to_df(df): Removing 4 entries for which Y is NA.
 
 ``` r
-head(long.df)
+head(long_df)
 ```
 
     ##   Y ROW COL
@@ -334,14 +334,13 @@ these models in more detail later, and for now we’ll use the
 proportional-odds model, which is the most widely-used and simplest
 ordinal model.
 
-The third and fourth input arguments are `nclus.row` and `nclus.column`,
-which are used to define the number of row and/or column clusters. While
-we are doing row clustering, we will only specify `nclus.row` and we
-will choose to fit 2 clusters. `clustord` can only fit a specified
-number of clusters, and later we will discuss how to select the best
-number of clusters.
+The third and fourth input arguments are `RG` and `CG`, which are used
+to define the number of row and/or column clusters. While we are doing
+row clustering, we will only specify `RG` and we will choose to fit 2
+clusters. `clustord` can only fit a specified number of clusters, and
+later we will discuss how to select the best number of clusters.
 
-The fifth input argument is `long.df`, which is asking for the long form
+The fifth input argument is `long_df`, which is asking for the long form
 data frame we prepared earlier. So, leaving all the rest of the
 arguments at their default values, we fit the basic row clustering model
 to our dataset:
@@ -349,8 +348,7 @@ to our dataset:
 ``` r
 set.seed(2)
 fit_rowclust_only <- clustord(Y ~ ROWCLUST,
-    "POM", nclus.row = 2, long.df = long.df,
-    verbose = FALSE)
+    "POM", RG = 2, long_df = long_df, verbose = FALSE)
 ```
 
 This also uses the option `verbose=FALSE` which displays reduced output
@@ -367,7 +365,7 @@ algorithm settings for more detail).
 Once the fit is completed we should first check that it has converged:
 
 ``` r
-fit_rowclust_only$EM.status$converged
+fit_rowclust_only$EMstatus$converged
 ```
 
     ## [1] TRUE
@@ -375,7 +373,8 @@ fit_rowclust_only$EM.status$converged
 Then we can look at the probabilities of cluster membership:
 
 ``` r
-round(fit_rowclust_only$ppr, 2)
+round(fit_rowclust_only$row_cluster_probs,
+    2)
 ```
 
     ##       [,1] [,2]
@@ -390,7 +389,7 @@ round(fit_rowclust_only$ppr, 2)
     ##  [9,] 1.00 0.00
     ## [10,] 1.00 0.00
     ## [11,] 1.00 0.00
-    ## [12,] 0.96 0.04
+    ## [12,] 0.43 0.57
     ## [13,] 1.00 0.00
     ## [14,] 1.00 0.00
     ## [15,] 1.00 0.00
@@ -404,25 +403,25 @@ round(fit_rowclust_only$ppr, 2)
     ## [23,] 1.00 0.00
     ## [24,] 1.00 0.00
     ## [25,] 1.00 0.00
-    ## [26,] 1.00 0.00
+    ## [26,] 0.99 0.01
     ## [27,] 1.00 0.00
     ## [28,] 1.00 0.00
     ## [29,] 1.00 0.00
     ## [30,] 1.00 0.00
     ## [31,] 1.00 0.00
-    ## [32,] 1.00 0.00
+    ## [32,] 0.97 0.03
     ## [33,] 0.00 1.00
     ## [34,] 1.00 0.00
     ## [35,] 1.00 0.00
     ## [36,] 1.00 0.00
     ## [37,] 1.00 0.00
-    ## [38,] 0.94 0.06
+    ## [38,] 0.45 0.55
     ## [39,] 1.00 0.00
     ## [40,] 1.00 0.00
     ## [41,] 1.00 0.00
     ## [42,] 1.00 0.00
     ## [43,] 1.00 0.00
-    ## [44,] 1.00 0.00
+    ## [44,] 0.98 0.02
     ## [45,] 1.00 0.00
     ## [46,] 1.00 0.00
     ## [47,] 1.00 0.00
@@ -443,7 +442,7 @@ round(fit_rowclust_only$ppr, 2)
     ## [62,] 1.00 0.00
     ## [63,] 1.00 0.00
     ## [64,] 1.00 0.00
-    ## [65,] 1.00 0.00
+    ## [65,] 0.99 0.01
     ## [66,] 1.00 0.00
     ## [67,] 0.00 1.00
     ## [68,] 1.00 0.00
@@ -455,7 +454,7 @@ round(fit_rowclust_only$ppr, 2)
     ## [74,] 1.00 0.00
     ## [75,] 1.00 0.00
     ## [76,] 1.00 0.00
-    ## [77,] 1.00 0.00
+    ## [77,] 0.98 0.02
     ## [78,] 1.00 0.00
     ## [79,] 1.00 0.00
     ## [80,] 1.00 0.00
@@ -471,17 +470,17 @@ assign individuals to clusters, but those are not implemented within
 `clustord`).
 
 ``` r
-fit_rowclust_only$RowClusterMembers
+fit_rowclust_only$row_cluster_members
 ```
 
     ## [[1]]
-    ##  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 18 19 20 21 22 23 24 25 26
-    ## [26] 27 28 29 30 31 32 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52
-    ## [51] 53 54 55 56 57 58 59 60 62 63 64 65 66 68 69 70 71 72 73 74 75 76 77 78 79
-    ## [76] 80 81 82
+    ##  [1]  1  2  3  4  5  6  7  8  9 10 11 13 14 15 16 18 19 20 21 22 23 24 25 26 27
+    ## [26] 28 29 30 31 32 34 35 36 37 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54
+    ## [51] 55 56 57 58 59 60 62 63 64 65 66 68 69 70 71 72 73 74 75 76 77 78 79 80 81
+    ## [76] 82
     ## 
     ## [[2]]
-    ## [1] 17 33 61 67
+    ## [1] 12 17 33 38 61 67
 
 For each cluster, a vector of row numbers in that cluster is provided.
 In this instance, only four individuals have been allocated to the
@@ -492,10 +491,11 @@ each cluster (each mixing proportion is the mean of the posterior
 probabilities for membership of that cluster across all the rows).
 
 ``` r
-round(fit_rowclust_only$pi.out, 2)
+round(fit_rowclust_only$row_cluster_proportions,
+    2)
 ```
 
-    ## [1] 0.95 0.05
+    ## [1] 0.94 0.06
 
 So only about 5% of the rows are in the second cluster, which matches
 what we saw from the cluster memberships.
@@ -509,11 +509,11 @@ the `.out` parameter values that are the final ones at the end of the
 algorithm, so the `.out` values are the ones we want:
 
 ``` r
-fit_rowclust_only$parlist.out$rowc
+fit_rowclust_only$out_parlist$rowc
 ```
 
     ##    rowc_1    rowc_2 
-    ##  1.732987 -1.732987
+    ##  1.384354 -1.384354
 
 **Positive** values of the row cluster parameters increase the
 probability of getting **higher** ordinal categories, and **negative**
@@ -527,7 +527,7 @@ We can also check this against the mean value of responses for
 individuals in the first and second clusters:
 
 ``` r
-boxplot(split(rowMeans(df), fit_rowclust_only$RowClusters),
+boxplot(split(rowMeans(df), fit_rowclust_only$row_clusters),
     "Mean response values across all questions for each individual",
     names = c("Cluster 1", "Cluster 2"))
 ```
@@ -589,7 +589,7 @@ We will fit this model using the same model type as before, POM:
 ``` r
 set.seed(3)
 fit_rowclust_cols <- clustord(Y ~ ROWCLUST +
-    COL, "POM", nclus.row = 2, long.df = long.df,
+    COL, "POM", RG = 2, long_df = long_df,
     verbose = FALSE)
 ```
 
@@ -599,7 +599,7 @@ Again, once the fit is completed we should first check that it has
 converged:
 
 ``` r
-fit_rowclust_cols$EM.status$converged
+fit_rowclust_cols$EMstatus$converged
 ```
 
     ## [1] TRUE
@@ -607,7 +607,8 @@ fit_rowclust_cols$EM.status$converged
 Then we can look at the probabilities of cluster membership:
 
 ``` r
-round(fit_rowclust_cols$ppr, 2)
+round(fit_rowclust_cols$row_cluster_probs,
+    2)
 ```
 
     ##       [,1] [,2]
@@ -619,28 +620,28 @@ round(fit_rowclust_cols$ppr, 2)
     ##  [6,] 0.05 0.95
     ##  [7,] 0.00 1.00
     ##  [8,] 0.13 0.87
-    ##  [9,] 0.54 0.46
+    ##  [9,] 0.52 0.48
     ## [10,] 0.00 1.00
     ## [11,] 0.03 0.97
     ## [12,] 1.00 0.00
     ## [13,] 0.00 1.00
     ## [14,] 0.00 1.00
-    ## [15,] 0.99 0.01
+    ## [15,] 0.98 0.02
     ## [16,] 0.98 0.02
     ## [17,] 1.00 0.00
     ## [18,] 0.01 0.99
     ## [19,] 0.01 0.99
-    ## [20,] 0.97 0.03
+    ## [20,] 0.96 0.04
     ## [21,] 0.17 0.83
-    ## [22,] 0.44 0.56
+    ## [22,] 0.43 0.57
     ## [23,] 0.01 0.99
-    ## [24,] 0.91 0.09
+    ## [24,] 0.90 0.10
     ## [25,] 0.93 0.07
     ## [26,] 0.99 0.01
     ## [27,] 0.99 0.01
     ## [28,] 0.96 0.04
     ## [29,] 0.01 0.99
-    ## [30,] 0.95 0.05
+    ## [30,] 0.94 0.06
     ## [31,] 0.01 0.99
     ## [32,] 1.00 0.00
     ## [33,] 1.00 0.00
@@ -655,22 +656,22 @@ round(fit_rowclust_cols$ppr, 2)
     ## [42,] 0.10 0.90
     ## [43,] 0.14 0.86
     ## [44,] 0.96 0.04
-    ## [45,] 0.77 0.23
+    ## [45,] 0.75 0.25
     ## [46,] 0.00 1.00
-    ## [47,] 0.96 0.04
-    ## [48,] 0.96 0.04
+    ## [47,] 0.95 0.05
+    ## [48,] 0.95 0.05
     ## [49,] 0.13 0.87
     ## [50,] 0.00 1.00
     ## [51,] 0.01 0.99
     ## [52,] 0.00 1.00
     ## [53,] 0.01 0.99
-    ## [54,] 0.56 0.44
+    ## [54,] 0.54 0.46
     ## [55,] 0.97 0.03
     ## [56,] 0.15 0.85
-    ## [57,] 0.96 0.04
+    ## [57,] 0.95 0.05
     ## [58,] 0.00 1.00
     ## [59,] 0.03 0.97
-    ## [60,] 0.54 0.46
+    ## [60,] 0.52 0.48
     ## [61,] 1.00 0.00
     ## [62,] 0.00 1.00
     ## [63,] 0.00 1.00
@@ -679,18 +680,18 @@ round(fit_rowclust_cols$ppr, 2)
     ## [66,] 0.00 1.00
     ## [67,] 1.00 0.00
     ## [68,] 0.07 0.93
-    ## [69,] 0.86 0.14
+    ## [69,] 0.85 0.15
     ## [70,] 0.99 0.01
     ## [71,] 0.02 0.98
     ## [72,] 0.00 1.00
-    ## [73,] 0.45 0.55
+    ## [73,] 0.44 0.56
     ## [74,] 0.96 0.04
-    ## [75,] 0.55 0.45
-    ## [76,] 0.19 0.81
+    ## [75,] 0.54 0.46
+    ## [76,] 0.20 0.80
     ## [77,] 0.99 0.01
     ## [78,] 0.05 0.95
-    ## [79,] 0.25 0.75
-    ## [80,] 0.30 0.70
+    ## [79,] 0.24 0.76
+    ## [80,] 0.29 0.71
     ## [81,] 0.02 0.98
     ## [82,] 0.00 1.00
 
@@ -702,7 +703,7 @@ If we assign to clusters based on highest probability, let’s see the
 lists of cluster members:
 
 ``` r
-fit_rowclust_cols$RowClusterMembers
+fit_rowclust_cols$row_cluster_members
 ```
 
     ## [[1]]
@@ -719,11 +720,11 @@ others, we end up with a more evenly split pair of clusters.
 Now let’s look at the parameter values for each cluster:
 
 ``` r
-fit_rowclust_cols$parlist.out$rowc
+fit_rowclust_cols$out_parlist$rowc
 ```
 
     ##     rowc_1     rowc_2 
-    ## -0.8935557  0.8935557
+    ## -0.8748916  0.8748916
 
 In this fit, the first cluster has a negative row cluster effect,
 i.e. the individuals will tend to provide lower category responses, and
@@ -744,7 +745,7 @@ Again, let’s check the mean value of responses for individuals in the
 first and second clusters:
 
 ``` r
-boxplot(split(rowMeans(df), fit_rowclust_cols$RowClusters),
+boxplot(split(rowMeans(df), fit_rowclust_cols$row_clusters),
     "Mean response values across all questions for each individual",
     names = c("Cluster 1", "Cluster 2"))
 ```
@@ -758,12 +759,12 @@ responses in Cluster 1 vs. Cluster 2.
 Now let’s also check the column effect parameters:
 
 ``` r
-round(fit_rowclust_cols$parlist.out$col,
+round(fit_rowclust_cols$out_parlist$col,
     2)
 ```
 
-    ##    Q1    Q2    Q3    Q4    Q5    Q6    Q7    Q8    Q9   Q10   Q11   Q12 
-    ##  6.80 -1.43 -2.79 -3.18 -0.62  0.84 -0.36  1.05  1.17  0.69 -1.72 -0.45
+    ##  col1  col2  col3  col4  col5  col6  col7  col8  col9 col10 col11 col12 
+    ##  6.65 -1.41 -2.71 -3.10 -0.61  0.82 -0.37  1.02  1.14  0.68 -1.67 -0.44
 
 You can see that the first column parameter, for Q1, is much higher than
 the others, which matches what we observed in the data, i.e. the much
@@ -847,8 +848,8 @@ Y ~ ROWCLUST * COL
 ``` r
 set.seed(1)
 fit_rowclust_cols_interact <- clustord(Y ~
-    ROWCLUST * COL, "POM", nclus.row = 2,
-    long.df = long.df, verbose = FALSE)
+    ROWCLUST * COL, "POM", RG = 2, long_df = long_df,
+    verbose = FALSE)
 ```
 
 ##### Checking the output
@@ -857,78 +858,79 @@ Again, once the fit is completed we should first check that it has
 converged:
 
 ``` r
-fit_rowclust_cols_interact$EM.status$converged
+fit_rowclust_cols_interact$EMstatus$converged
 ```
 
-    ## [1] TRUE
+    ## [1] FALSE
 
 Then we can look at the probabilities of cluster membership:
 
 ``` r
-round(fit_rowclust_cols_interact$ppr, 2)
+round(fit_rowclust_cols_interact$row_cluster_probs,
+    2)
 ```
 
     ##       [,1] [,2]
-    ##  [1,] 0.89 0.11
+    ##  [1,] 0.99 0.01
     ##  [2,] 1.00 0.00
     ##  [3,] 1.00 0.00
     ##  [4,] 1.00 0.00
     ##  [5,] 1.00 0.00
     ##  [6,] 1.00 0.00
     ##  [7,] 1.00 0.00
-    ##  [8,] 0.96 0.04
-    ##  [9,] 0.24 0.76
+    ##  [8,] 0.98 0.02
+    ##  [9,] 0.80 0.20
     ## [10,] 1.00 0.00
     ## [11,] 1.00 0.00
     ## [12,] 0.00 1.00
     ## [13,] 1.00 0.00
     ## [14,] 1.00 0.00
-    ## [15,] 0.00 1.00
-    ## [16,] 0.00 1.00
+    ## [15,] 0.02 0.98
+    ## [16,] 0.01 0.99
     ## [17,] 0.00 1.00
     ## [18,] 1.00 0.00
     ## [19,] 1.00 0.00
-    ## [20,] 0.00 1.00
-    ## [21,] 0.40 0.60
-    ## [22,] 0.06 0.94
+    ## [20,] 0.01 0.99
+    ## [21,] 0.85 0.15
+    ## [22,] 0.37 0.63
     ## [23,] 1.00 0.00
-    ## [24,] 0.07 0.93
+    ## [24,] 0.44 0.56
     ## [25,] 0.00 1.00
     ## [26,] 0.00 1.00
-    ## [27,] 0.01 0.99
-    ## [28,] 0.00 1.00
+    ## [27,] 0.04 0.96
+    ## [28,] 0.02 0.98
     ## [29,] 1.00 0.00
-    ## [30,] 0.12 0.88
+    ## [30,] 0.63 0.37
     ## [31,] 1.00 0.00
     ## [32,] 0.00 1.00
     ## [33,] 0.00 1.00
     ## [34,] 1.00 0.00
     ## [35,] 1.00 0.00
     ## [36,] 0.00 1.00
-    ## [37,] 0.00 1.00
+    ## [37,] 0.07 0.93
     ## [38,] 0.00 1.00
-    ## [39,] 0.99 0.01
+    ## [39,] 1.00 0.00
     ## [40,] 1.00 0.00
     ## [41,] 1.00 0.00
-    ## [42,] 0.99 0.01
+    ## [42,] 1.00 0.00
     ## [43,] 1.00 0.00
     ## [44,] 0.00 1.00
-    ## [45,] 0.23 0.77
+    ## [45,] 0.84 0.16
     ## [46,] 1.00 0.00
-    ## [47,] 0.29 0.71
-    ## [48,] 0.02 0.98
-    ## [49,] 0.99 0.01
+    ## [47,] 0.82 0.18
+    ## [48,] 0.07 0.93
+    ## [49,] 1.00 0.00
     ## [50,] 1.00 0.00
     ## [51,] 1.00 0.00
     ## [52,] 1.00 0.00
     ## [53,] 1.00 0.00
-    ## [54,] 0.39 0.61
-    ## [55,] 0.05 0.95
-    ## [56,] 0.49 0.51
-    ## [57,] 0.08 0.92
+    ## [54,] 0.72 0.28
+    ## [55,] 0.22 0.78
+    ## [56,] 0.85 0.15
+    ## [57,] 0.42 0.58
     ## [58,] 1.00 0.00
     ## [59,] 1.00 0.00
-    ## [60,] 0.22 0.78
+    ## [60,] 0.75 0.25
     ## [61,] 0.00 1.00
     ## [62,] 1.00 0.00
     ## [63,] 1.00 0.00
@@ -936,50 +938,51 @@ round(fit_rowclust_cols_interact$ppr, 2)
     ## [65,] 0.00 1.00
     ## [66,] 1.00 0.00
     ## [67,] 0.00 1.00
-    ## [68,] 0.99 0.01
-    ## [69,] 0.03 0.97
-    ## [70,] 0.01 0.99
+    ## [68,] 1.00 0.00
+    ## [69,] 0.18 0.82
+    ## [70,] 0.08 0.92
     ## [71,] 1.00 0.00
     ## [72,] 1.00 0.00
-    ## [73,] 0.08 0.92
-    ## [74,] 0.00 1.00
-    ## [75,] 0.99 0.01
-    ## [76,] 0.98 0.02
+    ## [73,] 0.39 0.61
+    ## [74,] 0.01 0.99
+    ## [75,] 1.00 0.00
+    ## [76,] 0.99 0.01
     ## [77,] 0.00 1.00
-    ## [78,] 0.99 0.01
-    ## [79,] 0.94 0.06
-    ## [80,] 0.65 0.35
-    ## [81,] 0.94 0.06
+    ## [78,] 1.00 0.00
+    ## [79,] 0.99 0.01
+    ## [80,] 0.92 0.08
+    ## [81,] 0.99 0.01
     ## [82,] 1.00 0.00
 
 Let’s see the lists of cluster members:
 
 ``` r
-fit_rowclust_cols_interact$RowClusterMembers
+fit_rowclust_cols_interact$row_cluster_members
 ```
 
     ## [[1]]
-    ##  [1]  1  2  3  4  5  6  7  8 10 11 13 14 18 19 23 29 31 34 35 39 40 41 42 43 46
-    ## [26] 49 50 51 52 53 58 59 62 63 64 66 68 71 72 75 76 78 79 80 81 82
+    ##  [1]  1  2  3  4  5  6  7  8  9 10 11 13 14 18 19 21 23 29 30 31 34 35 39 40 41
+    ## [26] 42 43 45 46 47 49 50 51 52 53 54 56 58 59 60 62 63 64 66 68 71 72 75 76 78
+    ## [51] 79 80 81 82
     ## 
     ## [[2]]
-    ##  [1]  9 12 15 16 17 20 21 22 24 25 26 27 28 30 32 33 36 37 38 44 45 47 48 54 55
-    ## [26] 56 57 60 61 65 67 69 70 73 74 77
+    ##  [1] 12 15 16 17 20 22 24 25 26 27 28 32 33 36 37 38 44 48 55 57 61 65 67 69 70
+    ## [26] 73 74 77
 
 Now let’s look at the parameter values for each cluster:
 
 ``` r
-fit_rowclust_cols_interact$parlist.out$rowc
+fit_rowclust_cols_interact$out_parlist$rowc
 ```
 
     ##     rowc_1     rowc_2 
-    ##  0.9715144 -0.9715144
+    ##  0.9917545 -0.9917545
 
 And again, we can show that the first cluster has higher response values
 than the second cluster, although now there appears to be more overlap:
 
 ``` r
-boxplot(split(rowMeans(df), fit_rowclust_cols_interact$RowClusters),
+boxplot(split(rowMeans(df), fit_rowclust_cols_interact$row_clusters),
     "Mean response values across all questions for each individual",
     names = c("Cluster 1", "Cluster 2"))
 ```
@@ -989,12 +992,12 @@ boxplot(split(rowMeans(df), fit_rowclust_cols_interact$RowClusters),
 Now let’s check the column effect parameters:
 
 ``` r
-round(fit_rowclust_cols_interact$parlist.out$col,
+round(fit_rowclust_cols_interact$out_parlist$col,
     2)
 ```
 
-    ##    Q1    Q2    Q3    Q4    Q5    Q6    Q7    Q8    Q9   Q10   Q11   Q12 
-    ##  7.14 -1.48 -2.91 -3.30 -0.72  1.10 -0.40  1.10  1.27  0.63 -1.84 -0.59
+    ##  col1  col2  col3  col4  col5  col6  col7  col8  col9 col10 col11 col12 
+    ##  7.38 -1.39 -2.88 -3.33 -0.71  1.29 -0.43  1.00  1.29  0.41 -1.93 -0.69
 
 When we include the interaction terms, the column effects have become a
 bit larger than before for some columns.
@@ -1002,19 +1005,19 @@ bit larger than before for some columns.
 We can then finally check the interaction effects:
 
 ``` r
-round(fit_rowclust_cols_interact$parlist.out$rowc_col,
+round(fit_rowclust_cols_interact$out_parlist$rowc_col,
     2)
 ```
 
-    ##         Q1    Q2    Q3    Q4    Q5    Q6    Q7    Q8    Q9   Q10   Q11   Q12
-    ## [1,] -1.18 -0.19 -0.12 -0.18  0.46 -0.94  0.29  0.33  0.14  0.64  0.11  0.63
-    ## [2,]  1.18  0.19  0.12  0.18 -0.46  0.94 -0.29 -0.33 -0.14 -0.64 -0.11 -0.63
+    ##      col1  col2  col3  col4  col5  col6  col7  col8  col9 col10 col11 col12
+    ## [1,] -1.3 -0.24 -0.11 -0.03  0.29 -0.95  0.17  0.33 -0.03  0.84  0.35  0.68
+    ## [2,]  1.3  0.24  0.11  0.03 -0.29  0.95 -0.17 -0.33  0.03 -0.84 -0.35 -0.68
 
 We can plot these interaction terms against each other to see the
 interaction effects:
 
 ``` r
-rowc_col <- fit_rowclust_cols_interact$parlist.out$rowc_col
+rowc_col <- fit_rowclust_cols_interact$out_parlist$rowc_col
 plot(rowc_col[1, ], type = "b", col = "black",
     lwd = 2, ylim = c(-1.3, 1.3))
 lines(rowc_col[2, ], lty = 2, col = "blue",
@@ -1050,37 +1053,37 @@ those for now.
 fit_rowclust_only$criteria$AIC
 ```
 
-    ## [1] 3854.975
+    ## [1] 3856.914
 
 ``` r
 fit_rowclust_cols$criteria$AIC
 ```
 
-    ## [1] 2258.931
+    ## [1] 2259.279
 
 ``` r
 fit_rowclust_cols_interact$criteria$AIC
 ```
 
-    ## [1] 2216.477
+    ## [1] 2219.851
 
 ``` r
 fit_rowclust_only$criteria$BIC
 ```
 
-    ## [1] 3894.108
+    ## [1] 3896.047
 
 ``` r
 fit_rowclust_cols$criteria$BIC
 ```
 
-    ## [1] 2351.872
+    ## [1] 2352.22
 
 ``` r
 fit_rowclust_cols_interact$criteria$BIC
 ```
 
-    ## [1] 2363.225
+    ## [1] 2366.6
 
 For both AIC and BIC, lower values indicate better goodness-of-fit. So
 we can see that according to AIC the third model, with column effects
@@ -1169,26 +1172,26 @@ where the main part of the linear predictor is `colc`, the column
 cluster effect.
 
 We use the case-sensitive keyword `COLCLUST` in the formula, and we need
-to set `nclus.column` instead of `nclus.row`:
+to set `CG` instead of `RG`:
 
 ``` r
 set.seed(1)
 fit_colclust_only <- clustord(Y ~ COLCLUST,
-    model = "POM", nclus.column = 2, long.df = long.df,
+    model = "POM", CG = 2, long_df = long_df,
     verbose = FALSE)
 ```
 
 In column clustering, the mixing proportions are renamed
 $\{\kappa_{c}\}$ (to avoid confusion when performing biclustering with
 both sets of mixing proportions, as seen below). The cluster membership
-probabilities are stored in the output as `ppc` not `ppr` and the
-cluster memberships are named `ColumnClusters` not `RowClusters` and the
-lists of cluster members are named `ColumnClusterMembers` not
-`RowClusterMembers`.
+probabilities are stored in the output as `ppc` not `row_cluster_probs`
+and the cluster memberships are named `column_clusters` not
+`row_clusters` and the lists of cluster members are named
+`column_cluster_members` not `row_cluster_members`.
 
 ``` r
 # Convergence
-fit_colclust_only$EM.status$converged
+fit_colclust_only$EMstatus$converged
 ```
 
     ## [1] TRUE
@@ -1196,7 +1199,8 @@ fit_colclust_only$EM.status$converged
 ``` r
 # Column cluster membership
 # probabilities
-round(fit_colclust_only$ppc, 2)
+round(fit_colclust_only$column_cluster_probs,
+    2)
 ```
 
     ##       [,1] [,2]
@@ -1215,7 +1219,7 @@ round(fit_colclust_only$ppc, 2)
 
 ``` r
 # Members of each column cluster
-fit_colclust_only$ColumnClusterMembers
+fit_colclust_only$column_cluster_members
 ```
 
     ## [[1]]
@@ -1226,18 +1230,19 @@ fit_colclust_only$ColumnClusterMembers
 
 ``` r
 # Mixing proportions
-round(fit_colclust_only$kappa.out, 2)
+round(fit_colclust_only$column_cluster_proportions,
+    2)
 ```
 
     ## [1] 0.42 0.58
 
 ``` r
 # Parameters
-fit_colclust_only$parlist.out$colc
+fit_colclust_only$out_parlist$colc
 ```
 
     ##    colc_1    colc_2 
-    ##  1.201864 -1.201864
+    ##  1.206868 -1.206868
 
 The algorithm has converged, all of the columns are firmly allocated to
 one or other of the clusters, and they are roughly equally split between
@@ -1260,13 +1265,13 @@ This uses the case-sensitive keyword `ROW`.
 ``` r
 set.seed(1)
 fit_colclust_rows <- clustord(Y ~ COLCLUST +
-    ROW, model = "POM", nclus.column = 2,
-    long.df = long.df, verbose = FALSE)
+    ROW, model = "POM", CG = 2, long_df = long_df,
+    verbose = FALSE)
 ```
 
 ``` r
 # Convergence
-fit_colclust_rows$EM.status$converged
+fit_colclust_rows$EMstatus$converged
 ```
 
     ## [1] TRUE
@@ -1274,7 +1279,8 @@ fit_colclust_rows$EM.status$converged
 ``` r
 # Column cluster membership
 # probabilities
-round(fit_colclust_rows$ppc, 2)
+round(fit_colclust_rows$column_cluster_probs,
+    2)
 ```
 
     ##       [,1] [,2]
@@ -1293,7 +1299,7 @@ round(fit_colclust_rows$ppc, 2)
 
 ``` r
 # Members of each column cluster
-fit_colclust_rows$ColumnClusterMembers
+fit_colclust_rows$column_cluster_members
 ```
 
     ## [[1]]
@@ -1304,38 +1310,39 @@ fit_colclust_rows$ColumnClusterMembers
 
 ``` r
 # Mixing proportions
-round(fit_colclust_rows$kappa.out, 2)
+round(fit_colclust_rows$column_cluster_proportions,
+    2)
 ```
 
     ## [1] 0.08 0.92
 
 ``` r
 # Parameters
-fit_colclust_rows$parlist.out$colc
+fit_colclust_rows$out_parlist$colc
 ```
 
     ##    colc_1    colc_2 
-    ##  3.493738 -3.493738
+    ##  3.503594 -3.503594
 
 ``` r
-round(fit_colclust_rows$parlist.out$row,
+round(fit_colclust_rows$out_parlist$row,
     2)
 ```
 
-    ##   ID1   ID2   ID3   ID4   ID5   ID6   ID7   ID8   ID9  ID10  ID11  ID12  ID13 
-    ## -0.01  0.62  0.65  1.07  1.08  0.40  1.87  0.08 -0.20  0.92  0.28 -1.33  1.74 
-    ##  ID14  ID15  ID16  ID17  ID18  ID19  ID20  ID21  ID22  ID23  ID24  ID25  ID26 
-    ##  1.02 -0.74 -0.71 -2.73  0.30  0.50 -0.47  0.01 -0.18  0.49 -0.52 -0.45 -0.71 
-    ##  ID27  ID28  ID29  ID30  ID31  ID32  ID33  ID34  ID35  ID36  ID37  ID38  ID39 
-    ## -0.72 -0.48  0.26 -0.60  0.55 -0.92 -3.00  0.57  0.97 -1.05 -0.88 -1.86  0.50 
-    ##  ID40  ID41  ID42  ID43  ID44  ID45  ID46  ID47  ID48  ID49  ID50  ID51  ID52 
-    ##  0.80  0.51  0.08  0.13 -0.69 -0.39  0.57 -0.74 -0.53  0.23  1.25  0.71  1.11 
-    ##  ID53  ID54  ID55  ID56  ID57  ID58  ID59  ID60  ID61  ID62  ID63  ID64  ID65 
-    ##  0.65  0.00 -0.64  0.01 -0.53  0.65  0.42 -0.10 -3.71  2.96  2.27  0.75 -0.71 
-    ##  ID66  ID67  ID68  ID69  ID70  ID71  ID72  ID73  ID74  ID75  ID76  ID77  ID78 
-    ##  1.20 -4.27  0.17 -0.30 -0.73  0.27  1.48 -0.18 -0.48 -0.15  0.05 -0.84  0.18 
-    ##  ID79  ID80  ID81  ID82 
-    ##  0.00  0.05  0.55  1.63
+    ##  row1  row2  row3  row4  row5  row6  row7  row8  row9 row10 row11 row12 row13 
+    ## -0.03  0.60  0.65  1.06  1.07  0.39  1.88  0.06 -0.21  0.93  0.27 -1.33  1.76 
+    ## row14 row15 row16 row17 row18 row19 row20 row21 row22 row23 row24 row25 row26 
+    ##  1.03 -0.74 -0.72 -2.70  0.31  0.49 -0.48  0.02 -0.21  0.47 -0.54 -0.43 -0.72 
+    ## row27 row28 row29 row30 row31 row32 row33 row34 row35 row36 row37 row38 row39 
+    ## -0.72 -0.49  0.25 -0.61  0.54 -0.92 -2.99  0.54  0.97 -1.05 -0.88 -1.89  0.50 
+    ## row40 row41 row42 row43 row44 row45 row46 row47 row48 row49 row50 row51 row52 
+    ##  0.78  0.50  0.06  0.12 -0.71 -0.36  0.56 -0.74 -0.53  0.23  1.23  0.69  1.09 
+    ## row53 row54 row55 row56 row57 row58 row59 row60 row61 row62 row63 row64 row65 
+    ##  0.63  0.00 -0.66  0.02 -0.53  0.65  0.40 -0.09 -3.64  2.98  2.29  0.73 -0.74 
+    ## row66 row67 row68 row69 row70 row71 row72 row73 row74 row75 row76 row77 row78 
+    ##  1.19 -3.92  0.17 -0.30 -0.71  0.27  1.48 -0.20 -0.49 -0.17  0.04 -0.84  0.20 
+    ## row79 row80 row81 row82 
+    ## -0.01  0.03  0.54  1.62
 
 We see that in this case, column clustering with individual row effects
 has detected that column Q1 is different to all the other columns, so
@@ -1357,15 +1364,15 @@ formula notation.
 ``` r
 set.seed(1)
 fit_colclust_rows_interact <- clustord(Y ~
-    COLCLUST * ROW, model = "POM", nclus.column = 2,
-    long.df = long.df, verbose = FALSE)
+    COLCLUST * ROW, model = "POM", CG = 2,
+    long_df = long_df, verbose = FALSE)
 ```
 
 The interaction terms added are named `colc_row`.
 
 ``` r
 # Convergence
-fit_colclust_rows_interact$EM.status$converged
+fit_colclust_rows_interact$EMstatus$converged
 ```
 
     ## [1] TRUE
@@ -1373,7 +1380,8 @@ fit_colclust_rows_interact$EM.status$converged
 ``` r
 # Column cluster membership
 # probabilities
-round(fit_colclust_rows_interact$ppc, 2)
+round(fit_colclust_rows_interact$column_cluster_probs,
+    2)
 ```
 
     ##       [,1] [,2]
@@ -1392,7 +1400,7 @@ round(fit_colclust_rows_interact$ppc, 2)
 
 ``` r
 # Members of each column cluster
-fit_colclust_rows_interact$ColumnClusterMembers
+fit_colclust_rows_interact$column_cluster_members
 ```
 
     ## [[1]]
@@ -1403,7 +1411,7 @@ fit_colclust_rows_interact$ColumnClusterMembers
 
 ``` r
 # Mixing proportions
-round(fit_colclust_rows_interact$kappa.out,
+round(fit_colclust_rows_interact$column_cluster_proportions,
     2)
 ```
 
@@ -1411,60 +1419,60 @@ round(fit_colclust_rows_interact$kappa.out,
 
 ``` r
 # Parameters
-fit_colclust_rows_interact$parlist.out$colc
+fit_colclust_rows_interact$out_parlist$colc
 ```
 
     ##    colc_1    colc_2 
-    ##  10.49554 -10.49554
+    ##  7.878388 -7.878388
 
 ``` r
-round(fit_colclust_rows_interact$parlist.out$row,
+round(fit_colclust_rows_interact$out_parlist$row,
     2)
 ```
 
-    ##    ID1    ID2    ID3    ID4    ID5    ID6    ID7    ID8    ID9   ID10   ID11 
-    ##  -3.89   3.58   3.63  -3.61   3.87  -3.76   4.30  -3.86  -3.92   3.78  -7.83 
-    ##   ID12   ID13   ID14   ID15   ID16   ID17   ID18   ID19   ID20   ID21   ID22 
-    ##   2.64   4.23   3.83  -4.06   2.93   1.79  -3.83   3.54   3.03   3.28   3.18 
-    ##   ID23   ID24   ID25   ID26   ID27   ID28   ID29   ID30   ID31   ID32   ID33 
-    ##  -7.73  -8.26   3.00   2.92  -4.05   3.02  -3.83  -4.00   3.57   2.83  -5.90 
-    ##   ID34   ID35   ID36   ID37   ID38   ID39   ID40   ID41   ID42   ID43   ID44 
-    ##  -3.77   3.81  -4.19  -8.45  -4.76   3.54   3.72  -3.78  -7.94  -8.60   2.90 
-    ##   ID45   ID46   ID47   ID48   ID49   ID50   ID51   ID52   ID53   ID54   ID55 
-    ##  -3.96  -7.67  -8.35  -3.99  -3.80   3.97   3.66   3.88  -3.71   3.25  -4.02 
-    ##   ID56   ID57   ID58   ID59   ID60   ID61   ID62   ID63   ID64   ID65   ID66 
-    ##   3.28  -3.99   3.63  -3.79   3.20 -10.20   4.85   4.49  -7.53   2.92  -7.27 
-    ##   ID67   ID68   ID69   ID70   ID71   ID72   ID73   ID74   ID75   ID76   ID77 
-    ##  -2.78  -3.85   3.12  -4.06  -7.79  -7.17   3.18   3.02  -8.72   3.25   2.86 
-    ##   ID78   ID79   ID80   ID81   ID82 
-    ##  -3.86  -3.87   3.29   3.57  84.06
+    ##   row1   row2   row3   row4   row5   row6   row7   row8   row9  row10  row11 
+    ##  -3.08   0.73   0.74  -2.94   0.85  -3.04   1.17  -3.07  -3.09   0.81  -5.14 
+    ##  row12  row13  row14  row15  row16  row17  row18  row19  row20  row21  row22 
+    ##   0.42   1.10   0.83  -3.12   0.53  -0.30  -3.06   0.71   0.55   0.64   0.62 
+    ##  row23  row24  row25  row26  row27  row28  row29  row30  row31  row32  row33 
+    ##  -5.04  -5.60   0.56   0.52  -3.11   0.55  -3.05  -3.11   0.72   0.50  -4.03 
+    ##  row34  row35  row36  row37  row38  row39  row40  row41  row42  row43  row44 
+    ##  -3.04   0.82  -3.15  -5.83  -3.38   0.71   0.79  -3.04  -5.25  -5.98   0.54 
+    ##  row45  row46  row47  row48  row49  row50  row51  row52  row53  row54  row55 
+    ##  -3.10  -4.97  -5.70  -3.09  -3.05   0.91   0.75   0.87  -3.01   0.61  -3.11 
+    ##  row56  row57  row58  row59  row60  row61  row62  row63  row64  row65  row66 
+    ##   0.64  -3.09   0.74  -3.04   0.60  -7.33   1.80   1.37  -4.88   0.52  -4.66 
+    ##  row67  row68  row69  row70  row71  row72  row73  row74  row75  row76  row77 
+    ##  -4.77  -3.06   0.58  -3.11  -5.11  -4.55   0.62   0.55  -6.08   0.62   0.51 
+    ##  row78  row79  row80  row81  row82 
+    ##  -3.07  -3.08   0.62   0.72 133.91
 
 ``` r
-round(fit_colclust_rows_interact$parlist.out$colc_row,
+round(fit_colclust_rows_interact$out_parlist$colc_row,
     2)
 ```
 
-    ##        ID1   ID2   ID3 ID4   ID5   ID6   ID7   ID8   ID9  ID10  ID11  ID12 ID13
-    ## [1,] -4.09  3.01  2.96  -5  2.75 -4.51  2.33 -4.19 -3.91  2.83 -8.46  4.14  2.4
-    ## [2,]  4.09 -3.01 -2.96   5 -2.75  4.51 -2.33  4.19  3.91 -2.83  8.46 -4.14 -2.4
-    ##       ID14  ID15  ID16  ID17  ID18  ID19 ID20 ID21  ID22  ID23  ID24  ID25
-    ## [1,]  2.78 -3.44  3.75  4.98 -4.38  3.04  3.6  3.3  3.41 -8.56 -8.03  3.63
-    ## [2,] -2.78  3.44 -3.75 -4.98  4.38 -3.04 -3.6 -3.3 -3.41  8.56  8.03 -3.63
-    ##       ID26  ID27  ID28  ID29  ID30  ID31  ID32  ID33  ID34 ID35  ID36  ID37
-    ## [1,]  3.75 -3.46  3.61 -4.35 -3.56  3.01  3.88 -2.57 -4.61  2.8 -3.21 -7.84
-    ## [2,] -3.75  3.46 -3.61  4.35  3.56 -3.01 -3.88  2.57  4.61 -2.8  3.21  7.84
-    ##       ID38  ID39  ID40  ID41  ID42 ID43  ID44  ID45  ID46  ID47  ID48  ID49
-    ## [1,] -2.85  3.04  2.88 -4.56 -8.35 -9.1  3.77 -3.74 -8.62 -7.94 -3.62 -4.36
-    ## [2,]  2.85 -3.04 -2.88  4.56  8.35  9.1 -3.77  3.74  8.62  7.94  3.62  4.36
-    ##       ID50  ID51  ID52  ID53  ID54  ID55 ID56  ID57  ID58 ID59  ID60  ID61
-    ## [1,]  2.66  2.94  2.75 -4.72  3.32 -3.53  3.3 -3.62  2.96 -4.5  3.39 -6.09
-    ## [2,] -2.66 -2.94 -2.75  4.72 -3.32  3.53 -3.3  3.62 -2.96  4.5 -3.39  6.09
-    ##       ID62  ID63  ID64  ID65  ID66  ID67  ID68  ID69  ID70 ID71  ID72  ID73
-    ## [1,]  1.73  2.11 -8.76  3.75 -9.02  9.36 -4.27  3.49 -3.44 -8.5 -9.12  3.41
-    ## [2,] -1.73 -2.11  8.76 -3.75  9.02 -9.36  4.27 -3.49  3.44  8.5  9.12 -3.41
-    ##       ID74  ID75  ID76  ID77  ID78  ID79  ID80  ID81   ID82
-    ## [1,]  3.61 -8.98  3.32  3.84 -4.27 -4.11  3.29  3.01  82.36
-    ## [2,] -3.61  8.98 -3.32 -3.84  4.27  4.11 -3.29 -3.01 -82.36
+    ##       row1  row2  row3  row4  row5  row6  row7 row8  row9 row10 row11 row12
+    ## [1,] -3.29  0.13  0.09 -4.34 -0.25 -3.75 -0.77 -3.4 -3.08 -0.13 -5.77  1.93
+    ## [2,]  3.29 -0.13 -0.09  4.34  0.25  3.75  0.77  3.4  3.08  0.13  5.77 -1.93
+    ##      row13 row14 row15 row16 row17 row18 row19 row20 row21 row22 row23 row24
+    ## [1,] -0.69  -0.2  -2.5  1.36  3.06 -3.63  0.21  1.13  0.64  0.83 -5.88 -5.38
+    ## [2,]  0.69   0.2   2.5 -1.36 -3.06  3.63 -0.21 -1.13 -0.64 -0.83  5.88  5.38
+    ##      row25 row26 row27 row28 row29 row30 row31 row32 row33 row34 row35 row36
+    ## [1,]  1.12  1.36 -2.53  1.15 -3.59 -2.67  0.17  1.56  -0.6 -3.88 -0.17  -2.2
+    ## [2,] -1.12 -1.36  2.53 -1.15  3.59  2.67 -0.17 -1.56   0.6  3.88  0.17   2.2
+    ##      row37 row38 row39 row40 row41 row42 row43 row44 row45 row46 row47 row48
+    ## [1,] -5.23 -1.51  0.21 -0.06 -3.83 -5.67 -6.52  1.35 -2.88 -5.95 -5.32 -2.74
+    ## [2,]  5.23  1.51 -0.21  0.06  3.83  5.67  6.52 -1.35  2.88  5.95  5.32  2.74
+    ##      row49 row50 row51 row52 row53 row54 row55 row56 row57 row58 row59 row60
+    ## [1,] -3.58 -0.37  0.04 -0.26 -3.98  0.69 -2.63  0.64 -2.74  0.09 -3.75  0.78
+    ## [2,]  3.58  0.37 -0.04  0.26  3.98 -0.69  2.63 -0.64  2.74 -0.09  3.75 -0.78
+    ##      row61 row62 row63 row64 row65 row66 row67 row68 row69 row70 row71 row72
+    ## [1,] -3.46 -1.27 -0.98 -6.05  1.36 -6.33  7.26  -3.5  0.96 -2.51  -5.8 -6.49
+    ## [2,]  3.46  1.27  0.98  6.05 -1.36  6.33 -7.26   3.5 -0.96  2.51   5.8  6.49
+    ##      row73 row74 row75 row76 row77 row78 row79 row80 row81   row82
+    ## [1,]  0.83  1.15 -6.37  0.65   1.5 -3.49 -3.32  0.63  0.17  132.21
+    ## [2,] -0.83 -1.15  6.37 -0.65  -1.5  3.49  3.32 -0.63 -0.17 -132.21
 
 Adding interactions between individual rows and column clusters has not
 changed the cluster memberships, compared with the model without
@@ -1476,7 +1484,7 @@ We can plot these interaction terms against each other to see the
 interaction effects:
 
 ``` r
-colc_row <- fit_colclust_rows_interact$parlist.out$colc_row
+colc_row <- fit_colclust_rows_interact$out_parlist$colc_row
 plot(colc_row[1, ], type = "b", col = "black",
     lwd = 2, ylim = c(-85, 85), xlab = "Subject",
     ylab = "Cluster interaction effect")
@@ -1497,7 +1505,7 @@ last subject, but other than that the cluster responses are broadly
 similar for most subjects. Zooming in on the rest of the plot:
 
 ``` r
-colc_row <- fit_colclust_rows_interact$parlist.out$colc_row
+colc_row <- fit_colclust_rows_interact$out_parlist$colc_row
 plot(colc_row[1, ], type = "b", col = "black",
     lwd = 2, ylim = c(-10, 10), xlab = "Subject",
     ylab = "Cluster interaction effect")
@@ -1524,37 +1532,37 @@ the column clustering models.
 fit_colclust_only$criteria$AIC
 ```
 
-    ## [1] 2792.468
+    ## [1] 2792.49
 
 ``` r
 fit_colclust_rows$criteria$AIC
 ```
 
-    ## [1] 2572.39
+    ## [1] 2572.58
 
 ``` r
 fit_colclust_rows_interact$criteria$AIC
 ```
 
-    ## [1] 2558.218
+    ## [1] 2563.148
 
 ``` r
 fit_colclust_only$criteria$BIC
 ```
 
-    ## [1] 2831.601
+    ## [1] 2831.623
 
 ``` r
 fit_colclust_rows$criteria$BIC
 ```
 
-    ## [1] 3007.744
+    ## [1] 3007.934
 
 ``` r
 fit_colclust_rows_interact$criteria$BIC
 ```
 
-    ## [1] 3389.795
+    ## [1] 3394.724
 
 In this instance, AIC selects the model with individual row effects and
 interactions, though it has very similar AIC to the model with
@@ -1607,14 +1615,14 @@ and allow you to get a more accurate fit for your column clusters.
 The simpler biclustering model is the one that only has row and column
 cluster effects, without any interactions between them. This model has
 `rowc + colc` as the main part of the linear predictor. We have to
-define both `nclus.row` and `nclus.column`.
+define both `RG` and `CG`.
 
 ``` r
 set.seed(4)
 fit_biclust <- clustord(Y ~ ROWCLUST + COLCLUST,
-    model = "POM", nclus.row = 2, nclus.column = 2,
-    long.df = long.df, verbose = FALSE)
-converged <- fit_biclust$EM.status$converged
+    model = "POM", RG = 2, CG = 2, long_df = long_df,
+    verbose = FALSE)
+converged <- fit_biclust$EMstatus$converged
 ```
 
 By default, the biclustering model fits row clustering and column
@@ -1630,110 +1638,110 @@ column clusters, so we use an entropy-based approximation to calculate
 it.
 
 In biclustering, we will obtain cluster membership proportions for both
-row and column clusters (`ppr` and `ppc`), and the mixing proportions
-for both ($\{\pi_{r}\}$ and $\{\kappa_{c}\}$). The maximum-probability
-cluster memberships are named `RowClusters` and `ColumnClusters` and the
-lists of cluster memberships are `RowClusterMembers` and
-`ColumnClusterMembers`.
+row and column clusters (`row_cluster_probs` and `ppc`), and the mixing
+proportions for both ($\{\pi_{r}\}$ and $\{\kappa_{c}\}$). The
+maximum-probability cluster memberships are named `row_clusters` and
+`column_clusters` and the lists of cluster memberships are
+`row_cluster_members` and `column_cluster_members`.
 
 ``` r
 # Convergence
-fit_biclust$EM.status$converged
+fit_biclust$EMstatus$converged
 ```
 
     ## [1] FALSE
 
 ``` r
 # Cluster membership probabilities
-round(fit_biclust$ppr, 2)
+round(fit_biclust$row_cluster_probs, 2)
 ```
 
     ##       [,1] [,2]
-    ##  [1,] 0.99 0.01
-    ##  [2,] 0.97 0.03
-    ##  [3,] 0.98 0.02
+    ##  [1,] 0.98 0.02
+    ##  [2,] 0.96 0.04
+    ##  [3,] 0.96 0.04
     ##  [4,] 1.00 0.00
     ##  [5,] 1.00 0.00
     ##  [6,] 0.99 0.01
     ##  [7,] 1.00 0.00
-    ##  [8,] 0.99 0.01
-    ##  [9,] 0.97 0.03
-    ## [10,] 1.00 0.00
-    ## [11,] 1.00 0.00
+    ##  [8,] 0.98 0.02
+    ##  [9,] 0.95 0.05
+    ## [10,] 0.99 0.01
+    ## [11,] 0.99 0.01
     ## [12,] 0.01 0.99
     ## [13,] 1.00 0.00
     ## [14,] 0.99 0.01
-    ## [15,] 0.79 0.21
-    ## [16,] 0.15 0.85
+    ## [15,] 0.72 0.28
+    ## [16,] 0.12 0.88
     ## [17,] 0.00 1.00
-    ## [18,] 1.00 0.00
-    ## [19,] 0.95 0.05
-    ## [20,] 0.31 0.69
-    ## [21,] 0.86 0.14
-    ## [22,] 0.76 0.24
+    ## [18,] 0.99 0.01
+    ## [19,] 0.92 0.08
+    ## [20,] 0.25 0.75
+    ## [21,] 0.80 0.20
+    ## [22,] 0.67 0.33
     ## [23,] 1.00 0.00
-    ## [24,] 0.93 0.07
-    ## [25,] 0.39 0.61
-    ## [26,] 0.11 0.89
-    ## [27,] 0.58 0.42
-    ## [28,] 0.21 0.79
+    ## [24,] 0.90 0.10
+    ## [25,] 0.31 0.69
+    ## [26,] 0.09 0.91
+    ## [27,] 0.48 0.52
+    ## [28,] 0.16 0.84
     ## [29,] 1.00 0.00
-    ## [30,] 0.75 0.25
-    ## [31,] 0.98 0.02
-    ## [32,] 0.06 0.94
+    ## [30,] 0.67 0.33
+    ## [31,] 0.97 0.03
+    ## [32,] 0.05 0.95
     ## [33,] 0.00 1.00
     ## [34,] 1.00 0.00
-    ## [35,] 1.00 0.00
-    ## [36,] 0.50 0.50
-    ## [37,] 0.70 0.30
+    ## [35,] 0.99 0.01
+    ## [36,] 0.41 0.59
+    ## [37,] 0.61 0.39
     ## [38,] 0.01 0.99
-    ## [39,] 0.95 0.05
-    ## [40,] 0.99 0.01
+    ## [39,] 0.92 0.08
+    ## [40,] 0.98 0.02
     ## [41,] 1.00 0.00
     ## [42,] 0.99 0.01
-    ## [43,] 0.99 0.01
-    ## [44,] 0.06 0.94
-    ## [45,] 0.94 0.06
+    ## [43,] 0.97 0.03
+    ## [44,] 0.05 0.95
+    ## [45,] 0.91 0.09
     ## [46,] 1.00 0.00
-    ## [47,] 0.88 0.12
-    ## [48,] 0.80 0.20
-    ## [49,] 0.99 0.01
-    ## [50,] 1.00 0.00
-    ## [51,] 0.97 0.03
+    ## [47,] 0.82 0.18
+    ## [48,] 0.72 0.28
+    ## [49,] 0.98 0.02
+    ## [50,] 0.99 0.01
+    ## [51,] 0.95 0.05
     ## [52,] 0.99 0.01
     ## [53,] 1.00 0.00
-    ## [54,] 0.53 0.47
-    ## [55,] 0.74 0.26
-    ## [56,] 0.86 0.14
-    ## [57,] 0.80 0.20
-    ## [58,] 0.98 0.02
+    ## [54,] 0.43 0.57
+    ## [55,] 0.65 0.35
+    ## [56,] 0.80 0.20
+    ## [57,] 0.72 0.28
+    ## [58,] 0.96 0.04
     ## [59,] 0.99 0.01
-    ## [60,] 0.59 0.41
+    ## [60,] 0.50 0.50
     ## [61,] 0.00 1.00
     ## [62,] 1.00 0.00
     ## [63,] 1.00 0.00
     ## [64,] 1.00 0.00
-    ## [65,] 0.11 0.89
+    ## [65,] 0.09 0.91
     ## [66,] 1.00 0.00
     ## [67,] 0.00 1.00
-    ## [68,] 0.99 0.01
-    ## [69,] 0.43 0.57
-    ## [70,] 0.73 0.27
-    ## [71,] 0.99 0.01
+    ## [68,] 0.98 0.02
+    ## [69,] 0.35 0.65
+    ## [70,] 0.64 0.36
+    ## [71,] 0.98 0.02
     ## [72,] 1.00 0.00
-    ## [73,] 0.76 0.24
-    ## [74,] 0.21 0.79
-    ## [75,] 0.96 0.04
-    ## [76,] 0.83 0.17
-    ## [77,] 0.12 0.88
+    ## [73,] 0.67 0.33
+    ## [74,] 0.16 0.84
+    ## [75,] 0.93 0.07
+    ## [76,] 0.76 0.24
+    ## [77,] 0.09 0.91
     ## [78,] 0.99 0.01
     ## [79,] 0.99 0.01
-    ## [80,] 0.76 0.24
-    ## [81,] 0.98 0.02
+    ## [80,] 0.68 0.32
+    ## [81,] 0.97 0.03
     ## [82,] 1.00 0.00
 
 ``` r
-round(fit_biclust$ppc, 2)
+round(fit_biclust$column_cluster_probs, 2)
 ```
 
     ##       [,1] [,2]
@@ -1752,19 +1760,19 @@ round(fit_biclust$ppc, 2)
 
 ``` r
 # Members of each cluster
-fit_biclust$RowClusterMembers
+fit_biclust$row_cluster_members
 ```
 
     ## [[1]]
-    ##  [1]  1  2  3  4  5  6  7  8  9 10 11 13 14 15 18 19 21 22 23 24 27 29 30 31 34
-    ## [26] 35 37 39 40 41 42 43 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 62 63
-    ## [51] 64 66 68 70 71 72 73 75 76 78 79 80 81 82
+    ##  [1]  1  2  3  4  5  6  7  8  9 10 11 13 14 15 18 19 21 22 23 24 29 30 31 34 35
+    ## [26] 37 39 40 41 42 43 45 46 47 48 49 50 51 52 53 55 56 57 58 59 62 63 64 66 68
+    ## [51] 70 71 72 73 75 76 78 79 80 81 82
     ## 
     ## [[2]]
-    ##  [1] 12 16 17 20 25 26 28 32 33 36 38 44 61 65 67 69 74 77
+    ##  [1] 12 16 17 20 25 26 27 28 32 33 36 38 44 54 60 61 65 67 69 74 77
 
 ``` r
-fit_biclust$ColumnClusterMembers
+fit_biclust$column_cluster_members
 ```
 
     ## [[1]]
@@ -1775,31 +1783,33 @@ fit_biclust$ColumnClusterMembers
 
 ``` r
 # Mixing proportions
-round(fit_biclust$pi.out, 2)
+round(fit_biclust$row_cluster_proportions,
+    2)
 ```
 
-    ## [1] 0.75 0.25
+    ## [1] 0.73 0.27
 
 ``` r
-round(fit_biclust$kappa.out, 2)
+round(fit_biclust$column_cluster_proportions,
+    2)
 ```
 
     ## [1] 0.58 0.42
 
 ``` r
 # Parameters
-fit_biclust$parlist.out$rowc
+fit_biclust$out_parlist$rowc
 ```
 
-    ##     rowc_1     rowc_2 
-    ##  0.8698192 -0.8698192
+    ##    rowc_1    rowc_2 
+    ##  0.839018 -0.839018
 
 ``` r
-fit_biclust$parlist.out$colc
+fit_biclust$out_parlist$colc
 ```
 
     ##    colc_1    colc_2 
-    ## -1.183548  1.183548
+    ## -1.190796  1.190796
 
 The cluster probabilities are very close to 1 and 0 for both row and
 column clusters. The row clusters identified are the same small and big
@@ -1818,22 +1828,22 @@ element of the linear predictor, `rowc_colc`.
 ``` r
 set.seed(3)
 fit_biclust_interact <- clustord(Y ~ ROWCLUST *
-    COLCLUST, model = "POM", nclus.row = 2,
-    nclus.column = 2, long.df = long.df,
-    verbose = FALSE)
-converged <- fit_biclust_interact$EM.status$converged
+    COLCLUST, model = "POM", RG = 2, CG = 2,
+    long_df = long_df, verbose = FALSE)
+converged <- fit_biclust_interact$EMstatus$converged
 ```
 
 ``` r
 # Convergence
-fit_biclust_interact$EM.status$converged
+fit_biclust_interact$EMstatus$converged
 ```
 
     ## [1] TRUE
 
 ``` r
 # Cluster membership probabilities
-round(fit_biclust_interact$ppr, 2)
+round(fit_biclust_interact$row_cluster_probs,
+    2)
 ```
 
     ##       [,1] [,2]
@@ -1848,7 +1858,7 @@ round(fit_biclust_interact$ppr, 2)
     ##  [9,] 1.00 0.00
     ## [10,] 1.00 0.00
     ## [11,] 1.00 0.00
-    ## [12,] 0.99 0.01
+    ## [12,] 0.97 0.03
     ## [13,] 1.00 0.00
     ## [14,] 1.00 0.00
     ## [15,] 1.00 0.00
@@ -1874,7 +1884,7 @@ round(fit_biclust_interact$ppr, 2)
     ## [35,] 1.00 0.00
     ## [36,] 1.00 0.00
     ## [37,] 1.00 0.00
-    ## [38,] 0.88 0.12
+    ## [38,] 0.78 0.22
     ## [39,] 1.00 0.00
     ## [40,] 1.00 0.00
     ## [41,] 1.00 0.00
@@ -1921,7 +1931,8 @@ round(fit_biclust_interact$ppr, 2)
     ## [82,] 1.00 0.00
 
 ``` r
-round(fit_biclust_interact$ppc, 2)
+round(fit_biclust_interact$column_cluster_probs,
+    2)
 ```
 
     ##       [,1] [,2]
@@ -1940,7 +1951,7 @@ round(fit_biclust_interact$ppc, 2)
 
 ``` r
 # Members of each cluster
-fit_biclust_interact$RowClusterMembers
+fit_biclust_interact$row_cluster_members
 ```
 
     ## [[1]]
@@ -1953,7 +1964,7 @@ fit_biclust_interact$RowClusterMembers
     ## [1] 17 33 61 67
 
 ``` r
-fit_biclust_interact$ColumnClusterMembers
+fit_biclust_interact$column_cluster_members
 ```
 
     ## [[1]]
@@ -1964,40 +1975,42 @@ fit_biclust_interact$ColumnClusterMembers
 
 ``` r
 # Mixing proportions
-round(fit_biclust_interact$pi.out, 2)
+round(fit_biclust_interact$row_cluster_proportions,
+    2)
 ```
 
     ## [1] 0.95 0.05
 
 ``` r
-round(fit_biclust_interact$kappa.out, 2)
+round(fit_biclust_interact$column_cluster_proportions,
+    2)
 ```
 
     ## [1] 0.67 0.33
 
 ``` r
 # Parameters
-fit_biclust_interact$parlist.out$rowc
+fit_biclust_interact$out_parlist$rowc
 ```
 
     ##    rowc_1    rowc_2 
-    ##  3.001568 -3.001568
+    ##  2.120596 -2.120596
 
 ``` r
-fit_biclust_interact$parlist.out$colc
+fit_biclust_interact$out_parlist$colc
 ```
 
     ##    colc_1    colc_2 
-    ##  2.328658 -2.328658
+    ##  1.533107 -1.533107
 
 ``` r
-round(fit_biclust_interact$parlist.out$rowc_colc,
+round(fit_biclust_interact$out_parlist$rowc_colc,
     2)
 ```
 
     ##       [,1]  [,2]
-    ## [1,] -1.07  1.07
-    ## [2,]  1.07 -1.07
+    ## [1,] -0.28  0.28
+    ## [2,]  0.28 -0.28
 
 The models with and without interactions have detected similar
 clustering structures. This is reassuring, because it indicates that
@@ -2017,61 +2030,61 @@ Let’s assess the row clustering vs. biclustering comparison.
 fit_rowclust_only$criteria$AIC
 ```
 
-    ## [1] 3854.975
+    ## [1] 3856.914
 
 ``` r
 fit_rowclust_cols$criteria$AIC
 ```
 
-    ## [1] 2258.931
+    ## [1] 2259.279
 
 ``` r
 fit_rowclust_cols_interact$criteria$AIC
 ```
 
-    ## [1] 2216.477
+    ## [1] 2219.851
 
 ``` r
 fit_biclust$criteria$AIC
 ```
 
-    ## [1] 2951.194
+    ## [1] 3165.548
 
 ``` r
 fit_biclust_interact$criteria$AIC
 ```
 
-    ## [1] 2692.541
+    ## [1] 2734.886
 
 ``` r
 fit_rowclust_only$criteria$BIC
 ```
 
-    ## [1] 3894.108
+    ## [1] 3896.047
 
 ``` r
 fit_rowclust_cols$criteria$BIC
 ```
 
-    ## [1] 2351.872
+    ## [1] 2352.22
 
 ``` r
 fit_rowclust_cols_interact$criteria$BIC
 ```
 
-    ## [1] 2363.225
+    ## [1] 2366.6
 
 ``` r
 fit_biclust$criteria$BIC
 ```
 
-    ## [1] 3000.11
+    ## [1] 3214.464
 
 ``` r
 fit_biclust_interact$criteria$BIC
 ```
 
-    ## [1] 2746.349
+    ## [1] 2788.694
 
 AIC selects the row clustering model with individual column effects and
 interactions as the best, with the row clustering without interactions a
@@ -2091,61 +2104,61 @@ Now let’s compare column clustering and biclustering.
 fit_colclust_only$criteria$AIC
 ```
 
-    ## [1] 2792.468
+    ## [1] 2792.49
 
 ``` r
 fit_colclust_rows$criteria$AIC
 ```
 
-    ## [1] 2572.39
+    ## [1] 2572.58
 
 ``` r
 fit_colclust_rows_interact$criteria$AIC
 ```
 
-    ## [1] 2558.218
+    ## [1] 2563.148
 
 ``` r
 fit_biclust$criteria$AIC
 ```
 
-    ## [1] 2951.194
+    ## [1] 3165.548
 
 ``` r
 fit_biclust_interact$criteria$AIC
 ```
 
-    ## [1] 2692.541
+    ## [1] 2734.886
 
 ``` r
 fit_colclust_only$criteria$BIC
 ```
 
-    ## [1] 2831.601
+    ## [1] 2831.623
 
 ``` r
 fit_colclust_rows$criteria$BIC
 ```
 
-    ## [1] 3007.744
+    ## [1] 3007.934
 
 ``` r
 fit_colclust_rows_interact$criteria$BIC
 ```
 
-    ## [1] 3389.795
+    ## [1] 3394.724
 
 ``` r
 fit_biclust$criteria$BIC
 ```
 
-    ## [1] 3000.11
+    ## [1] 3214.464
 
 ``` r
 fit_biclust_interact$criteria$BIC
 ```
 
-    ## [1] 2746.349
+    ## [1] 2788.694
 
 Here we have a more nuanced picture. AIC is roughly similar for all five
 models, but best for the model with individual row effects and
@@ -2208,8 +2221,8 @@ algorithm is complex, so has many settings, but a handful of them are
 particularly important to understand for achieving good clustering
 results.
 
-The key parameters are `EMcycles` and `startEMcycles` inside the
-`EM.control` argument, and the `nstarts` argument. All of these are
+The key parameters are `maxiter` and `startmaxiter` inside the
+`control_EM` argument, and the `nstarts` argument. All of these are
 related.
 
 The EM algorithm works by iteratively improving on the parameter
@@ -2235,9 +2248,9 @@ effects and there are a lot of individual rows or columns, and
 especially if you are fitting interaction terms, then it would be a good
 idea to increase the number of random starts to 10 or 20.
 
-### `EMcycles` and `startEMcycles`
+### `maxiter` and `startmaxiter`
 
-`EMcycles`, one of the entries in the `EM.control` argument, is the
+`maxiter`, one of the entries in the `control_EM` argument, is the
 maximum number of EM iterations. In the examples above, we checked each
 time whether the EM algorithm had converged **before** looking at the
 rest of the output. If the algorithm has not converged, try running it
@@ -2250,25 +2263,25 @@ increasing the number of iterations, because lack of convergence means
 that it hit the upper limit on the number of iterations before it
 reached convergence.
 
-The default number of `EMcycles` is 50, so you could try 100, for
+The default number of `maxiter` is 50, so you could try 100, for
 example.
 
-`startEMcycles` is another setting in the `EM.control` argument, and
-this controls the number of EM iterations that the algorithm goes
-through for each random start. This is 5 by default, and it does **not**
-have to be very high. It takes a while for the EM algorithm to reach
-convergence, but it takes very few iterations for the algorithm to
-distinguish between different starting points. The differences between
-starting points are usually much bigger than the improvement that can be
-achieved in a few iterations.
+`startmaxiter` is another setting in the `control_EM` argument, and this
+controls the number of EM iterations that the algorithm goes through for
+each random start. This is 5 by default, and it does **not** have to be
+very high. It takes a while for the EM algorithm to reach convergence,
+but it takes very few iterations for the algorithm to distinguish
+between different starting points. The differences between starting
+points are usually much bigger than the improvement that can be achieved
+in a few iterations.
 
-The default number of `startEMcycles` is 5, but if you are using lots of
+The default number of `startmaxiter` is 5, but if you are using lots of
 random starts, e.g. at least 20, then you may want to change this value
 **down** to 2 or 3, for example, to save a bit of computing time.
 
-If you want to set `EMcycles` or `startEMcycles`, you have to input them
-as part of the `EM.control` argument, which is a list object. The
-`EM.control` list has other settings in it by default, but you do
+If you want to set `maxiter` or `startmaxiter`, you have to input them
+as part of the `control_EM` argument, which is a list object. The
+`control_EM` list has other settings in it by default, but you do
 **not** have to set these if you don’t want to; you can simply set the
 ones you want. This works the same way that the `control` argument in R
 works.
@@ -2280,8 +2293,8 @@ main iterations than the defaults:
 
 ``` r
 fit <- clustord(Y ~ ROWCLUST + COL, model = "POM",
-    nclus.row = 2, long.df = long.df, EM.control = list(startEMcycles = 2,
-        EMcycles = 100), nstarts = 10)
+    RG = 2, long_df = long_df, control_EM = list(startmaxiter = 2,
+        maxiter = 100), nstarts = 10)
 ```
 
 The rest of the settings are discussed in the *Advanced Settings*
@@ -2313,7 +2326,7 @@ covariate that gives the age of each survey respondent.
 If you want to use covariates, they have to be added to the long form
 data frame that will be used in the clustering. You can feed them in to
 the
-[`mat2df()`](https://vuw-clustering.github.io/clustord/reference/mat2df.md)
+[`mat_to_df()`](https://vuw-clustering.github.io/clustord/reference/mat_to_df.md)
 function along with the original data matrix, and that function will
 automatically add them to the long form data frame.
 
@@ -2322,29 +2335,29 @@ includes it in the long form data frame.
 
 If you are adding covariates for the **rows** of the data matrix,
 i.e. covariates that take different values for the different rows, then
-you need to supply them using the `xr.df` argument to
-[`mat2df()`](https://vuw-clustering.github.io/clustord/reference/mat2df.md).
+you need to supply them using the `xr_df` argument to
+[`mat_to_df()`](https://vuw-clustering.github.io/clustord/reference/mat_to_df.md).
 You can add as many covariates as you like, both numerical and
 categorical, just as if you were setting up a data frame for regression
 analysis. The
-[`mat2df()`](https://vuw-clustering.github.io/clustord/reference/mat2df.md)
+[`mat_to_df()`](https://vuw-clustering.github.io/clustord/reference/mat_to_df.md)
 function will handle converting any categorical covariates to dummy
 variables, just as [`lm()`](https://rdrr.io/r/stats/lm.html) and
 [`glm()`](https://rdrr.io/r/stats/glm.html) do.
 
 ``` r
-age.df <- data.frame(age = round(runif(nrow(df),
+age_df <- data.frame(age = round(runif(nrow(df),
     min = 20, max = 60)))
 
-long.df <- mat2df(df, xr.df = age.df)
+long_df <- mat_to_df(df, xr_df = age_df)
 ```
 
-    ## Warning in mat2df(df, xr.df = age.df): Removing 4 entries for which Y is NA.
+    ## Warning in mat_to_df(df, xr_df = age_df): Removing 4 entries for which Y is NA.
 
 If you are instead adding covariates for the **columns** of the data
 matrix, i.e. covariates that take different values for the different
-columns, then you need to supply them using the `xc.df` argument to
-[`mat2df()`](https://vuw-clustering.github.io/clustord/reference/mat2df.md),
+columns, then you need to supply them using the `xc_df` argument to
+[`mat_to_df()`](https://vuw-clustering.github.io/clustord/reference/mat_to_df.md),
 although again you can add as many numerical or categorical covariates
 as you like.
 
@@ -2353,14 +2366,15 @@ dataset, and adds that and the age covariate to the long form data
 frame.
 
 ``` r
-question.df <- data.frame(question = sample(c("Group A",
+question_df <- data.frame(question = sample(c("Group A",
     "Group B"), ncol(df), replace = TRUE))
 
-long.df <- mat2df(df, xr.df = age.df, xc.df = question.df)
+long_df <- mat_to_df(df, xr_df = age_df,
+    xc_df = question_df)
 ```
 
-    ## Warning in mat2df(df, xr.df = age.df, xc.df = question.df): Removing 4 entries
-    ## for which Y is NA.
+    ## Warning in mat_to_df(df, xr_df = age_df, xc_df = question_df): Removing 4
+    ## entries for which Y is NA.
 
 #### Fitting a model with covariates
 
@@ -2375,44 +2389,43 @@ had in their original data frames.
 
 ``` r
 fit_with_covariates <- clustord(Y ~ ROWCLUST +
-    age + question, model = "POM", nclus.row = 2,
-    long.df = long.df, verbose = FALSE)
+    age + question, model = "POM", RG = 2,
+    long_df = long_df, verbose = FALSE)
 ```
 
 ``` r
-fit_with_covariates$EM.status$converged
+fit_with_covariates$EMstatus$converged
 ```
 
-    ## [1] FALSE
+    ## [1] TRUE
 
 ``` r
-fit_with_covariates$RowClusterMembers
+fit_with_covariates$row_cluster_members
 ```
 
     ## [[1]]
-    ##  [1]  1  2  3  4  5  6  7  8  9 10 11 13 14 15 16 18 19 20 21 22 23 24 25 26 27
-    ## [26] 28 29 30 31 32 34 35 36 37 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54
-    ## [51] 55 56 57 58 59 60 62 63 64 65 66 68 69 70 71 72 73 74 75 76 77 78 79 80 81
-    ## [76] 82
+    ##  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 18 19 20 21 22 23 24 25 26
+    ## [26] 27 28 29 30 31 32 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52
+    ## [51] 53 54 55 56 57 58 59 60 62 63 64 65 66 68 69 70 71 72 73 74 75 76 77 78 79
+    ## [76] 80 81 82
     ## 
     ## [[2]]
-    ## [1] 12 17 33 38 61 67
+    ## [1] 17 33 61 67
 
 ``` r
-fit_with_covariates$parlist.out
+fit_with_covariates$out_parlist
 ```
 
     ## $mu
     ##       mu_1       mu_2       mu_3       mu_4       mu_5       mu_6 
-    ## -0.9972361  1.0423167  2.8071614  3.6728607  4.1871719 26.5198712 
+    ## -1.6540704  0.4263578  2.2790126  3.1782858  3.7519005 26.0845885 
     ## 
     ## $rowc
     ##    rowc_1    rowc_2 
-    ##  1.310333 -1.310333 
+    ##  1.707533 -1.707533 
     ## 
     ## $cov
-    ##        cov_l        cov_l 
-    ##  0.001709197 -0.956487126
+    ## [1] -0.005600079 -1.476779639
 
 Within the parameter output object are the $\{\mu_{k}\}$ parameters
 discussed below in the ordinal models section, and the row cluster
@@ -2496,7 +2509,7 @@ then a simple way to make them a bit more consistent is to relabel the
 parameters in increasing order of the cluster main effect. So if they’re
 row clusters, relabel them in order of increasing `rowc` values and if
 they’re column clusters, relabel them in order of increasing `colc`
-values from `...\$parlist.out`.
+values from `...\$out_parlist`.
 
 ## A note about notation
 
