@@ -43,7 +43,7 @@ Imports: Rcpp (>= 1.0.1),
          nnet,
          flexclust,
          methods
-LinkingTo: Rcpp, RcppArmadillo, RcppClock
+LinkingTo: Rcpp, RcppArmadillo
 Suggests: 
     knitr,
     formatR,
