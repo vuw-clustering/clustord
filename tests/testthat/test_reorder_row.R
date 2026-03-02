@@ -665,34 +665,34 @@ test_that("reordering row clustering results produces correct results.", {
     expect_equal(reord$out_parlist$col, orig$out_parlist$col)
     expect_equal(reord$out_parlist$cov, orig$out_parlist$cov)
 
-    expect_equal(reord$out_parlist$rowc, orig$out_parlist$rowc[c(3,2,1)])
-    expect_equal(reord$out_parlist$rowc_cov[,1], orig$out_parlist$rowc_cov[c(3,2,1),])
+    expect_equal(reord$out_parlist$rowc, orig$out_parlist$rowc[c(3,1,2)])
+    expect_equal(reord$out_parlist$rowc_cov[,1], orig$out_parlist$rowc_cov[c(3,1,2),])
 
-    expect_equal(reord$row_cluster_proportions, orig$row_cluster_proportions[c(3,2,1)])
+    expect_equal(reord$row_cluster_proportions, orig$row_cluster_proportions[c(3,1,2)])
 
-    reconstruct_out_parvec <- c(orig$out_parvec[1],-sum(orig$out_parvec[2:3]),orig$out_parvec[3],
-                             orig$out_parvec[c(6,5,4)],orig$out_parvec[7])
+    reconstruct_out_parvec <- c(orig$out_parvec[1],-sum(orig$out_parvec[2:3]),orig$out_parvec[2],
+                             orig$out_parvec[c(6,4,5)],orig$out_parvec[7])
     names(reconstruct_out_parvec)[2] <- "rowc_r"
     expect_equal(reord$out_parvec, reconstruct_out_parvec)
 
-    expect_equal(reord$row_cluster_probs, orig$row_cluster_probs[,c(3,2,1)])
+    expect_equal(reord$row_cluster_probs, orig$row_cluster_probs[,c(3,1,2)])
 
     expect_equal(match("1",reord$row_clusters),match("3",orig$row_clusters))
-    expect_equal(match("2",reord$row_clusters),match("2",orig$row_clusters))
-    expect_equal(match("3",reord$row_clusters),match("1",orig$row_clusters))
+    expect_equal(match("2",reord$row_clusters),match("1",orig$row_clusters))
+    expect_equal(match("3",reord$row_clusters),match("2",orig$row_clusters))
 
     expect_equal(reord$row_cluster_members[[1]], orig$row_cluster_members[[3]])
-    expect_equal(reord$row_cluster_members[[2]], orig$row_cluster_members[[2]])
-    expect_equal(reord$row_cluster_members[[3]], orig$row_cluster_members[[1]])
+    expect_equal(reord$row_cluster_members[[2]], orig$row_cluster_members[[1]])
+    expect_equal(reord$row_cluster_members[[3]], orig$row_cluster_members[[2]])
 
     expect_equal(reord$EMstatus$params_for_best_lli$mu, orig$EMstatus$params_for_best_lli$mu)
     expect_equal(reord$EMstatus$params_for_best_lli$col, orig$EMstatus$params_for_best_lli$col)
     expect_equal(reord$EMstatus$params_for_best_lli$cov, orig$EMstatus$params_for_best_lli$cov)
 
-    expect_equal(reord$EMstatus$params_for_best_lli$rowc, orig$EMstatus$params_for_best_lli$rowc[c(3,2,1)])
-    expect_equal(reord$EMstatus$params_for_best_lli$rowc_cov[,1], orig$EMstatus$params_for_best_lli$rowc_cov[c(3,2,1),])
+    expect_equal(reord$EMstatus$params_for_best_lli$rowc, orig$EMstatus$params_for_best_lli$rowc[c(3,1,2)])
+    expect_equal(reord$EMstatus$params_for_best_lli$rowc_cov[,1], orig$EMstatus$params_for_best_lli$rowc_cov[c(3,1,2),])
 
-    expect_equal(reord$EMstatus$params_every_iteration, orig$EMstatus$params_every_iteration[,c(1,4,3,2,7,6,5,8,11,10,9,12:13)])
+    expect_equal(reord$EMstatus$params_every_iteration, orig$EMstatus$params_every_iteration[,c(1,4,2,3,7,5,6,8,11,9,10,12:13)])
 
 
     ### Rows decreasing ----
@@ -702,27 +702,33 @@ test_that("reordering row clustering results produces correct results.", {
     expect_equal(reord$out_parlist$col, orig$out_parlist$col)
     expect_equal(reord$out_parlist$cov, orig$out_parlist$cov)
 
-    expect_equal(reord$out_parlist$rowc, orig$out_parlist$rowc)
-    expect_equal(reord$out_parlist$rowc_cov, orig$out_parlist$rowc_cov)
+    expect_equal(reord$out_parlist$rowc, orig$out_parlist$rowc[c(2,1,3)])
+    expect_equal(reord$out_parlist$rowc_cov[,1], orig$out_parlist$rowc_cov[c(2,1,3),])
 
-    expect_equal(reord$row_cluster_proportions, orig$row_cluster_proportions)
+    expect_equal(reord$row_cluster_proportions, orig$row_cluster_proportions[c(2,1,3)])
 
-    expect_equal(reord$out_parvec, orig$out_parvec)
+    reconstruct_out_parvec <- c(orig$out_parvec[1],orig$out_parvec[3],orig$out_parvec[2],
+                                orig$out_parvec[c(5,4,6)],orig$out_parvec[7])
+    expect_equal(reord$out_parvec, reconstruct_out_parvec)
 
-    expect_equal(reord$row_cluster_probs, orig$row_cluster_probs)
+    expect_equal(reord$row_cluster_probs, orig$row_cluster_probs[,c(2,1,3)])
 
-    expect_equal(reord$row_clusters,orig$row_clusters)
+    expect_equal(match("1",reord$row_clusters),match("2",orig$row_clusters))
+    expect_equal(match("2",reord$row_clusters),match("1",orig$row_clusters))
+    expect_equal(match("3",reord$row_clusters),match("3",orig$row_clusters))
 
-    expect_equal(reord$row_cluster_members, orig$row_cluster_members)
+    expect_equal(reord$row_cluster_members[[1]], orig$row_cluster_members[[2]])
+    expect_equal(reord$row_cluster_members[[2]], orig$row_cluster_members[[1]])
+    expect_equal(reord$row_cluster_members[[3]], orig$row_cluster_members[[3]])
 
     expect_equal(reord$EMstatus$params_for_best_lli$mu, orig$EMstatus$params_for_best_lli$mu)
     expect_equal(reord$EMstatus$params_for_best_lli$col, orig$EMstatus$params_for_best_lli$col)
     expect_equal(reord$EMstatus$params_for_best_lli$cov, orig$EMstatus$params_for_best_lli$cov)
 
-    expect_equal(reord$EMstatus$params_for_best_lli$rowc, orig$EMstatus$params_for_best_lli$rowc)
-    expect_equal(reord$EMstatus$params_for_best_lli$rowc_cov, orig$EMstatus$params_for_best_lli$rowc_cov)
+    expect_equal(reord$EMstatus$params_for_best_lli$rowc, orig$EMstatus$params_for_best_lli$rowc[c(2,1,3)])
+    expect_equal(reord$EMstatus$params_for_best_lli$rowc_cov[,1], orig$EMstatus$params_for_best_lli$rowc_cov[c(2,1,3),])
 
-    expect_equal(reord$EMstatus$params_every_iteration, orig$EMstatus$params_every_iteration)
+    expect_equal(reord$EMstatus$params_every_iteration, orig$EMstatus$params_every_iteration[,c(1,3,2,4,6,5,7,8,10,9,11,12:13)])
 
 })
 
