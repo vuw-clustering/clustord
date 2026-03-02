@@ -33,7 +33,10 @@ Check the algorithm has converged using `EMstatus$converged` in the
 output object, and if it has not, try increasing the number of random
 starting points using `nstarts` or increase the maximum number of EM
 iterations using the `control_EM = list(maxiter = X)` input, where X is
-the number of iterations you want.
+the number of iterations you want. If you have multiple cores in your
+machine, or access to a high-performance computing cluster, you can also
+use the `parallel_starts = TRUE` argument to run the random starts in
+parallel.
 
 `clustord` can fit two kinds of ordinal models. “POM”, the
 proportional-odds model, is the simplest, and the most widely used

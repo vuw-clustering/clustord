@@ -194,10 +194,10 @@ summary(fit)
 #>     subset = (time == 1))
 #> 
 #> Coefficients:
-#>              Value Std. Error t value   p value
-#> baseline  1.860974    0.43373  4.2906 1.782e-05
-#> sex       0.811524    0.52760  1.5381 1.240e-01
-#> age      -0.009104    0.02281 -0.3991 6.898e-01
+#>          Value   Std. Error t value p value
+#> baseline  1.8610  0.4337     4.2906  0.0000
+#> sex       0.8115  0.5276     1.5381  0.1240
+#> age      -0.0091  0.0228    -0.3991  0.6898
 #> 
 #> Intercepts mu:
 #>     Value   Std. Error t value p value
@@ -338,10 +338,10 @@ summary(fit_merged)
 #>     control = list(maxit = 5000), subset = (time == 1))
 #> 
 #> Coefficients:
-#>             Value Std. Error t value   p value
-#> baseline  1.84434    0.50364   3.662 0.0002502
-#> sex       0.79654    0.55684   1.430 0.1525835
-#> age      -0.02463    0.02356  -1.045 0.2959670
+#>          Value   Std. Error t value p value
+#> baseline  1.8443  0.5036     3.6620  0.0003
+#> sex       0.7965  0.5568     1.4305  0.1526
+#> age      -0.0246  0.0236    -1.0451  0.2960
 #> 
 #> Intercepts mu:
 #>       Value   Std. Error t value p value
@@ -487,7 +487,7 @@ The `effects` package in R can be used to plot the effects of different
 covariates. Read the package documentation for detailed information
 about it:
 
-<https://cran.r-project.org/web/packages/effects/index.html>
+<https://CRAN.R-project.org/package=effects>
 
 The package has been forked to provide a version modified to work with
 `clustord`. It still has all the existing functionality of `effects`, so

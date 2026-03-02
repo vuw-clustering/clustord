@@ -62,7 +62,7 @@
                         <h4 data-toc-skip class="author">Louise
 McMillan</h4>
             
-            <h4 data-toc-skip class="date">2026-02-14</h4>
+            <h4 data-toc-skip class="date">2026-03-02</h4>
       
 
       <div class="d-none name"><code>clustordTutorial.Rmd</code></div>
@@ -104,7 +104,10 @@ clustering. Use the covariate names in the formula like in
 try increasing the number of random starting points using
 <code>nstarts</code> or increase the maximum number of EM iterations
 using the <code>control_EM = list(maxiter = X)</code> input, where X is
-the number of iterations you want.</p>
+the number of iterations you want. If you have multiple cores in your
+machine, or access to a high-performance computing cluster, you can also
+use the <code>parallel_starts = TRUE</code> argument to run the random
+starts in parallel.</p>
 <p><code>clustord</code> can fit two kinds of ordinal models. “POM”, the
 proportional-odds model, is the simplest, and the most widely used
 ordinal model. “OSM”, the ordered stereotype model, is more flexible and
