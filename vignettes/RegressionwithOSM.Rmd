@@ -198,7 +198,7 @@ The Stereotype Model, i.e. the model fitted in `ordinalgmifs`, does not have thi
 
 The `effects` package in R can be used to plot the effects of different covariates. Read the package documentation for detailed information about it:
 
-https://cran.r-project.org/web/packages/effects/index.html
+https://CRAN.R-project.org/package=effects
 
 The package has been forked to provide a version modified to work with `clustord`. It still has all the existing functionality of `effects`, so can be used to plot effects for other types of models supported by `effects` (such as `lm`, `glm` and `polr`). 
 
