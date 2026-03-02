@@ -485,6 +485,7 @@ test_that("reordering row clustering results produces correct results.", {
 
 
     ## Binary results ----------------------------------------------------------
+    set.seed(50)
     long_df_sim <- data.frame(Y=factor(sample(1:2,n*p,replace=TRUE)),
                               ROW=rep(1:n,times=p),COL=rep(1:p,each=n))
     n <- 30
