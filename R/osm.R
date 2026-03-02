@@ -540,7 +540,11 @@ summary.osm <- function(object, digits = max(3, .Options$digits - 3),
     llev <- length(object$lev)
     cc <- c(coef(object), object$mu[-1L], object$phi[-c(1,llev)])
     pc <- length(coef(object))
-    coef <- matrix(0, pc+llev-1+llev-2, 6L, dimnames=list(names(cc),
+
+    # Set all values in coef matrix to NA to start with so that the excess
+    # t-value and p-value columns for the main coefficients will not appear to
+    # be genuine numerical values if the user displays the coefficients table
+    coef <- matrix(NA, pc+llev-1+llev-2, 6L, dimnames=list(names(cc),
                                                           c("Value", "Std. Error", "t value", "p value", "t value", "p value")))
     coef[, 1L] <- cc
     vc <- vcov(object)
@@ -593,7 +597,7 @@ print.summary.osm <- function(x, digits = x$digits, ...)
     llev <- length(x$lev)
     if(pc > 0) {
         cat("\nCoefficients:\n")
-        print(x$coefficients[seq_len(pc), 1:4 , drop=FALSE], quote = FALSE,
+        print(coef[seq_len(pc), 1:4 , drop=FALSE], quote = FALSE,
               digits = digits, ...)
     } else {
         cat("\nNo coefficients\n")
