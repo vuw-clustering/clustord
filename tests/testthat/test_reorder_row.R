@@ -734,7 +734,6 @@ test_that("reordering row clustering results produces correct results.", {
 
 ## row clustering first-element-zero testing -----------------------------------
 test_that("reordering row clustering results with other constraint produces correct results.", {
-
     ## Check that reorder() produces correctly reordered results
     set.seed(30)
     n <- 30
@@ -767,6 +766,8 @@ test_that("reordering row clustering results with other constraint produces corr
     orig <- clustord(Y~ROWCLUST*xr1+xr2*xr3+COL, model="OSM", RG=4,
                      long_df=long_df_sim, nstarts=1, constraint_sum_zero = FALSE,
                      control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+
+    expect_equal(orig$out_parlist$rowc, rep(0, times=4))
 
     ### Rows increasing ----
     reord <- reorder(orig, "row", decreasing=FALSE)
