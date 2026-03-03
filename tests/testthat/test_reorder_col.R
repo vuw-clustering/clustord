@@ -28,6 +28,10 @@ test_that("reordering column clustering results produces correct results.", {
                      long_df=long_df_sim, nstarts=1, constraint_sum_zero = TRUE,
                      control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
 
+    temp <- rep(0, times=4)
+    names(temp) <- names(orig$out_parlist$rowc)
+    expect_equal(orig$out_parlist$rowc, temp)
+
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
 
@@ -758,6 +762,10 @@ test_that("reordering column clustering results with other constraint produces c
     orig <- clustord(Y~COLCLUST*xc1+xc2*xc3+ROW, model="OSM", CG=4,
                      long_df=long_df_sim, nstarts=1, constraint_sum_zero = FALSE,
                      control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+
+    temp <- rep(0, times=4)
+    names(temp) <- names(orig$out_parlist$rowc)
+    expect_equal(orig$out_parlist$rowc, temp)
 
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
