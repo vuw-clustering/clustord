@@ -739,7 +739,7 @@ test_that("reordering row clustering results produces correct results.", {
 ## row clustering first-element-zero testing -----------------------------------
 test_that("reordering row clustering results with other constraint produces correct results.", {
     ## Check that reorder() produces correctly reordered results
-    set.seed(30)
+    set.seed(30, kind="Mersenne-Twister", normal.kind="Inversion")
     n <- 30
     p <- 5
     long_df_sim <- data.frame(Y=factor(sample(1:3,n*p,replace=TRUE)),
@@ -770,6 +770,10 @@ test_that("reordering row clustering results with other constraint produces corr
     orig <- clustord(Y~ROWCLUST*xr1+xr2*xr3+COL, model="OSM", RG=4,
                      long_df=long_df_sim, nstarts=1, constraint_sum_zero = FALSE,
                      control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+
+    temp <- rep(0, times=length(orig$init_parlist$rowc))
+    names(temp) <- names(orig$init_parlist$rowc)
+    expect_equal(orig$init_parlist$rowc, temp)
 
     temp <- rep(0, times=length(orig$out_parlist$rowc))
     names(temp) <- names(orig$out_parlist$rowc)
