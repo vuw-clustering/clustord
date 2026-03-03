@@ -757,6 +757,15 @@ test_that("reordering row clustering results with other constraint produces corr
     long_df_sim$xr3 <- rep(xr3, times=5)
     long_df_sim$xc1 <- rep(xc1, each=30)
 
+    temp <- rep(0, times=5)
+    expect_equal(xr1, temp)
+    temp <- rep(0, times=5)
+    expect_equal(xr2, temp)
+    temp <- rep(0, times=5)
+    expect_equal(xr3, temp)
+    temp <- rep(0, times=5)
+    expect_equal(xc1, temp)
+
     ## NOTE: Using RG = 4 here (compared with RG = 3 above)
     ## because for RG = 3 with first cluster effect set to 0 there are
     ## only 2 possible orderings of the non-zero cluster effects, so always one
