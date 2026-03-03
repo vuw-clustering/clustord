@@ -1,30 +1,11 @@
 ## biclustering testing --------------------------------------------------------
 test_that("reordering biclustering results produces correct results.", {
 
-    ## Check that reorder() produces correctly reordered results
-    set.seed(30)
-    n <- 30
-    p <- 30
-    long_df_sim <- data.frame(Y=factor(sample(1:3,n*p,replace=TRUE)),
-                              ROW=rep(1:n,times=p),COL=rep(1:p,each=n))
+    load("reorder_models_bi.Rdata")
 
-    ## Make sure to test continuous and categorical covariates
-    xr1 <- runif(n, min=0, max=2)
-    xr2 <- sample(c("A","B"),size=n, replace=TRUE, prob=c(0.3,0.7))
-
-    xc1 <- factor(sample(1:4, size=p, replace=TRUE))
-    xc2 <- runif(p, min=-1, max=1)
-
-    long_df_sim$xr1 <- rep(xr1, each=p)
-    long_df_sim$xr2 <- rep(xr2, each=p)
-    long_df_sim$xc1 <- rep(xc1, times=n)
-    long_df_sim$xc2 <- rep(xc2, times=n)
-
-    # OSM results --------------------------------------------------------------
+    # OSM results ----
     ## Model 1 ----
-    orig <- clustord(Y~ROWCLUST*COLCLUST+ROWCLUST:(xr1+xc1)+COLCLUST:(xr2+xc2)+xr1^2, model="OSM",
-                     RG=3, CG=3, nstarts=1, constraint_sum_zero = TRUE,
-                     long_df=long_df_sim, control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_standard_OSM1
 
     ### Rows increasing ----
     reord <- reorder(orig, "row", decreasing=FALSE)
@@ -560,9 +541,7 @@ test_that("reordering biclustering results produces correct results.", {
 
     # POM results --------------------------------------------------------------
     ## Model 1 ----
-    orig <- clustord(Y~ROWCLUST*COLCLUST+ROWCLUST:(xr1+xc1)+COLCLUST:(xr2+xc2)+xr1^2, model="POM",
-                     RG=3, CG=3, nstarts=1, constraint_sum_zero = TRUE,
-                     long_df=long_df_sim, control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_standard_POM1
 
     ### Rows increasing ----
     reord <- reorder(orig, "row", decreasing=FALSE)
@@ -1041,38 +1020,10 @@ test_that("reordering biclustering results produces correct results.", {
 ## biclustering first-element-zero testing -------------------------------------
 test_that("reordering biclustering results with other constraint produces correct results.", {
 
-    ## Check that reorder() produces correctly reordered results
-    set.seed(30)
-    n <- 30
-    p <- 30
-    long_df_sim <- data.frame(Y=factor(sample(1:3,n*p,replace=TRUE)),
-                              ROW=rep(1:n,times=p),COL=rep(1:p,each=n))
-
-    ## Make sure to test continuous and categorical covariates
-    xr1 <- runif(n, min=0, max=2)
-    xr2 <- sample(c("A","B"),size=n, replace=TRUE, prob=c(0.3,0.7))
-
-    xc1 <- factor(sample(1:4, size=p, replace=TRUE))
-    xc2 <- runif(p, min=-1, max=1)
-
-    long_df_sim$xr1 <- rep(xr1, each=p)
-    long_df_sim$xr2 <- rep(xr2, each=p)
-    long_df_sim$xc1 <- rep(xc1, times=n)
-    long_df_sim$xc2 <- rep(xc2, times=n)
-
-    ## NOTE: Using RG = 4 and CG = 4 here (compared with
-    ## RG = 3, CG = 3 above) because for 3 clusters with first
-    ## cluster effect set to 0 there are only 2 possible orderings of the
-    ## non-zero cluster effects, so always one of the increasing or decreasing
-    ## order will be the same as the original model ordering. Increasing to 4
-    ## clusters increases the chance of having both directions be different from
-    ## the original ordering
-
-    # OSM results --------------------------------------------------------------
+    load("reorder_models_bi.Rdata")
+    # OSM results ----
     ## Model 1 ----
-    orig <- clustord(Y~ROWCLUST*COLCLUST+ROWCLUST:(xr1+xc1)+COLCLUST:(xr2+xc2)+xr1^2, model="OSM",
-                     RG=4, CG=4, nstarts=1, constraint_sum_zero = FALSE,
-                     long_df=long_df_sim, control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_first_elt_OSM1
 
     ### Rows increasing ----
     reord <- reorder(orig, "row", decreasing=FALSE)
@@ -1683,9 +1634,7 @@ test_that("reordering biclustering results with other constraint produces correc
 
     # POM results --------------------------------------------------------------
     ## Model 1 ----
-    orig <- clustord(Y~ROWCLUST*COLCLUST+ROWCLUST:(xr1+xc1)+COLCLUST:(xr2+xc2)+xr1^2, model="POM",
-                     RG=4, CG=4, nstarts=1, constraint_sum_zero = FALSE,
-                     long_df=long_df_sim, control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_first_elt_POM1
 
     ### Rows increasing ----
     reord <- reorder(orig, "row", decreasing=FALSE)

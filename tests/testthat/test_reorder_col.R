@@ -1,33 +1,11 @@
 ## column clustering testing -------------------------------------------------------
 test_that("reordering column clustering results produces correct results.", {
 
-    ## Check that reorder() produces correctly reordered results
-    set.seed(30)
-    n <- 5
-    p <- 30
-    long_df_sim <- data.frame(Y=factor(sample(1:3,n*p,replace=TRUE)),
-                              ROW=rep(1:n,times=p),COL=rep(1:p,each=n))
-
-    ## Make sure to test continuous and categorical covariates
-    xc1 <- runif(p, min=0, max=2)
-    xc2 <- sample(c("A","B"),size=p, replace=TRUE, prob=c(0.3,0.7))
-    xc3 <- sample(1:4, size=p, replace=TRUE)
-
-    xr1 <- runif(n, min=-1, max=1)
-
-    long_df_sim$xc1 <- rep(xc1, times=5)
-    long_df_sim$xc2 <- rep(xc2, times=5)
-    long_df_sim$xc3 <- rep(xc3, times=5)
-    long_df_sim$xr1 <- rep(xr1, each=30)
+    load("reorder_models_col.Rdata")
 
     # OSM results --------------------------------------------------------------
     ## Model 1 ----
-    ## NOTE! Need to use keep_all_params=TRUE in order to actually have some output
-    ## to reorder in EMstatus$params_every_iteration
-    orig <- clustord(Y~COLCLUST*xc1+xc2*xc3+ROW, model="OSM", CG=3,
-                     long_df=long_df_sim, nstarts=1, constraint_sum_zero = TRUE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
-
+    orig <- orig_standard_OSM1
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
 
@@ -98,9 +76,7 @@ test_that("reordering column clustering results produces correct results.", {
     expect_equal(reord$EMstatus$params_every_iteration, orig$EMstatus$params_every_iteration)
 
     ## Model 2 ----
-    orig <- clustord(Y~COLCLUST*ROW+xr1, model="OSM", CG=3,
-                     long_df=long_df_sim, nstarts=1, constraint_sum_zero = TRUE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_standard_OSM2
 
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
@@ -178,9 +154,7 @@ test_that("reordering column clustering results produces correct results.", {
     expect_equal(reord$EMstatus$params_every_iteration, orig$EMstatus$params_every_iteration[,c(1:6,8,7,9,10:14,16,15,17,19,18,20,22,21,23,25,24,26,28,27,29,30,32,31,33,34:35)])
 
     ## Model 3 ----
-    orig <- clustord(Y~COLCLUST*xr1, model="OSM", CG=3,
-                     long_df=long_df_sim, nstarts=1, constraint_sum_zero = TRUE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_standard_OSM3
 
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
@@ -258,9 +232,7 @@ test_that("reordering column clustering results produces correct results.", {
 
     # POM results --------------------------------------------------------------
     ## Model 1 ----
-    orig <- clustord(Y~COLCLUST*xc1+xc2*xc3+ROW, model="POM", CG=3,
-                     long_df=long_df_sim, nstarts=1, constraint_sum_zero = TRUE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_standard_POM1
 
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
@@ -330,9 +302,7 @@ test_that("reordering column clustering results produces correct results.", {
 
 
     ## Model 2 ----
-    orig <- clustord(Y~COLCLUST*ROW+xr1, model="POM", CG=3,
-                     long_df=long_df_sim, nstarts=1, constraint_sum_zero = TRUE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_standard_POM2
 
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
@@ -402,9 +372,7 @@ test_that("reordering column clustering results produces correct results.", {
 
 
     ## Model 3 ----
-    orig <- clustord(Y~COLCLUST*xr1, model="POM", CG=3,
-                     long_df=long_df_sim, nstarts=1, constraint_sum_zero = TRUE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_standard_POM3
 
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
@@ -480,23 +448,9 @@ test_that("reordering column clustering results produces correct results.", {
     expect_equal(reord$EMstatus$params_every_iteration, orig$EMstatus$params_every_iteration[,c(1:2,4,3,5,7,6,8,9,11,10,12,13:14)])
 
 
-    ## Binary results ----------------------------------------------------------
-    set.seed(50)
-    long_df_sim <- data.frame(Y=factor(sample(1:2,n*p,replace=TRUE)),
-                              ROW=rep(1:n,times=p),COL=rep(1:p,each=n))
-    n <- 30
-    p <- 5
-
-    ## Make sure to test continuous and categorical covariates
-    long_df_sim$xc1 <- rep(xc1, times=5)
-    long_df_sim$xc2 <- rep(xc2, times=5)
-    long_df_sim$xc3 <- rep(xc3, times=5)
-    long_df_sim$xr1 <- rep(xr1, each=30)
-
+    # Binary results -----
     ## Model 1 ----
-    orig <- clustord(Y~COLCLUST*xc1+xc2*xc3+ROW, model="Binary", CG=3,
-                     long_df=long_df_sim, nstarts=1, constraint_sum_zero = TRUE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_standard_Binary1
 
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
@@ -573,9 +527,7 @@ test_that("reordering column clustering results produces correct results.", {
 
 
     ## Model 2 ----
-    orig <- clustord(Y~COLCLUST*ROW+xr1, model="Binary", CG=3,
-                     long_df=long_df_sim, nstarts=1, constraint_sum_zero = TRUE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_standard_Binary2
 
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
@@ -646,9 +598,7 @@ test_that("reordering column clustering results produces correct results.", {
 
 
     ## Model 3 ----
-    orig <- clustord(Y~COLCLUST*xr1, model="Binary", CG=3,
-                     long_df=long_df_sim, nstarts=1, constraint_sum_zero = TRUE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_standard_Binary3
 
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
@@ -726,38 +676,11 @@ test_that("reordering column clustering results produces correct results.", {
 ## column clustering first-element-zero testing --------------------------------
 test_that("reordering column clustering results with other constraint produces correct results.", {
 
-    ## Check that reorder() produces correctly reordered results
-    set.seed(30)
-    n <- 5
-    p <- 30
-    long_df_sim <- data.frame(Y=factor(sample(1:3,n*p,replace=TRUE)),
-                              ROW=rep(1:n,times=p),COL=rep(1:p,each=n))
+    load("reorder_models_col.Rdata")
 
-    ## Make sure to test continuous and categorical covariates
-    xc1 <- runif(p, min=0, max=2)
-    xc2 <- sample(c("A","B"),size=p, replace=TRUE, prob=c(0.3,0.7))
-    xc3 <- sample(1:4, size=p, replace=TRUE)
-
-    xr1 <- runif(n, min=-1, max=1)
-
-    long_df_sim$xc1 <- rep(xc1, times=5)
-    long_df_sim$xc2 <- rep(xc2, times=5)
-    long_df_sim$xc3 <- rep(xc3, times=5)
-    long_df_sim$xr1 <- rep(xr1, each=30)
-
-    ## NOTE: Using CG = 4 here (compared with CG = 3 above)
-    ## because for CG = 3 with first cluster effect set to 0 there are
-    ## only 2 possible orderings of the non-zero cluster effects, so always one
-    ## of the increasing or decreasing order will be the same as the original
-    ## model ordering.
-    ## Increasing to 4 clusters increases the chance of having both directions
-    ## be different from the original ordering
-
-    # OSM results --------------------------------------------------------------
+    # OSM results ----
     ## Model 1 ----
-    orig <- clustord(Y~COLCLUST*xc1+xc2*xc3+ROW, model="OSM", CG=4,
-                     long_df=long_df_sim, nstarts=1, constraint_sum_zero = FALSE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_first_elt_OSM1
 
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
@@ -856,9 +779,7 @@ test_that("reordering column clustering results with other constraint produces c
     expect_equal(reord$EMstatus$params_every_iteration, orig$EMstatus$params_every_iteration[,c(1:6,7,8,10,9,11:15,16,17,19,18,20:23,24,25,27,26,28:29)])
 
     ## Model 2 ----
-    orig <- clustord(Y~COLCLUST*ROW+xr1, model="OSM", CG=4,
-                     long_df=long_df_sim, nstarts=1, constraint_sum_zero = FALSE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_first_elt_OSM2
 
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
@@ -940,9 +861,7 @@ test_that("reordering column clustering results with other constraint produces c
     expect_equal(reord$EMstatus$params_every_iteration, orig$EMstatus$params_every_iteration[,c(1:6,7,10,8,9,11:15,16,19,17,18,20,23,21,22,24,27,25,26,28,31,29,30,32,35,33,34,36,37,40,38,39,41:42)])
 
     ## Model 3 ----
-    orig <- clustord(Y~COLCLUST*xr1, model="OSM", CG=4,
-                     long_df=long_df_sim, nstarts=1, constraint_sum_zero = FALSE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_first_elt_OSM3
 
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
@@ -1022,9 +941,7 @@ test_that("reordering column clustering results with other constraint produces c
 
     # POM results --------------------------------------------------------------
     ## Model 1 ----
-    orig <- clustord(Y~COLCLUST*xc1+xc2*xc3+ROW, model="POM", CG=4,
-                     long_df=long_df_sim, nstarts=1, constraint_sum_zero = FALSE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_first_elt_POM1
 
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
@@ -1101,9 +1018,7 @@ test_that("reordering column clustering results with other constraint produces c
     expect_equal(reord$EMstatus$params_every_iteration, orig$EMstatus$params_every_iteration[,c(1:2,3,6,4,5,7:11,12,15,13,14,16:19,20,23,21,22,24:25)])
 
     ## Model 2 ----
-    orig <- clustord(Y~COLCLUST*ROW+xr1, model="POM", CG=4,
-                     long_df=long_df_sim, nstarts=1, constraint_sum_zero = FALSE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_first_elt_POM2
 
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
@@ -1175,9 +1090,7 @@ test_that("reordering column clustering results with other constraint produces c
 
 
     ## Model 3 ----
-    orig <- clustord(Y~COLCLUST*xr1, model="POM", CG=4,
-                     long_df=long_df_sim, nstarts=1, constraint_sum_zero = FALSE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_first_elt_POM3
 
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
@@ -1254,24 +1167,10 @@ test_that("reordering column clustering results with other constraint produces c
 
     expect_equal(reord$EMstatus$params_every_iteration, orig$EMstatus$params_every_iteration[,c(1:2,3,5,6,4,7,9,10,8,11,12,14,15,13,16:17)])
 
-    ## Binary results ----------------------------------------------------------
-    set.seed(1)
-    long_df_sim <- data.frame(Y=factor(sample(1:2,n*p,replace=TRUE)),
-                              ROW=rep(1:n,times=p),COL=rep(1:p,each=n))
-    n <- 30
-    p <- 5
 
-    ## Make sure to test continuous and categorical covariates
-    long_df_sim$xc1 <- rep(xc1, times=5)
-    long_df_sim$xc2 <- rep(xc2, times=5)
-    long_df_sim$xc3 <- rep(xc3, times=5)
-    long_df_sim$xr1 <- rep(xr1, each=30)
-
-    ## Model 1 ----
-    orig <- clustord(Y~COLCLUST*xc1+xc2*xc3+ROW, model="Binary", CG=4,
-                     long_df=long_df_sim, nstarts=1, constraint_sum_zero = FALSE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
-
+    # Binary results ----
+    # Model 1 ----
+    orig <- orig_first_elt_Binary1
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
 
@@ -1349,9 +1248,7 @@ test_that("reordering column clustering results with other constraint produces c
     expect_equal(reord$EMstatus$params_every_iteration, orig$EMstatus$params_every_iteration[,c(1,2,3,5,4,6:10,11,12,14,13,15:18,19,20,22,21,23:24)])
 
     ## Model 2 ----
-    orig <- clustord(Y~COLCLUST*ROW+xr1, model="Binary", CG=4,
-                     long_df=long_df_sim, nstarts=1, constraint_sum_zero = FALSE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_first_elt_Binary2
 
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
@@ -1429,11 +1326,8 @@ test_that("reordering column clustering results with other constraint produces c
 
     expect_equal(reord$EMstatus$params_every_iteration, orig$EMstatus$params_every_iteration[,c(1,2,5,3,4,6:10,11,14,12,13,15,18,16,17,19,22,20,21,23,26,24,25,27,30,28,29,31,32,35,33,34,36:37)])
 
-
     ## Model 3 ----
-    orig <- clustord(Y~COLCLUST*xr1, model="Binary", CG=4,
-                     long_df=long_df_sim, nstarts=1, constraint_sum_zero = FALSE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+    orig <- orig_first_elt_Binary3
 
     ### Columns increasing ----
     reord <- reorder(orig, "col", decreasing=FALSE)
