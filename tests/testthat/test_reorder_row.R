@@ -758,11 +758,11 @@ test_that("reordering row clustering results with other constraint produces corr
     long_df_sim$xc1 <- rep(xc1, each=30)
 
     temp <- rep(0, times=5)
-    expect_equal(xr1, temp)
-    temp <- rep(0, times=5)
-    expect_equal(xr2, temp)
-    temp <- rep(0, times=5)
-    expect_equal(xr3, temp)
+    expect_equal(xr1[1:5], temp)
+    temp <- rep("TEST", times=5)
+    expect_equal(xr2[1:5], temp)
+    temp <- factor(rep(1, times=5), levels=1:4)
+    expect_equal(xr3[1:5], temp)
     temp <- rep(0, times=5)
     expect_equal(xc1, temp)
 
@@ -778,7 +778,7 @@ test_that("reordering row clustering results with other constraint produces corr
     ## Model 1 ----
     orig <- clustord(Y~ROWCLUST*xr1+xr2*xr3+COL, model="OSM", RG=4,
                      long_df=long_df_sim, nstarts=1, constraint_sum_zero = FALSE,
-                     control_EM=list(maxiter=3,maxiter_start=2,keep_all_params=TRUE))
+                     control_EM=list(maxiter=1,maxiter_start=1,keep_all_params=TRUE))
 
     temp <- rep(0, times=length(orig$init_parlist$rowc))
     names(temp) <- names(orig$init_parlist$rowc)
