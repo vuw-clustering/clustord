@@ -138,9 +138,8 @@ library(clustord)
 For this vignette, we will use a simple survey example, in which the data matrix is a matrix of responses to questions with the subjects as rows and the questions as columns. All the questions have responses between 1 and 7 -- the current version of `clustord` is not set up to handle datasets where some questions have more responses than others.
 
 ```{r}
-df <- read.table("eval_survey.txt")
-colnames(df) <- paste0("Q",1:ncol(df))
-rownames(df) <- paste0("ID",1:nrow(df))
+data(eval_survey, package='clustord')
+df <- eval_survey
 head(df)
 dim(df)
 ```
